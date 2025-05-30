@@ -11,7 +11,7 @@ import MobileBottomNav from "./components/MobileBottomNav";
 import "./global.css";
 
 // Pages
-import Home from "./pages/Home";
+import Home from "./pages/home";
 import Transcription from "./pages/Transcription";
 import Settings from "./pages/Settings";
 import Account from "./pages/Account";
