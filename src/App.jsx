@@ -10,7 +10,7 @@ import MobileBottomNav from "./components/MobileBottomNav";
 import './global.css';
 
 // Pages
-import HomePage from "./pages/Home";
+import Home from "./pages/Home";
 import Transcription from "./pages/Transcription";
 import Settings from "./pages/Settings";
 import Account from "./pages/Account";
