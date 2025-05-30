@@ -1,0 +1,24 @@
+# Node.js
+node_modules/
+dist/
+.env
+*.log
+
+# Vite
+.vite
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Optional builds
+*.local
+coverage/
