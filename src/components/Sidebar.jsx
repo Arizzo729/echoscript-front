@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState } from "react"
+import { useTheme } from "../context/useTheme.jsx";
 import { NavLink } from "react-router-dom";
 import {
   Menu,
