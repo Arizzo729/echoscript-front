@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
 import { ThemeProvider } from "./context/useTheme";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
@@ -10,7 +10,7 @@ import MobileBottomNav from "./components/MobileBottomNav";
 import './global.css';
 
 // Pages
-import Home from "./pages/Home";
+import HomePage from "./pages/Home";
 import Transcription from "./pages/Transcription";
 import Settings from "./pages/Settings";
 import Account from "./pages/Account";
@@ -18,7 +18,7 @@ import Purchase from "./pages/Purchase";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
-import ApifyTest from "./pages/ApifyTest"; // ⬅️ add this import
+import ApifyTest from "./pages/ApifyTest"; // ✅ Confirmed
 
 function Layout() {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -47,10 +47,7 @@ function Layout() {
         <EchoAssistantUltra />
       </div>
 
-      {/* Onboarding Modal */}
       {showOnboarding && <OnboardingModal onClose={closeOnboarding} />}
-
-      {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
     </>
   );
@@ -59,19 +56,21 @@ function Layout() {
 export default function App() {
   return (
     <ThemeProvider>
-      <Routes>
-        <Route element={<Layout />}>
-	<Route path="/devtools/apify" element={<ApifyTest />} />
-          <Route path="/" element={<HomePage />} />
-          <Route path="/transcription" element={<Transcription />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/account" element={<Account />} />
-          <Route path="/purchase" element={<Purchase />} />
-        </Route>
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Router>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/transcription" element={<Transcription />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/account" element={<Account />} />
+            <Route path="/purchase" element={<Purchase />} />
+            <Route path="/devtools/apify" element={<ApifyTest />} />
+          </Route>
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
     </ThemeProvider>
   );
 }
