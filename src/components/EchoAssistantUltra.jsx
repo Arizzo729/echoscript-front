@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Send, X, Loader2, Wand2 } from "lucide-react";
+import { Bot, Send, X, Loader2, Wand2, Mic, MicOff } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 // Persona & system prompt
@@ -30,7 +29,10 @@ const EchoAssistantUltra = ({
     { role: "assistant", content: persona.greeting },
   ]);
   const [loading, setLoading] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [recognitionAvailable, setRecognitionAvailable] = useState(false);
   const scrollRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   const toggle = () => setOpen((prev) => !prev);
 
@@ -45,6 +47,41 @@ const EchoAssistantUltra = ({
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history]);
+
+  useEffect(() => {
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.lang = "en-US";
+      recognitionRef.current.interimResults = false;
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error("Voice recognition error:", event.error);
+        setRecording(false);
+      };
+
+      setRecognitionAvailable(true);
+    }
+  }, []);
+
+  const startVoiceInput = () => {
+    if (!recognitionRef.current) return;
+    recognitionRef.current.start();
+    setRecording(true);
+  };
+
+  const stopVoiceInput = () => {
+    if (!recognitionRef.current) return;
+    recognitionRef.current.stop();
+    setRecording(false);
+  };
 
   const parseCommands = (text) => {
     if (text.startsWith("/lookup ")) {
@@ -126,12 +163,11 @@ const EchoAssistantUltra = ({
         {open && (
           <motion.div
             id="echo-assistant"
-            className="fixed bottom-24 right-6 w-[360px] max-h-[75vh] bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-2xl shadow-2xl z-50 flex flex-col"
+            className="fixed bottom-24 right-6 w-[380px] max-h-[80vh] bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-2xl shadow-2xl z-50 flex flex-col"
             initial={{ opacity: 0, y: 16, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
           >
-            {/* Header */}
             <div className="flex items-center justify-between p-4 border-b dark:border-zinc-700">
               <h2 className="text-base font-semibold text-zinc-900 dark:text-white">
                 Echo AI Assistant
@@ -141,7 +177,6 @@ const EchoAssistantUltra = ({
               </button>
             </div>
 
-            {/* Messages */}
             <div className="flex-1 overflow-y-auto px-4 py-3 text-sm space-y-3">
               {history.map((msg, idx) => (
                 <motion.div
@@ -159,21 +194,28 @@ const EchoAssistantUltra = ({
               ))}
               {loading && (
                 <div className="text-zinc-400 dark:text-zinc-500 text-sm flex items-center gap-1">
-                  <Loader2 className="animate-spin w-4 h-4" />
-                  Echo is thinking...
+                  <Loader2 className="animate-spin w-4 h-4" /> Echo is thinking...
                 </div>
               )}
               <div ref={scrollRef} />
             </div>
 
-            {/* Input */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSend();
               }}
-              className="flex items-center border-t dark:border-zinc-700 px-3 py-2"
+              className="flex items-center border-t dark:border-zinc-700 px-3 py-2 gap-2"
             >
+              <button
+                type="button"
+                onClick={recording ? stopVoiceInput : startVoiceInput}
+                className={`p-2 rounded-full ${
+                  recording ? "bg-red-500" : "bg-zinc-200 dark:bg-zinc-800"
+                } text-white`}
+              >
+                {recording ? <MicOff size={16} /> : <Mic size={16} />}
+              </button>
               <input
                 type="text"
                 value={input}
