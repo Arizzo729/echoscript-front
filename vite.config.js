@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import environmentPlugin from 'vite-plugin-environment';
 
 export default defineConfig({
-  base: "/", // <-- ✅ Key for Netlify routing
+  base: "/", // ✅ for Netlify routing
   plugins: [
     react(),
     environmentPlugin({
@@ -14,4 +14,7 @@ export default defineConfig({
       REACT_APP_BRIGHTDATA_PASSWORD: '',
     }),
   ],
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'], // ✅ allows extension-less imports
+  },
 });
