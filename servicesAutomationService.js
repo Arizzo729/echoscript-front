@@ -3,8 +3,8 @@
 const PROVIDERS = {
   BROWSE_AI: "browseAI",
   BARDEEN_AI: "bardeenAI",
-  SIMPLE_SCRAPER: "simpleScraper",
-  OCTOPARSE: "octoparse",
+  APIFY: "apify",
+  BRIGHTDATA: "brightData",
 };
 
 const config = {
@@ -13,13 +13,14 @@ const config = {
     apiKey: import.meta.env.VITE_BROWSE_AI_API_KEY,
   },
   bardeenAI: {},
-  simpleScraper: {
-    apiBase: "https://api.simplescraper.io/api",
-    apiKey: import.meta.env.VITE_SIMPLE_SCRAPER_API_KEY,
+  apify: {
+    apiBase: "https://api.apify.com/v2",
+    token: import.meta.env.VITE_APIFY_API_TOKEN,
   },
-  octoparse: {
-    apiBase: "https://dataapi.octoparse.com/api",
-    apiKey: import.meta.env.VITE_OCTOPARSE_API_KEY,
+  brightData: {
+    username: import.meta.env.VITE_BRIGHTDATA_USERNAME,
+    password: import.meta.env.VITE_BRIGHTDATA_PASSWORD,
+    proxyEndpoint: "zproxy.lum-superproxy.io:22225",
   },
 };
 
@@ -48,10 +49,10 @@ class AutomationService {
     switch (provider) {
       case PROVIDERS.BROWSE_AI:
         return await this._runBrowseAI(automationId, inputData, options);
-      case PROVIDERS.SIMPLE_SCRAPER:
-        return await this._runSimpleScraper(automationId, inputData, options);
-      case PROVIDERS.OCTOPARSE:
-        return await this._runOctoparse(automationId, inputData, options);
+      case PROVIDERS.APIFY:
+        return await this._runApify(automationId, options.apifyToken);
+      case PROVIDERS.BRIGHTDATA:
+        return await this._runBrightData(inputData);
       case PROVIDERS.BARDEEN_AI:
         throw new Error("Bardeen.AI requires extension or manual interaction.");
       default:
@@ -62,7 +63,6 @@ class AutomationService {
   static async _runBrowseAI(automationId, inputData, { webhookUrl, batchId } = {}) {
     const { apiBase, apiKey } = config.browseAI;
     const body = { inputData, webhookUrl, batchId };
-
     const url = `${apiBase}/automations/${automationId}/run`;
     const options = {
       method: "POST",
@@ -72,47 +72,30 @@ class AutomationService {
       },
       body: JSON.stringify(body),
     };
-
     return await this.fetchWithRetries(url, options);
   }
 
-  static async _runSimpleScraper(automationId, inputData, { webhookUrl } = {}) {
-    const { apiBase, apiKey } = config.simpleScraper;
-    const body = {
-      scraperId: automationId,
-      input: inputData,
-      webhook: webhookUrl || undefined,
-    };
-
-    const url = `${apiBase}/runs`;
-    const options = {
-      method: "POST",
-      headers: {
-        "X-API-KEY": apiKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    };
-
+  static async _runApify(taskId, token = config.apify.token) {
+    const url = `${config.apify.apiBase}/actor-tasks/${taskId}/run-sync-get-dataset-items?token=${token}`;
+    const options = { method: "GET" };
     return await this.fetchWithRetries(url, options);
   }
 
-  static async _runOctoparse(automationId, inputData, { webhookUrl } = {}) {
-    const { apiBase, apiKey } = config.octoparse;
-    const body = {
-      taskId: automationId,
-      params: inputData,
-      webhookUrl,
-    };
+  static async _runBrightData(inputData) {
+    const { username, password, proxyEndpoint } = config.brightData;
+    const proxyUrl = `http://${username}-session-rand:${password}@${proxyEndpoint}`;
 
-    const url = `${apiBase}/run-task`;
+    // NOTE: Replace this with your real scraping target URL:
+    const url = "https://target-site.com/api/search";
+
     const options = {
       method: "POST",
       headers: {
-        "X-API-KEY": apiKey,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ query: inputData }),
+      // WARNING: Node-only proxy agent (not supported in browser directly)
+      // Use `node-fetch` + `https-proxy-agent` in server-side code
     };
 
     return await this.fetchWithRetries(url, options);
@@ -133,3 +116,4 @@ class AutomationService {
 }
 
 export { AutomationService, PROVIDERS };
+

@@ -20,6 +20,7 @@
     "classnames": "^2.5.1",
     "dotenv": "^16.5.0",
     "framer-motion": "^11.18.2",
+    "https-proxy-agent": "^7.0.6",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.511.0",
     "react": "^18.3.1",
@@ -53,4 +54,3 @@
     "vite-plugin-pwa": "^1.0.0"
   }
 }
-

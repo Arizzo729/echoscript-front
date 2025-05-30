@@ -18,6 +18,7 @@ import Purchase from "./pages/Purchase";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
+import ApifyTest from "./pages/ApifyTest"; // ⬅️ add this import
 
 function Layout() {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -60,6 +61,7 @@ export default function App() {
     <ThemeProvider>
       <Routes>
         <Route element={<Layout />}>
+	<Route path="/devtools/apify" element={<ApifyTest />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/transcription" element={<Transcription />} />
           <Route path="/settings" element={<Settings />} />
