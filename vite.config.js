@@ -5,10 +5,12 @@ import environmentPlugin from 'vite-plugin-environment';
 export default defineConfig({
   plugins: [
     react(),
-    environmentPlugin([
-      "REACT_APP_BROWSE_AI_API_KEY",
-      "REACT_APP_SIMPLE_SCRAPER_API_KEY",
-      "REACT_APP_OCTOPARSE_API_KEY"
-    ]),
+    environmentPlugin({
+      VITE_OPENAI_API_KEY: '',
+      REACT_APP_BROWSE_AI_API_KEY: '',
+      REACT_APP_APIFY_API_TOKEN: '',
+      REACT_APP_BRIGHTDATA_USERNAME: '',
+      REACT_APP_BRIGHTDATA_PASSWORD: '',
+    }),
   ],
 });
