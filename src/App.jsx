@@ -11,15 +11,15 @@ import MobileBottomNav from "./components/MobileBottomNav";
 import "./global.css";
 
 // Pages
-import Home from "./pages/Home";
-import Transcription from "./pages/Transcription";
-import Settings from "./pages/Settings";
-import Account from "./pages/Account";
-import Purchase from "./pages/Purchase";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
-import NotFound from "./pages/NotFound";
-import ApifyTest from "./pages/ApifyTest";
+import Home from "./pages/Home.jsx";
+import Transcription from "./pages/Transcription.jsx";
+import Settings from "./pages/Settings.jsx";
+import Account from "./pages/Account.jsx";
+import Purchase from "./pages/Purchase.jsx";
+import SignIn from "./pages/SignIn.jsx";
+import SignUp from "./pages/SignUp.jsx";
+import NotFound from "./pages/NotFound.jsx";
+import ApifyTest from "./pages/ApifyTest.jsx";
 
 function Layout() {
   return (
