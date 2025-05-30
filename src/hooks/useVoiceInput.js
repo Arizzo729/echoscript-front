@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function useVoiceInput({ onTranscript }) {
+export default function useVoiceInput({ onTranscript = () => {} } = {}) {
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
 
