@@ -11,7 +11,7 @@ import Particles from "react-tsparticles";
 import { loadFull } from "tsparticles";
 import SmartAIAssistant from "../components/SmartAIAssistant";
 import AudioWaveform from "../components/AudioWaveform";
-import useVoiceInput from "../../hooks/useVoiceInput";
+import useVoiceInput from "../hooks/useVoiceInput";
 import useAmbientAudio from "../hooks/useAmbientAudio";
 import ProgressTimeline from "../components/ProgressTimeline";
 import AssistantOrb from "../components/AssistantOrb";
