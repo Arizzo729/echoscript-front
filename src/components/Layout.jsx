@@ -90,7 +90,7 @@ export default function Layout() {
               onToggleTheme={toggleTheme}
               isDarkMode={theme === "dark"}
             />
-            <main className="flex-1 p-4">
+            <main className="flex-1 min-h-screen w-full">
               <Outlet />
             </main>
             <Footer />

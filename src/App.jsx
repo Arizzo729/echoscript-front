@@ -1,15 +1,16 @@
-// src/App.jsx
-
-import React from "react";
-import { Routes, Route, Outlet, Navigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Routes, Route, Outlet } from "react-router-dom";
 import { ThemeProvider } from "./context/useTheme";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import EchoAssistantUltra from "./components/EchoAssistantUltra";
+import OnboardingModal from "./components/OnboardingModal";
+import MobileBottomNav from "./components/MobileBottomNav";
+import './global.css';
 
 // Pages
-import Home from "./pages/Home";
+import HomePage from "./pages/Home";
 import Transcription from "./pages/Transcription";
 import Settings from "./pages/Settings";
 import Account from "./pages/Account";
@@ -19,18 +20,38 @@ import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
 
 function Layout() {
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    const onboarded = localStorage.getItem("echoscript-onboarded");
+    if (!onboarded) setShowOnboarding(true);
+  }, []);
+
+  const closeOnboarding = () => {
+    localStorage.setItem("echoscript-onboarded", "true");
+    setShowOnboarding(false);
+  };
+
   return (
-    <div className="bg-neutral-900 text-white min-h-screen flex flex-col font-sans transition-all duration-300 ease-in-out">
-      <Header />
-      <div className="flex flex-grow">
-        <Sidebar />
-        <main className="flex-grow px-4 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700">
-          <Outlet />
-        </main>
+    <>
+      <div className="bg-neutral-900 text-white min-h-screen flex flex-col font-sans transition-all duration-300 ease-in-out">
+        <Header />
+        <div className="flex flex-grow">
+          <Sidebar />
+          <main className="flex-grow px-4 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700">
+            <Outlet />
+          </main>
+        </div>
+        <Footer />
+        <EchoAssistantUltra />
       </div>
-      <Footer />
-      <EchoAssistantUltra />
-    </div>
+
+      {/* Onboarding Modal */}
+      {showOnboarding && <OnboardingModal onClose={closeOnboarding} />}
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
+    </>
   );
 }
 
@@ -39,7 +60,7 @@ export default function App() {
     <ThemeProvider>
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/transcription" element={<Transcription />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/account" element={<Account />} />
@@ -52,5 +73,4 @@ export default function App() {
     </ThemeProvider>
   );
 }
-
 

@@ -1,64 +1,71 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+export default function HomePage() {
+  const [showLoader, setShowLoader] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
-export default function Home() {
+  useEffect(() => {
+    // Check if user completed onboarding previously
+    const onboarded = localStorage.getItem("echoscript-onboarded");
+    if (onboarded) setShowOnboarding(false);
+    else setShowOnboarding(true);
+  }, []);
+
+  const handleLoaderComplete = () => setShowLoader(false);
+
+  const handleOnboardingClose = () => {
+    localStorage.setItem("echoscript-onboarded", "true");
+    setShowOnboarding(false);
+  };
+
+  if (showLoader) {
+    return <LogoLoader duration={2000} onComplete={handleLoaderComplete} />;
+  }
+
   return (
-    <motion.section
-      className="w-full h-full flex flex-col justify-center items-center px-6 py-16 text-center bg-gradient-to-b from-white via-gray-50 to-gray-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-800"
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-    >
-      <motion.h1
-        className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white max-w-4xl leading-tight"
-        initial={{ opacity: 0, y: 20 }}
+    <>
+      {showOnboarding && <OnboardingModal onClose={handleOnboardingClose} />}
+
+      <motion.section
+        className="w-full min-h-screen flex flex-col items-center justify-center text-center px-6 py-24 bg-gradient-to-b from-white via-gray-50 to-gray-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800"
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ duration: 0.6 }}
       >
-        The Best Listener in the World.
-        <br />
-        <span className="text-primary">EchoScript.AI</span> understands everyone.
-      </motion.h1>
+        <img
+          src="/Logo.png"
+          alt="EchoScript.AI Logo"
+          className="w-36 sm:w-44 md:w-52 mb-6 dark:hidden"
+        />
+        <img
+          src="/EchoScriptAI_Transparent_Dark.png"
+          alt="EchoScript.AI Logo Dark"
+          className="w-36 sm:w-44 md:w-52 mb-6 hidden dark:block"
+        />
 
-      <motion.p
-        className="mt-6 text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.35 }}
-      >
-        Upload your audio, speak into the mic, or paste a link — EchoScript converts every voice into perfect, professional transcripts.
-      </motion.p>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white">
+          EchoScript.AI
+        </h1>
+        <h2 className="mt-2 text-2xl sm:text-3xl font-semibold text-gray-800 dark:text-zinc-200">
+          The Best Listener
+        </h2>
+        <p className="mt-2 text-base sm:text-lg text-gray-600 dark:text-zinc-400">
+          Understanding everyone
+        </p>
 
-      <motion.div
-        className="mt-10 flex flex-col sm:flex-row gap-4"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
-        <Link
-          to="/dashboard"
-          className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-light transition"
-        >
-          Get Started
-        </Link>
-        <Link
-          to="/upload"
-          className="border border-primary text-primary px-6 py-3 rounded-lg font-semibold hover:bg-primary hover:text-white transition"
-        >
-          Try Uploading
-        </Link>
-      </motion.div>
-
-      <motion.div
-        className="mt-20 text-sm text-gray-400 dark:text-gray-600"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.75 }}
-      >
-        EchoScript.AI is secure, smart, and always improving. <br className="hidden sm:inline" />
-        Built with love for podcasters, creators, and every voice that deserves to be heard.
-      </motion.div>
-    </motion.section>
+        <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <Link
+            to="/dashboard"
+            className="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-light transition"
+          >
+            Get Started
+          </Link>
+          <Link
+            to="/upload"
+            className="border border-primary text-primary px-6 py-3 rounded-lg font-semibold hover:bg-primary hover:text-white transition"
+          >
+            Try Uploading
+          </Link>
+        </div>
+      </motion.section>
+    </>
   );
 }

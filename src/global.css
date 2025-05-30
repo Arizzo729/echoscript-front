@@ -2,124 +2,123 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Root for theme-based color variables */
+/* --------------------------------------------- */
+/* Modern CSS Reset + Logical Properties */
+/* --------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: baseline;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  block-size: 100%;
+  inline-size: 100%;
+  scroll-behavior: smooth;
+  color-scheme: light dark;
+  background-color: rgb(var(--color-bg-light, 255 255 255));
+  color: rgb(var(--color-text-light, 17 24 39));
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    "Noto Sans",
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji";
+  font-size: 100%;
+  line-height: 1.5;
+  transition:
+    background-color var(--transition-duration, 400ms) var(--transition-ease, cubic-bezier(0.4,0,0.2,1)),
+    color var(--transition-duration, 400ms) var(--transition-ease, cubic-bezier(0.4,0,0.2,1));
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(.light) {
+    background-color: rgb(var(--color-bg-dark, 17 24 39));
+    color: rgb(var(--color-text-dark, 255 255 255));
+  }
+}
+
+/* --------------------------------------------- */
+/* CSS Container Query Support for Responsive Layouts */
+/* --------------------------------------------- */
+@container (min-width: 640px) {
+  /* Example: Adjust heading size inside container */
+  h1 {
+    font-size: 2.5rem;
+  }
+}
+
+/* --------------------------------------------- */
+/* CSS Variables with Fallbacks + Opacity-aware Utilities */
+/* --------------------------------------------- */
 :root {
-  --color-bg-light: 255 255 255; /* white */
-  --color-bg-dark: 17 24 39; /* gray-900 */
-  --color-text-light: 17 24 39; /* gray-900 */
-  --color-text-dark: 243 244 246; /* gray-100 */
-  --color-primary: 59 130 246; /* blue-500 */
-  --color-primary-hover: 37 99 235; /* blue-600 */
+  /* Hue-Saturation-Lightness for easier theming */
+  --color-primary-h: 214;
+  --color-primary-s: 88%;
+  --color-primary-l: 61%;
+
+  --color-primary-hover-h: 218;
+  --color-primary-hover-s: 85%;
+  --color-primary-hover-l: 49%;
+
+  --color-bg-light: 255 255 255;
+  --color-bg-dark: 17 24 39;
+
+  --color-text-light: 17 24 39;
+  --color-text-dark: 255 255 255;
+  --color-text-muted: 107 114 128;
+
+  --color-border-light: 229 231 235;
+  --color-border-dark: 55 65 81;
+
   --transition-duration: 400ms;
   --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Smooth theme transition using CSS variables */
-html {
-  color-scheme: light dark;
-  background-color: rgb(var(--color-bg-light));
-  color: rgb(var(--color-text-light));
-  transition:
-    background-color var(--transition-duration) var(--transition-ease),
-    color var(--transition-duration) var(--transition-ease);
-  scroll-behavior: smooth;
+/* CSS function fallback for rgba with opacity */
+@function rgba-var($name, $opacity: 1) {
+  @return rgba(var(#{$name}), $opacity);
 }
 
-/* Dark mode overrides */
-html.dark {
-  background-color: rgb(var(--color-bg-dark));
-  color: rgb(var(--color-text-dark));
-}
-
-/* Body base styles */
-body {
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol";
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  transition:
-    background-color var(--transition-duration) var(--transition-ease),
-    color var(--transition-duration) var(--transition-ease);
-  min-height: 100vh;
-  overscroll-behavior: contain;
-  -webkit-tap-highlight-color: transparent; /* Removes highlight on mobile tap */
-}
-
-/* Link styling with smooth color transition and subtle underline animation */
-a {
-  color: rgb(var(--color-primary));
-  text-decoration: none;
-  position: relative;
-  transition: color var(--transition-duration) var(--transition-ease);
-  cursor: pointer;
-}
-
-a::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 2px;
-  background-color: rgb(var(--color-primary));
-  left: 0;
-  bottom: -3px;
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform var(--transition-duration) var(--transition-ease);
-  will-change: transform;
-}
-
-a:hover,
-a:focus-visible {
-  color: rgb(var(--color-primary-hover));
-}
-
-a:hover::after,
-a:focus-visible::after {
-  transform: scaleX(1);
-  transform-origin: left;
-}
-
-/* Focus outline for accessibility */
-:focus-visible {
-  outline-offset: 2px;
-  outline: 3px solid rgb(var(--color-primary));
-  outline-radius: 4px;
-  transition: outline-color var(--transition-duration) var(--transition-ease);
-}
-
-/* Scrollbar styling with smooth fade-in/out on hover */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-  background: transparent;
-  transition: background-color 0.4s ease;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: rgba(59, 130, 246, 0.3);
-  border-radius: 9999px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-  transition: background-color 0.3s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(59, 130, 246, 0.6);
-}
-
-/* Smooth hover scale effect on interactive buttons and inputs */
+/* --------------------------------------------- */
+/* Interactive Elements - Buttons and Inputs */
+/* --------------------------------------------- */
 button,
 input[type="button"],
 input[type="submit"],
 input[type="reset"] {
+  cursor: pointer;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  padding-block: 0.625rem;
+  padding-inline: 1.25rem;
+  background-color: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
+  color: white;
+  box-shadow: 0 4px 6px hsla(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l), 0.4);
   transition:
     background-color var(--transition-duration) var(--transition-ease),
-    color var(--transition-duration) var(--transition-ease),
     box-shadow var(--transition-duration) var(--transition-ease),
-    transform 0.25s ease;
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform, background-color;
+  user-select: none;
+  outline-offset: 3px;
 }
 
 button:hover,
@@ -130,36 +129,121 @@ button:focus-visible,
 input[type="button"]:focus-visible,
 input[type="submit"]:focus-visible,
 input[type="reset"]:focus-visible {
+  background-color: hsl(var(--color-primary-hover-h), var(--color-primary-hover-s), var(--color-primary-hover-l));
+  box-shadow: 0 8px 15px hsla(var(--color-primary-hover-h), var(--color-primary-hover-s), var(--color-primary-hover-l), 0.5);
+  outline: 3px solid hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
   transform: scale(1.05);
-  box-shadow: 0 8px 15px rgba(59, 130, 246, 0.3);
-  outline: none;
 }
 
-/* Container utility with max width + responsive padding */
+/* --------------------------------------------- */
+/* Link Styles with Animated Underline */
+/* --------------------------------------------- */
+a {
+  color: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
+  text-decoration: none;
+  position: relative;
+  cursor: pointer;
+  transition: color var(--transition-duration) var(--transition-ease);
+}
+
+a::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
+  left: 0;
+  bottom: -3px;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--transition-duration) var(--transition-ease);
+  will-change: transform;
+}
+
+a:hover,
+a:focus-visible {
+  color: hsl(var(--color-primary-hover-h), var(--color-primary-hover-s), var(--color-primary-hover-l));
+}
+
+a:hover::after,
+a:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* --------------------------------------------- */
+/* Accessibility Focus Enhancements */
+/* --------------------------------------------- */
+:focus-visible {
+  outline-offset: 3px;
+  outline: 3px solid hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
+  outline-radius: 6px;
+  box-shadow:
+    0 0 8px hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l) / 0.5);
+  transition:
+    outline-color var(--transition-duration) var(--transition-ease),
+    box-shadow var(--transition-duration) var(--transition-ease);
+}
+
+/* --------------------------------------------- */
+/* Scrollbar Styling (WebKit and Firefox) */
+/* --------------------------------------------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: transparent;
+  transition: background-color 0.4s ease;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsla(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l), 0.3);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: background-color 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsla(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l), 0.6);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: 
+    hsla(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l), 0.3)
+    transparent;
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background-color: hsla(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l), 0.8);
+}
+
+/* --------------------------------------------- */
+/* Utility container with logical padding */
+/* --------------------------------------------- */
 .container {
-  max-width: 1280px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  max-inline-size: 1280px;
+  margin-inline: auto;
+  padding-inline: 1rem;
   transition: padding 0.3s ease;
 }
 
 @media (min-width: 640px) {
   .container {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding-inline: 1.5rem;
   }
 }
 
 @media (min-width: 1024px) {
   .container {
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-inline: 2rem;
   }
 }
 
-/* Utility class for visually hidden elements but accessible for screen readers */
+/* --------------------------------------------- */
+/* Screen reader only helper */
+/* --------------------------------------------- */
 .sr-only {
   position: absolute !important;
   width: 1px !important;
@@ -172,14 +256,16 @@ input[type="reset"]:focus-visible {
   border: 0 !important;
 }
 
-/* Animate presence helper classes for smoother React/Framer Motion transitions */
+/* --------------------------------------------- */
+/* Motion/Animation Helper */
+/* --------------------------------------------- */
 .motion-safe {
   will-change: opacity, transform;
   transition-timing-function: var(--transition-ease);
   transition-duration: var(--transition-duration);
 }
 
-/* Subtle fade-in animation for images */
+/* Subtle fade-in animation */
 .fade-in {
   opacity: 0;
   animation: fadeIn 0.7s ease forwards;
@@ -191,33 +277,53 @@ input[type="reset"]:focus-visible {
   }
 }
 
-/* Button primary style */
-.btn-primary {
-  background-color: rgb(var(--color-primary));
-  color: white;
-  border-radius: 0.375rem;
-  padding: 0.625rem 1.25rem;
-  font-weight: 600;
-  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.4);
-  transition: background-color var(--transition-duration) var(--transition-ease),
-    box-shadow var(--transition-duration) var(--transition-ease);
-  cursor: pointer;
-  user-select: none;
-}
-
-.btn-primary:hover,
-.btn-primary:focus-visible {
-  background-color: rgb(var(--color-primary-hover));
-  box-shadow: 0 8px 15px rgba(37, 99, 235, 0.5);
-  outline: none;
-  transform: scale(1.05);
-}
-
-/* Link styled as button */
+/* --------------------------------------------- */
+/* Button Link Styles */
+/* --------------------------------------------- */
 .btn-link {
-  @apply text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600;
   font-weight: 600;
   cursor: pointer;
   user-select: none;
+  color: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
   transition: color var(--transition-duration) var(--transition-ease);
 }
+
+.btn-link:hover,
+.btn-link:focus-visible {
+  color: hsl(var(--color-primary-hover-h), var(--color-primary-hover-s), var(--color-primary-hover-l));
+}
+
+/* --------------------------------------------- */
+/* Utility Colors */
+/* --------------------------------------------- */
+.bg-primary {
+  background-color: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
+}
+
+.bg-primary-hover:hover {
+  background-color: hsl(var(--color-primary-hover-h), var(--color-primary-hover-s), var(--color-primary-hover-l));
+}
+
+.text-light {
+  color: rgb(var(--color-text-light));
+}
+
+.text-dark {
+  color: rgb(var(--color-text-dark));
+}
+
+/* --------------------------------------------- */
+/* Prefers Reduced Motion */
+/* --------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --------------------------------------------- */
+/* Placeholder for Future CSS
+

@@ -22,3 +22,6 @@ pnpm-debug.log*
 # Optional builds
 *.local
 coverage/
+
+# Local Netlify folder
+.netlify
