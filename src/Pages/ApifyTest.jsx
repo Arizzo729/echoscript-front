@@ -4,13 +4,14 @@ import { AutomationService, PROVIDERS } from "../services/AutomationService";
 export default function ApifyTest() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
-  const taskId = "your-apify-task-id"; // ⬅️ Replace with real Task ID
+
+  const taskId = "your-apify-task-id"; // Replace with your actual Apify task ID
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await AutomationService.runAutomation(PROVIDERS.APIFY, taskId);
-        setData(res);
+        const result = await AutomationService.runAutomation(PROVIDERS.APIFY, taskId);
+        setData(result);
       } catch (err) {
         setError(err.message);
       }

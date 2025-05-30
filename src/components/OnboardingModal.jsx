@@ -70,4 +70,6 @@ function OnboardingModal({ onClose }) {
     </AnimatePresence>
   );
 }
+// 👇 Add this at the bottom of OnboardingModal.jsx
+export default OnboardingModal;
 

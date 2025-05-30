@@ -1,3 +1,7 @@
+/* ✅ Always FIRST */
+@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -325,5 +329,5 @@ a:focus-visible::after {
 }
 
 /* --------------------------------------------- */
-/* Placeholder for Future CSS
+/* Placeholder for Future CSS*/
 
