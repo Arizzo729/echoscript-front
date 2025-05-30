@@ -1,16 +1,20 @@
-export default function HomePage() {
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import LogoLoader from "../components/LogoLoader";
+import OnboardingModal from "../components/OnboardingModal";
+
+export default function Home() {
   const [showLoader, setShowLoader] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    // Check if user completed onboarding previously
     const onboarded = localStorage.getItem("echoscript-onboarded");
     if (onboarded) setShowOnboarding(false);
     else setShowOnboarding(true);
   }, []);
 
   const handleLoaderComplete = () => setShowLoader(false);
-
   const handleOnboardingClose = () => {
     localStorage.setItem("echoscript-onboarded", "true");
     setShowOnboarding(false);

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 /** LogoLoader: fullscreen animated logo loader */
-function LogoLoader({ duration = 2000, onComplete }) {
+export default function LogoLoader({ duration = 2000, onComplete }) {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ function LogoLoader({ duration = 2000, onComplete }) {
   );
 }
 
-/** Onboarding modal guiding new users */
+/** Steps used in the onboarding modal */
 const STEPS = [
   {
     title: "Welcome to EchoScript.AI!",
@@ -53,7 +53,8 @@ const STEPS = [
   },
 ];
 
-function OnboardingModal({ onClose }) {
+/** OnboardingModal: separate export */
+export function OnboardingModal({ onClose }) {
   const [step, setStep] = useState(0);
   const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
   const prev = () => setStep((s) => Math.max(s - 1, 0));
@@ -73,8 +74,12 @@ function OnboardingModal({ onClose }) {
           exit={{ scale: 0.8, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
         >
-          <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{STEPS[step].title}</h2>
-          <p className="mb-6 text-gray-700 dark:text-gray-300">{STEPS[step].description}</p>
+          <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
+            {STEPS[step].title}
+          </h2>
+          <p className="mb-6 text-gray-700 dark:text-gray-300">
+            {STEPS[step].description}
+          </p>
           <div className="flex justify-between">
             <button
               onClick={prev}

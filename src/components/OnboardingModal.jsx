@@ -1,3 +1,6 @@
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
 const STEPS = [
   {
     title: "Welcome to EchoScript.AI!",
@@ -70,6 +73,5 @@ function OnboardingModal({ onClose }) {
     </AnimatePresence>
   );
 }
-// 👇 Add this at the bottom of OnboardingModal.jsx
-export default OnboardingModal;
 
+export default OnboardingModal;
