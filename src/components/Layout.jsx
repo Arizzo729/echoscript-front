@@ -1,14 +1,11 @@
-// Layout.jsx — Final EchoScript.AI Layout with Sidebar, Header, Theme, Settings, and Notifications
-
 import React, { useState, useEffect, createContext, useContext } from "react";
 import { Outlet } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { FiBell, FiSettings, FiLogOut } from "react-icons/fi";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import ToastContainer from "./components/ToastContainer";
 import EchoAssistantUltra from "./components/EchoAssistantUltra";
 import MobileBottomNav from "./components/MobileBottomNav";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const ThemeContext = createContext();
 export const UserContext = createContext();
@@ -59,7 +56,7 @@ const SettingsDrawer = ({ isOpen, onClose }) => {
 };
 
 export default function Layout() {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState("dark");
   const toggleTheme = () => setTheme((prev) => (prev === "light" ? "dark" : "light"));
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -80,27 +77,20 @@ export default function Layout() {
       <UserContext.Provider value={{ user }}>
         <NotificationContext.Provider value={{ notifications, markAllRead }}>
           <div className="flex min-h-screen bg-white dark:bg-zinc-900 text-black dark:text-white transition-colors duration-300">
-            
-            {/* ✅ Sidebar */}
             <Sidebar />
-
-            {/* ✅ Main Panel */}
             <div className="flex flex-col flex-1 relative">
               <Header
                 onToggleTheme={toggleTheme}
                 onSettingsOpen={() => setSettingsOpen(true)}
                 isDarkMode={theme === "dark"}
               />
-              
               <main className="flex-grow overflow-y-auto px-6 py-4">
                 <Outlet />
               </main>
-
               <MobileBottomNav />
               <ToastContainer />
               <EchoAssistantUltra />
             </div>
-
             <SettingsDrawer isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
           </div>
         </NotificationContext.Provider>
