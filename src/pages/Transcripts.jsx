@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { UploadAndTranscribe } from "../components/UploadandTranscribe";
+import UploadAndTranscribe from "../components/UploadandTranscribe";
 import LanguageModelSelector from "../components/Transcription";
 import AdaptiveAI from "../components/AdaptiveAI";
 import StatusConsole from "../components/StatusConsole";
 
 export default function Transcripts() {
   const [activeTab, setActiveTab] = useState("upload");
+
+  // Connect language/model selection to uploader
+  const [language, setLanguage] = useState("auto");
+  const [model, setModel] = useState("medium");
 
   const tabClasses = (tab) =>
     `px-5 py-2.5 text-sm sm:text-base rounded-t-lg font-medium transition-all duration-200 ease-in-out focus:outline-none ${
@@ -48,8 +52,14 @@ export default function Transcripts() {
       >
         {activeTab === "upload" && (
           <div className="space-y-6">
-            <LanguageModelSelector />
-            <UploadAndTranscribe />
+            <LanguageModelSelector
+              onChangeLanguage={(lang) => setLanguage(lang)}
+              onChangeModel={(mod) => setModel(mod)}
+            />
+            <UploadAndTranscribe
+              language={language}
+              model={model}
+            />
           </div>
         )}
 

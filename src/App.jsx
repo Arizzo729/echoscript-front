@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Routes, Route, Outlet, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+// ✅ Finalized App.jsx for EchoScript.AI — Full Integration & UI Logic
 
+import React from "react";
+import { Routes, Route, Outlet } from "react-router-dom";
 import { ThemeProvider } from "./context/useTheme";
 import { GPTProvider } from "./context/GPTContext";
-
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
@@ -12,8 +11,8 @@ import EchoAssistantUltra from "./components/EchoAssistantUltra";
 import OnboardingModal from "./components/OnboardingModal";
 import MobileBottomNav from "./components/MobileBottomNav";
 import ToastContainer from "./components/ToastContainer";
+import { AnimatePresence } from "framer-motion";
 import AnimatedSplash from "./components/AnimatedSplash";
-
 import "./global.css";
 
 // Pages
@@ -27,73 +26,48 @@ import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
 import ApifyTest from "./pages/ApifyTest";
 
-const isAuthenticated = () => {
-  return localStorage.getItem("auth") === "true";
-};
+function Layout() {
+  return (
+    <div className="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark min-h-screen flex flex-col font-sans transition-all duration-300 ease-in-out">
+      <Header />
+      <div className="flex flex-grow">
+        <Sidebar />
+        <main className="flex-grow px-4 py-6 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700">
+          <Outlet />
+        </main>
+      </div>
+      <Footer />
+      <MobileBottomNav />
+      <EchoAssistantUltra />
+      <ToastContainer />
+    </div>
+  );
+}
 
 export default function App() {
-  const location = useLocation();
-  const [splashComplete, setSplashComplete] = useState(
-    sessionStorage.getItem("splashShown") === "true"
-  );
-
-  // Reset scroll on route change
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location.pathname]);
-
-  // Persist splash state
-  useEffect(() => {
-    if (!splashComplete) {
-      sessionStorage.setItem("splashShown", "true");
-    }
-  }, [splashComplete]);
-
-  // Show splash screen first
-  if (!splashComplete) {
-    return (
-      <AnimatePresence mode="wait">
-        <AnimatedSplash key="splash" onComplete={() => setSplashComplete(true)} />
-      </AnimatePresence>
-    );
-  }
-
-  // Main app content
   return (
     <ThemeProvider>
       <GPTProvider>
-        <motion.div
-          key="main"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
-          className="bg-gradient-to-br from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900 min-h-screen"
-        >
-          <Header />
-          <Sidebar />
-          <OnboardingModal />
-          <main className="pt-16 pb-20 px-4 md:px-10">
-            <Routes location={location} key={location.pathname}>
-              <Route path="/" element={<Home />} />
-              <Route path="/transcription" element={<Transcription />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/account" element={<Account />} />
-              <Route path="/purchase" element={<Purchase />} />
-              <Route path="/signin" element={<SignIn />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/apify" element={<ApifyTest />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Outlet />
-          </main>
-          <MobileBottomNav />
-          <ToastContainer />
-          <Footer />
-          <EchoAssistantUltra />
-        </motion.div>
+        <AnimatePresence mode="wait">
+          <AnimatedSplash duration={2000} />
+        </AnimatePresence>
+
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/transcription" element={<Transcription />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/account" element={<Account />} />
+            <Route path="/purchase" element={<Purchase />} />
+            <Route path="/apify" element={<ApifyTest />} />
+          </Route>
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+
+        <OnboardingModal />
       </GPTProvider>
     </ThemeProvider>
   );
 }
-

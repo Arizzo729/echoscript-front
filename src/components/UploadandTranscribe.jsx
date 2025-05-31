@@ -1,9 +1,14 @@
-
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Mic, UploadCloud, CheckCircle, AlertCircle, Clipboard } from "lucide-react";
+import {
+  Mic,
+  UploadCloud,
+  CheckCircle,
+  AlertCircle,
+  Clipboard,
+} from "lucide-react";
 
-export function UploadAndTranscribe() {
+export default function UploadAndTranscribe({ language = "auto", model = "medium" }) {
   const [file, setFile] = useState(null);
   const [recording, setRecording] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -19,18 +24,13 @@ export function UploadAndTranscribe() {
 
   const startRecording = async () => {
     setError(null);
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setError("Microphone not supported on this browser.");
-      return;
-    }
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
       audioChunksRef.current = [];
 
-      mediaRecorderRef.current.ondataavailable = (event) => {
-        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      mediaRecorderRef.current.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
       };
 
       mediaRecorderRef.current.onstop = async () => {
@@ -41,7 +41,7 @@ export function UploadAndTranscribe() {
       mediaRecorderRef.current.start();
       setRecording(true);
     } catch {
-      setError("Could not access microphone.");
+      setError("Microphone access denied or unsupported.");
     }
   };
 
@@ -51,11 +51,10 @@ export function UploadAndTranscribe() {
   };
 
   const handleFileChange = async (e) => {
-    setError(null);
     const selected = e.target.files[0];
     if (!selected) return;
     if (!selected.type.startsWith("audio") && !selected.type.startsWith("video")) {
-      setError("Only audio/video files are allowed.");
+      setError("Only audio or video files are allowed.");
       return;
     }
 
@@ -74,21 +73,23 @@ export function UploadAndTranscribe() {
     try {
       const formData = new FormData();
       formData.append("file", inputFile);
+      formData.append("language", language);
+      formData.append("model", model);
 
-      const response = await fetch("/api/transcribe-enhanced", {
+      const res = await fetch("/api/transcribe-enhanced", {
         method: "POST",
         body: formData,
       });
 
-      if (!response.ok) throw new Error("Failed to transcribe.");
+      if (!res.ok) throw new Error("Server error during transcription.");
 
-      const result = await response.json();
-      setTranscript(result.transcript || "");
-      setSummary(result.summary || "");
-      setSentiment(result.sentiment || "");
-      setKeywords(result.keywords || []);
+      const data = await res.json();
+      setTranscript(data.transcript || "");
+      setSummary(data.summary || "");
+      setSentiment(data.sentiment || "");
+      setKeywords(data.keywords || []);
     } catch (err) {
-      setError(err.message || "An error occurred during transcription.");
+      setError(err.message || "Unknown error occurred.");
     } finally {
       setLoading(false);
     }
@@ -102,57 +103,59 @@ export function UploadAndTranscribe() {
 
   return (
     <motion.div
-      className="p-6 bg-white dark:bg-zinc-800 rounded-xl shadow-xl max-w-2xl mx-auto"
-      initial={{ opacity: 0, y: 20 }}
+      className="p-6 bg-white dark:bg-zinc-800 rounded-xl shadow-md max-w-2xl mx-auto"
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.4 }}
     >
-      <div className="space-y-5">
-        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+      <div className="space-y-6">
+        <label className="block text-sm font-medium text-zinc-800 dark:text-zinc-300">
           Upload audio/video file or record live:
         </label>
 
-        <input
-          type="file"
-          accept="audio/*,video/*"
-          onChange={handleFileChange}
-          disabled={loading || recording}
-          className="block w-full text-sm text-zinc-600 dark:text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-        />
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <label className="flex flex-col items-center justify-center w-full sm:w-auto px-6 py-3 bg-blue-50 dark:bg-zinc-700 rounded-lg border border-dashed border-blue-300 dark:border-zinc-500 text-blue-700 dark:text-white hover:bg-blue-100 cursor-pointer transition">
+            <UploadCloud size={20} />
+            <span className="mt-1 text-sm">Choose File</span>
+            <input
+              type="file"
+              accept="audio/*,video/*"
+              onChange={handleFileChange}
+              disabled={loading || recording}
+              className="hidden"
+            />
+          </label>
 
-        <div className="flex gap-4 items-center flex-wrap">
           <button
             onClick={recording ? stopRecording : startRecording}
             disabled={loading}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition ${
+            className={`flex items-center gap-2 px-5 py-2 rounded-md font-medium transition ${
               recording ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"
             } text-white`}
           >
             <Mic size={18} />
-            {recording ? "Stop Recording" : "Record Live"}
+            {recording ? "Stop" : "Record"}
           </button>
-
-          {loading && (
-            <span className="text-sm text-zinc-500 dark:text-zinc-400 animate-pulse">
-              Transcribing...
-            </span>
-          )}
-          {error && (
-            <span className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle size={16} /> {error}
-            </span>
-          )}
-          {!loading && transcript && !error && (
-            <span className="text-sm text-green-600 flex items-center gap-1">
-              <CheckCircle size={16} /> Transcription ready
-            </span>
-          )}
         </div>
+
+        {error && (
+          <div className="flex items-center text-red-600 gap-2 text-sm">
+            <AlertCircle size={16} /> {error}
+          </div>
+        )}
+        {loading && (
+          <div className="text-sm text-zinc-500 dark:text-zinc-400">Transcribing...</div>
+        )}
+        {!loading && transcript && !error && (
+          <div className="text-sm text-green-600 flex items-center gap-2">
+            <CheckCircle size={16} /> Transcript ready
+          </div>
+        )}
 
         {transcript && (
           <section className="bg-zinc-100 dark:bg-zinc-900 p-4 rounded-md text-sm relative">
             <div className="flex justify-between items-center mb-2">
-              <h3 className="font-semibold text-zinc-700 dark:text-zinc-100">Transcript</h3>
+              <h3 className="font-semibold text-zinc-800 dark:text-white">Transcript</h3>
               <button
                 onClick={copyTranscript}
                 className="text-blue-600 dark:text-blue-400 hover:underline text-xs flex items-center gap-1"
@@ -161,21 +164,21 @@ export function UploadAndTranscribe() {
                 {copied ? "Copied!" : "Copy"}
               </button>
             </div>
-            <p className="whitespace-pre-wrap text-zinc-800 dark:text-zinc-100">{transcript}</p>
+            <p className="whitespace-pre-wrap text-zinc-700 dark:text-zinc-200">{transcript}</p>
           </section>
         )}
 
         {summary && (
-          <section className="bg-blue-50 dark:bg-blue-900 p-4 rounded-md text-blue-800 dark:text-blue-300 text-sm">
+          <section className="p-4 bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-300 rounded-md text-sm">
             <h4 className="font-semibold mb-1">Summary</h4>
             <p className="italic">{summary}</p>
           </section>
         )}
 
         {sentiment && (
-          <section className="p-4 rounded-md border border-zinc-300 dark:border-zinc-700 text-sm text-zinc-700 dark:text-zinc-300">
-            <h4 className="font-semibold mb-1">Sentiment</h4>
-            <p>{sentiment}</p>
+          <section className="p-4 border border-zinc-300 dark:border-zinc-600 rounded-md text-sm">
+            <h4 className="font-semibold mb-1 text-zinc-800 dark:text-white">Sentiment</h4>
+            <p className="text-zinc-600 dark:text-zinc-300">{sentiment}</p>
           </section>
         )}
 
@@ -183,10 +186,10 @@ export function UploadAndTranscribe() {
           <section className="p-4 bg-zinc-200 dark:bg-zinc-700 rounded-md text-sm">
             <h4 className="font-semibold mb-2 text-zinc-800 dark:text-zinc-100">Keywords</h4>
             <div className="flex flex-wrap gap-2">
-              {keywords.map((kw, i) => (
+              {keywords.map((kw, idx) => (
                 <span
-                  key={i}
-                  className="bg-blue-300 dark:bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium"
+                  key={idx}
+                  className="bg-blue-400 dark:bg-blue-600 text-white px-3 py-1 rounded-full text-xs"
                 >
                   {kw}
                 </span>

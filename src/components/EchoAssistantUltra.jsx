@@ -1,107 +1,70 @@
+// ✅ Upgraded EchoAssistantUltra.jsx — GPT-4 Contextual Assistant
+
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Send, X, Loader2, Wand2, Mic, MicOff } from "lucide-react";
+import { Bot, Send, X, Loader2, Wand2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const persona = {
   name: "Echo",
-  greeting: "Hi, I'm Echo — your smart assistant. Ask me anything or use slash commands like `/summarize`, `/fix grammar`, or `/keywords`.",
+  greeting: "Hi, I'm Echo — your smart assistant. Ask me anything about transcripts, plans, usage, or even command me with `/summarize`, `/fix grammar`, or `/lookup something`.",
 };
 
 const defaultSystemPrompt = (user, context) => `
-You are Echo, an AI assistant for EchoScript.AI.
-User: ${user.name} (Plan: ${user.plan})
-Context: "${context}" page
-Always be helpful, concise, and intelligent. 
-You support commands like /summarize, /keywords, /fix grammar, /lookup.
+You are Echo, a super-intelligent assistant helping a user on EchoScript.AI.
+The user is ${user.name} and is currently on the "${user.plan}" plan.
+They are currently on: "${context}" page.
+You are helpful, intelligent, and capable of looking things up if needed.
+Always help with transcripts, AI tools, pricing, feedback, or technical questions.
+If you are unsure, suggest looking it up with "/lookup {topic}".
+Respond kindly and with clarity, like a real support engineer.
 `;
 
-export default function EchoAssistantUltra({
-  user = { name: "User", plan: "Free" },
-  context = "Dashboard",
-}) {
+const EchoAssistantUltra = ({ user = { name: "User", plan: "Free" }, context = "Dashboard" }) => {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [history, setHistory] = useState([{ role: "assistant", content: persona.greeting }]);
+  const [history, setHistory] = useState([
+    { role: "assistant", content: persona.greeting },
+  ]);
   const [loading, setLoading] = useState(false);
-  const [recording, setRecording] = useState(false);
-  const recognitionRef = useRef(null);
-  const scrollRef = useRef(null);
+  const scrollRef = useRef();
 
-  // Toggle visibility
   const toggle = () => setOpen((prev) => !prev);
 
-  // Global hotkey Shift+A
   useEffect(() => {
     const handler = (e) => e.shiftKey && e.key === "A" && toggle();
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  useEffect(() => scrollRef.current?.scrollIntoView({ behavior: "smooth" }), [history]);
-
-  // Voice recognition setup
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.lang = "en-US";
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.onresult = (e) => setInput(e.results[0][0].transcript);
-      recognitionRef.current.onerror = (e) => {
-        console.error("Mic error:", e.error);
-        setRecording(false);
-      };
-    }
-  }, []);
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [history]);
 
-  const startMic = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.start();
-      setRecording(true);
-    }
-  };
-
-  const stopMic = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      setRecording(false);
-    }
-  };
-
-  const parseCommand = (text) => {
-    const command = text.trim().split(" ")[0];
-    if (["/summarize", "/keywords", "/fix", "/lookup"].includes(command)) {
-      return command;
+  const parseCommands = (text) => {
+    if (text.startsWith("/lookup ")) {
+      return { command: "lookup", value: text.replace("/lookup ", "") };
     }
     return null;
   };
 
   const handleSend = async () => {
     if (!input.trim()) return;
-
-    const message = { role: "user", content: input };
-    const command = parseCommand(input);
-
-    setHistory((prev) => [...prev, message]);
+    const userMessage = { role: "user", content: input };
+    setHistory((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
-    // Simulated handling of command
-    if (command === "/lookup") {
-      const topic = input.replace("/lookup", "").trim();
+    const parsed = parseCommands(input);
+    if (parsed?.command === "lookup") {
       setHistory((prev) => [
         ...prev,
-        { role: "assistant", content: `🔍 Searching for "${topic}"...` },
+        { role: "assistant", content: `🌐 Looking up \"${parsed.value}\" from external sources...` },
       ]);
       setTimeout(() => {
         setHistory((prev) => [
           ...prev,
-          {
-            role: "assistant",
-            content: `📘 *Coming soon:* I'll pull live results for "${topic}".`,
-          },
+          { role: "assistant", content: `📘 Here's what I found about \"${parsed.value}\":\n\n*Coming soon: real-time external lookup integration.*` },
         ]);
         setLoading(false);
       }, 2000);
@@ -113,22 +76,25 @@ export default function EchoAssistantUltra({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY || "sk-xxx"}`,
+          Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
           model: "gpt-4",
           messages: [
             { role: "system", content: defaultSystemPrompt(user, context) },
             ...history,
-            message,
+            userMessage,
           ],
         }),
       });
       const data = await res.json();
-      const reply = data.choices?.[0]?.message?.content || "⚠️ Echo couldn’t reply.";
+      const reply = data.choices?.[0]?.message?.content || "⚠️ Unexpected error.";
       setHistory((prev) => [...prev, { role: "assistant", content: reply }]);
-    } catch (e) {
-      setHistory((prev) => [...prev, { role: "assistant", content: "⚠️ Network issue." }]);
+    } catch (err) {
+      setHistory((prev) => [
+        ...prev,
+        { role: "assistant", content: "⚠️ Network error." },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -136,7 +102,6 @@ export default function EchoAssistantUltra({
 
   return (
     <>
-      {/* Orb trigger */}
       <motion.button
         onClick={toggle}
         className="fixed bottom-6 right-6 z-50 p-3 bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-xl"
@@ -147,11 +112,10 @@ export default function EchoAssistantUltra({
         <Wand2 className="w-5 h-5" />
       </motion.button>
 
-      {/* Panel */}
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed bottom-24 right-6 w-[380px] max-h-[80vh] bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-2xl shadow-2xl z-50 flex flex-col"
+            className="fixed bottom-24 right-6 w-[360px] max-h-[75vh] bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-2xl shadow-2xl z-50 flex flex-col"
             initial={{ opacity: 0, y: 16, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
@@ -166,9 +130,9 @@ export default function EchoAssistantUltra({
             </div>
 
             <div className="flex-1 overflow-y-auto px-4 py-3 text-sm space-y-3">
-              {history.map((msg, i) => (
+              {history.map((msg, idx) => (
                 <motion.div
-                  key={i}
+                  key={idx}
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={`px-3 py-2 rounded-xl whitespace-pre-line max-w-[85%] ${
@@ -181,38 +145,31 @@ export default function EchoAssistantUltra({
                 </motion.div>
               ))}
               {loading && (
-                <div className="text-zinc-400 dark:text-zinc-500 flex items-center gap-1 text-sm">
-                  <Loader2 className="animate-spin w-4 h-4" /> Echo is thinking...
+                <div className="text-zinc-400 dark:text-zinc-500 text-sm flex items-center gap-1">
+                  <Loader2 className="animate-spin w-4 h-4" />
+                  Echo is thinking...
                 </div>
               )}
               <div ref={scrollRef} />
             </div>
 
-            {/* Input section */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSend();
               }}
-              className="flex items-center gap-2 px-3 py-2 border-t dark:border-zinc-700"
+              className="flex items-center border-t dark:border-zinc-700 px-3 py-2"
             >
-              <button
-                type="button"
-                onClick={recording ? stopMic : startMic}
-                className={`p-2 rounded-full ${recording ? "bg-red-500" : "bg-zinc-200 dark:bg-zinc-800"} text-white`}
-              >
-                {recording ? <MicOff size={16} /> : <Mic size={16} />}
-              </button>
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask Echo or use /command"
+                placeholder="Ask Echo or use /lookup"
                 className="flex-1 px-3 py-2 text-sm rounded-md bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white focus:outline-none"
               />
               <button
                 type="submit"
-                className="ml-2 p-2 bg-teal-600 hover:bg-teal-700 rounded-md text-white"
+                className="ml-2 p-2 text-white bg-teal-600 hover:bg-teal-700 rounded-md"
                 disabled={loading}
               >
                 <Send size={16} />
@@ -223,5 +180,8 @@ export default function EchoAssistantUltra({
       </AnimatePresence>
     </>
   );
-}
+};
+
+export default EchoAssistantUltra;
+
 
