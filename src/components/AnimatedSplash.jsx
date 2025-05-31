@@ -11,17 +11,18 @@ const AnimatedSplash = ({ onComplete }) => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Subtle glow pulse
       gsap.to(logoRef.current, {
         backgroundPosition: "200% center",
-        duration: 3,
-        ease: "power2.inOut",
+        duration: 2.8,
+        ease: "power1.inOut",
         repeat: -1,
         yoyo: true,
       });
 
       gsap.to(orbRef.current, {
         rotate: 360,
-        duration: 20,
+        duration: 22,
         ease: "linear",
         repeat: -1,
       });
@@ -30,7 +31,7 @@ const AnimatedSplash = ({ onComplete }) => {
     const timer = setTimeout(() => {
       setVisible(false);
       if (onComplete) onComplete();
-    }, 2000); // 2 seconds
+    }, 2300); // 2.3 seconds
 
     return () => {
       ctx.revert();
@@ -42,21 +43,21 @@ const AnimatedSplash = ({ onComplete }) => {
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white dark:bg-zinc-950"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-zinc-100 to-teal-100 dark:from-zinc-950 dark:to-zinc-900"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.7 } }}
         >
-          {/* 🌀 Orb Glow */}
+          {/* 🌌 Orb Glow */}
           <div
             ref={orbRef}
-            className="absolute w-[340px] h-[340px] rounded-full bg-gradient-to-tr from-teal-500 to-blue-500 opacity-10 blur-2xl"
+            className="absolute w-[380px] h-[380px] rounded-full bg-gradient-to-tr from-teal-500 to-blue-500 opacity-10 blur-3xl"
           />
 
-          {/* 🔄 Animated Logo */}
+          {/* 🌀 Animated Logo Mask */}
           <div
             ref={logoRef}
-            className="w-40 h-40 bg-[url('/Logo.png')] bg-contain bg-no-repeat bg-center"
+            className="w-44 h-44 bg-[url('/Logo.png')] bg-contain bg-no-repeat bg-center"
             style={{
               WebkitMaskImage: "url('/Logo.png')",
               maskImage: "url('/Logo.png')",
@@ -65,13 +66,14 @@ const AnimatedSplash = ({ onComplete }) => {
               WebkitMaskPosition: "center",
               maskPosition: "center",
               backgroundSize: "200% auto",
-              backgroundImage: "linear-gradient(90deg, #14b8a6, #0ea5e9, #14b8a6)",
+              backgroundImage:
+                "linear-gradient(90deg, #14b8a6, #0ea5e9, #14b8a6)",
             }}
           />
 
-          {/* 💬 Updated Tagline */}
+          {/* ✨ Brand Name */}
           <motion.div
-            className="mt-6 text-xl font-semibold text-zinc-700 dark:text-zinc-300"
+            className="mt-6 text-2xl sm:text-3xl font-bold tracking-tight text-zinc-800 dark:text-white"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
@@ -79,8 +81,8 @@ const AnimatedSplash = ({ onComplete }) => {
             EchoScript.AI
           </motion.div>
 
-          {/* 🔊 Lottie Pulse */}
-          <div className="mt-4 w-24 h-24">
+          {/* 🔊 Lottie Visual Accent */}
+          <div className="mt-4 w-20 h-20 sm:w-24 sm:h-24">
             <Lottie animationData={animationData} loop autoplay />
           </div>
         </motion.div>
