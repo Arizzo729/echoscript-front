@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import Lottie from "lottie-react";
-import { X } from "lucide-react";
 import animationData from "../assets/ai-waveform.json";
 
 const AnimatedSplash = ({ onComplete }) => {
@@ -55,15 +54,6 @@ const AnimatedSplash = ({ onComplete }) => {
             className="absolute w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-teal-500 to-blue-500 opacity-10 blur-3xl"
           />
 
-          {/* Top-right close */}
-          <button
-            onClick={closeSplash}
-            className="absolute top-4 right-4 text-zinc-400 hover:text-red-500 transition"
-            aria-label="Close splash"
-          >
-            <X className="w-5 h-5" />
-          </button>
-
           {/* Animated logo */}
           <div
             ref={logoRef}
@@ -82,7 +72,7 @@ const AnimatedSplash = ({ onComplete }) => {
             }}
           />
 
-          {/* Site title */}
+          {/* Brand text */}
           <motion.div
             className="mt-6 text-3xl font-bold text-zinc-800 dark:text-white tracking-tight"
             initial={{ opacity: 0, y: 6 }}
@@ -97,7 +87,7 @@ const AnimatedSplash = ({ onComplete }) => {
             <Lottie animationData={animationData} loop autoplay />
           </div>
 
-          {/* Skip button */}
+          {/* Skip Button */}
           <button
             onClick={closeSplash}
             className="absolute bottom-5 right-5 text-sm px-4 py-2 rounded-md bg-white/20 dark:bg-zinc-700/30 text-zinc-800 dark:text-white backdrop-blur hover:bg-white/30 hover:dark:bg-zinc-600/40 transition-all shadow-lg"

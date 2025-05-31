@@ -8,7 +8,7 @@ export default function LogoLoader({ duration = 2500, onComplete }) {
     setVisible(false);
     setTimeout(() => {
       if (onComplete) onComplete();
-    }, 500); // Match fade-out
+    }, 500); // match fade-out
   };
 
   useEffect(() => {
@@ -27,15 +27,6 @@ export default function LogoLoader({ duration = 2500, onComplete }) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6 }}
         >
-          {/* ❌ Top-right close */}
-          <button
-            onClick={close}
-            className="absolute top-4 right-4"
-            aria-label="Close intro"
-          >
-            <span className="text-xl font-bold">×</span>
-          </button>
-
           {/* 🔄 Logo animation */}
           <motion.img
             src="/EchoScriptAI_Animated.svg"
