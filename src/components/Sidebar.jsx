@@ -26,7 +26,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-zinc-800">
-        {!sidebarOpen ? null : (
+        {sidebarOpen && (
           <span className="text-xl font-bold tracking-tight text-indigo-300">
             EchoScript.AI
           </span>
@@ -40,7 +40,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
         </button>
       </div>
 
-      {/* Links */}
+      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
         {navItems.map(({ name, icon: Icon, to }) => (
           <NavLink
@@ -62,6 +62,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
+                  className="whitespace-nowrap"
                 >
                   {name}
                 </motion.span>
@@ -71,11 +72,11 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
         ))}
       </nav>
 
+      {/* Footer */}
       <div className="p-3 text-xs text-zinc-500 text-center">
         {sidebarOpen ? `© ${new Date().getFullYear()} EchoScript.AI` : "©"}
       </div>
     </motion.aside>
   );
 }
-
 

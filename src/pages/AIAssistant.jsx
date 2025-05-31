@@ -1,71 +1,81 @@
+// src/pages/AIAssistant.jsx
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Send, Bot } from "lucide-react";
+import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 
 export default function AIAssistant() {
-  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([
+    { role: "assistant", text: "Hi! I'm your EchoScript Assistant. How can I help?" },
+  ]);
 
   const handleSend = () => {
     if (!input.trim()) return;
-    const newMsg = { role: "user", text: input };
-    setMessages([...messages, newMsg]);
+    const userMsg = { role: "user", text: input };
+    const botMsg = { role: "assistant", text: "⏳ Thinking..." };
+
+    setMessages((prev) => [...prev, userMsg, botMsg]);
     setInput("");
 
+    // Simulated GPT response delay
     setTimeout(() => {
-      const reply = {
-        role: "assistant",
-        text: `You asked: “${newMsg.text}.” EchoScript.AI is processing it with care.`,
-      };
-      setMessages((prev) => [...prev, reply]);
-    }, 1000);
+      setMessages((prev) =>
+        prev.map((m, i) => (i === prev.length - 1 ? { ...m, text: "✅ GPT logic will go here soon!" } : m))
+      );
+    }, 1200);
   };
 
   return (
     <motion.div
-      className="max-w-3xl mx-auto px-6 py-12"
-      initial={{ opacity: 0, y: 24 }}
+      className="max-w-3xl mx-auto px-4 py-10"
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.4 }}
     >
-      <h1 className="text-4xl font-bold mb-6 text-indigo-400 flex items-center gap-3">
-        <Bot className="w-7 h-7" />
-        EchoScript AI Assistant
-      </h1>
+      <Link to="/dashboard" className="text-sm text-blue-500 hover:underline mb-6 inline-block">
+        ← Back to Dashboard
+      </Link>
 
-      <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 shadow space-y-4">
-        <div className="h-72 overflow-y-auto space-y-3 pr-2">
+      <h1 className="text-3xl font-bold mb-2 text-zinc-900 dark:text-white">AI Assistant</h1>
+      <p className="text-zinc-600 dark:text-zinc-400 mb-6">
+        Ask EchoScript anything. From transcription advice to productivity help.
+      </p>
+
+      <div className="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden shadow">
+        <div className="p-4 space-y-4 h-[400px] overflow-y-auto">
           {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`px-4 py-2 max-w-[80%] rounded-lg text-sm ${
-                msg.role === "user"
-                  ? "ml-auto bg-teal-600 text-white"
-                  : "bg-zinc-800 text-zinc-300"
-              }`}
-            >
-              {msg.text}
+            <div key={i} className={`text-sm ${msg.role === "user" ? "text-right" : "text-left"}`}>
+              <div
+                className={`inline-block px-3 py-2 rounded-md ${
+                  msg.role === "user"
+                    ? "bg-teal-500 text-white"
+                    : "bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-white"
+                }`}
+              >
+                {msg.text}
+              </div>
             </div>
           ))}
         </div>
-
-        <div className="flex items-center gap-3 pt-3 border-t border-zinc-700">
+        <div className="flex items-center gap-2 border-t border-zinc-300 dark:border-zinc-700 p-3 bg-white dark:bg-zinc-950">
           <input
+            type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Ask the assistant anything..."
-            className="flex-1 px-4 py-2 rounded-md bg-zinc-800 border border-zinc-600 text-sm text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+            placeholder="Ask something..."
+            className="flex-grow bg-transparent focus:outline-none px-3 py-2 rounded-md"
           />
           <button
             onClick={handleSend}
-            className="p-2 rounded-md bg-teal-600 hover:bg-teal-500 text-white"
+            className="bg-teal-500 hover:bg-teal-600 text-white p-2 rounded-full transition"
+            title="Send"
           >
-            <Send className="w-5 h-5" />
+            <PaperAirplaneIcon className="w-5 h-5" />
           </button>
         </div>
       </div>
     </motion.div>
   );
 }
+

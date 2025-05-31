@@ -1,14 +1,14 @@
+// src/pages/Transcription.jsx
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import UploadAndTranscribe from "../components/UploadandTranscribe";
 import LanguageModelSelector from "../components/Transcription";
 import AdaptiveAI from "../components/AdaptiveAI";
 import StatusConsole from "../components/StatusConsole";
+import { Link } from "react-router-dom";
 
-export default function Transcripts() {
+export default function Transcription() {
   const [activeTab, setActiveTab] = useState("upload");
-
-  // Connect language/model selection to uploader
   const [language, setLanguage] = useState("auto");
   const [model, setModel] = useState("medium");
 
@@ -27,10 +27,15 @@ export default function Transcripts() {
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
+      <Link to="/dashboard" className="text-sm text-blue-500 hover:underline mb-6 inline-block">
+        ← Back to Dashboard
+      </Link>
+
       <h1 className="text-4xl font-extrabold text-center mb-8 text-teal-600 dark:text-teal-400 drop-shadow-sm tracking-tight">
         🎧 Transcribe Anything with AI Precision
       </h1>
 
+      {/* Tab Navigation */}
       <div className="flex justify-center gap-2 sm:gap-4 mb-6 border-b border-zinc-200 dark:border-zinc-700">
         <button className={tabClasses("upload")} onClick={() => setActiveTab("upload")}>
           Upload
@@ -43,6 +48,7 @@ export default function Transcripts() {
         </button>
       </div>
 
+      {/* Tab Content */}
       <motion.div
         key={activeTab}
         initial={{ opacity: 0, y: 10 }}
@@ -56,15 +62,11 @@ export default function Transcripts() {
               onChangeLanguage={(lang) => setLanguage(lang)}
               onChangeModel={(mod) => setModel(mod)}
             />
-            <UploadAndTranscribe
-              language={language}
-              model={model}
-            />
+            <UploadAndTranscribe language={language} model={model} />
           </div>
         )}
 
         {activeTab === "ai" && <AdaptiveAI />}
-
         {activeTab === "console" && <StatusConsole />}
       </motion.div>
     </motion.div>

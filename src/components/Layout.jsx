@@ -1,10 +1,11 @@
+// src/Layout.jsx
 import React, { useState, useEffect, createContext, useContext } from "react";
 import { Outlet } from "react-router-dom";
-import Sidebar from "./components/Sidebar";
-import Header from "./components/Header";
-import EchoAssistantUltra from "./components/EchoAssistantUltra";
-import ToastContainer from "./components/ToastContainer";
-import MobileBottomNav from "./components/MobileBottomNav";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
+import EchoAssistantUltra from "./EchoAssistantUltra";
+import ToastContainer from "./ToastContainer";
+import MobileBottomNav from "./MobileBottomNav";
 
 export const ThemeContext = createContext();
 export const UserContext = createContext();
@@ -20,7 +21,8 @@ export default function Layout() {
     { id: 1, message: "Welcome to EchoScript", read: false },
     { id: 2, message: "New features have launched!", read: false },
   ]);
-  const markAllRead = () => setNotifications(n => n.map(notif => ({ ...notif, read: true })));
+  const markAllRead = () =>
+    setNotifications((n) => n.map((notif) => ({ ...notif, read: true })));
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
@@ -34,17 +36,26 @@ export default function Layout() {
             {/* Sidebar */}
             <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-            {/* Right content wrapper */}
-            <div className="flex flex-col flex-grow">
+            {/* Right Content */}
+            <div
+              className={`flex flex-col flex-grow transition-all duration-300 ${
+                sidebarOpen ? "pl-[240px]" : "pl-[64px]"
+              }`}
+            >
+              {/* Header */}
               <Header
                 sidebarOpen={sidebarOpen}
                 setSidebarOpen={setSidebarOpen}
                 isDarkMode={theme === "dark"}
                 onToggleTheme={toggleTheme}
               />
+
+              {/* Main Content */}
               <main className="flex-grow overflow-y-auto p-4">
                 <Outlet />
               </main>
+
+              {/* Utilities */}
               <MobileBottomNav />
               <ToastContainer />
               <EchoAssistantUltra />

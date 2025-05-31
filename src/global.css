@@ -390,5 +390,24 @@ a:focus-visible::after {
     transform: translateX(50%);
   }
 }
+/* --------------------------------------------- */
+/* Root + Full Background Fix for Dark Mode Fill */
+/* --------------------------------------------- */
+html,
+body,
+#root {
+  height: 100%;
+  min-height: 100vh;
+  background-color: rgb(var(--color-bg-light));
+  color: rgb(var(--color-text-light));
+}
+
+html.dark,
+html.dark body,
+html.dark #root {
+  background-color: rgb(var(--color-bg-dark)) !important;
+  color: rgb(var(--color-text-dark));
+}
+
 
 
