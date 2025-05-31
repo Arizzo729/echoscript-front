@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Lottie from "lottie-react";
 import { gsap } from "gsap";
+import Lottie from "lottie-react";
+import { X } from "lucide-react";
 import animationData from "../assets/ai-waveform.json";
 
 const AnimatedSplash = ({ onComplete }) => {
@@ -38,20 +39,35 @@ const AnimatedSplash = ({ onComplete }) => {
     };
   }, [onComplete]);
 
+  const handleSkip = () => {
+    setVisible(false);
+    if (onComplete) onComplete();
+  };
+
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center px-6 text-center bg-gradient-to-br from-zinc-100 to-teal-100 dark:from-zinc-950 dark:to-zinc-900"
+          key="animated-splash"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center px-6 text-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-2xl"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.7 } }}
         >
-          {/* 🌌 Orb Glow */}
+          {/* 💫 Orb Glow */}
           <div
             ref={orbRef}
-            className="absolute w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-teal-500 to-blue-500 opacity-10 blur-3xl"
+            className="absolute w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-teal-500 to-blue-500 opacity-10 blur-3xl pointer-events-none"
           />
+
+          {/* ❌ Top Right Close */}
+          <button
+            onClick={handleSkip}
+            className="absolute top-4 right-4 text-zinc-400 hover:text-red-500 transition"
+            aria-label="Close splash"
+          >
+            <X className="w-5 h-5" />
+          </button>
 
           {/* 🌀 Animated Logo Mask */}
           <div
@@ -71,7 +87,7 @@ const AnimatedSplash = ({ onComplete }) => {
 
           {/* ✨ Brand Name */}
           <motion.div
-            className="mt-6 text-2xl sm:text-3xl font-bold tracking-normal text-zinc-800 dark:text-white max-w-xs break-words"
+            className="mt-6 text-2xl sm:text-3xl font-bold tracking-tight text-zinc-800 dark:text-white max-w-xs break-words"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
@@ -79,10 +95,18 @@ const AnimatedSplash = ({ onComplete }) => {
             EchoScript.AI
           </motion.div>
 
-          {/* 🔊 Lottie Visual Accent */}
+          {/* 🔊 Lottie Waveform */}
           <div className="mt-4 w-20 h-20 sm:w-24 sm:h-24">
             <Lottie animationData={animationData} loop autoplay />
           </div>
+
+          {/* 🔘 Bottom Right Skip Button */}
+          <button
+            onClick={handleSkip}
+            className="absolute bottom-5 right-5 text-sm px-4 py-2 rounded-md bg-white/20 dark:bg-zinc-700/30 text-zinc-800 dark:text-white backdrop-blur hover:bg-white/30 hover:dark:bg-zinc-600/40 transition-all shadow-lg"
+          >
+            Skip
+          </button>
         </motion.div>
       )}
     </AnimatePresence>
