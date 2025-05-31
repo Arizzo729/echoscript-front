@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Outlet, useLocation, Navigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Outlet,
+  useLocation,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "./context/useTheme";
 import { GPTProvider } from "./context/GPTContext";
+
+// Core Layout Components
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
@@ -24,20 +33,31 @@ import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
 import ApifyTest from "./pages/ApifyTest";
 
-// Layout wrapper
+// --- Layout Wrapper
 function Layout() {
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
   return (
-    <div className="bg-neutral-900 text-white min-h-screen flex flex-col font-sans transition-colors duration-300">
-      <Header />
+    <div className="bg-background-dark text-white min-h-screen flex flex-col font-sans transition-colors duration-300">
+      <Header
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
       <div className="flex flex-grow overflow-hidden">
-        <Sidebar />
-        <main className="flex-grow overflow-y-auto px-4 py-6 scrollbar-thin scrollbar-thumb-zinc-700">
+        <Sidebar
+          collapsedDefault={!sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+        <main
+          className={`flex-grow overflow-y-auto transition-all duration-300 px-4 py-6 scrollbar-thin scrollbar-thumb-zinc-700 ${
+            sidebarOpen ? "pl-[260px]" : "pl-[64px]"
+          }`}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -59,9 +79,12 @@ function Layout() {
   );
 }
 
+// --- Main App Wrapper
 export default function App() {
   const [splashDone, setSplashDone] = useState(false);
-  const [introDone, setIntroDone] = useState(() => localStorage.getItem("introComplete") === "true");
+  const [introDone, setIntroDone] = useState(
+    () => localStorage.getItem("introComplete") === "true"
+  );
 
   const handleIntroClose = () => {
     localStorage.setItem("introComplete", "true");
@@ -71,8 +94,12 @@ export default function App() {
   return (
     <ThemeProvider>
       <GPTProvider>
-        {!splashDone && <AnimatedSplash onComplete={() => setSplashDone(true)} />}
-        {splashDone && !introDone && <OnboardingModal onClose={handleIntroClose} />}
+        {!splashDone && (
+          <AnimatedSplash onComplete={() => setSplashDone(true)} />
+        )}
+        {splashDone && !introDone && (
+          <OnboardingModal onClose={handleIntroClose} />
+        )}
 
         {splashDone && introDone && (
           <Routes>
@@ -84,10 +111,10 @@ export default function App() {
               <Route path="account" element={<Account />} />
               <Route path="purchase" element={<Purchase />} />
               <Route path="devtools/apify" element={<ApifyTest />} />
+              <Route path="*" element={<NotFound />} />
             </Route>
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="*" element={<NotFound />} />
           </Routes>
         )}
       </GPTProvider>

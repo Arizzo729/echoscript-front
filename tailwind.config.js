@@ -1,35 +1,45 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: 'class', // Manual toggle for dark mode
+  darkMode: 'class', // Enables dark mode via a `dark` class
   content: [
-    "./src/**/*.{js,jsx,ts,tsx,vue}",
-    "./public/index.html",
+    './src/**/*.{js,jsx,ts,tsx}',
+    './public/index.html',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: {
+        DEFAULT: '1rem',
+        sm: '2rem',
+        lg: '4rem',
+        xl: '5rem',
+        '2xl': '6rem',
+      },
+    },
     extend: {
       colors: {
         primary: {
           DEFAULT: 'hsl(var(--color-primary-h) / 1)',
           hover: 'hsl(var(--color-primary-hover-h) / 1)',
-          light: 'hsl(var(--color-primary-h) var(--color-primary-s) calc(var(--color-primary-l) + 15%))',
-          dark: 'hsl(var(--color-primary-h) var(--color-primary-s) calc(var(--color-primary-l) - 15%))',
-          active: 'hsl(var(--color-primary-h) var(--color-primary-s) calc(var(--color-primary-l) - 25%))',
-          disabled: 'hsl(var(--color-primary-h) var(--color-primary-s) calc(var(--color-primary-l) + 40%))',
+          light: 'hsl(var(--color-primary-h) / 1)', // fallback-safe
+          dark: 'hsl(var(--color-primary-h) / 0.8)',
+          active: 'hsl(var(--color-primary-h) / 0.6)',
+          disabled: 'hsl(var(--color-primary-h) / 0.3)',
         },
         background: {
-          light: 'rgb(var(--color-bg-light) / <alpha-value>)',
-          dark: 'rgb(var(--color-bg-dark) / <alpha-value>)',
+          light: 'rgb(var(--color-bg-light) / 1)',
+          dark: 'rgb(var(--color-bg-dark) / 1)',
           overlay: 'rgba(0, 0, 0, 0.6)',
         },
         text: {
-          light: 'rgb(var(--color-text-light) / <alpha-value>)',
-          dark: 'rgb(var(--color-text-dark) / <alpha-value>)',
-          muted: 'rgb(var(--color-text-muted) / <alpha-value>)',
-          link: 'hsl(var(--color-primary-h) var(--color-primary-s) var(--color-primary-l))',
+          light: 'rgb(var(--color-text-light) / 1)',
+          dark: 'rgb(var(--color-text-dark) / 1)',
+          muted: 'rgb(var(--color-text-muted) / 0.6)',
+          link: 'hsl(var(--color-primary-h) / 1)',
         },
         border: {
-          light: 'rgb(var(--color-border-light) / <alpha-value>)',
-          dark: 'rgb(var(--color-border-dark) / <alpha-value>)',
+          light: 'rgb(var(--color-border-light) / 1)',
+          dark: 'rgb(var(--color-border-dark) / 1)',
         },
       },
       fontFamily: {
@@ -51,13 +61,14 @@ module.exports = {
         mono: ['Fira Code', 'monospace'],
       },
       boxShadow: {
-        'primary-glow': '0 0 12px hsl(var(--color-primary-h) var(--color-primary-s) var(--color-primary-l) / 0.6)',
-        'focus-ring': '0 0 0 3px hsl(var(--color-primary-h) var(--color-primary-s) var(--color-primary-l) / 0.4)',
-        'card': '0 2px 10px rgba(0, 0, 0, 0.08)',
+        'primary-glow': '0 0 12px hsl(var(--color-primary-h) / 0.6)',
+        'focus-ring': '0 0 0 3px hsl(var(--color-primary-h) / 0.4)',
+        card: '0 2px 10px rgba(0, 0, 0, 0.08)',
       },
       borderRadius: {
         lg: '0.5rem',
         xl: '0.75rem',
+        '2xl': '1rem',
       },
       spacing: {
         18: '4.5rem',
@@ -79,9 +90,9 @@ module.exports = {
         'screen-2xl': '1536px',
       },
       zIndex: {
-        modal: '1050',
-        popover: '1100',
-        tooltip: '1200',
+        modal: 1050,
+        popover: 1100,
+        tooltip: 1200,
       },
     },
   },
@@ -116,3 +127,4 @@ module.exports = {
     'text-green-600',
   ],
 };
+

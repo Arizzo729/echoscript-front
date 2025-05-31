@@ -18,7 +18,7 @@ import AssistantOrb from "../components/AssistantOrb";
 import LiveGPTBubble from "../components/LiveGPTBubble";
 import { GPTContext } from "../context/GPTContext";
 import detectTone from "../utils/EmotionToneDetector";
-import OnboardingModal from "../components/OnboardingModal"; // ✅ MODAL IMPORT
+import OnboardingModal from "../components/OnboardingModal";
 
 export default function HomePage() {
   const [time, setTime] = useState(new Date());
@@ -26,20 +26,18 @@ export default function HomePage() {
   const [introStep, setIntroStep] = useState(0);
   const [gptResponse, setGptResponse] = useState(null);
   const [showBubble, setShowBubble] = useState(false);
-  const [showIntroModal, setShowIntroModal] = useState(false); // ✅ MODAL STATE
+  const [showIntroModal, setShowIntroModal] = useState(false);
 
   const navigate = useNavigate();
   const { voiceLevel, transcriptLive, micStatus, shortTranscript } = useVoiceInput();
   const { isPlaying, toggleAudio } = useAmbientAudio("/ambient-loop.mp3");
   const { user, setUser, setContextMessage } = useContext(GPTContext);
 
-  // ⏰ Live clock
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // 🧠 Show onboarding modal only if first time
   useEffect(() => {
     const seenIntro = localStorage.getItem("introComplete");
     if (!seenIntro) {
@@ -55,7 +53,6 @@ export default function HomePage() {
     navigate("/dashboard");
   };
 
-  // 🧠 GPT mood/tone analysis
   useEffect(() => {
     if (shortTranscript) {
       const tone = detectTone(shortTranscript);
@@ -81,11 +78,9 @@ export default function HomePage() {
 
   return (
     <>
-      {/* 🟢 Modal Only Once */}
       {showIntroModal && <OnboardingModal onClose={handleCloseIntro} />}
 
       <div className="relative min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-950 text-white overflow-hidden flex flex-col items-center justify-center text-center">
-        {/* 🔮 Particle Effect */}
         <Particles
           id="tsparticles"
           init={loadFull}
@@ -103,7 +98,6 @@ export default function HomePage() {
           className="absolute inset-0 z-0"
         />
 
-        {/* 🌟 Animated Header */}
         <motion.div
           className="z-10 mb-6"
           initial={{ opacity: 0, y: -30 }}
@@ -129,18 +123,15 @@ export default function HomePage() {
           <p className="text-sm mt-1 text-zinc-400">{formattedTime}</p>
         </motion.div>
 
-        {/* 🔊 Audio Visualization */}
         <motion.div className="z-10 mt-2 mb-3">
           <AudioWaveform voiceLevel={voiceLevel} />
           <div className="text-xs text-zinc-500 mt-1">{micStatus}</div>
         </motion.div>
 
-        {/* 💬 GPT Welcome Bubble */}
         {gptResponse && showBubble && (
           <LiveGPTBubble message={gptResponse} onClose={() => setShowBubble(false)} />
         )}
 
-        {/* 📝 Assistant Message Box */}
         <motion.div
           className="max-w-xl mx-auto bg-zinc-800/80 p-5 rounded-xl border border-teal-700 backdrop-blur-md shadow-lg z-10"
           initial={{ opacity: 0, y: 20 }}
@@ -153,10 +144,8 @@ export default function HomePage() {
           </p>
         </motion.div>
 
-        {/* 🧭 Timeline Progress */}
         <ProgressTimeline currentStep={introStep} />
 
-        {/* 🌐 Language & Audio Controls */}
         <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
           <motion.button
             onClick={() => setLanguage(language === "en" ? "es" : "en")}
@@ -174,13 +163,11 @@ export default function HomePage() {
           </motion.button>
         </div>
 
-        {/* 🧠 Assistant Orb */}
         <AssistantOrb
           status={introStep >= 2 ? "active" : "idle"}
           mood={shortTranscript ? detectTone(shortTranscript) : "neutral"}
         />
 
-        {/* 🤖 GPT Assistant (Full Help) */}
         <SmartAIAssistant
           welcome={shortTranscript ? `You said: ${shortTranscript}` : "Need help getting started?"}
           position="bottom-right"

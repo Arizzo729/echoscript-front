@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef, useEffect } from "react";
+import React, { useState, useContext, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { GPTContext } from "../context/GPTContext";
 import { BsRobot, BsMicFill, BsX } from "react-icons/bs";
@@ -22,6 +22,7 @@ export default function SmartAIAssistant() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
+    // Echo thinking...
     const thinking = { sender: "assistant", text: "..." };
     setMessages((prev) => [...prev, thinking]);
 
@@ -41,17 +42,16 @@ export default function SmartAIAssistant() {
 
   return (
     <>
-      {/* Floating Orb */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-50 bg-teal-500 hover:bg-teal-600 p-4 rounded-full shadow-lg text-white transition-all"
+          className="fixed bottom-6 right-6 z-50 bg-teal-500 hover:bg-teal-600 p-4 rounded-full shadow-xl text-white transition-all duration-200"
+          aria-label="Open Echo Assistant"
         >
           <BsRobot size={24} />
         </button>
       )}
 
-      {/* Assistant Panel */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -64,31 +64,32 @@ export default function SmartAIAssistant() {
           >
             {/* Header */}
             <div className="flex items-center justify-between p-3 border-b border-zinc-700">
-              <div className="flex items-center space-x-2">
-                <BsRobot className="text-teal-400" />
-                <h2 className="text-base font-semibold">Echo Assistant</h2>
+              <div className="flex items-center gap-2 text-teal-400 font-semibold">
+                <BsRobot />
+                <span>Echo Assistant</span>
               </div>
               <button
                 onClick={() => setOpen(false)}
                 className="text-zinc-400 hover:text-white"
+                aria-label="Close assistant"
               >
                 <BsX size={20} />
               </button>
             </div>
 
-            {/* Message Log */}
+            {/* Message log */}
             <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2 scrollbar-thin scrollbar-thumb-zinc-600">
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
                   className={`max-w-[80%] px-3 py-2 text-sm rounded-xl ${
                     msg.sender === "assistant"
-                      ? "bg-zinc-700 self-start"
-                      : "bg-teal-600 self-end ml-auto"
+                      ? "bg-zinc-700 text-zinc-100 self-start"
+                      : "bg-teal-600 text-white self-end ml-auto"
                   }`}
                 >
                   {msg.text === "..." ? (
-                    <span className="italic text-zinc-400">Echo is thinking...</span>
+                    <span className="italic text-zinc-300 animate-pulse">Echo is thinking...</span>
                   ) : (
                     msg.text
                   )}
@@ -99,18 +100,22 @@ export default function SmartAIAssistant() {
             {/* Input */}
             <div className="flex items-center gap-2 p-3 border-t border-zinc-700">
               <input
-                className="flex-1 bg-zinc-800 text-sm rounded-xl px-3 py-2 focus:outline-none"
+                className="flex-1 bg-zinc-800 text-sm text-white rounded-xl px-3 py-2 focus:outline-none placeholder:text-zinc-400"
                 type="text"
-                placeholder="Ask something..."
+                placeholder="Ask anything..."
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyPress}
-                autoFocus
               />
               <button
                 onClick={handleSend}
-                disabled={isLoading}
-                className="bg-teal-500 hover:bg-teal-600 p-2 rounded-xl text-white transition"
+                disabled={isLoading || !input.trim()}
+                className={`p-2 rounded-xl transition ${
+                  isLoading || !input.trim()
+                    ? "bg-zinc-600 cursor-not-allowed"
+                    : "bg-teal-500 hover:bg-teal-600 text-white"
+                }`}
+                aria-label="Send message"
               >
                 <IoSend size={16} />
               </button>

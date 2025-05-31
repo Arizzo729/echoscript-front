@@ -11,7 +11,6 @@ const AnimatedSplash = ({ onComplete }) => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Subtle glow pulse
       gsap.to(logoRef.current, {
         backgroundPosition: "200% center",
         duration: 2.8,
@@ -31,7 +30,7 @@ const AnimatedSplash = ({ onComplete }) => {
     const timer = setTimeout(() => {
       setVisible(false);
       if (onComplete) onComplete();
-    }, 2300); // 2.3 seconds
+    }, 2300);
 
     return () => {
       ctx.revert();
@@ -43,7 +42,7 @@ const AnimatedSplash = ({ onComplete }) => {
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-zinc-100 to-teal-100 dark:from-zinc-950 dark:to-zinc-900"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-zinc-100 to-teal-100 dark:from-zinc-950 dark:to-zinc-900 overflow-hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.7 } }}
@@ -51,13 +50,13 @@ const AnimatedSplash = ({ onComplete }) => {
           {/* 🌌 Orb Glow */}
           <div
             ref={orbRef}
-            className="absolute w-[380px] h-[380px] rounded-full bg-gradient-to-tr from-teal-500 to-blue-500 opacity-10 blur-3xl"
+            className="absolute w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-teal-500 to-blue-500 opacity-10 blur-3xl"
           />
 
           {/* 🌀 Animated Logo Mask */}
           <div
             ref={logoRef}
-            className="w-44 h-44 bg-[url('/Logo.png')] bg-contain bg-no-repeat bg-center"
+            className="w-[160px] h-[160px] bg-[url('/Logo.png')] bg-no-repeat bg-center"
             style={{
               WebkitMaskImage: "url('/Logo.png')",
               maskImage: "url('/Logo.png')",
@@ -65,7 +64,7 @@ const AnimatedSplash = ({ onComplete }) => {
               maskRepeat: "no-repeat",
               WebkitMaskPosition: "center",
               maskPosition: "center",
-              backgroundSize: "200% auto",
+              backgroundSize: "250% auto",
               backgroundImage:
                 "linear-gradient(90deg, #14b8a6, #0ea5e9, #14b8a6)",
             }}
@@ -92,4 +91,5 @@ const AnimatedSplash = ({ onComplete }) => {
 };
 
 export default AnimatedSplash;
+
 

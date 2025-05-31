@@ -10,6 +10,7 @@ import {
   Settings2,
   Info,
 } from "lucide-react";
+import Button from "../components/ui/Button"; // ✅ Unified button
 
 const tabs = [
   { id: "preferences", label: "Preferences", icon: Settings2 },
@@ -49,8 +50,8 @@ export default function Settings() {
               onClick={() => setActiveTab(id)}
               className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition ${
                 activeTab === id
-                  ? "bg-primary text-white dark:bg-primary-light dark:text-black"
-                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  ? "bg-teal-600 text-white dark:bg-teal-500"
+                  : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
               }`}
               aria-current={activeTab === id ? "page" : undefined}
             >
@@ -129,17 +130,17 @@ export default function Settings() {
               <input
                 type="text"
                 placeholder="Your name"
-                className="w-full p-2 rounded-md border dark:bg-gray-800 dark:border-gray-700"
+                className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm"
                 required
               />
               <input
                 type="email"
                 placeholder="Your email"
-                className="w-full p-2 rounded-md border dark:bg-gray-800 dark:border-gray-700"
+                className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm"
                 required
               />
               <select
-                className="w-full p-2 rounded-md border dark:bg-gray-800 dark:border-gray-700"
+                className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm"
                 required
               >
                 <option value="">Choose a subject</option>
@@ -151,15 +152,12 @@ export default function Settings() {
               <textarea
                 rows={4}
                 placeholder="Describe your issue or request"
-                className="w-full p-2 rounded-md border dark:bg-gray-800 dark:border-gray-700"
+                className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm"
                 required
               ></textarea>
-              <button
-                type="submit"
-                className="bg-primary dark:bg-primary-light text-white dark:text-black px-4 py-2 rounded-md hover:opacity-90 transition"
-              >
+              <Button variant="primary" type="submit" className="w-full">
                 Send Message
-              </button>
+              </Button>
             </form>
           </motion.section>
         )}
@@ -170,19 +168,19 @@ export default function Settings() {
 
 function SettingToggle({ label, description, enabled, onChange, Icon }) {
   return (
-    <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 px-4 py-3 rounded-lg">
+    <div className="flex items-center justify-between bg-zinc-50 dark:bg-zinc-800 px-4 py-3 rounded-lg">
       <div className="flex flex-col gap-1 text-sm">
-        <div className="flex items-center gap-2 font-medium">
-          <Icon className="w-5 h-5 text-primary" />
+        <div className="flex items-center gap-2 font-medium text-zinc-800 dark:text-white">
+          <Icon className="w-5 h-5 text-teal-500" />
           <span>{label}</span>
         </div>
-        <span className="text-gray-500 dark:text-gray-400">{description}</span>
+        <span className="text-zinc-500 dark:text-zinc-400">{description}</span>
       </div>
       <Switch
         checked={enabled}
         onChange={onChange}
         className={`${
-          enabled ? "bg-primary dark:bg-primary-light" : "bg-gray-300"
+          enabled ? "bg-teal-500" : "bg-zinc-400"
         } relative inline-flex h-6 w-11 items-center rounded-full transition`}
       >
         <span
@@ -198,20 +196,19 @@ function SettingToggle({ label, description, enabled, onChange, Icon }) {
 function FAQItem({ question, children }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border dark:border-gray-700 rounded-md">
+    <div className="border border-zinc-200 dark:border-zinc-700 rounded-md">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full px-4 py-3 flex justify-between items-center text-left font-medium"
+        className="w-full px-4 py-3 flex justify-between items-center text-left font-medium text-zinc-700 dark:text-white"
         aria-expanded={open}
       >
         <span>{question}</span>
         <span>{open ? "−" : "+"}</span>
       </button>
       {open && (
-        <div className="px-4 pb-4 text-gray-600 dark:text-gray-400">
-          {children}
-        </div>
+        <div className="px-4 pb-4 text-zinc-600 dark:text-zinc-400">{children}</div>
       )}
     </div>
   );
 }
+

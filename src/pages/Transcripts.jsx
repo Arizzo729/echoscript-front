@@ -9,10 +9,10 @@ export default function Transcripts() {
   const [activeTab, setActiveTab] = useState("upload");
 
   const tabClasses = (tab) =>
-    `px-4 py-2 rounded-t-lg font-medium transition-colors duration-200 ${
+    `px-5 py-2.5 text-sm sm:text-base rounded-t-lg font-medium transition-all duration-200 ease-in-out focus:outline-none ${
       activeTab === tab
-        ? "bg-primary text-white dark:bg-primary-light dark:text-black shadow"
-        : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+        ? "bg-teal-600 text-white shadow-md dark:bg-teal-400 dark:text-black"
+        : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
     }`;
 
   return (
@@ -21,13 +21,13 @@ export default function Transcripts() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      <h1 className="text-4xl font-extrabold text-center mb-8 text-primary dark:text-primary-light drop-shadow">
+      <h1 className="text-4xl font-extrabold text-center mb-8 text-teal-600 dark:text-teal-400 drop-shadow-sm tracking-tight">
         🎧 Transcribe Anything with AI Precision
       </h1>
 
-      <div className="flex justify-center gap-4 mb-6 border-b dark:border-gray-700">
+      <div className="flex justify-center gap-2 sm:gap-4 mb-6 border-b border-zinc-200 dark:border-zinc-700">
         <button className={tabClasses("upload")} onClick={() => setActiveTab("upload")}>
           Upload
         </button>
@@ -41,17 +41,16 @@ export default function Transcripts() {
 
       <motion.div
         key={activeTab}
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
+        className="bg-white dark:bg-zinc-900 rounded-lg shadow-inner px-4 sm:px-6 py-6"
       >
         {activeTab === "upload" && (
-          <>
+          <div className="space-y-6">
             <LanguageModelSelector />
-            <div className="mt-6">
-              <UploadAndTranscribe />
-            </div>
-          </>
+            <UploadAndTranscribe />
+          </div>
         )}
 
         {activeTab === "ai" && <AdaptiveAI />}
