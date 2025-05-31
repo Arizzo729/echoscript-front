@@ -9,7 +9,6 @@ import AudioWaveform from "../components/AudioWaveform";
 import useVoiceInput from "../hooks/useVoiceInput";
 import useAmbientAudio from "../hooks/useAmbientAudio";
 import ProgressTimeline from "../components/ProgressTimeline";
-import AssistantOrb from "../components/AssistantOrb";
 import LiveGPTBubble from "../components/LiveGPTBubble";
 import { GPTContext } from "../context/GPTContext";
 import detectTone from "../utils/EmotionToneDetector";
@@ -25,7 +24,6 @@ export default function HomePage() {
   const { isPlaying, toggleAudio } = useAmbientAudio("/ambient-loop.mp3");
   const { setContextMessage } = useContext(GPTContext);
 
-  // ✅ Particles safe init
   const particlesInit = async (main) => {
     await loadFull(main);
   };
@@ -141,11 +139,6 @@ export default function HomePage() {
           {isPlaying ? "Mute" : "Ambient"}
         </motion.button>
       </div>
-
-      <AssistantOrb
-        status={introStep >= 2 ? "active" : "idle"}
-        mood={shortTranscript ? detectTone(shortTranscript) : "neutral"}
-      />
 
       <SmartAIAssistant
         welcome={shortTranscript ? `You said: ${shortTranscript}` : "Need help getting started?"}

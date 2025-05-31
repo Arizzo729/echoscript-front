@@ -24,6 +24,9 @@ import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
 import ApifyTest from "./pages/ApifyTest";
 import Dashboard from "./pages/Dashboard";
+import Upload from "./pages/Upload";
+import AIAssistant from "./pages/AIAssistant";
+
 
 
 function Layout() {
@@ -76,6 +79,9 @@ export default function App() {
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="*" element={<NotFound />} />
+		<Route path="/upload" element={<Upload />} />
+		<Route path="/assistant" element={<AIAssistant />} />
+
             </Routes>
 
             {showIntro && <OnboardingModal onClose={() => setShowIntro(false)} />}

@@ -11,7 +11,7 @@ import {
   Cog6ToothIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import Button from "./ui/Button";
+import Button from "../components/ui/Button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Logo from "/Logo.png";
@@ -137,5 +137,3 @@ export default function Header({
     </motion.header>
   );
 }
-
-
