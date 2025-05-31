@@ -18,7 +18,10 @@ export default function Dashboard() {
     plan: "Pro",
     minutesUsed: 227,
     sessions: 15,
+    limit: 1000,
   };
+
+  const percentUsed = Math.min((user.minutesUsed / user.limit) * 100, 100);
 
   return (
     <motion.div
@@ -46,15 +49,17 @@ export default function Dashboard() {
           <h2 className="text-xl font-semibold mb-4 text-zinc-800 dark:text-white">
             📊 Usage Snapshot
           </h2>
-          <p className="text-zinc-600 dark:text-zinc-300 mb-2">
-            <strong>Plan:</strong> {user.plan}
-          </p>
-          <p className="text-zinc-600 dark:text-zinc-300 mb-2">
-            <strong>Minutes Used:</strong> {user.minutesUsed}
-          </p>
-          <p className="text-zinc-600 dark:text-zinc-300">
-            <strong>Sessions:</strong> {user.sessions}
-          </p>
+          <div className="space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
+            <p><strong>Plan:</strong> {user.plan}</p>
+            <p><strong>Minutes Used:</strong> {user.minutesUsed} / {user.limit}</p>
+            <p><strong>Sessions:</strong> {user.sessions}</p>
+          </div>
+          <div className="mt-4 h-3 w-full bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-teal-400 to-blue-500 transition-all duration-300"
+              style={{ width: `${percentUsed}%` }}
+            />
+          </div>
         </div>
 
         <div className="p-6 rounded-xl border dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 shadow-sm flex items-center gap-4">
@@ -73,7 +78,11 @@ export default function Dashboard() {
 
 function DashboardCard({ icon, label, color }) {
   return (
-    <button className={`flex items-center justify-between w-full p-5 rounded-lg border border-transparent dark:border-zinc-700 ${color} hover:brightness-105 transition`}>
+    <motion.button
+      whileHover={{ scale: 1.025 }}
+      whileTap={{ scale: 0.97 }}
+      className={`flex items-center justify-between w-full p-5 rounded-lg border border-transparent dark:border-zinc-700 ${color} hover:brightness-105 transition`}
+    >
       <div className="flex items-center gap-4 text-left text-md font-medium text-zinc-800 dark:text-zinc-100">
         <span className="p-2 bg-white dark:bg-zinc-800 rounded-full shadow-md">
           {icon}
@@ -81,7 +90,7 @@ function DashboardCard({ icon, label, color }) {
         {label}
       </div>
       <span className="text-sm text-zinc-500 dark:text-zinc-400">→</span>
-    </button>
+    </motion.button>
   );
 }
 
