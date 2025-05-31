@@ -33,6 +33,11 @@ export default function HomePage() {
   const { isPlaying, toggleAudio } = useAmbientAudio("/ambient-loop.mp3");
   const { user, setUser, setContextMessage } = useContext(GPTContext);
 
+  // ✅ Patch for Particles loadFull
+  const particlesInit = async (main) => {
+    await loadFull(main);
+  };
+
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(interval);
@@ -81,9 +86,10 @@ export default function HomePage() {
       {showIntroModal && <OnboardingModal onClose={handleCloseIntro} />}
 
       <div className="relative min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-950 text-white overflow-hidden flex flex-col items-center justify-center text-center">
+        {/* ✅ Particles working */}
         <Particles
           id="tsparticles"
-          init={loadFull}
+          init={particlesInit}
           options={{
             background: { color: { value: "transparent" } },
             fpsLimit: 60,

@@ -42,30 +42,30 @@ export default function OnboardingModal({ onClose }) {
     <AnimatePresence>
       {!dismissed && (
         <motion.div
-          className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           {...swipeHandlers}
         >
           <motion.div
-            className="relative max-w-md w-full bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 border border-teal-500 rounded-3xl shadow-xl overflow-hidden p-6 backdrop-blur-lg bg-opacity-90"
+            className="relative max-w-md w-full bg-white/5 dark:bg-zinc-900/80 border border-teal-500 rounded-3xl shadow-2xl overflow-hidden p-6 backdrop-blur-xl"
             initial={{ scale: 0.96, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.92, opacity: 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
           >
-            {/* Clean semi-transparent X button */}
+            {/* Semi-transparent X in top-right */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-5 text-white/60 hover:text-white transition text-xl z-10"
+              className="absolute top-4 right-4 text-white/40 hover:text-white text-xl transition-opacity"
               aria-label="Close"
             >
               ×
             </button>
 
-            {/* Lottie background */}
-            <div className="absolute inset-0 pointer-events-none opacity-10 blur-sm">
+            {/* Animated background */}
+            <div className="absolute inset-0 opacity-10 pointer-events-none blur-md">
               <Lottie animationData={animationData} loop autoplay style={{ width: "100%", height: "100%" }} />
             </div>
 
@@ -79,22 +79,22 @@ export default function OnboardingModal({ onClose }) {
               transition={{ duration: 0.4 }}
             >
               <h2 className="text-xl sm:text-2xl font-semibold text-white mb-2">{STEPS[step].title}</h2>
-              <p className="text-sm text-zinc-400 leading-relaxed">{STEPS[step].description}</p>
+              <p className="text-sm text-zinc-300 leading-relaxed">{STEPS[step].description}</p>
             </motion.div>
 
-            {/* Step indicators */}
+            {/* Dots */}
             <div className="flex justify-center mt-5 gap-2 z-10 relative">
               {STEPS.map((_, i) => (
                 <div
                   key={i}
                   className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
-                    i === step ? "bg-teal-400 shadow-md scale-110" : "bg-zinc-700"
+                    i === step ? "bg-teal-400 scale-110 shadow-md" : "bg-zinc-700"
                   }`}
                 />
               ))}
             </div>
 
-            {/* Navigation buttons */}
+            {/* Navigation */}
             <div className="flex justify-between gap-3 mt-6 relative z-10">
               <Button
                 variant="secondary"
@@ -113,11 +113,11 @@ export default function OnboardingModal({ onClose }) {
               </Button>
             </div>
 
-            {/* Skip link */}
-            <div className="text-center mt-4 z-10 relative">
+            {/* Subtle Skip link */}
+            <div className="text-center mt-3 z-10 relative">
               <button
                 onClick={handleClose}
-                className="text-sm text-zinc-400 hover:text-teal-400 transition"
+                className="text-xs text-zinc-400 hover:text-teal-400 transition"
               >
                 Skip Intro
               </button>
