@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: 'class', // Enables dark mode via a `dark` class
+  darkMode: 'class',
   content: [
     './src/**/*.{js,jsx,ts,tsx}',
     './public/index.html',
@@ -21,7 +21,7 @@ module.exports = {
         primary: {
           DEFAULT: 'hsl(var(--color-primary-h) / 1)',
           hover: 'hsl(var(--color-primary-hover-h) / 1)',
-          light: 'hsl(var(--color-primary-h) / 1)', // fallback-safe
+          light: 'hsl(var(--color-primary-h) / 1)',
           dark: 'hsl(var(--color-primary-h) / 0.8)',
           active: 'hsl(var(--color-primary-h) / 0.6)',
           disabled: 'hsl(var(--color-primary-h) / 0.3)',
@@ -44,6 +44,7 @@ module.exports = {
       },
       fontFamily: {
         sans: [
+          'Inter',
           'system-ui',
           '-apple-system',
           'BlinkMacSystemFont',
@@ -53,10 +54,6 @@ module.exports = {
           'Arial',
           '"Noto Sans"',
           'sans-serif',
-          '"Apple Color Emoji"',
-          '"Segoe UI Emoji"',
-          '"Segoe UI Symbol"',
-          '"Noto Color Emoji"',
         ],
         mono: ['Fira Code', 'monospace'],
       },
@@ -94,6 +91,16 @@ module.exports = {
         popover: 1100,
         tooltip: 1200,
       },
+      keyframes: {
+        dashSpin: {
+          '0%': { strokeDashoffset: '220', transform: 'rotate(0deg)' },
+          '50%': { strokeDashoffset: '60', transform: 'rotate(180deg)' },
+          '100%': { strokeDashoffset: '220', transform: 'rotate(360deg)' },
+        },
+      },
+      animation: {
+        dashSpin: 'dashSpin 1.4s ease-in-out infinite',
+      },
     },
   },
   plugins: [
@@ -127,4 +134,3 @@ module.exports = {
     'text-green-600',
   ],
 };
-
