@@ -1,53 +1,44 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
 const STEPS = [
   {
-    title: "Welcome to EchoScript.AI",
-    description: "Upload audio, record live, and get stunningly accurate transcripts — instantly.",
+    title: "👋 Welcome to EchoScript.AI!",
+    description:
+      "Record or upload your voice. Echo gives you perfect transcripts with smart AI help.",
   },
   {
-    title: "Meet Echo",
-    description: "Echo is your smart assistant. Summarize, fix grammar, or even research via commands.",
+    title: "💡 Smarter AI Support",
+    description:
+      "Echo summarizes, detects tone, and helps you clean up your speech with a click.",
   },
   {
-    title: "Flexible Plans",
-    description: "Start free or scale up with premium features, integrations, and unlimited transcription.",
+    title: "🚀 Choose a Plan",
+    description:
+      "Use Echo free, or upgrade for more features. Let’s get started!",
   },
 ];
 
 export default function OnboardingModal({ onClose }) {
   const [step, setStep] = useState(0);
-  const isLast = step === STEPS.length - 1;
-
   const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
   const prev = () => setStep((s) => Math.max(s - 1, 0));
-
-  useEffect(() => {
-    const handleKeys = (e) => {
-      if (e.key === "ArrowRight") next();
-      if (e.key === "ArrowLeft") prev();
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKeys);
-    return () => window.removeEventListener("keydown", handleKeys);
-  }, [step]);
 
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
         <motion.div
-          className="relative bg-white/80 dark:bg-zinc-900/80 backdrop-blur-lg border border-white/20 dark:border-zinc-700 rounded-3xl px-8 py-10 max-w-lg w-full shadow-2xl overflow-hidden mx-4"
-          initial={{ scale: 0.95, opacity: 0 }}
+          className="relative w-full max-w-md p-6 mx-4 text-center rounded-2xl shadow-xl bg-white/90 dark:bg-zinc-900/90 border border-teal-400 backdrop-blur-sm"
+          initial={{ scale: 0.96, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 260, damping: 26 }}
+          exit={{ scale: 0.96, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 200, damping: 22 }}
         >
           {/* Close Button */}
           <button
@@ -58,63 +49,46 @@ export default function OnboardingModal({ onClose }) {
             <X size={20} />
           </button>
 
-          {/* Title + Description */}
+          {/* Step Content */}
           <motion.div
             key={step}
-            initial={{ y: 10, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -10, opacity: 0 }}
-            transition={{ duration: 0.35 }}
+            initial={{ x: 30, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -30, opacity: 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
           >
-            <h2 className="text-3xl font-extrabold bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent mb-3">
+            <h2 className="text-2xl font-semibold mb-2 text-zinc-800 dark:text-white tracking-tight">
               {STEPS[step].title}
             </h2>
-            <p className="text-lg text-zinc-700 dark:text-zinc-300 leading-relaxed">
+            <p className="mb-6 text-base text-zinc-600 dark:text-zinc-300 leading-relaxed">
               {STEPS[step].description}
             </p>
           </motion.div>
 
-          {/* Progress Dots */}
-          <div className="flex justify-center gap-2 mt-6">
-            {STEPS.map((_, i) => (
-              <motion.div
-                key={i}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  i === step
-                    ? "bg-gradient-to-r from-teal-400 to-blue-500 shadow-lg scale-110"
-                    : "bg-zinc-300 dark:bg-zinc-700"
-                }`}
-                layout
-              />
-            ))}
-          </div>
-
           {/* Navigation Buttons */}
-          <div className="flex justify-between gap-3 mt-8">
+          <div className="flex justify-between items-center gap-2 mt-2">
             <button
               onClick={prev}
               disabled={step === 0}
-              className="w-full py-2 rounded-lg border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-200 disabled:opacity-40 transition"
+              className="w-full py-2 rounded-md border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 disabled:opacity-30 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
             >
-              Previous
+              Back
             </button>
             <button
-              onClick={isLast ? onClose : next}
-              className="w-full py-2 rounded-lg bg-gradient-to-r from-teal-500 to-blue-500 text-white font-semibold hover:opacity-90 transition"
+              onClick={step === STEPS.length - 1 ? onClose : next}
+              className="w-full py-2 rounded-md bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white font-medium transition"
             >
-              {isLast ? "Finish" : "Next"}
+              {step === STEPS.length - 1 ? "Finish" : "Next"}
             </button>
           </div>
 
-          {/* Skip */}
-          {!isLast && (
-            <button
-              onClick={onClose}
-              className="mt-4 text-sm text-zinc-500 dark:text-zinc-400 hover:underline"
-            >
-              Skip Intro
-            </button>
-          )}
+          {/* Skip Option */}
+          <button
+            onClick={onClose}
+            className="mt-4 text-sm text-zinc-500 dark:text-zinc-400 hover:underline transition"
+          >
+            Skip Intro
+          </button>
         </motion.div>
       </motion.div>
     </AnimatePresence>

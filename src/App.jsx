@@ -1,5 +1,4 @@
-// App.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, Outlet, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "./context/useTheme";
@@ -7,10 +6,11 @@ import { GPTProvider } from "./context/GPTContext";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
-import EchoAssistantUltra from "./components/EchoAssistantUltra"; // or EchoAssistantUltraStreaming
+import EchoAssistantUltra from "./components/EchoAssistantUltra";
 import OnboardingModal from "./components/OnboardingModal";
-import MobileBottomNav from "./components/MobileBottomNav";
+import AnimatedSplash from "./components/AnimatedSplash";
 import ToastContainer from "./components/ToastContainer";
+import MobileBottomNav from "./components/MobileBottomNav";
 import "./global.css";
 
 // Pages
@@ -23,9 +23,6 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
 import ApifyTest from "./pages/ApifyTest";
-
-// Auth logic placeholder
-const isAuthenticated = () => localStorage.getItem("auth_token") !== null;
 
 // Layout wrapper
 function Layout() {
@@ -55,33 +52,44 @@ function Layout() {
         </main>
       </div>
       <Footer />
-      <EchoAssistantUltra /> {/* or EchoAssistantUltraStreaming */}
-      <OnboardingModal />
+      <EchoAssistantUltra />
       <ToastContainer />
       <MobileBottomNav />
     </div>
   );
 }
 
-// Root app wrapper
 export default function App() {
+  const [splashDone, setSplashDone] = useState(false);
+  const [introDone, setIntroDone] = useState(() => localStorage.getItem("introComplete") === "true");
+
+  const handleIntroClose = () => {
+    localStorage.setItem("introComplete", "true");
+    setIntroDone(true);
+  };
+
   return (
     <ThemeProvider>
       <GPTProvider>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="transcription" element={<Transcription />} />
-            <Route path="dashboard" element={<Navigate to="/transcription" replace />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="account" element={<Account />} />
-            <Route path="purchase" element={<Purchase />} />
-            <Route path="devtools/apify" element={<ApifyTest />} />
-          </Route>
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        {!splashDone && <AnimatedSplash onComplete={() => setSplashDone(true)} />}
+        {splashDone && !introDone && <OnboardingModal onClose={handleIntroClose} />}
+
+        {splashDone && introDone && (
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="transcription" element={<Transcription />} />
+              <Route path="dashboard" element={<Navigate to="/transcription" replace />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="account" element={<Account />} />
+              <Route path="purchase" element={<Purchase />} />
+              <Route path="devtools/apify" element={<ApifyTest />} />
+            </Route>
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        )}
       </GPTProvider>
     </ThemeProvider>
   );
