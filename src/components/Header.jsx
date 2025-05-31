@@ -1,4 +1,3 @@
-// ✅ Final Header.jsx — Responsive, Themed, Integrated
 import React, { useState, useEffect, useRef } from "react";
 import {
   Bars3Icon,
@@ -66,7 +65,7 @@ export default function Header({
         </Link>
       </div>
 
-      {/* Middle: Search */}
+      {/* Search */}
       <div className="relative flex-1 max-w-lg mx-6" ref={searchRef}>
         <div className="relative text-white focus-within:text-teal-300">
           <input
@@ -80,9 +79,8 @@ export default function Header({
         </div>
       </div>
 
-      {/* Right */}
+      {/* Right Actions */}
       <div className="flex items-center gap-4">
-        {/* Theme */}
         <Button variant="ghost" size="sm" onClick={onToggleTheme} className="p-2">
           {isDarkMode ? (
             <SunIcon className="w-6 h-6 text-yellow-300" />
@@ -116,7 +114,7 @@ export default function Header({
           )}
         </div>
 
-        {/* User */}
+        {/* User Menu */}
         <div className="relative">
           <Button variant="ghost" size="sm" onClick={() => setShowUserDropdown(!showUserDropdown)} className="flex items-center gap-2">
             <UserCircleIcon className="w-8 h-8 text-teal-400" />
@@ -137,5 +135,4 @@ export default function Header({
     </motion.header>
   );
 }
-
 
