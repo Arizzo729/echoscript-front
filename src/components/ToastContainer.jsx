@@ -2,21 +2,27 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MdClose, MdCheckCircle, MdErrorOutline, MdInfoOutline } from "react-icons/md";
+import {
+  MdClose,
+  MdCheckCircle,
+  MdErrorOutline,
+  MdInfoOutline,
+} from "react-icons/md";
 
+// Icon + Style mapping for each toast type
 const toastVariants = {
   success: {
-    icon: <MdCheckCircle className="text-green-400 text-xl" />,
-    bg: "bg-zinc-800 border-green-500"
+    icon: <MdCheckCircle className="text-green-400 text-xl shrink-0" />,
+    bg: "bg-zinc-800 border-green-500",
   },
   error: {
-    icon: <MdErrorOutline className="text-red-400 text-xl" />,
-    bg: "bg-zinc-800 border-red-500"
+    icon: <MdErrorOutline className="text-red-400 text-xl shrink-0" />,
+    bg: "bg-zinc-800 border-red-500",
   },
   info: {
-    icon: <MdInfoOutline className="text-blue-400 text-xl" />,
-    bg: "bg-zinc-800 border-blue-500"
-  }
+    icon: <MdInfoOutline className="text-blue-400 text-xl shrink-0" />,
+    bg: "bg-zinc-800 border-blue-500",
+  },
 };
 
 export default function ToastContainer() {
@@ -24,7 +30,7 @@ export default function ToastContainer() {
 
   useEffect(() => {
     const handler = (e) => {
-      if (e.detail && e.detail.message) {
+      if (e.detail?.message) {
         const id = Date.now();
         setToasts((prev) => [...prev, { ...e.detail, id }]);
         setTimeout(() => {
@@ -42,21 +48,24 @@ export default function ToastContainer() {
         {toasts.map(({ id, message, type = "info" }) => (
           <motion.div
             key={id}
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 60 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 50 }}
-            transition={{ duration: 0.3 }}
-            className={`flex items-start gap-3 p-4 rounded-xl border-l-4 shadow-lg ${toastVariants[type].bg}`}
+            exit={{ opacity: 0, x: 60 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className={`flex items-start gap-3 px-4 py-3 rounded-xl border-l-4 shadow-2xl ${toastVariants[type].bg}`}
           >
             {toastVariants[type].icon}
             <div className="flex-1 text-sm text-white font-medium leading-tight">
               {message}
             </div>
             <button
-              onClick={() => setToasts((prev) => prev.filter((t) => t.id !== id))}
-              className="text-zinc-400 hover:text-white"
+              onClick={() =>
+                setToasts((prev) => prev.filter((t) => t.id !== id))
+              }
+              className="text-zinc-400 hover:text-white transition"
+              aria-label="Dismiss notification"
             >
-              <MdClose />
+              <MdClose size={18} />
             </button>
           </motion.div>
         ))}
@@ -65,6 +74,3 @@ export default function ToastContainer() {
   );
 }
 
-// USAGE
-// Dispatch a toast from anywhere:
-// window.dispatchEvent(new CustomEvent("toast", { detail: { type: "success", message: "Transcript saved!" } }))

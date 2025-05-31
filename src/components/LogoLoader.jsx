@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
 
 export default function LogoLoader({ duration = 2500, onComplete }) {
   const [visible, setVisible] = useState(true);
@@ -9,13 +8,11 @@ export default function LogoLoader({ duration = 2500, onComplete }) {
     setVisible(false);
     setTimeout(() => {
       if (onComplete) onComplete();
-    }, 500); // Match fade-out animation
+    }, 500); // Match fade-out
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      close();
-    }, duration);
+    const timer = setTimeout(close, duration);
     return () => clearTimeout(timer);
   }, [duration]);
 
@@ -33,13 +30,13 @@ export default function LogoLoader({ duration = 2500, onComplete }) {
           {/* ❌ Top-right close */}
           <button
             onClick={close}
-            className="absolute top-4 right-4 text-zinc-400 hover:text-red-500 transition"
+            className="absolute top-4 right-4"
             aria-label="Close intro"
           >
-            <X className="w-5 h-5" />
+            <span className="text-xl font-bold">×</span>
           </button>
 
-          {/* 🔄 Animated Logo SVG */}
+          {/* 🔄 Logo animation */}
           <motion.img
             src="/EchoScriptAI_Animated.svg"
             alt="EchoScript.AI Logo Animation"
@@ -49,7 +46,7 @@ export default function LogoLoader({ duration = 2500, onComplete }) {
             transition={{ duration: 1, ease: "easeOut" }}
           />
 
-          {/* 🧠 Brand Title */}
+          {/* 🧠 Brand title */}
           <motion.h1
             className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-800 dark:text-white break-words"
             initial={{ opacity: 0, y: 10 }}
@@ -82,4 +79,3 @@ export default function LogoLoader({ duration = 2500, onComplete }) {
   );
 }
 
-}

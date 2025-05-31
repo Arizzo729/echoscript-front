@@ -9,16 +9,16 @@ export function ThemeToggle() {
     <button
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
       onClick={toggleTheme}
-      className="p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-glow focus:ring-offset-1 transition duration-400 ease-in-out bg-background-light dark:bg-background-dark"
-      type="button"
+      className="p-2 rounded-lg bg-transparent hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2"
       title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+      type="button"
     >
-      <AnimatePresence exitBeforeEnter initial={false}>
+      <AnimatePresence mode="wait" initial={false}>
         {theme === "light" ? (
           <motion.svg
             key="sun"
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-primary"
+            className="h-6 w-6 text-yellow-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -38,7 +38,7 @@ export function ThemeToggle() {
           <motion.svg
             key="moon"
             xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-primary"
+            className="h-6 w-6 text-blue-400"
             fill="currentColor"
             viewBox="0 0 24 24"
             initial={{ opacity: 0, rotate: 90, scale: 0.8 }}

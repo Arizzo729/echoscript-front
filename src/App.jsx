@@ -1,6 +1,4 @@
-// ✅ Finalized App.jsx for EchoScript.AI — Full Integration & UI Logic
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
 import { ThemeProvider } from "./context/useTheme";
 import { GPTProvider } from "./context/GPTContext";
@@ -45,29 +43,43 @@ function Layout() {
 }
 
 export default function App() {
+  const [splashDone, setSplashDone] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
+
+  useEffect(() => {
+    if (splashDone && !localStorage.getItem("onboardingComplete")) {
+      setTimeout(() => setShowIntro(true), 300); // short delay after splash
+    }
+  }, [splashDone]);
+
   return (
     <ThemeProvider>
       <GPTProvider>
         <AnimatePresence mode="wait">
-          <AnimatedSplash duration={2000} />
+          {!splashDone && <AnimatedSplash onComplete={() => setSplashDone(true)} />}
         </AnimatePresence>
 
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/transcription" element={<Transcription />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/purchase" element={<Purchase />} />
-            <Route path="/apify" element={<ApifyTest />} />
-          </Route>
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        {splashDone && (
+          <>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/transcription" element={<Transcription />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/account" element={<Account />} />
+                <Route path="/purchase" element={<Purchase />} />
+                <Route path="/apify" element={<ApifyTest />} />
+              </Route>
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
 
-        <OnboardingModal />
+            {showIntro && <OnboardingModal onClose={() => setShowIntro(false)} />}
+          </>
+        )}
       </GPTProvider>
     </ThemeProvider>
   );
 }
+
