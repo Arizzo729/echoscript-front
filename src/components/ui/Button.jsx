@@ -1,6 +1,12 @@
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
+/**
+ * Unified Button component
+ * Props:
+ * - variant: "primary" | "secondary" | "ghost" | "danger"
+ * - size: "sm" | "md" | "lg"
+ */
 export default function Button({
   children,
   variant = "primary",
@@ -23,9 +29,9 @@ export default function Button({
     secondary:
       "bg-zinc-200 text-zinc-800 hover:bg-zinc-300 dark:bg-zinc-700 dark:text-white dark:hover:bg-zinc-600 focus-visible:ring-zinc-500",
     ghost:
-      "bg-transparent text-teal-500 hover:bg-teal-500/10 dark:hover:bg-teal-400/10 focus-visible:ring-teal-400",
+      "bg-transparent text-teal-600 hover:bg-teal-100 dark:text-teal-400 dark:hover:bg-teal-500/10 focus-visible:ring-teal-400",
     danger:
-      "bg-red-600 text-white hover:bg-red-500 focus-visible:ring-red-400",
+      "bg-red-600 text-white hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-500 focus-visible:ring-red-400",
   };
 
   return (

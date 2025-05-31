@@ -42,7 +42,7 @@ const AnimatedSplash = ({ onComplete }) => {
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gradient-to-br from-zinc-100 to-teal-100 dark:from-zinc-950 dark:to-zinc-900 overflow-hidden"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center px-6 text-center bg-gradient-to-br from-zinc-100 to-teal-100 dark:from-zinc-950 dark:to-zinc-900"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.7 } }}
@@ -65,14 +65,13 @@ const AnimatedSplash = ({ onComplete }) => {
               WebkitMaskPosition: "center",
               maskPosition: "center",
               backgroundSize: "250% auto",
-              backgroundImage:
-                "linear-gradient(90deg, #14b8a6, #0ea5e9, #14b8a6)",
+              backgroundImage: "linear-gradient(90deg, #14b8a6, #0ea5e9, #14b8a6)",
             }}
           />
 
           {/* ✨ Brand Name */}
           <motion.div
-            className="mt-6 text-2xl sm:text-3xl font-bold tracking-tight text-zinc-800 dark:text-white"
+            className="mt-6 text-2xl sm:text-3xl font-bold tracking-normal text-zinc-800 dark:text-white max-w-xs break-words"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
