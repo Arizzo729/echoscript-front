@@ -4,13 +4,10 @@ import Lottie from "lottie-react";
 import { gsap } from "gsap";
 import animationData from "../assets/ai-waveform.json";
 
-
-const AnimatedSplash = () => {
+const AnimatedSplash = ({ onComplete }) => {
   const [visible, setVisible] = useState(true);
   const logoRef = useRef(null);
   const orbRef = useRef(null);
-
-  const closeSplash = () => setVisible(false);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -30,12 +27,16 @@ const AnimatedSplash = () => {
       });
     });
 
-    const timer = setTimeout(closeSplash, 3000);
+    const timer = setTimeout(() => {
+      setVisible(false);
+      if (onComplete) onComplete();
+    }, 2000); // 2 seconds
+
     return () => {
       ctx.revert();
       clearTimeout(timer);
     };
-  }, []);
+  }, [onComplete]);
 
   return (
     <AnimatePresence>
@@ -46,50 +47,42 @@ const AnimatedSplash = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.7 } }}
         >
-          {/* Orb Glow */}
+          {/* 🌀 Orb Glow */}
           <div
             ref={orbRef}
             className="absolute w-[340px] h-[340px] rounded-full bg-gradient-to-tr from-teal-500 to-blue-500 opacity-10 blur-2xl"
           />
 
-          {/* Logo Animation */}
+          {/* 🔄 Animated Logo */}
           <div
             ref={logoRef}
             className="w-40 h-40 bg-[url('/Logo.png')] bg-contain bg-no-repeat bg-center"
             style={{
               WebkitMaskImage: "url('/Logo.png')",
               maskImage: "url('/Logo.png')",
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+              WebkitMaskPosition: "center",
+              maskPosition: "center",
               backgroundSize: "200% auto",
-              backgroundImage:
-                "linear-gradient(90deg, #14b8a6, #0ea5e9, #14b8a6)",
+              backgroundImage: "linear-gradient(90deg, #14b8a6, #0ea5e9, #14b8a6)",
             }}
           />
 
-          {/* Tagline */}
+          {/* 💬 Updated Tagline */}
           <motion.div
-            className="mt-6 text-lg font-medium text-zinc-700 dark:text-zinc-300"
+            className="mt-6 text-xl font-semibold text-zinc-700 dark:text-zinc-300"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.1 }}
+            transition={{ delay: 0.8 }}
           >
-            The Best Listener.
+            EchoScript.AI
           </motion.div>
 
-          {/* Lottie Animation */}
+          {/* 🔊 Lottie Pulse */}
           <div className="mt-4 w-24 h-24">
             <Lottie animationData={animationData} loop autoplay />
           </div>
-
-          {/* Skip Option */}
-          <motion.button
-            onClick={closeSplash}
-            className="mt-6 text-sm text-zinc-400 dark:text-zinc-500 hover:text-teal-500 transition"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.6 }}
-          >
-            Skip intro
-          </motion.button>
         </motion.div>
       )}
     </AnimatePresence>
