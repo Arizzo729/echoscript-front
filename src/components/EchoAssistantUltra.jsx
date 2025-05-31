@@ -1,5 +1,3 @@
-// ✅ Upgraded EchoAssistantUltra.jsx — GPT-4 Contextual Assistant
-
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Send, X, Loader2, Wand2 } from "lucide-react";
@@ -7,25 +5,17 @@ import ReactMarkdown from "react-markdown";
 
 const persona = {
   name: "Echo",
-  greeting: "Hi, I'm Echo — your smart assistant. Ask me anything about transcripts, plans, usage, or even command me with `/summarize`, `/fix grammar`, or `/lookup something`.",
+  greeting: "Hi, I'm Echo — your smart assistant. Ask me anything about transcripts, plans, tools, or commands like `/summarize`, `/clarify`, or `/lookup keyword`.",
 };
 
-const defaultSystemPrompt = (user, context) => `
-You are Echo, a super-intelligent assistant helping a user on EchoScript.AI.
-The user is ${user.name} and is currently on the "${user.plan}" plan.
-They are currently on: "${context}" page.
-You are helpful, intelligent, and capable of looking things up if needed.
-Always help with transcripts, AI tools, pricing, feedback, or technical questions.
-If you are unsure, suggest looking it up with "/lookup {topic}".
-Respond kindly and with clarity, like a real support engineer.
-`;
-
-const EchoAssistantUltra = ({ user = { name: "User", plan: "Free" }, context = "Dashboard" }) => {
+const EchoAssistantUltra = ({
+  user = { name: "User", plan: "Free", id: "anon" },
+  context = "Dashboard",
+  transcript = ""
+}) => {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [history, setHistory] = useState([
-    { role: "assistant", content: persona.greeting },
-  ]);
+  const [history, setHistory] = useState([{ role: "assistant", content: persona.greeting }]);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef();
 
@@ -41,60 +31,53 @@ const EchoAssistantUltra = ({ user = { name: "User", plan: "Free" }, context = "
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history]);
 
-  const parseCommands = (text) => {
-    if (text.startsWith("/lookup ")) {
-      return { command: "lookup", value: text.replace("/lookup ", "") };
-    }
+  const parseCommand = (text) => {
+    if (text.startsWith("/lookup ")) return { command: "lookup", arg: text.replace("/lookup ", "") };
     return null;
   };
 
   const handleSend = async () => {
     if (!input.trim()) return;
-    const userMessage = { role: "user", content: input };
-    setHistory((prev) => [...prev, userMessage]);
+    const userMsg = { role: "user", content: input };
+    setHistory((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
 
-    const parsed = parseCommands(input);
-    if (parsed?.command === "lookup") {
+    const cmd = parseCommand(input);
+    if (cmd?.command === "lookup") {
       setHistory((prev) => [
         ...prev,
-        { role: "assistant", content: `🌐 Looking up \"${parsed.value}\" from external sources...` },
+        { role: "assistant", content: `🌐 Looking up "${cmd.arg}"...` },
       ]);
       setTimeout(() => {
         setHistory((prev) => [
           ...prev,
-          { role: "assistant", content: `📘 Here's what I found about \"${parsed.value}\":\n\n*Coming soon: real-time external lookup integration.*` },
+          { role: "assistant", content: `🔎 Result for "${cmd.arg}":\n\n*Coming soon — external AI search integration.*` },
         ]);
         setLoading(false);
-      }, 2000);
+      }, 1500);
       return;
     }
 
     try {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      const res = await fetch("https://your-backend-domain.com/assistant/ask", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "gpt-4",
-          messages: [
-            { role: "system", content: defaultSystemPrompt(user, context) },
-            ...history,
-            userMessage,
-          ],
+          transcript,
+          question: input,
+          history: history.map(h => ({ role: h.role, content: h.content })),
+          user_id: user.id,
+          mode: "auto",
+          tone: "friendly",
+          voice: "coach",
         }),
       });
       const data = await res.json();
-      const reply = data.choices?.[0]?.message?.content || "⚠️ Unexpected error.";
+      const reply = data.response || "⚠️ No response from assistant.";
       setHistory((prev) => [...prev, { role: "assistant", content: reply }]);
     } catch (err) {
-      setHistory((prev) => [
-        ...prev,
-        { role: "assistant", content: "⚠️ Network error." },
-      ]);
+      setHistory((prev) => [...prev, { role: "assistant", content: "⚠️ Error talking to backend." }]);
     } finally {
       setLoading(false);
     }
@@ -164,7 +147,7 @@ const EchoAssistantUltra = ({ user = { name: "User", plan: "Free" }, context = "
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask Echo or use /lookup"
+                placeholder="Ask Echo or type a command..."
                 className="flex-1 px-3 py-2 text-sm rounded-md bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white focus:outline-none"
               />
               <button
@@ -183,5 +166,3 @@ const EchoAssistantUltra = ({ user = { name: "User", plan: "Free" }, context = "
 };
 
 export default EchoAssistantUltra;
-
-
