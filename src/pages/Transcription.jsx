@@ -1,12 +1,19 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { UploadCloud, Mic, Loader2, Wand2, TextCursorInput } from "lucide-react";
+import {
+  UploadCloud,
+  Mic,
+  Loader2,
+  Wand2,
+  TextCursorInput,
+} from "lucide-react";
 import { useTheme } from "../context/useTheme";
+import Button from "../components/ui/Button";
 
 export default function Transcription() {
   const [rawTranscript, setRawTranscript] = useState("Raw audio transcript will appear here...");
   const [cleanTranscript, setCleanTranscript] = useState("Cleaned transcript with GPT enhancements...");
-  const [viewMode, setViewMode] = useState("clean"); // 'clean' or 'raw'
+  const [viewMode, setViewMode] = useState("clean");
   const [loading, setLoading] = useState(false);
 
   const { theme } = useTheme();
@@ -31,23 +38,25 @@ export default function Transcription() {
 
       {/* Upload + Record */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <motion.button
+        <Button
           onClick={handleUpload}
           disabled={loading}
-          className="bg-primary hover:bg-primary-light text-white font-semibold px-6 py-4 rounded-lg flex items-center justify-center gap-3 transition"
-          whileTap={{ scale: 0.95 }}
+          className="w-full justify-center"
+          size="lg"
+          variant="primary"
         >
           <UploadCloud size={20} />
           {loading ? <Loader2 className="animate-spin" /> : "Upload Audio"}
-        </motion.button>
+        </Button>
 
-        <motion.button
-          className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white font-semibold px-6 py-4 rounded-lg flex items-center justify-center gap-3 transition"
-          whileTap={{ scale: 0.95 }}
+        <Button
+          className="w-full justify-center"
+          size="lg"
+          variant="secondary"
         >
           <Mic size={20} />
           Start Recording
-        </motion.button>
+        </Button>
       </div>
 
       {/* Transcript Viewer */}
@@ -59,26 +68,20 @@ export default function Transcription() {
           </h2>
 
           <div className="flex gap-2">
-            <button
-              className={`px-3 py-1 rounded-md text-sm font-medium ${
-                viewMode === "clean"
-                  ? "bg-primary text-white"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-              }`}
+            <Button
+              size="sm"
+              variant={viewMode === "clean" ? "primary" : "secondary"}
               onClick={() => setViewMode("clean")}
             >
               Clean
-            </button>
-            <button
-              className={`px-3 py-1 rounded-md text-sm font-medium ${
-                viewMode === "raw"
-                  ? "bg-primary text-white"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-              }`}
+            </Button>
+            <Button
+              size="sm"
+              variant={viewMode === "raw" ? "primary" : "secondary"}
               onClick={() => setViewMode("raw")}
             >
               Raw
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -89,17 +92,18 @@ export default function Transcription() {
 
       {/* AI Actions */}
       <div className="flex flex-wrap gap-4 mt-6">
-        <button className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 transition">
+        <Button variant="primary">
           <Wand2 size={18} />
           Clean with GPT
-        </button>
-        <button className="flex items-center gap-2 px-4 py-2 bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-white rounded-md hover:bg-gray-400 dark:hover:bg-gray-600 transition">
+        </Button>
+        <Button variant="secondary">
           Summarize
-        </button>
-        <button className="flex items-center gap-2 px-4 py-2 bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-white rounded-md hover:bg-gray-400 dark:hover:bg-gray-600 transition">
+        </Button>
+        <Button variant="secondary">
           Label Speakers
-        </button>
+        </Button>
       </div>
     </motion.div>
   );
 }
+

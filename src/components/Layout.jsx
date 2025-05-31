@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect, createContext, useContext } from "react";
 import { Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "./components/Header";
-import Footer from "./components/Footer"; // ✅ optional if Footer exists
+import Footer from "./components/Footer"; // Optional
+import "./global.css"; // Make sure ambient classes are available
 
 const ThemeContext = createContext();
 const UserContext = createContext();
@@ -79,25 +79,38 @@ export default function Layout() {
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <UserContext.Provider value={{ user }}>
         <NotificationContext.Provider value={{ notifications, markAllRead }}>
-          <div className="flex min-h-screen w-full flex-col bg-background-light text-text-light dark:bg-background-dark dark:text-text-dark transition-colors duration-500 ease-in-out">
-            <Header
-              sidebarOpen={sidebarOpen}
-              setSidebarOpen={setSidebarOpen}
-              user={user}
-              onLogout={() => console.log("Logout clicked")}
-              onSearch={(query) => console.log("Search:", query)}
-              notifications={notifications}
-              onToggleTheme={toggleTheme}
-              isDarkMode={theme === "dark"}
-            />
-            <main className="flex-1 min-h-screen w-full">
-              <Outlet />
-            </main>
-            <Footer />
-            <SettingsDrawer isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+          <div className="relative min-h-screen w-full overflow-x-hidden transition-colors duration-500 ease-in-out">
+            {/* Ambient background layer */}
+            <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-50 via-sky-50 to-zinc-100 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 opacity-100 pointer-events-none" />
+            <div className="absolute inset-0 z-0 bg-[url('/noise.png')] opacity-5 mix-blend-overlay pointer-events-none" />
+
+            <div className="relative z-10 flex flex-col min-h-screen">
+              <Header
+                sidebarOpen={sidebarOpen}
+                setSidebarOpen={setSidebarOpen}
+                user={user}
+                onLogout={() => console.log("Logout clicked")}
+                onSearch={(query) => console.log("Search:", query)}
+                notifications={notifications}
+                onToggleTheme={toggleTheme}
+                isDarkMode={theme === "dark"}
+                onSettingsOpen={() => setSettingsOpen(true)}
+              />
+              <motion.main
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+                className="flex-1"
+              >
+                <Outlet />
+              </motion.main>
+              <Footer />
+              <SettingsDrawer isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+            </div>
           </div>
         </NotificationContext.Provider>
       </UserContext.Provider>
     </ThemeContext.Provider>
   );
 }
+

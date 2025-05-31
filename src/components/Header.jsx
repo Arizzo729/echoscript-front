@@ -1,3 +1,4 @@
+// Header.jsx — Finalized & Polished
 import React, { useState, useEffect, useRef } from "react";
 import {
   Bars3Icon,
@@ -10,7 +11,10 @@ import {
   Cog6ToothIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import Button from "./ui/Button"; // ✅ New shared button
+import Button from "./ui/Button";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import Logo from "/Logo.png";
 
 export default function Header({
   sidebarOpen,
@@ -30,130 +34,101 @@ export default function Header({
   const searchRef = useRef(null);
 
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      onSearch("");
-      return;
-    }
-    const handler = setTimeout(() => {
-      onSearch(searchQuery);
-    }, 500);
+    if (!searchQuery.trim()) return onSearch("");
+    const handler = setTimeout(() => onSearch(searchQuery), 400);
     return () => clearTimeout(handler);
   }, [searchQuery, onSearch]);
 
   useEffect(() => {
-    function handleClickOutside(event) {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setShowSearchSuggestions(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    const close = (e) => {
+      if (!searchRef.current?.contains(e.target)) setShowSearchSuggestions(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
   }, []);
 
   return (
-    <header className="flex items-center justify-between px-6 py-3 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shadow-sm sticky top-0 z-30">
-      {/* Sidebar toggle & brand */}
+    <motion.header
+      className="sticky top-0 z-50 flex items-center justify-between px-6 py-3 bg-white/80 dark:bg-zinc-900/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800 shadow-sm"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      {/* Left: Logo + Sidebar */}
       <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2"
-          aria-label="Toggle sidebar"
-        >
+        <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2">
           <Bars3Icon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
         </Button>
-        <h1 className="text-xl font-bold text-indigo-700 dark:text-indigo-300 select-none">
-          AI Transcriber
-        </h1>
+        <Link to="/" className="flex items-center gap-2">
+          <img src={Logo} alt="EchoScript.AI logo" className="h-8 w-auto" />
+          <span className="text-xl font-bold text-indigo-700 dark:text-indigo-300">
+            EchoScript<span className="text-teal-500">.AI</span>
+          </span>
+        </Link>
       </div>
 
-      {/* Search */}
+      {/* Middle: Search */}
       <div ref={searchRef} className="relative flex-1 max-w-lg mx-6">
-        <div className="relative text-gray-500 dark:text-gray-400 focus-within:text-indigo-600 dark:focus-within:text-indigo-400">
+        <div className="relative text-zinc-500 focus-within:text-indigo-600 dark:text-zinc-400 dark:focus-within:text-indigo-400">
           <input
             type="search"
-            autoComplete="off"
             placeholder="Search transcripts, tools, users..."
-            className="block w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 py-2 pl-10 pr-4 text-sm placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+            autoComplete="off"
+            className="w-full pl-10 pr-4 py-2 text-sm rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setShowSearchSuggestions(true)}
           />
-          <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 w-5 h-5 -translate-y-1/2 pointer-events-none" />
         </div>
 
         {showSearchSuggestions && searchQuery.trim() && (
-          <ul className="absolute z-20 w-full mt-1 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md shadow-lg max-h-60 overflow-auto">
+          <ul className="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md shadow-lg max-h-60 overflow-auto">
             {[1, 2, 3].map((n) => (
-              <li
-                key={n}
-                className="cursor-pointer px-4 py-2 hover:bg-indigo-600 hover:text-white"
-              >
-                Search suggestion {n} for "{searchQuery}"
+              <li key={n} className="px-4 py-2 cursor-pointer hover:bg-indigo-600 hover:text-white">
+                Result {n} for “{searchQuery}”
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      {/* Right Actions */}
+      {/* Right: Actions */}
       <div className="flex items-center gap-4">
         {/* Notifications */}
         <div className="relative">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowNotifDropdown(!showNotifDropdown)}
-            className="relative p-2"
-            aria-label="Notifications"
-          >
+          <Button variant="ghost" size="sm" onClick={() => setShowNotifDropdown(!showNotifDropdown)} className="p-2">
             <BellIcon className="w-6 h-6 text-zinc-600 dark:text-zinc-300" />
-            {notifications.length > 0 && (
-              <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2">
+            {!!notifications.length && (
+              <span className="absolute top-0 right-0 px-1.5 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2">
                 {notifications.length}
               </span>
             )}
           </Button>
-
           {showNotifDropdown && (
             <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-md shadow-lg z-50 max-h-80 overflow-y-auto">
-              <div className="p-4 font-semibold text-zinc-700 dark:text-zinc-200 border-b border-zinc-300 dark:border-zinc-700">
-                Notifications
-              </div>
+              <div className="p-4 font-semibold text-zinc-700 dark:text-zinc-200 border-b">Notifications</div>
               <ul>
-                {notifications.length === 0 ? (
-                  <li className="p-4 text-zinc-500 dark:text-zinc-500">
-                    No new notifications
+                {notifications.map((notif, i) => (
+                  <li
+                    key={i}
+                    className="px-4 py-3 border-b hover:bg-indigo-100 dark:hover:bg-indigo-600 text-sm"
+                    onClick={() => {
+                      setShowNotifDropdown(false);
+                      notif.onClick?.();
+                    }}
+                  >
+                    <p>{notif.message}</p>
+                    <p className="text-xs text-zinc-400">{notif.time}</p>
                   </li>
-                ) : (
-                  notifications.map((notif, i) => (
-                    <li
-                      key={i}
-                      className="px-4 py-3 border-b border-zinc-300 dark:border-zinc-700 hover:bg-indigo-100 dark:hover:bg-indigo-600 cursor-pointer"
-                      onClick={() => {
-                        setShowNotifDropdown(false);
-                        notif.onClick && notif.onClick();
-                      }}
-                    >
-                      <p className="text-sm">{notif.message}</p>
-                      <p className="text-xs text-zinc-400">{notif.time}</p>
-                    </li>
-                  ))
-                )}
+                ))}
               </ul>
             </div>
           )}
         </div>
 
-        {/* Theme Toggle */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggleTheme}
-          className="p-2"
-          aria-label="Toggle theme"
-        >
+        {/* Theme toggle */}
+        <Button variant="ghost" size="sm" onClick={onToggleTheme} className="p-2">
           {isDarkMode ? (
             <SunIcon className="w-6 h-6 text-yellow-400" />
           ) : (
@@ -161,7 +136,7 @@ export default function Header({
           )}
         </Button>
 
-        {/* User Dropdown */}
+        {/* User dropdown */}
         <div className="relative">
           <Button
             variant="ghost"
@@ -169,25 +144,18 @@ export default function Header({
             onClick={() => setShowUserDropdown(!showUserDropdown)}
             className="flex items-center gap-2 px-2"
           >
-            {user?.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.name}
-                className="w-8 h-8 rounded-full object-cover"
-              />
+            {user.avatar ? (
+              <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
             ) : (
               <UserCircleIcon className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
             )}
-            <span className="hidden md:inline text-zinc-700 dark:text-zinc-300 font-medium">
-              {user?.name || "Guest"}
+            <span className="hidden md:inline font-medium text-zinc-700 dark:text-zinc-300">
+              {user.name || "Guest"}
             </span>
             <ChevronDownIcon
-              className={`w-5 h-5 text-zinc-700 dark:text-zinc-300 transition-transform ${
-                showUserDropdown ? "rotate-180" : "rotate-0"
-              }`}
+              className={`w-5 h-5 transition-transform ${showUserDropdown ? "rotate-180" : "rotate-0"} text-zinc-700 dark:text-zinc-300`}
             />
           </Button>
-
           {showUserDropdown && (
             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-md shadow-lg z-50">
               <NavItem icon={UserCircleIcon} label="Profile" href="/account/profile" />
@@ -202,12 +170,7 @@ export default function Header({
                 App Settings
               </Button>
               <hr className="border-zinc-300 dark:border-zinc-700" />
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={onLogout}
-                className="w-full justify-start px-4 py-2 gap-2"
-              >
+              <Button variant="danger" size="sm" onClick={onLogout} className="w-full justify-start px-4 py-2 gap-2">
                 <ArrowRightOnRectangleIcon className="w-5 h-5" />
                 Logout
               </Button>
@@ -215,7 +178,7 @@ export default function Header({
           )}
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 }
 
@@ -230,4 +193,5 @@ function NavItem({ icon: Icon, label, href }) {
     </a>
   );
 }
+
 

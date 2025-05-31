@@ -1,25 +1,19 @@
 import React, { useEffect, useState } from "react";
-import {
-  Routes,
-  Route,
-  Outlet,
-  useLocation,
-  Navigate,
-  useNavigate,
-} from "react-router-dom";
+import { Routes, Route, Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+
 import { ThemeProvider } from "./context/useTheme";
 import { GPTProvider } from "./context/GPTContext";
 
-// Core Layout Components
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import EchoAssistantUltra from "./components/EchoAssistantUltra";
 import OnboardingModal from "./components/OnboardingModal";
-import AnimatedSplash from "./components/AnimatedSplash";
-import ToastContainer from "./components/ToastContainer";
 import MobileBottomNav from "./components/MobileBottomNav";
+import ToastContainer from "./components/ToastContainer";
+import AnimatedSplash from "./components/AnimatedSplash";
+
 import "./global.css";
 
 // Pages
@@ -33,89 +27,66 @@ import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
 import ApifyTest from "./pages/ApifyTest";
 
-// --- Layout Wrapper
-function Layout() {
+const isAuthenticated = () => {
+  return localStorage.getItem("auth") === "true";
+};
+
+export default function App() {
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [splashComplete, setSplashComplete] = useState(
+    sessionStorage.getItem("splashShown") === "true"
+  );
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  return (
-    <div className="bg-background-dark text-white min-h-screen flex flex-col font-sans transition-colors duration-300">
-      <Header
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-      />
-      <div className="flex flex-grow overflow-hidden">
-        <Sidebar
-          collapsedDefault={!sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-        />
-        <main
-          className={`flex-grow overflow-y-auto transition-all duration-300 px-4 py-6 scrollbar-thin scrollbar-thumb-zinc-700 ${
-            sidebarOpen ? "pl-[260px]" : "pl-[64px]"
-          }`}
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.35 }}
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
-        </main>
-      </div>
-      <Footer />
-      <EchoAssistantUltra />
-      <ToastContainer />
-      <MobileBottomNav />
-    </div>
-  );
-}
-
-// --- Main App Wrapper
-export default function App() {
-  const [splashDone, setSplashDone] = useState(false);
-  const [introDone, setIntroDone] = useState(
-    () => localStorage.getItem("introComplete") === "true"
-  );
-
-  const handleIntroClose = () => {
-    localStorage.setItem("introComplete", "true");
-    setIntroDone(true);
-  };
+  useEffect(() => {
+    if (!splashComplete) {
+      sessionStorage.setItem("splashShown", "true");
+    }
+  }, [splashComplete]);
 
   return (
     <ThemeProvider>
       <GPTProvider>
-        {!splashDone && (
-          <AnimatedSplash onComplete={() => setSplashDone(true)} />
-        )}
-        {splashDone && !introDone && (
-          <OnboardingModal onClose={handleIntroClose} />
-        )}
+        <AnimatePresence mode="wait">
+          {!splashComplete && (
+            <AnimatedSplash key="splash" onComplete={() => setSplashComplete(true)} />
+          )}
+        </AnimatePresence>
 
-        {splashDone && introDone && (
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route path="transcription" element={<Transcription />} />
-              <Route path="dashboard" element={<Navigate to="/transcription" replace />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="account" element={<Account />} />
-              <Route path="purchase" element={<Purchase />} />
-              <Route path="devtools/apify" element={<ApifyTest />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-          </Routes>
+        {splashComplete && (
+          <motion.div
+            key="main"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            className="bg-gradient-to-br from-white to-zinc-50 dark:from-zinc-950 dark:to-zinc-900 min-h-screen"
+          >
+            <Header />
+            <Sidebar />
+            <OnboardingModal />
+            <main className="pt-16 pb-20 px-4 md:px-10">
+              <Routes location={location} key={location.pathname}>
+                <Route path="/" element={<Home />} />
+                <Route path="/transcription" element={<Transcription />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/account" element={<Account />} />
+                <Route path="/purchase" element={<Purchase />} />
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/apify" element={<ApifyTest />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Outlet />
+            </main>
+            <MobileBottomNav />
+            <ToastContainer />
+            <Footer />
+            <EchoAssistantUltra />
+          </motion.div>
         )}
       </GPTProvider>
     </ThemeProvider>
