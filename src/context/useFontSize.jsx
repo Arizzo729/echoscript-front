@@ -1,7 +1,6 @@
-// ✅ useFontSize.js — Global Font Size Context
 import { createContext, useContext, useState } from "react";
 
-const FontSizeContext = createContext();
+export const FontSizeContext = createContext(); // ✅ named export
 
 export function FontSizeProvider({ children }) {
   const [fontSize, setFontSize] = useState(1);
@@ -15,4 +14,4 @@ export function FontSizeProvider({ children }) {
   );
 }
 
-export const useFontSize = () => useContext(FontSizeContext);
+export const useFontSize = () => useContext(FontSizeContext); // ✅ optional hook
