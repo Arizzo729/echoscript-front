@@ -47,8 +47,7 @@ export default function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/upload" element={<Upload />} />
-                  <Route path="/assistant" element={<AIAssistant />} />
-                  <Route path="/transcription" element={<Transcription />} />
+                  <Route path="/assistant" element={<AIAssistant />} 
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/account" element={<Account />} />
                   <Route path="/purchase" element={<Purchase />} />
