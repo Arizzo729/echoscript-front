@@ -1,3 +1,4 @@
+// ✅ FINAL Settings.jsx — Clean, Advanced, and Refined
 import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { Switch } from "@headlessui/react";
@@ -12,7 +13,7 @@ import {
   Text,
 } from "lucide-react";
 import Button from "../components/ui/Button";
-import { FontSizeContext } from "../context/useFontSize.jsx"; // ✅ Corrected
+import { FontSizeContext } from "../context/useFontSize.jsx";
 
 const tabs = [
   { id: "preferences", label: "Preferences", icon: Settings2 },
@@ -236,4 +237,3 @@ function FAQItem({ question, children }) {
     </div>
   );
 }
-
