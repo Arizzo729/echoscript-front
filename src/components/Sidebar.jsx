@@ -14,7 +14,7 @@ import {
   Bars3
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Button from "./components/ui/Button"; // ✅ Using enhanced button
+import Button from "./ui/Button"; // ✅ Using enhanced button
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
