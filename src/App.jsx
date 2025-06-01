@@ -1,6 +1,5 @@
-// src/App.jsx
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./context/useTheme";
 import { GPTProvider } from "./context/GPTContext";
 import { FontSizeProvider } from "./context/useFontSize";
@@ -38,32 +37,34 @@ export default function App() {
   return (
     <ThemeProvider>
       <GPTProvider>
-        {!splashDone && <AnimatedSplash onComplete={() => setSplashDone(true)} />}
+        <FontSizeProvider>
+          {!splashDone && <AnimatedSplash onComplete={() => setSplashDone(true)} />}
 
-        {splashDone && (
-          <>
-            <Routes>
-              <Route element={<Layout />}>
-                <Route path="/" element={<Home />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/upload" element={<Upload />} />
-                <Route path="/assistant" element={<AIAssistant />} />
-                <Route path="/transcription" element={<Transcription />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/account" element={<Account />} />
-                <Route path="/purchase" element={<Purchase />} />
-                <Route path="/apify" element={<ApifyTest />} />
-              </Route>
+          {splashDone && (
+            <>
+              <Routes>
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/upload" element={<Upload />} />
+                  <Route path="/assistant" element={<AIAssistant />} />
+                  <Route path="/transcription" element={<Transcription />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/account" element={<Account />} />
+                  <Route path="/purchase" element={<Purchase />} />
+                  <Route path="/apify" element={<ApifyTest />} />
+                </Route>
 
-              {/* Auth + Error Routes */}
-              <Route path="/signin" element={<SignIn />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+                {/* Auth + Error Routes */}
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
 
-            {showIntro && <OnboardingModal onClose={() => setShowIntro(false)} />}
-          </>
-        )}
+              {showIntro && <OnboardingModal onClose={() => setShowIntro(false)} />}
+            </>
+          )}
+        </FontSizeProvider>
       </GPTProvider>
     </ThemeProvider>
   );
