@@ -12,7 +12,7 @@ import {
   Text,
 } from "lucide-react";
 import Button from "../components/ui/Button";
-import { FontSizeContext } from "../context/useFontSize"; // ✅ Corrected
+import { FontSizeContext } from "../context/useFontSize.jsx"; // ✅ Corrected
 
 const tabs = [
   { id: "preferences", label: "Preferences", icon: Settings2 },
