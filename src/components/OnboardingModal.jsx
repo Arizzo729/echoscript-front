@@ -1,4 +1,3 @@
-// ✅ EchoScript.AI: OnboardingModal — Final Polished Version
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
@@ -32,7 +31,6 @@ export default function OnboardingModal({ onClose }) {
     localStorage.setItem("onboardingComplete", "true");
     setTimeout(() => {
       onClose?.();
-      // navigate("/dashboard"); // Optional redirect
     }, 500);
   };
 
@@ -61,21 +59,21 @@ export default function OnboardingModal({ onClose }) {
             role="dialog"
             aria-modal="true"
           >
-            {/* ❌ Close Button */}
+            {/* ❌ Close (X) Button */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-5 z-20 text-zinc-400 text-sm hover:text-teal-400"
+              className="absolute top-4 right-5 z-20 text-zinc-500 text-lg hover:text-teal-400 transition"
               aria-label="Close"
             >
               ×
             </button>
 
-            {/* 🌊 Background Animation */}
+            {/* 🌊 Animated Background */}
             <div className="absolute inset-0 z-0 pointer-events-none opacity-10">
               <Lottie animationData={animationData} loop autoplay style={{ width: "100%", height: "100%" }} />
             </div>
 
-            {/* 💬 Main Step Content */}
+            {/* 💬 Step Content */}
             <motion.div
               key={step}
               className="relative z-10 text-center px-4"
@@ -88,7 +86,7 @@ export default function OnboardingModal({ onClose }) {
               <p className="text-base text-zinc-400">{STEPS[step].description}</p>
             </motion.div>
 
-            {/* 🔘 Step Indicators */}
+            {/* 🔘 Progress Dots */}
             <div className="flex justify-center mt-6 space-x-2 z-10 relative">
               {STEPS.map((_, i) => (
                 <div
@@ -100,25 +98,25 @@ export default function OnboardingModal({ onClose }) {
               ))}
             </div>
 
-            {/* 🧭 Navigation Buttons */}
+            {/* 🔄 Navigation Buttons */}
             <div className="mt-6 flex gap-3 z-10 relative justify-center">
               {step > 0 && (
                 <button
                   onClick={() => setStep((s) => Math.max(s - 1, 0))}
-                  className="text-sm px-3 py-1 rounded-lg text-white hover:text-teal-400"
+                  className="text-sm text-white px-3 py-1 hover:text-teal-400 transition"
                 >
                   Back
                 </button>
               )}
               <button
                 onClick={step === STEPS.length - 1 ? handleClose : () => setStep(step + 1)}
-                className="text-sm px-4 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-medium shadow-sm transition"
+                className="text-sm px-4 py-1.5 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 hover:from-blue-500 hover:to-teal-400 text-white font-medium shadow transition"
               >
                 {step === STEPS.length - 1 ? "Finish" : "Next"}
               </button>
             </div>
 
-            {/* 🧼 Skip Option */}
+            {/* ⏩ Skip Button */}
             <div className="text-center mt-4 z-10 relative">
               <button
                 onClick={handleClose}

@@ -12,7 +12,11 @@ import {
   Info,
   Text,
 } from "lucide-react";
-import Button from "../components/ui/Button";
+import Button from "../components/ui/Button"; // or adjust path as needed
+
+<Button variant="primary" size="md" onClick={...}>
+  Label
+</Button>
 import { FontSizeContext } from "../context/useFontSize.jsx";
 
 const tabs = [

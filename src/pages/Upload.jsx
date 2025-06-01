@@ -9,6 +9,11 @@ export default function Upload() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredLanguages = languageOptions.filter((lang) =>
+    lang.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -40,22 +45,29 @@ export default function Upload() {
       </Link>
 
       <h1 className="text-3xl font-bold mb-2 text-zinc-900 dark:text-white">Upload Audio</h1>
-      <p className="text-zinc-600 dark:text-zinc-400 mb-4">
+      <p className="text-zinc-600 dark:text-zinc-400 mb-6">
         Drag and drop audio files or click to browse. Supported formats: MP3, WAV, M4A.
       </p>
 
-      {/* Language Selector */}
+      {/* Language Selector with Search */}
       <div className="mb-8">
         <label htmlFor="language" className="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Language
         </label>
+        <input
+          type="text"
+          placeholder="Search languages..."
+          className="w-full mb-2 px-3 py-2 text-sm rounded-md border border-zinc-300 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
         <select
           id="language"
           value={selectedLanguage}
           onChange={(e) => setSelectedLanguage(e.target.value)}
-          className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="w-full px-3 py-2 text-sm rounded-md border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
         >
-          {languageOptions.map((lang) => (
+          {filteredLanguages.map((lang) => (
             <option key={lang.value} value={lang.value}>
               {lang.label}
             </option>
@@ -63,7 +75,7 @@ export default function Upload() {
         </select>
       </div>
 
-      {/* File Drop Zone */}
+      {/* Upload Drop Zone */}
       <div
         className={`border-2 border-dashed rounded-lg transition-colors ${
           dragActive
@@ -91,7 +103,7 @@ export default function Upload() {
         </label>
       </div>
 
-      {/* File Preview + Submit */}
+      {/* File Info + Button */}
       {selectedFile && (
         <div className="mt-6 p-4 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700">
           <div className="flex items-center gap-3">
@@ -114,4 +126,3 @@ export default function Upload() {
     </motion.div>
   );
 }
-

@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI: Bubbly Smart Button — Premium Design
+// ✅ EchoScript.AI: Bubbly Smart Button — Premium Design (Animated Gradient)
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -12,7 +12,7 @@ export default function Button({
   ...props
 }) {
   const base =
-    "relative inline-flex items-center justify-center font-semibold select-none rounded-full transition-all duration-300 ease-out group focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-95 shadow-md";
+    "relative inline-flex items-center justify-center font-semibold select-none rounded-full transition-all duration-500 ease-in-out group focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-95 shadow-md overflow-hidden";
 
   const sizes = {
     xs: "px-3 py-1 text-xs gap-1.5",
@@ -24,8 +24,11 @@ export default function Button({
   const variants = {
     primary: `
       bg-gradient-to-br from-teal-500 to-blue-500 text-white
-      hover:from-blue-500 hover:to-teal-400
-      hover:shadow-lg hover:brightness-105
+      bg-[length:200%_200%] bg-[position:0%_0%]
+      transition-all duration-500 ease-in-out
+      hover:bg-[position:100%_100%]
+      hover:brightness-110
+      hover:shadow-xl
       focus-visible:ring-teal-300
     `,
     secondary: `
@@ -51,7 +54,6 @@ export default function Button({
       className={twMerge(base, sizes[size], variants[variant], className)}
       {...props}
     >
-      {/* Optional shimmer effect when loading */}
       {loading && (
         <span className="absolute inset-0 animate-pulse bg-white/10 rounded-full" />
       )}

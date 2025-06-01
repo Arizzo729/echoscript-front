@@ -1,23 +1,21 @@
-// ✅ EchoScript.AI Sidebar — Final Clean Version with Community Tab
+// ✅ EchoScript.AI Sidebar — Final Version (Polished, Cleaned, Community Added)
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   Upload,
-  FileText,
   User,
   Settings2,
   CreditCard,
   MessageCircle,
   ChevronLeft,
-  Menu
+  Menu,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
   { name: "Upload", icon: Upload, to: "/upload" },
-  { name: "Transcripts", icon: FileText, to: "/transcription" },
   { name: "Account", icon: User, to: "/account" },
   { name: "Settings", icon: Settings2, to: "/settings" },
   { name: "Purchase", icon: CreditCard, to: "/purchase" },
@@ -86,7 +84,6 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
               )}
             </AnimatePresence>
 
-            {/* Tooltip when collapsed */}
             {!sidebarOpen && (
               <span className="absolute left-14 z-50 top-1/2 -translate-y-1/2 text-xs px-2 py-1 bg-zinc-800 text-white rounded shadow-lg opacity-0 group-hover:opacity-100 transition pointer-events-none">
                 {name}
@@ -103,5 +100,3 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
     </motion.aside>
   );
 }
-
-
