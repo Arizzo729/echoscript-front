@@ -1,3 +1,4 @@
+// ✅ EchoScript.AI Sidebar — Animated, Clean, Consistent
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
@@ -7,7 +8,6 @@ import {
   User,
   Settings2,
   CreditCard,
-  Bot,
   ChevronLeft,
   Menu
 } from "lucide-react";
@@ -20,7 +20,6 @@ const navItems = [
   { name: "Account", icon: User, to: "/account" },
   { name: "Settings", icon: Settings2, to: "/settings" },
   { name: "Purchase", icon: CreditCard, to: "/purchase" },
-  { name: "AI Assistant", icon: Bot, to: "/assistant" },
 ];
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
@@ -28,14 +27,13 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
     <motion.aside
       animate={{ width: sidebarOpen ? 200 : 60 }}
       transition={{ duration: 0.25 }}
-      className="h-screen fixed top-0 left-0 z-40 bg-zinc-950 text-white border-r border-zinc-800 flex flex-col shadow-xl"
+      className="h-screen fixed top-0 left-0 z-30 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white border-r border-zinc-800 flex flex-col shadow-xl"
     >
       {/* Sidebar Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
         {sidebarOpen && (
           <span className="text-lg font-semibold tracking-tight text-teal-400">
-            EchoScript
-            <span className="text-white">.AI</span>
+            EchoScript<span className="text-white">.AI</span>
           </span>
         )}
         <button
@@ -54,7 +52,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             key={name}
             to={to}
             className={({ isActive }) =>
-              `group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out 
+              `group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out 
               ${
                 isActive
                   ? "bg-gradient-to-r from-teal-500 to-blue-500 text-white shadow"
@@ -87,5 +85,4 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
     </motion.aside>
   );
 }
-
 

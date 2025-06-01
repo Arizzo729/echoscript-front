@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
 import { TbLanguage } from "react-icons/tb";
 import Particles from "react-tsparticles";
 import { loadFull } from "tsparticles";
-import SmartAIAssistant from "../components/SmartAIAssistant";
 import AudioWaveform from "../components/AudioWaveform";
 import useVoiceInput from "../hooks/useVoiceInput";
 import useAmbientAudio from "../hooks/useAmbientAudio";
@@ -19,14 +18,11 @@ export default function HomePage() {
   const [introStep, setIntroStep] = useState(0);
   const [gptResponse, setGptResponse] = useState(null);
   const [showBubble, setShowBubble] = useState(false);
-
   const { voiceLevel, transcriptLive, micStatus, shortTranscript } = useVoiceInput();
   const { isPlaying, toggleAudio } = useAmbientAudio("/ambient-loop.mp3");
   const { setContextMessage } = useContext(GPTContext);
 
-  const particlesInit = async (main) => {
-    await loadFull(main);
-  };
+  const particlesInit = async (main) => await loadFull(main);
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -42,7 +38,6 @@ export default function HomePage() {
           : tone === "neutral"
           ? `Got it — you said: “${shortTranscript}.” Let’s begin.`
           : `You said: “${shortTranscript}.” Don’t worry, I’ve got your back.`;
-
       setGptResponse(gptMsg);
       setIntroStep(2);
       setShowBubble(true);
@@ -57,7 +52,7 @@ export default function HomePage() {
   });
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-950 to-black text-white overflow-hidden flex flex-col items-center justify-center text-center">
+    <div className="relative min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-950 text-white overflow-hidden flex flex-col items-center justify-center text-center">
       <Particles
         id="tsparticles"
         init={particlesInit}
@@ -65,11 +60,11 @@ export default function HomePage() {
           background: { color: { value: "transparent" } },
           fpsLimit: 60,
           particles: {
-            number: { value: 50 },
+            number: { value: 40 },
             size: { value: 2 },
-            color: { value: "#14b8a6" },
-            links: { enable: true, distance: 130, color: "#14b8a6", opacity: 0.15 },
-            move: { enable: true, speed: 1.2 },
+            color: { value: "#00f5d4" },
+            links: { enable: true, distance: 150, color: "#00f5d4", opacity: 0.2 },
+            move: { enable: true, speed: 1 },
           },
         }}
         className="absolute inset-0 z-0"
@@ -81,7 +76,7 @@ export default function HomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2 }}
       >
-        <img src="/LogoSymbol.png" alt="EchoScript.AI" className="w-24 drop-shadow-xl mx-auto mb-4" />
+        <img src="/LogoSymbol.png" alt="EchoScript.AI Logo" className="w-24 drop-shadow-xl mx-auto mb-4" />
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">EchoScript.AI</h1>
         <TypeAnimation
           sequence={[
@@ -126,25 +121,20 @@ export default function HomePage() {
       <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
         <motion.button
           onClick={() => setLanguage(language === "en" ? "es" : "en")}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm text-white border border-zinc-600"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm text-white border border-zinc-600 transition-all duration-300"
           whileTap={{ scale: 0.95 }}
         >
           <TbLanguage /> {language === "en" ? "Español" : "English"}
         </motion.button>
         <motion.button
           onClick={toggleAudio}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-sm text-white shadow-md"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-600 hover:bg-blue-500 text-sm text-white shadow-md transition-all duration-500"
           whileTap={{ scale: 0.95 }}
         >
           {isPlaying ? "Mute" : "Ambient"}
         </motion.button>
       </div>
-
-      <SmartAIAssistant
-        welcome={shortTranscript ? `You said: ${shortTranscript}` : "Need help getting started?"}
-        position="bottom-right"
-        autoOpenDelay={2500}
-      />
     </div>
   );
 }
+

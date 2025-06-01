@@ -1,3 +1,4 @@
+// ✅ FINAL Settings.jsx — Clean, Advanced, and Refined
 import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { Switch } from "@headlessui/react";
@@ -11,7 +12,7 @@ import {
   Info,
   Text
 } from "lucide-react";
-import Button from "../components/ui/Button"; // ✅ Unified button
+import Button from "../components/ui/Button";
 import { FontSizeContext } from "../Layout";
 
 const tabs = [
@@ -236,5 +237,6 @@ function FAQItem({ question, children }) {
     </div>
   );
 }
+
 
 

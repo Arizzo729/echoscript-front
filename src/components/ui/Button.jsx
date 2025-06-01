@@ -1,9 +1,9 @@
-// ✅ EchoScript.AI: Unified Button Component (Upgraded)
+// ✅ EchoScript.AI: Unified Button Component (Enhanced Visuals)
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
 /**
- * EchoScript.AI Smart Button — Polished, Unified UI
+ * EchoScript.AI Smart Button — Final Polished UI
  * Variants: "primary", "secondary", "ghost", "danger"
  * Sizes: "xs", "sm", "md", "lg"
  */
@@ -17,19 +17,19 @@ export default function Button({
   ...props
 }) {
   const base =
-    "relative inline-flex items-center justify-center font-medium select-none rounded-2xl transition-all duration-300 ease-out group focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.97] overflow-hidden shadow-sm";
+    "relative inline-flex items-center justify-center font-medium select-none rounded-2xl transition-all duration-500 ease-in-out group focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.96] overflow-hidden shadow-sm";
 
   const sizes = {
-    xs: "px-3 py-1 text-xs gap-1.5",
-    sm: "px-4 py-1.5 text-sm gap-2",
-    md: "px-5 py-2 text-base gap-2.5",
-    lg: "px-6 py-2.5 text-lg gap-3",
+    xs: "px-2.5 py-1 text-xs gap-1.5 rounded-xl",
+    sm: "px-3 py-1.5 text-sm gap-2 rounded-xl",
+    md: "px-4 py-2 text-sm gap-2 rounded-xl",
+    lg: "px-5 py-2.5 text-base gap-3 rounded-xl",
   };
 
   const variants = {
     primary: `
-      bg-teal-600 text-white shadow hover:bg-teal-700
-      dark:bg-teal-500 dark:hover:bg-teal-400
+      bg-gradient-to-br from-teal-500 to-blue-500 text-white shadow-md
+      hover:from-blue-500 hover:to-teal-500 hover:shadow-xl
       focus-visible:ring-teal-300
     `,
     secondary: `
@@ -56,7 +56,7 @@ export default function Button({
       {...props}
     >
       {loading && (
-        <span className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/20 to-white/10 animate-pulse-slow z-0 rounded-2xl" />
+        <span className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/20 to-white/10 animate-pulse-slow z-0 rounded-xl" />
       )}
 
       <span className="relative z-10 inline-flex items-center">
@@ -66,3 +66,4 @@ export default function Button({
     </button>
   );
 }
+
