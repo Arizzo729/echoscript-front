@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI: Layout.jsx with Font Size Settings
+// ✅ EchoScript.AI: Layout.jsx — Seamless Header, Sidebar, and Content
 import React, { useState, useEffect, createContext, useContext } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
@@ -39,13 +39,16 @@ export default function Layout() {
       <UserContext.Provider value={{ user }}>
         <NotificationContext.Provider value={{ notifications, markAllRead }}>
           <FontSizeContext.Provider value={{ fontSize: clampedFontSize, setFontSize }}>
-            <div className="flex h-screen overflow-hidden bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark" style={{ fontSize: `${clampedFontSize}em` }}>
+            <div
+              className="flex h-screen overflow-hidden bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark"
+              style={{ fontSize: `${clampedFontSize}em` }}
+            >
               {/* Sidebar */}
               <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
               {/* Right Content */}
               <div
-                className={`flex flex-col flex-grow transition-all duration-300 ${
+                className={`flex flex-col flex-grow transition-all duration-300 ease-in-out ${
                   sidebarOpen ? "pl-[240px]" : "pl-[64px]"
                 }`}
               >
@@ -58,7 +61,7 @@ export default function Layout() {
                 />
 
                 {/* Main Content */}
-                <main className="flex-grow overflow-y-auto p-4">
+                <main className="flex-grow overflow-y-auto p-6 bg-transparent">
                   <Outlet />
                 </main>
 

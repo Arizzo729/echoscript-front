@@ -1,3 +1,4 @@
+// ✅ EchoScript.AI: OnboardingModal — Polished, Animated, Refined
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
@@ -45,7 +46,7 @@ export default function OnboardingModal({ onClose }) {
     <AnimatePresence>
       {!dismissed && (
         <motion.div
-          className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[9998] flex items-center justify-center bg-zinc-950/80 backdrop-blur-sm p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -61,10 +62,10 @@ export default function OnboardingModal({ onClose }) {
             {/* ❌ Close Button */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 z-20 text-white text-lg bg-zinc-800 hover:bg-zinc-700 rounded-full w-8 h-8 flex items-center justify-center transition"
+              className="absolute top-4 right-4 z-20 text-teal-400 text-sm hover:underline"
               aria-label="Close"
             >
-              &times;
+              ✕
             </button>
 
             {/* 🌊 Background Animation */}
@@ -81,7 +82,7 @@ export default function OnboardingModal({ onClose }) {
               exit={{ x: -20, opacity: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <h2 className="text-2xl font-bold mb-2">{STEPS[step].title}</h2>
+              <h2 className="text-2xl font-bold mb-2 text-white drop-shadow-sm">{STEPS[step].title}</h2>
               <p className="text-base text-zinc-400">{STEPS[step].description}</p>
             </motion.div>
 
@@ -98,17 +99,18 @@ export default function OnboardingModal({ onClose }) {
             </div>
 
             {/* 🧭 Navigation Buttons */}
-            <div className="mt-6 flex gap-4 z-10 relative">
-              <button
-                onClick={() => setStep((s) => Math.max(s - 1, 0))}
-                disabled={step === 0}
-                className="flex-1 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm text-white border border-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Back
-              </button>
+            <div className="mt-6 flex gap-3 z-10 relative justify-center">
+              {step > 0 && (
+                <button
+                  onClick={() => setStep((s) => Math.max(s - 1, 0))}
+                  className="text-sm px-4 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white transition"
+                >
+                  Back
+                </button>
+              )}
               <button
                 onClick={step === STEPS.length - 1 ? handleClose : () => setStep(step + 1)}
-                className="flex-1 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-sm text-white font-medium shadow-lg"
+                className="text-sm px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium shadow-sm transition"
               >
                 {step === STEPS.length - 1 ? "Finish" : "Next"}
               </button>
@@ -118,9 +120,9 @@ export default function OnboardingModal({ onClose }) {
             <div className="text-center mt-4 z-10 relative">
               <button
                 onClick={handleClose}
-                className="text-xs text-zinc-400 hover:text-teal-400 transition"
+                className="text-xs text-zinc-400 hover:text-teal-400 hover:underline transition"
               >
-                Skip Introduction
+                Skip
               </button>
             </div>
           </motion.div>
