@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI Sidebar — Advanced, Animated, Responsive
+/// ✅ EchoScript.AI Sidebar — Final with Community Tab + Fixed Button Integration
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
@@ -8,10 +8,13 @@ import {
   User,
   Settings2,
   CreditCard,
+  MessageCircle,
   ChevronLeft,
-  Menu
+  Menu,
+  Bars3
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Button from "./components/ui/Button"; // ✅ Using enhanced button
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
@@ -20,80 +23,76 @@ const navItems = [
   { name: "Account", icon: User, to: "/account" },
   { name: "Settings", icon: Settings2, to: "/settings" },
   { name: "Purchase", icon: CreditCard, to: "/purchase" },
+  { name: "Community", icon: MessageCircle, to: "/community" }, // 💬 NEW
 ];
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   return (
     <motion.aside
-      animate={{ width: sidebarOpen ? 200 : 60 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="h-screen fixed top-0 left-0 z-30 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white border-r border-zinc-800 flex flex-col shadow-2xl"
+      animate={{ width: sidebarOpen ? 220 : 64 }}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      className="h-screen fixed top-0 left-0 z-40 backdrop-blur-xl bg-zinc-900/80 text-white border-r border-zinc-800 shadow-xl flex flex-col"
     >
-      {/* Sidebar Header */}
+      {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
         {sidebarOpen && (
-          <span className="text-lg font-semibold tracking-tight text-teal-400">
+          <span className="text-lg font-semibold tracking-tight text-teal-400 whitespace-nowrap">
             EchoScript<span className="text-white">.AI</span>
           </span>
         )}
-        <motion.button
+        <Button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          title={sidebarOpen ? "Collapse" : "Expand"}
-          whileTap={{ scale: 0.9 }}
-          className="p-1.5 text-zinc-400 hover:text-teal-400 transition"
-        >
-          <motion.div
-            key={sidebarOpen ? "open" : "closed"}
-            initial={{ rotate: 90, opacity: 0 }}
-            animate={{ rotate: 0, opacity: 1 }}
-            exit={{ rotate: -90, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {sidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
-          </motion.div>
-        </motion.button>
+          variant="ghost"
+          size="sm"
+          className="text-zinc-400 hover:text-teal-400"
+          icon={sidebarOpen ? <ChevronLeft size={20} /> : <Bars3 size={20} />}
+        />
       </div>
 
-      {/* Navigation Links */}
+      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
         {navItems.map(({ name, icon: Icon, to }) => (
           <NavLink
             key={name}
             to={to}
             className={({ isActive }) =>
-              `group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ease-in-out relative 
+              `group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ease-in-out relative overflow-hidden
               ${
                 isActive
-                  ? "bg-gradient-to-r from-teal-500 to-blue-500 text-white shadow-lg"
-                  : "text-zinc-400 hover:bg-zinc-800"
+                  ? "bg-gradient-to-r from-teal-500 to-blue-500 text-white shadow-[0_0_10px_rgba(13,148,136,0.5)]"
+                  : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
               }`
             }
             title={!sidebarOpen ? name : undefined}
           >
-            <div className="relative">
-              <Icon className="w-5 h-5 shrink-0" />
-              <AnimatePresence>
-                {sidebarOpen && (
-                  <motion.span
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    className="ml-3"
-                  >
-                    {name}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </div>
+            <Icon className="w-5 h-5 shrink-0" />
+            <AnimatePresence>
+              {sidebarOpen && (
+                <motion.span
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -8 }}
+                  className="ml-2 truncate"
+                >
+                  {name}
+                </motion.span>
+              )}
+            </AnimatePresence>
+
+            {/* Tooltip when collapsed */}
+            {!sidebarOpen && (
+              <span className="absolute left-14 z-50 top-1/2 -translate-y-1/2 text-xs px-2 py-1 bg-zinc-800 text-white rounded shadow-lg opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                {name}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>
 
       {/* Footer */}
-      <div className="p-2 text-[10px] text-zinc-500 text-center">
+      <div className="p-3 text-[10px] text-zinc-500 text-center border-t border-zinc-800">
         {sidebarOpen ? `© ${new Date().getFullYear()} EchoScript.AI` : "©"}
       </div>
     </motion.aside>
   );
 }
-

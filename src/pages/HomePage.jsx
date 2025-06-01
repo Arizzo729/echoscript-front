@@ -11,6 +11,9 @@ import ProgressTimeline from "../components/ProgressTimeline";
 import LiveGPTBubble from "../components/LiveGPTBubble";
 import { GPTContext } from "../context/GPTContext";
 import detectTone from "../utils/EmotionToneDetector";
+import Icon from "../assets/Icon.png";
+<img src={Icon} alt="Logo" />
+
 
 export default function HomePage() {
   const [time, setTime] = useState(new Date());

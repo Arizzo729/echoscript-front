@@ -12,7 +12,6 @@ import Layout from "./components/Layout";
 
 // Pages
 import Home from "./pages/HomePage";
-import Transcription from "./pages/Transcription";
 import Settings from "./pages/Settings";
 import Account from "./pages/Account";
 import Purchase from "./pages/Purchase";
@@ -23,6 +22,7 @@ import ApifyTest from "./pages/ApifyTest";
 import Dashboard from "./pages/Dashboard";
 import Upload from "./pages/Upload";
 import AIAssistant from "./pages/AIAssistant";
+import Community from "./pages/Community";
 
 export default function App() {
   const [splashDone, setSplashDone] = useState(false);

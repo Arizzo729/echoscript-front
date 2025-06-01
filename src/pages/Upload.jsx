@@ -1,4 +1,3 @@
-// ✅ FINAL Upload.jsx — Enhanced Upload UI with Language Option
 import React, { useState } from "react";
 import { InboxArrowDownIcon, PaperClipIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
@@ -36,7 +35,7 @@ export default function Upload() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <Link to="/dashboard" className="text-sm text-blue-500 hover:underline mb-6 inline-block">
+      <Link to="/dashboard" className="text-sm text-teal-500 hover:underline mb-6 inline-block">
         ← Back to Dashboard
       </Link>
 
@@ -45,6 +44,7 @@ export default function Upload() {
         Drag and drop audio files or click to browse. Supported formats: MP3, WAV, M4A.
       </p>
 
+      {/* Language Selector */}
       <div className="mb-8">
         <label htmlFor="language" className="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Language
@@ -53,7 +53,7 @@ export default function Upload() {
           id="language"
           value={selectedLanguage}
           onChange={(e) => setSelectedLanguage(e.target.value)}
-          className="w-full p-2 rounded-md border dark:border-zinc-600 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-white"
+          className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
         >
           {languageOptions.map((lang) => (
             <option key={lang.value} value={lang.value}>
@@ -63,6 +63,7 @@ export default function Upload() {
         </select>
       </div>
 
+      {/* File Drop Zone */}
       <div
         className={`border-2 border-dashed rounded-lg transition-colors ${
           dragActive
@@ -90,6 +91,7 @@ export default function Upload() {
         </label>
       </div>
 
+      {/* File Preview + Submit */}
       {selectedFile && (
         <div className="mt-6 p-4 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700">
           <div className="flex items-center gap-3">
@@ -99,9 +101,17 @@ export default function Upload() {
               <p className="text-xs text-zinc-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
             </div>
           </div>
-          <Button className="mt-4 w-full" onClick={() => alert("TODO: Hook up backend upload")}>Transcribe with EchoScript.AI</Button>
+          <Button
+            className="mt-4 w-full"
+            onClick={() =>
+              alert(`TODO: send ${selectedFile.name} to backend with lang: ${selectedLanguage}`)
+            }
+          >
+            Transcribe with EchoScript.AI
+          </Button>
         </div>
       )}
     </motion.div>
   );
 }
+

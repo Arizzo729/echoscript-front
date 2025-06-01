@@ -32,7 +32,7 @@ export default function OnboardingModal({ onClose }) {
     localStorage.setItem("onboardingComplete", "true");
     setTimeout(() => {
       onClose?.();
-     // navigate("/dashboard");
+      // navigate("/dashboard"); // Optional redirect
     }, 500);
   };
 
@@ -58,6 +58,8 @@ export default function OnboardingModal({ onClose }) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ duration: 0.4 }}
+            role="dialog"
+            aria-modal="true"
           >
             {/* ❌ Close Button */}
             <button

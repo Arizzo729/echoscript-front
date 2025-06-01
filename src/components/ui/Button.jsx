@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI: BubbleButton — Comfort + Joy UX
+// ✅ EchoScript.AI: Bubbly Smart Button — Premium Design
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -11,41 +11,36 @@ export default function Button({
   className = "",
   ...props
 }) {
-  const base = `
-    relative inline-flex items-center justify-center font-semibold
-    rounded-full transition-all duration-300 ease-in-out
-    focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-    active:scale-95 hover:scale-[1.025] transform-gpu
-    overflow-hidden shadow-sm group
-  `;
+  const base =
+    "relative inline-flex items-center justify-center font-semibold select-none rounded-full transition-all duration-300 ease-out group focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-95 shadow-md";
 
   const sizes = {
-    xs: "px-3 py-1 text-xs gap-1",
-    sm: "px-3.5 py-1.5 text-sm gap-1.5",
-    md: "px-4.5 py-2 text-base gap-2",
-    lg: "px-5.5 py-2.5 text-lg gap-2.5",
+    xs: "px-3 py-1 text-xs gap-1.5",
+    sm: "px-4 py-1.5 text-sm gap-2",
+    md: "px-5 py-2 text-sm gap-2.5",
+    lg: "px-6 py-2.5 text-base gap-3",
   };
 
   const variants = {
     primary: `
-      bg-gradient-to-br from-teal-400 to-blue-500 text-white
-      shadow-md hover:shadow-lg
+      bg-gradient-to-br from-teal-500 to-blue-500 text-white
       hover:from-blue-500 hover:to-teal-400
+      hover:shadow-lg hover:brightness-105
       focus-visible:ring-teal-300
     `,
     secondary: `
-      bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-white
+      bg-zinc-200 text-zinc-900 dark:bg-zinc-700 dark:text-white
       hover:bg-zinc-300 dark:hover:bg-zinc-600
       focus-visible:ring-zinc-400
     `,
     ghost: `
       bg-transparent text-teal-600 dark:text-teal-400
-      hover:bg-teal-100 dark:hover:bg-teal-800/20
+      hover:bg-teal-100 dark:hover:bg-teal-700/10
       focus-visible:ring-teal-400
     `,
     danger: `
-      bg-gradient-to-br from-red-500 to-red-700 text-white
-      hover:from-red-600 hover:to-red-800 hover:shadow-lg
+      bg-red-500 text-white hover:bg-red-600
+      dark:bg-red-600 dark:hover:bg-red-700
       focus-visible:ring-red-400
     `,
   };
@@ -56,12 +51,10 @@ export default function Button({
       className={twMerge(base, sizes[size], variants[variant], className)}
       {...props}
     >
-      {/* 🫧 Bubble shimmer effect on loading */}
+      {/* Optional shimmer effect when loading */}
       {loading && (
-        <span className="absolute inset-0 animate-pulse-slow bg-gradient-to-r from-white/10 via-white/30 to-white/10 z-0 rounded-full" />
+        <span className="absolute inset-0 animate-pulse bg-white/10 rounded-full" />
       )}
-
-      {/* Content Layer */}
       <span className="relative z-10 inline-flex items-center">
         {icon && <span className="mr-2">{icon}</span>}
         {children}
@@ -69,5 +62,6 @@ export default function Button({
     </button>
   );
 }
+
 
 
