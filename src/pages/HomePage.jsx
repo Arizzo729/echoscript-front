@@ -76,7 +76,19 @@ export default function HomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2 }}
       >
-        <img src="/LogoSymbol.png" alt="EchoScript.AI Logo" className="w-24 drop-shadow-xl mx-auto mb-4" />
+        <div className="relative w-24 sm:w-28 mx-auto mb-4">
+          <motion.div
+            className="absolute inset-0 rounded-full bg-teal-400 blur-2xl opacity-30"
+            animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.4, 0.2] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <img
+            src="/icon.png"
+            alt="EchoScript Icon"
+            className="relative w-full drop-shadow-xl"
+          />
+        </div>
+
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">EchoScript.AI</h1>
         <TypeAnimation
           sequence={[

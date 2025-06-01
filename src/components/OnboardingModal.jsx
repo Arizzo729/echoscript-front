@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI: OnboardingModal — Polished, Animated, Refined
+// ✅ EchoScript.AI: OnboardingModal — Final Polished Version
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
@@ -32,7 +32,7 @@ export default function OnboardingModal({ onClose }) {
     localStorage.setItem("onboardingComplete", "true");
     setTimeout(() => {
       onClose?.();
-      navigate("/dashboard");
+     // navigate("/dashboard");
     }, 500);
   };
 
@@ -62,10 +62,10 @@ export default function OnboardingModal({ onClose }) {
             {/* ❌ Close Button */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 z-20 text-teal-400 text-sm hover:underline"
+              className="absolute top-4 right-5 z-20 text-zinc-400 text-sm hover:text-teal-400"
               aria-label="Close"
             >
-              ✕
+              ×
             </button>
 
             {/* 🌊 Background Animation */}
@@ -103,14 +103,14 @@ export default function OnboardingModal({ onClose }) {
               {step > 0 && (
                 <button
                   onClick={() => setStep((s) => Math.max(s - 1, 0))}
-                  className="text-sm px-4 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white transition"
+                  className="text-sm px-3 py-1 rounded-lg text-white hover:text-teal-400"
                 >
                   Back
                 </button>
               )}
               <button
                 onClick={step === STEPS.length - 1 ? handleClose : () => setStep(step + 1)}
-                className="text-sm px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-medium shadow-sm transition"
+                className="text-sm px-4 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-medium shadow-sm transition"
               >
                 {step === STEPS.length - 1 ? "Finish" : "Next"}
               </button>
