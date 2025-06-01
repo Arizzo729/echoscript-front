@@ -4,7 +4,7 @@ import { InboxArrowDownIcon, PaperClipIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Select from "react-select";
-import languageOptions from "../utils/languageOptions"; // optional: list of languages
+import { languageOptions } from "../utils/languageOptions"; // optional: list of languages
 
 export default function Upload() {
   const [selectedFile, setSelectedFile] = useState(null);
