@@ -1,4 +1,4 @@
-/// ✅ EchoScript.AI Sidebar — Final with Community Tab + Fixed Button Integration
+// ✅ EchoScript.AI Sidebar — Final Clean Version with Community Tab
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
@@ -10,11 +10,9 @@ import {
   CreditCard,
   MessageCircle,
   ChevronLeft,
-  Menu,
-  Bars3
+  Menu
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Button from "./ui/Button"; // ✅ Using enhanced button
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
@@ -23,7 +21,7 @@ const navItems = [
   { name: "Account", icon: User, to: "/account" },
   { name: "Settings", icon: Settings2, to: "/settings" },
   { name: "Purchase", icon: CreditCard, to: "/purchase" },
-  { name: "Community", icon: MessageCircle, to: "/community" }, // 💬 NEW
+  { name: "Community", icon: MessageCircle, to: "/community" },
 ];
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
@@ -40,13 +38,22 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             EchoScript<span className="text-white">.AI</span>
           </span>
         )}
-        <Button
+        <motion.button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          variant="ghost"
-          size="sm"
-          className="text-zinc-400 hover:text-teal-400"
-          icon={sidebarOpen ? <ChevronLeft size={20} /> : <Bars3 size={20} />}
-        />
+          title={sidebarOpen ? "Collapse" : "Expand"}
+          whileTap={{ scale: 0.92 }}
+          className="p-1.5 text-zinc-400 hover:text-teal-400 transition"
+        >
+          <motion.div
+            key={sidebarOpen ? "open" : "closed"}
+            initial={{ rotate: 90, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            exit={{ rotate: -90, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {sidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
+          </motion.div>
+        </motion.button>
       </div>
 
       {/* Navigation */}
@@ -96,3 +103,5 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
     </motion.aside>
   );
 }
+
+
