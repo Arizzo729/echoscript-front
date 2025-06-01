@@ -1,16 +1,17 @@
 # Node.js
 node_modules/
 dist/
-.env
 *.log
+.env
 
 # Vite
 .vite/
 
-# Python virtual environment
+# Python
 venv/
 __pycache__/
 *.pyc
+*.pth
 *.dll
 *.lib
 *.so
@@ -27,16 +28,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Optional builds
-*.local
+# Test coverage
 coverage/
 
 # Netlify
 .netlify/
-v e n v / 
- 
- _ _ p y c a c h e _ _ / 
- 
- * . p t h 
- 
- 
