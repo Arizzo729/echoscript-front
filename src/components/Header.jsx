@@ -1,3 +1,4 @@
+// ✅ EchoScript.AI: Unified Header — Fixed Sidebar Button, Themed Consistently
 import React, { useState, useEffect, useRef } from "react";
 import {
   Bars3Icon,
@@ -54,9 +55,13 @@ export default function Header({
     >
       {/* Left */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2">
-          <Bars3Icon className="w-6 h-6 text-teal-400" />
-        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="text-teal-400"
+          icon={<Bars3Icon className="w-6 h-6" />}
+        />
         <Link to="/" className="flex items-center gap-2">
           <img src={Logo} alt="EchoScript.AI" className="h-8 w-auto" />
           <span className="text-xl font-bold tracking-tight">
@@ -81,18 +86,21 @@ export default function Header({
 
       {/* Right Actions */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={onToggleTheme} className="p-2">
-          {isDarkMode ? (
-            <SunIcon className="w-6 h-6 text-yellow-300" />
-          ) : (
-            <MoonIcon className="w-6 h-6 text-zinc-300" />
-          )}
-        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onToggleTheme}
+          icon={isDarkMode ? <SunIcon className="w-6 h-6 text-yellow-300" /> : <MoonIcon className="w-6 h-6 text-zinc-300" />}
+        />
 
         {/* Notifications */}
         <div className="relative">
-          <Button variant="ghost" size="sm" onClick={() => setShowNotifDropdown(!showNotifDropdown)} className="p-2">
-            <BellIcon className="w-6 h-6 text-zinc-300" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowNotifDropdown(!showNotifDropdown)}
+            icon={<BellIcon className="w-6 h-6 text-zinc-300" />}
+          >
             {!!notifications.length && (
               <span className="absolute top-0 right-0 px-1.5 py-0.5 text-xs bg-red-600 text-white rounded-full -translate-y-1/2 translate-x-1/2">
                 {notifications.length}
@@ -116,8 +124,13 @@ export default function Header({
 
         {/* User Menu */}
         <div className="relative">
-          <Button variant="ghost" size="sm" onClick={() => setShowUserDropdown(!showUserDropdown)} className="flex items-center gap-2">
-            <UserCircleIcon className="w-8 h-8 text-teal-400" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowUserDropdown(!showUserDropdown)}
+            className="flex items-center gap-2"
+            icon={<UserCircleIcon className="w-8 h-8 text-teal-400" />}
+          >
             <ChevronDownIcon className={`w-5 h-5 transition-transform ${showUserDropdown ? "rotate-180" : ""}`} />
           </Button>
           {showUserDropdown && (
@@ -135,4 +148,5 @@ export default function Header({
     </motion.header>
   );
 }
+
 

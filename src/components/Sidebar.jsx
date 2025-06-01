@@ -1,9 +1,15 @@
-// src/components/Sidebar.jsx
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
-  LayoutDashboard, Upload, FileText, User, Settings2,
-  CreditCard, Bot, ChevronLeft, Menu
+  LayoutDashboard,
+  Upload,
+  FileText,
+  User,
+  Settings2,
+  CreditCard,
+  Bot,
+  ChevronLeft,
+  Menu
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -20,36 +26,38 @@ const navItems = [
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   return (
     <motion.aside
-      animate={{ width: sidebarOpen ? 240 : 64 }}
-      transition={{ duration: 0.3 }}
-      className="h-screen fixed top-0 left-0 z-40 bg-zinc-950 text-white border-r border-zinc-800 flex flex-col"
+      animate={{ width: sidebarOpen ? 200 : 60 }}
+      transition={{ duration: 0.25 }}
+      className="h-screen fixed top-0 left-0 z-40 bg-zinc-950 text-white border-r border-zinc-800 flex flex-col shadow-xl"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-zinc-800">
+      {/* Sidebar Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
         {sidebarOpen && (
-          <span className="text-xl font-bold tracking-tight text-indigo-300">
-            EchoScript.AI
+          <span className="text-lg font-semibold tracking-tight text-teal-400">
+            EchoScript
+            <span className="text-white">.AI</span>
           </span>
         )}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="text-zinc-400 hover:text-teal-400"
+          className="text-zinc-400 hover:text-teal-400 transition"
           title={sidebarOpen ? "Collapse" : "Expand"}
         >
           {sidebarOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
+      {/* Navigation Links */}
+      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
         {navItems.map(({ name, icon: Icon, to }) => (
           <NavLink
             key={name}
             to={to}
             className={({ isActive }) =>
-              `group flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${
+              `group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ease-in-out 
+              ${
                 isActive
-                  ? "bg-indigo-600 text-white"
+                  ? "bg-gradient-to-r from-teal-500 to-blue-500 text-white shadow"
                   : "text-zinc-400 hover:bg-zinc-800"
               }`
             }
@@ -73,10 +81,11 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
       </nav>
 
       {/* Footer */}
-      <div className="p-3 text-xs text-zinc-500 text-center">
+      <div className="p-2 text-[10px] text-zinc-500 text-center">
         {sidebarOpen ? `© ${new Date().getFullYear()} EchoScript.AI` : "©"}
       </div>
     </motion.aside>
   );
 }
+
 

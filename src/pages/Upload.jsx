@@ -3,10 +3,13 @@ import React, { useState } from "react";
 import { InboxArrowDownIcon, PaperClipIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import Select from "react-select";
+import languageOptions from "../utils/languageOptions"; // optional: list of languages
 
 export default function Upload() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -24,6 +27,10 @@ export default function Upload() {
     e.preventDefault();
     if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
     else setDragActive(false);
+  };
+
+  const handleLanguageChange = (selectedOption) => {
+    setSelectedLanguage(selectedOption);
   };
 
   return (
@@ -71,6 +78,19 @@ export default function Upload() {
         </label>
       </div>
 
+      {/* Language Selector */}
+      <div className="mt-6">
+        <label className="block text-sm font-medium text-zinc-800 dark:text-zinc-200 mb-1">Choose Language</label>
+        <Select
+          options={languageOptions}
+          value={selectedLanguage}
+          onChange={handleLanguageChange}
+          placeholder="Search or select a language..."
+          className="text-sm"
+          classNamePrefix="select"
+        />
+      </div>
+
       {/* File Preview */}
       {selectedFile && (
         <div className="mt-6 p-4 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700">
@@ -82,7 +102,7 @@ export default function Upload() {
             </div>
           </div>
 
-          {/* Submit Button (placeholder) */}
+          {/* Submit Button */}
           <button
             className="mt-4 bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md font-semibold shadow transition-all"
             onClick={() => alert("TODO: Hook up backend upload")}

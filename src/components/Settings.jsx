@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { Switch } from "@headlessui/react";
 import {
@@ -9,8 +9,10 @@ import {
   Accessibility,
   Settings2,
   Info,
+  Text
 } from "lucide-react";
 import Button from "../components/ui/Button"; // ✅ Unified button
+import { FontSizeContext } from "../Layout";
 
 const tabs = [
   { id: "preferences", label: "Preferences", icon: Settings2 },
@@ -25,12 +27,18 @@ export default function Settings() {
   );
   const [showHints, setShowHints] = useState(true);
   const [accessibleFonts, setAccessibleFonts] = useState(false);
+  const { fontSize, setFontSize } = useContext(FontSizeContext);
 
   const toggleDarkMode = () => {
     const nextMode = !darkMode;
     setDarkMode(nextMode);
     document.documentElement.classList.toggle("dark", nextMode);
     localStorage.setItem("theme", nextMode ? "dark" : "light");
+  };
+
+  const handleFontSizeChange = (e) => {
+    const newSize = parseFloat(e.target.value);
+    setFontSize(Math.min(1.25, Math.max(0.85, newSize)));
   };
 
   return (
@@ -94,6 +102,23 @@ export default function Settings() {
                 onChange={() => setAccessibleFonts(!accessibleFonts)}
                 Icon={Accessibility}
               />
+              <div className="bg-zinc-50 dark:bg-zinc-800 px-4 py-3 rounded-lg">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2 font-medium text-zinc-800 dark:text-white">
+                    <Text className="w-5 h-5 text-teal-500" />
+                    <span>Adjust Font Size</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.85"
+                    max="1.25"
+                    step="0.01"
+                    value={fontSize}
+                    onChange={handleFontSizeChange}
+                    className="w-40"
+                  />
+                </div>
+              </div>
             </div>
           </motion.section>
         )}
@@ -211,4 +236,5 @@ function FAQItem({ question, children }) {
     </div>
   );
 }
+
 

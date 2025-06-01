@@ -57,7 +57,7 @@ export default function HomePage() {
   });
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-950 text-white overflow-hidden flex flex-col items-center justify-center text-center">
+    <div className="relative min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-950 to-black text-white overflow-hidden flex flex-col items-center justify-center text-center">
       <Particles
         id="tsparticles"
         init={particlesInit}
@@ -65,11 +65,11 @@ export default function HomePage() {
           background: { color: { value: "transparent" } },
           fpsLimit: 60,
           particles: {
-            number: { value: 40 },
+            number: { value: 50 },
             size: { value: 2 },
-            color: { value: "#00f5d4" },
-            links: { enable: true, distance: 150, color: "#00f5d4", opacity: 0.2 },
-            move: { enable: true, speed: 1 },
+            color: { value: "#14b8a6" },
+            links: { enable: true, distance: 130, color: "#14b8a6", opacity: 0.15 },
+            move: { enable: true, speed: 1.2 },
           },
         }}
         className="absolute inset-0 z-0"
@@ -81,8 +81,8 @@ export default function HomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2 }}
       >
-        <img src="/Logo.png" alt="EchoScript.AI" className="w-32 drop-shadow-xl mx-auto mb-4" />
-        <h1 className="text-4xl sm:text-5xl font-bold">EchoScript.AI</h1>
+        <img src="/LogoSymbol.png" alt="EchoScript.AI" className="w-24 drop-shadow-xl mx-auto mb-4" />
+        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">EchoScript.AI</h1>
         <TypeAnimation
           sequence={[
             "The Best Listener",
@@ -97,12 +97,12 @@ export default function HomePage() {
           repeat={Infinity}
           className="text-lg mt-3 text-teal-400"
         />
-        <p className="text-sm mt-1 text-zinc-400">{formattedTime}</p>
+        <p className="text-sm mt-1 text-zinc-400 font-mono">{formattedTime}</p>
       </motion.div>
 
       <motion.div className="z-10 mt-2 mb-3">
         <AudioWaveform voiceLevel={voiceLevel} />
-        <div className="text-xs text-zinc-500 mt-1">{micStatus}</div>
+        <div className="text-xs text-zinc-500 mt-1 font-medium">{micStatus}</div>
       </motion.div>
 
       {gptResponse && showBubble && (
@@ -110,7 +110,7 @@ export default function HomePage() {
       )}
 
       <motion.div
-        className="max-w-xl mx-auto bg-zinc-800/80 p-5 rounded-xl border border-teal-700 backdrop-blur-md shadow-lg z-10"
+        className="max-w-2xl mx-auto bg-zinc-800/80 p-6 rounded-2xl border border-teal-700 backdrop-blur-md shadow-lg z-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.5 }}
@@ -126,14 +126,14 @@ export default function HomePage() {
       <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
         <motion.button
           onClick={() => setLanguage(language === "en" ? "es" : "en")}
-          className="flex items-center gap-2 px-3 py-2 rounded-md bg-zinc-800 hover:bg-zinc-700 text-sm text-white border border-zinc-600"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm text-white border border-zinc-600"
           whileTap={{ scale: 0.95 }}
         >
           <TbLanguage /> {language === "en" ? "Español" : "English"}
         </motion.button>
         <motion.button
           onClick={toggleAudio}
-          className="flex items-center gap-2 px-3 py-2 rounded-md bg-teal-600 hover:bg-teal-500 text-sm text-white shadow-lg"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-sm text-white shadow-md"
           whileTap={{ scale: 0.95 }}
         >
           {isPlaying ? "Mute" : "Ambient"}
@@ -148,4 +148,3 @@ export default function HomePage() {
     </div>
   );
 }
-

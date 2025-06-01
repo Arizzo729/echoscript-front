@@ -1,9 +1,10 @@
+// vite.config.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import environmentPlugin from 'vite-plugin-environment';
 
 export default defineConfig({
-  base: "./", // ✅ for Netlify routing
+  base: "/", // ✅ '/' is correct for root domains like echoscriptai.com
   plugins: [
     react(),
     environmentPlugin({
@@ -15,6 +16,13 @@ export default defineConfig({
     }),
   ],
   resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'], // ✅ allows extension-less imports
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+  },
+  build: {
+    rollupOptions: {
+      input: './index.html', // ✅ ensure it uses your root HTML file
+    },
+    outDir: 'dist', // default is fine, but explicitly set if needed
+    emptyOutDir: true,
   },
 });

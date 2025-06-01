@@ -54,9 +54,9 @@ export default function AdaptiveAI({
   }, [automationId, inputData, runAutomation]);
 
   return (
-    <div className="adaptive-ai-widget p-6 bg-white dark:bg-zinc-900 rounded-xl shadow-xl max-w-3xl mx-auto font-sans space-y-6">
+    <div className="adaptive-ai-widget p-6 bg-gradient-to-br from-white via-zinc-50 to-zinc-100 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-900 rounded-2xl shadow-xl max-w-3xl mx-auto font-inter space-y-6">
       <div>
-        <h2 className="text-2xl font-extrabold text-teal-600 dark:text-teal-400 mb-2">
+        <h2 className="text-2xl font-bold text-teal-600 dark:text-teal-400 mb-2">
           Adaptive AI Automation
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -64,14 +64,13 @@ export default function AdaptiveAI({
         </p>
       </div>
 
-      {/* Provider Selector */}
       <div>
         <label htmlFor="provider-select" className="block mb-1 font-semibold text-sm">
           Select Provider:
         </label>
         <select
           id="provider-select"
-          className="p-2 border rounded-md w-full max-w-xs text-sm dark:bg-zinc-800 dark:border-zinc-700"
+          className="p-2 border rounded-md w-full max-w-xs text-sm dark:bg-zinc-800 dark:border-zinc-700 focus:ring-2 focus:ring-teal-400"
           value={provider}
           onChange={(e) => setProvider(e.target.value)}
           disabled={status === "running"}
@@ -84,7 +83,6 @@ export default function AdaptiveAI({
         </select>
       </div>
 
-      {/* Status & Result Output */}
       <div className="min-h-[64px]">
         {status === "idle" && (
           <p className="text-gray-500 dark:text-gray-400">Awaiting input to run automation...</p>
@@ -96,7 +94,7 @@ export default function AdaptiveAI({
         )}
         {status === "success" && result && (
           <div className="relative">
-            <pre className="bg-gray-100 dark:bg-zinc-800 rounded p-4 overflow-x-auto max-h-64 text-xs sm:text-sm whitespace-pre-wrap leading-snug">
+            <pre className="bg-gray-100 dark:bg-zinc-800 rounded-lg p-4 overflow-x-auto max-h-64 text-xs sm:text-sm whitespace-pre-wrap leading-snug">
               {JSON.stringify(result, null, 2)}
             </pre>
             <button
@@ -115,19 +113,17 @@ export default function AdaptiveAI({
         )}
       </div>
 
-      {/* Manual Run */}
       <div>
         <button
           onClick={runAutomation}
-          className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 dark:bg-teal-400 dark:hover:bg-teal-300 text-white dark:text-black rounded-lg font-medium transition disabled:opacity-60"
+          className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 dark:bg-teal-400 dark:hover:bg-teal-300 text-white dark:text-black rounded-lg font-semibold transition disabled:opacity-60 shadow-sm"
           disabled={status === "running"}
         >
           Run Automation
         </button>
       </div>
 
-      {/* Logs */}
-      <details className="bg-zinc-50 dark:bg-zinc-800 rounded p-4 text-sm">
+      <details className="bg-zinc-50 dark:bg-zinc-800 rounded-xl p-4 text-sm">
         <summary className="cursor-pointer font-semibold">
           View Logs ({log.length})
         </summary>
