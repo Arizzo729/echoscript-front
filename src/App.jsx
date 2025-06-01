@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./context/useTheme";
 import { GPTProvider } from "./context/GPTContext";
-import { FontSizeProvider } from "./context/useFontSize";
+import { FontSizeProvider } from "./context/useFontSize.jsx";
 import AnimatedSplash from "./components/AnimatedSplash";
 import OnboardingModal from "./components/OnboardingModal";
 import "./global.css";
