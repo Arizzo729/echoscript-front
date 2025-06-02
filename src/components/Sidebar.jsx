@@ -1,4 +1,3 @@
-// ✅ EchoScript.AI — Animated, Elegant Sidebar with Tooltip & Glow
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
@@ -13,7 +12,6 @@ import {
   X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import useIsMobile from "../hooks/useIsMobile";
 
 const navItems = [
   { path: "/", label: "Home", icon: Home },
@@ -26,20 +24,16 @@ const navItems = [
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(true);
-  const isMobile = useIsMobile();
-
-  if (isMobile) return null;
 
   return (
     <motion.aside
       initial={{ x: -250 }}
       animate={{ x: collapsed ? -64 : 0 }}
       transition={{ type: "spring", stiffness: 70 }}
-      className={`fixed top-0 left-0 h-screen z-40 bg-zinc-950/90 border-r border-zinc-800 shadow-xl backdrop-blur-md ${
+      className={`hidden md:block fixed top-0 left-0 h-screen z-40 bg-zinc-950/90 border-r border-zinc-800 shadow-xl backdrop-blur-md ${
         collapsed ? "w-16" : "w-52"
       } transition-all duration-300`}
     >
-      {/* Toggle Button */}
       <div className="flex items-center justify-end px-3 pt-4">
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -50,7 +44,6 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* Navigation Links */}
       <nav className="mt-6 flex flex-col gap-1 px-2">
         {navItems.map(({ path, label, icon: Icon }) => (
           <NavLink
@@ -81,7 +74,6 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Logout */}
       <div className="absolute bottom-6 w-full px-3">
         <button className="flex items-center gap-3 px-3 py-2 w-full text-left rounded-xl text-red-400 hover:bg-red-500/20 hover:text-white transition-all duration-300">
           <LogOut className="w-5 h-5" />
