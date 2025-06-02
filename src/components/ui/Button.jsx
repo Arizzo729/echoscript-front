@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI: Bubbly Smart Button — Premium Design (Animated Gradient)
+// ✅ EchoScript.AI — Final Polished SmartButton
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -12,7 +12,7 @@ export default function Button({
   ...props
 }) {
   const base =
-    "relative inline-flex items-center justify-center font-semibold select-none rounded-full transition-all duration-500 ease-in-out group focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-95 shadow-md overflow-hidden";
+    "relative inline-flex items-center justify-center font-medium select-none rounded-full transition-all duration-300 ease-out group focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 shadow-sm";
 
   const sizes = {
     xs: "px-3 py-1 text-xs gap-1.5",
@@ -23,17 +23,17 @@ export default function Button({
 
   const variants = {
     primary: `
-      bg-gradient-to-br from-teal-500 to-blue-500 text-white
-      bg-[length:200%_200%] bg-[position:0%_0%]
-      transition-all duration-500 ease-in-out
-      hover:bg-[position:100%_100%]
-      hover:brightness-110
-      hover:shadow-xl
-      focus-visible:ring-teal-300
+      bg-teal-600 text-white
+      hover:bg-teal-500
+      hover:shadow-teal-500/30
+      shadow-md
+      focus-visible:ring-teal-400
+      dark:shadow-teal-400/20
     `,
     secondary: `
-      bg-zinc-200 text-zinc-900 dark:bg-zinc-700 dark:text-white
-      hover:bg-zinc-300 dark:hover:bg-zinc-600
+      bg-zinc-200 text-zinc-800
+      hover:bg-zinc-300
+      dark:bg-zinc-700 dark:text-white dark:hover:bg-zinc-600
       focus-visible:ring-zinc-400
     `,
     ghost: `
@@ -64,6 +64,5 @@ export default function Button({
     </button>
   );
 }
-
 
 

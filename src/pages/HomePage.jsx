@@ -1,3 +1,4 @@
+// ✅ EchoScript.AI — Enhanced HomePage with Scroll Sections & Newsletter
 import React, { useEffect, useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
@@ -52,7 +53,7 @@ export default function HomePage() {
   });
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-950 text-white overflow-hidden flex flex-col items-center justify-center text-center px-4">
+    <div className="relative min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-950 text-white overflow-x-hidden overflow-y-auto flex flex-col items-center px-4">
       <Particles
         id="tsparticles"
         init={particlesInit}
@@ -70,12 +71,8 @@ export default function HomePage() {
         className="absolute inset-0 z-0"
       />
 
-      <motion.div
-        className="z-10 mb-6"
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.2 }}
-      >
+      {/* Hero Section */}
+      <motion.div className="z-10 mt-24 mb-6 text-center">
         <div className="relative w-24 sm:w-28 mx-auto mb-4">
           <motion.div
             className="absolute inset-0 rounded-full bg-teal-400 blur-2xl opacity-30"
@@ -84,7 +81,6 @@ export default function HomePage() {
           />
           <img src="/Icon.png" alt="EchoScript Icon" className="relative w-full drop-shadow-xl" />
         </div>
-
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">EchoScript.AI</h1>
         <TypeAnimation
           sequence={[
@@ -112,21 +108,54 @@ export default function HomePage() {
         <LiveGPTBubble message={gptResponse} onClose={() => setShowBubble(false)} />
       )}
 
-      <motion.div
-        className="max-w-2xl mx-auto bg-zinc-800/80 p-6 rounded-2xl border border-teal-700 backdrop-blur-md shadow-lg z-10"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5 }}
-      >
-        <p className="text-lg leading-relaxed">
-          Welcome to <span className="text-teal-400 font-semibold">EchoScript.AI</span>. This AI isn’t just
-          listening — it’s learning your voice, your tone, and what matters to you.
-        </p>
-      </motion.div>
-
       <ProgressTimeline currentStep={introStep} />
 
-      <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
+      {/* About Section */}
+      <section className="mt-20 max-w-3xl text-center space-y-4 z-10">
+        <h2 className="text-3xl font-bold text-teal-400">About EchoScript</h2>
+        <p className="text-zinc-300 text-lg leading-relaxed">
+          EchoScript.AI is an intelligent transcription and voice understanding platform that helps you convert speech into clean, structured, and smart text. Designed to be inclusive, adaptive, and insightful.
+        </p>
+      </section>
+
+      {/* Features Section */}
+      <section className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 z-10">
+        {["Dashboard", "Upload & Mic", "Smart Assistant", "User Account", "Settings", "Transcripts"].map((feature, idx) => (
+          <div key={idx} className="bg-zinc-800/70 p-6 rounded-xl border border-zinc-700 text-center hover:scale-105 transition-transform duration-300">
+            <h3 className="text-lg font-semibold text-white mb-2">{feature}</h3>
+            <p className="text-sm text-zinc-400">Explore the {feature.toLowerCase()} page to customize, interact, and get the most out of your voice data.</p>
+          </div>
+        ))}
+      </section>
+
+      {/* Newsletter Signup */}
+      <section className="mt-20 mb-24 max-w-xl w-full bg-zinc-800/80 border border-teal-700 backdrop-blur-md shadow-lg p-6 rounded-2xl z-10 text-center">
+        <h3 className="text-2xl font-bold text-white mb-3">Stay Updated</h3>
+        <p className="text-zinc-400 mb-4">Subscribe to our newsletter for updates, releases, and AI tips.</p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            alert("Subscribed! (placeholder)");
+          }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-3"
+        >
+          <input
+            type="email"
+            required
+            placeholder="you@example.com"
+            className="px-4 py-2 w-full sm:w-auto rounded-md text-black"
+          />
+          <button
+            type="submit"
+            className="px-5 py-2 bg-teal-600 text-white rounded-md hover:bg-blue-500 transition-all"
+          >
+            Subscribe
+          </button>
+        </form>
+      </section>
+
+      {/* Top Controls */}
+      <div className="fixed top-6 right-6 flex flex-col gap-3 z-20">
         <motion.button
           onClick={() => setLanguage(language === "en" ? "es" : "en")}
           className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm text-white border border-zinc-600 transition-all duration-300"
@@ -145,4 +174,3 @@ export default function HomePage() {
     </div>
   );
 }
-

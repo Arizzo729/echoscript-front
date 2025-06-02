@@ -1,3 +1,4 @@
+// ✅ EchoScript.AI: EchoAssistantUltra — Advanced Conversational Assistant
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Send, X, Loader2, Wand2 } from "lucide-react";
@@ -5,7 +6,8 @@ import ReactMarkdown from "react-markdown";
 
 const persona = {
   name: "Echo",
-  greeting: "Hi, I'm Echo — your smart assistant. Ask me anything about transcripts, plans, tools, or commands like `/summarize`, `/clarify`, or `/lookup keyword`.",
+  greeting:
+    "Hi, I'm Echo — your smart assistant. Ask me anything about transcripts, plans, tools, or try commands like `/summarize`, `/clarify`, `/lookup keyword`, `/export`, or `/feedback`.",
 };
 
 const EchoAssistantUltra = ({
@@ -33,6 +35,9 @@ const EchoAssistantUltra = ({
 
   const parseCommand = (text) => {
     if (text.startsWith("/lookup ")) return { command: "lookup", arg: text.replace("/lookup ", "") };
+    if (text.startsWith("/summarize")) return { command: "summarize" };
+    if (text.startsWith("/clarify")) return { command: "clarify" };
+    if (text.startsWith("/feedback")) return { command: "feedback" };
     return null;
   };
 
@@ -47,26 +52,29 @@ const EchoAssistantUltra = ({
     if (cmd?.command === "lookup") {
       setHistory((prev) => [
         ...prev,
-        { role: "assistant", content: `🌐 Looking up "${cmd.arg}"...` },
+        { role: "assistant", content: `🌐 Looking up \"${cmd.arg}\"...` },
       ]);
       setTimeout(() => {
         setHistory((prev) => [
           ...prev,
-          { role: "assistant", content: `🔎 Result for "${cmd.arg}":\n\n*Coming soon — external AI search integration.*` },
+          { role: "assistant", content: `🔎 Result for \"${cmd.arg}\":\n\n*Coming soon — external AI search integration.*` },
         ]);
         setLoading(false);
       }, 1500);
       return;
     }
 
+    const systemPrompt = `You are Echo, a helpful AI assistant in a smart transcription tool. The user is currently on the ${context} page. Offer assistance with empathy and precision. If the user asks a question about pricing, plans, or tools, give links or directions. If they ask for a summary or clarification, use the transcript below.`;
+
     try {
       const res = await fetch("https://your-backend-domain.com/assistant/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          system_prompt: systemPrompt,
           transcript,
           question: input,
-          history: history.map(h => ({ role: h.role, content: h.content })),
+          history: history.map((h) => ({ role: h.role, content: h.content })),
           user_id: user.id,
           mode: "auto",
           tone: "friendly",
