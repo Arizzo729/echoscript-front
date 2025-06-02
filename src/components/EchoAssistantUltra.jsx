@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI: EchoAssistantUltra — Advanced Conversational Assistant
+// ✅ EchoScript.AI — EchoAssistantUltra (Final Polished GPT Assistant)
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Send, X, Loader2, Wand2 } from "lucide-react";
@@ -13,7 +13,7 @@ const persona = {
 const EchoAssistantUltra = ({
   user = { name: "User", plan: "Free", id: "anon" },
   context = "Dashboard",
-  transcript = ""
+  transcript = "",
 }) => {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -37,12 +37,14 @@ const EchoAssistantUltra = ({
     if (text.startsWith("/lookup ")) return { command: "lookup", arg: text.replace("/lookup ", "") };
     if (text.startsWith("/summarize")) return { command: "summarize" };
     if (text.startsWith("/clarify")) return { command: "clarify" };
+    if (text.startsWith("/export")) return { command: "export" };
     if (text.startsWith("/feedback")) return { command: "feedback" };
     return null;
   };
 
   const handleSend = async () => {
     if (!input.trim()) return;
+
     const userMsg = { role: "user", content: input };
     setHistory((prev) => [...prev, userMsg]);
     setInput("");
@@ -52,22 +54,22 @@ const EchoAssistantUltra = ({
     if (cmd?.command === "lookup") {
       setHistory((prev) => [
         ...prev,
-        { role: "assistant", content: `🌐 Looking up \"${cmd.arg}\"...` },
+        { role: "assistant", content: `🌐 Looking up **"${cmd.arg}"**...` },
       ]);
       setTimeout(() => {
         setHistory((prev) => [
           ...prev,
-          { role: "assistant", content: `🔎 Result for \"${cmd.arg}\":\n\n*Coming soon — external AI search integration.*` },
+          { role: "assistant", content: `🔎 **Result:** _Coming soon — EchoScript external AI search integration._` },
         ]);
         setLoading(false);
       }, 1500);
       return;
     }
 
-    const systemPrompt = `You are Echo, a helpful AI assistant in a smart transcription tool. The user is currently on the ${context} page. Offer assistance with empathy and precision. If the user asks a question about pricing, plans, or tools, give links or directions. If they ask for a summary or clarification, use the transcript below.`;
+    const systemPrompt = `You are Echo, a helpful and intelligent assistant in a smart transcription tool. The user is currently on the "${context}" page. Offer responses with precision and empathy. Use the transcript context below for commands like summarize, clarify, or feedback.`;
 
     try {
-      const res = await fetch("https://your-backend-domain.com/assistant/ask", {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE}/assistant/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -81,11 +83,12 @@ const EchoAssistantUltra = ({
           voice: "coach",
         }),
       });
+
       const data = await res.json();
       const reply = data.response || "⚠️ No response from assistant.";
       setHistory((prev) => [...prev, { role: "assistant", content: reply }]);
     } catch (err) {
-      setHistory((prev) => [...prev, { role: "assistant", content: "⚠️ Error talking to backend." }]);
+      setHistory((prev) => [...prev, { role: "assistant", content: "⚠️ Error contacting the assistant." }]);
     } finally {
       setLoading(false);
     }

@@ -1,3 +1,4 @@
+// ✅ EchoScript.AI — Final Account Page with Activity, Controls & Saved Transcripts
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
@@ -49,7 +50,7 @@ export default function Account() {
 
   const toggleDarkMode = () => {
     const nextMode = !user.darkMode;
-    setUser({ ...user, darkMode: nextMode });
+    setUser((prev) => ({ ...prev, darkMode: nextMode }));
     document.documentElement.classList.toggle("dark", nextMode);
   };
 
@@ -61,9 +62,11 @@ export default function Account() {
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.4 }}
     >
-      {/* Header Controls */}
+      {/* 🔧 Header Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">Account Overview</h1>
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
+          Account Overview
+        </h1>
         <div className="flex gap-3">
           <Button
             onClick={toggleDarkMode}
@@ -79,7 +82,7 @@ export default function Account() {
         </div>
       </div>
 
-      {/* Profile & Usage */}
+      {/* 👤 Profile + 📊 Usage */}
       <div className="grid md:grid-cols-2 gap-6 mb-12">
         <Card title="👤 Profile">
           <p><strong>Name:</strong> {user.name}</p>
@@ -97,7 +100,7 @@ export default function Account() {
             <label className="text-sm text-zinc-500 dark:text-zinc-400">Monthly Limit Usage</label>
             <div className="w-full bg-zinc-200 dark:bg-zinc-700 h-3 rounded-full mt-1">
               <div
-                className="h-3 rounded-full bg-teal-500"
+                className="h-3 rounded-full bg-gradient-to-r from-teal-400 to-blue-500"
                 style={{ width: `${Math.min((user.minutesUsed / 500) * 100, 100)}%` }}
               />
             </div>
@@ -105,24 +108,28 @@ export default function Account() {
         </Card>
       </div>
 
-      {/* Saved Transcripts */}
+      {/* 📁 Saved Transcripts */}
       <div className="mb-12">
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-zinc-800 dark:text-white">
           <FileText className="w-5 h-5" />
           Saved Transcripts
         </h2>
         {transcripts.length === 0 ? (
-          <p className="text-zinc-500 dark:text-zinc-400">You haven’t saved any transcripts yet.</p>
+          <p className="text-zinc-500 dark:text-zinc-400">
+            You haven’t saved any transcripts yet.
+          </p>
         ) : (
           <div className="space-y-4">
             {transcripts.map((t) => (
               <div
                 key={t.id}
-                className="flex justify-between items-start bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-xl p-4 hover:shadow transition"
+                className="flex justify-between items-start bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-xl p-4 hover:shadow transition-all"
               >
-                <div>
+                <div className="flex-1">
                   <p className="font-medium text-zinc-900 dark:text-white">{t.title}</p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">{t.date} • {t.format} • {t.size}</p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    {t.date} • {t.format} • {t.size}
+                  </p>
                   <p className="text-sm text-zinc-600 dark:text-zinc-300">{t.summary}</p>
                   <div className="flex gap-3 mt-2">
                     <Button variant="ghost" size="xs">Copy</Button>
@@ -138,7 +145,7 @@ export default function Account() {
         )}
       </div>
 
-      {/* Quick Actions */}
+      {/* ⚙️ Quick Actions */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         <ActionCard icon={<Settings className="w-5 h-5" />} label="Preferences" />
         <ActionCard icon={<UploadCloud className="w-5 h-5" />} label="Upload History" />
@@ -147,7 +154,7 @@ export default function Account() {
         <ActionCard icon={<AlertCircle className="w-5 h-5" />} label="Report a Problem" />
       </div>
 
-      {/* Recent Activity */}
+      {/* 🕓 Recent Activity */}
       <div className="mt-10">
         <h2 className="text-xl font-semibold text-zinc-800 dark:text-white mb-4">
           🕓 Recent Activity
@@ -174,7 +181,7 @@ function Card({ title, children }) {
 function ActionCard({ icon, label }) {
   return (
     <button
-      className="flex items-center justify-between w-full p-4 rounded-xl border dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition"
+      className="flex items-center justify-between w-full p-4 rounded-xl border dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all"
       title={label}
     >
       <div className="flex items-center gap-3 text-left text-sm font-medium text-zinc-700 dark:text-zinc-200">

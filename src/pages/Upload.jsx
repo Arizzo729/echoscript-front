@@ -1,3 +1,4 @@
+// ✅ EchoScript.AI — Upload Page with Live Transcript & AI Feedback
 import React, { useState } from "react";
 import { InboxArrowDownIcon, PaperClipIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
@@ -10,6 +11,9 @@ export default function Upload() {
   const [dragActive, setDragActive] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [transcript, setTranscript] = useState(null);
+  const [aiFeedback, setAiFeedback] = useState(null);
 
   const filteredLanguages = languageOptions.filter((lang) =>
     lang.label.toLowerCase().includes(searchQuery.toLowerCase())
@@ -17,20 +21,56 @@ export default function Upload() {
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
-    if (file) setSelectedFile(file);
+    if (file) {
+      setSelectedFile(file);
+      setTranscript(null);
+      setAiFeedback(null);
+    }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     setDragActive(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) setSelectedFile(file);
+    if (file) {
+      setSelectedFile(file);
+      setTranscript(null);
+      setAiFeedback(null);
+    }
   };
 
   const handleDrag = (e) => {
     e.preventDefault();
-    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
-    else setDragActive(false);
+    setDragActive(e.type === "dragenter" || e.type === "dragover");
+  };
+
+  const handleTranscribe = async () => {
+    if (!selectedFile) return;
+    setIsUploading(true);
+    setTranscript(null);
+    setAiFeedback(null);
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    formData.append("language", selectedLanguage);
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE}/transcribe-enhanced`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Transcription failed.");
+
+      const data = await res.json();
+      setTranscript(data.transcript);
+      setAiFeedback(data.summary || "Transcript complete. No summary returned.");
+    } catch (err) {
+      console.error(err);
+      setAiFeedback("❌ Failed to transcribe. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -49,7 +89,7 @@ export default function Upload() {
         Drag and drop audio files or click to browse. Supported formats: MP3, WAV, M4A.
       </p>
 
-      {/* Language Selector */}
+      {/* 🌍 Language Selector */}
       <div className="mb-8">
         <label htmlFor="language" className="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Language
@@ -75,7 +115,7 @@ export default function Upload() {
         </select>
       </div>
 
-      {/* Upload Dropzone */}
+      {/* 📥 Dropzone */}
       <div
         className={`border-2 border-dashed rounded-xl transition-all duration-300 cursor-pointer ${
           dragActive
@@ -103,7 +143,7 @@ export default function Upload() {
         </label>
       </div>
 
-      {/* File Info */}
+      {/* 📎 File Details & Transcribe */}
       {selectedFile && (
         <div className="mt-6 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700">
           <div className="flex items-center gap-3">
@@ -115,18 +155,34 @@ export default function Upload() {
           </div>
 
           <div className="mt-4">
-            <Button
-              className="w-full"
-              onClick={() =>
-                alert(`TODO: Send ${selectedFile.name} to backend with lang: ${selectedLanguage}`)
-              }
-            >
-              Transcribe with EchoScript.AI
+            <Button className="w-full" disabled={isUploading} onClick={handleTranscribe}>
+              {isUploading ? "Transcribing..." : "Transcribe with EchoScript.AI"}
             </Button>
           </div>
         </div>
       )}
+
+      {/* 📄 Transcript Output */}
+      {transcript && (
+        <div className="mt-8 p-6 bg-zinc-800 rounded-xl text-white border border-teal-600 shadow-inner">
+          <h2 className="text-lg font-semibold mb-2 text-teal-400">Transcript:</h2>
+          <pre className="whitespace-pre-wrap text-sm text-zinc-200">{transcript}</pre>
+        </div>
+      )}
+
+      {/* 🧠 AI Feedback Output */}
+      {aiFeedback && (
+        <motion.div
+          className="mt-4 bg-zinc-900 border border-blue-700 text-white p-4 rounded-xl shadow-lg"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <h3 className="font-semibold text-blue-400 mb-1">AI Feedback:</h3>
+          <p className="text-sm text-blue-100">{aiFeedback}</p>
+        </motion.div>
+      )}
     </motion.div>
   );
 }
+
 

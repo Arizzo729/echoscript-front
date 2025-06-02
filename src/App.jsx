@@ -7,7 +7,7 @@ import AnimatedSplash from "./components/AnimatedSplash";
 import OnboardingModal from "./components/OnboardingModal";
 import "./global.css";
 
-// Layout + UI
+// Layout & Shared UI
 import Layout from "./components/Layout";
 
 // Pages
@@ -38,7 +38,9 @@ export default function App() {
     <ThemeProvider>
       <GPTProvider>
         <FontSizeProvider>
-          {!splashDone && <AnimatedSplash onComplete={() => setSplashDone(true)} />}
+          {!splashDone && (
+            <AnimatedSplash onComplete={() => setSplashDone(true)} />
+          )}
 
           {splashDone && (
             <>
@@ -47,20 +49,23 @@ export default function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/upload" element={<Upload />} />
-                  <Route path="/assistant" element={<AIAssistant />} /> 
+                  <Route path="/assistant" element={<AIAssistant />} />
+                  <Route path="/community" element={<Community />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/account" element={<Account />} />
                   <Route path="/purchase" element={<Purchase />} />
                   <Route path="/apify" element={<ApifyTest />} />
                 </Route>
 
-                {/* Auth + Error Routes */}
+                {/* Auth and Error Routes */}
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
 
-              {showIntro && <OnboardingModal onClose={() => setShowIntro(false)} />}
+              {showIntro && (
+                <OnboardingModal onClose={() => setShowIntro(false)} />
+              )}
             </>
           )}
         </FontSizeProvider>

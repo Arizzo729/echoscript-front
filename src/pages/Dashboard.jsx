@@ -1,4 +1,5 @@
-import React from "react";
+// ✅ EchoScript.AI — Final Ultra-Polished Dashboard.jsx
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Mic,
@@ -8,9 +9,14 @@ import {
   Video,
   Clock,
   User,
+  Trash,
+  Loader2,
 } from "lucide-react";
+import Button from "../components/ui/Button";
 
 export default function Dashboard() {
+  const [loadingId, setLoadingId] = useState(null);
+
   const user = {
     name: "Echo User",
     email: "user@example.com",
@@ -22,6 +28,31 @@ export default function Dashboard() {
 
   const percentUsed = Math.min((user.minutesUsed / user.limit) * 100, 100);
 
+  const mockTranscripts = [
+    {
+      id: 1,
+      title: "Podcast Interview with Sarah",
+      date: "June 1, 2025",
+      duration: "42:18",
+      summary: "Key highlights from the product launch interview.",
+    },
+    {
+      id: 2,
+      title: "Team Sync May Recap",
+      date: "May 28, 2025",
+      duration: "24:06",
+      summary: "Discussion on Q2 planning and deliverables.",
+    },
+  ];
+
+  const handleDelete = (id) => {
+    setLoadingId(id);
+    setTimeout(() => {
+      setLoadingId(null);
+      alert(`Transcript ${id} deleted.`);
+    }, 1000);
+  };
+
   return (
     <motion.div
       className="max-w-7xl mx-auto px-6 py-10"
@@ -30,10 +61,12 @@ export default function Dashboard() {
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.5 }}
     >
-      <h1 className="text-4xl font-bold mb-8 text-white">Welcome back, {user.name.split(" ")[0]} 👋</h1>
+      <h1 className="text-4xl font-bold mb-10 text-white tracking-tight">
+        Welcome back, <span className="text-teal-400">{user.name.split(" ")[0]}</span> 👋
+      </h1>
 
-      {/* 🔧 Tool Cards */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+      {/* 🚀 Quick Tools */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
         {[
           { icon: <Mic />, label: "New Recording", color: "from-teal-500 to-teal-700" },
           { icon: <UploadCloud />, label: "Upload Audio", color: "from-blue-500 to-blue-700" },
@@ -46,34 +79,38 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* 📊 Analytics + User Info */}
-      <div className="grid md:grid-cols-2 gap-6">
+      {/* 📊 Usage & Profile */}
+      <div className="grid md:grid-cols-2 gap-6 mb-16">
+        {/* Usage Snapshot */}
         <motion.div
-          className="rounded-xl border dark:border-zinc-700 bg-zinc-900 shadow-xl p-6"
+          className="rounded-2xl border border-zinc-700 bg-zinc-900 shadow-xl p-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h2 className="text-xl font-bold text-white mb-4">Usage Snapshot</h2>
+          <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+            📊 Usage Snapshot
+          </h2>
           <ul className="space-y-2 text-sm text-zinc-300">
-            <li><strong>Plan:</strong> {user.plan}</li>
-            <li><strong>Minutes Used:</strong> {user.minutesUsed} / {user.limit}</li>
-            <li><strong>Sessions:</strong> {user.sessions}</li>
+            <li><strong className="text-white">Plan:</strong> {user.plan}</li>
+            <li><strong className="text-white">Minutes Used:</strong> {user.minutesUsed} / {user.limit}</li>
+            <li><strong className="text-white">Sessions:</strong> {user.sessions}</li>
           </ul>
-          <div className="mt-4 h-3 bg-zinc-700 rounded-full overflow-hidden">
+          <div className="mt-5 h-3 bg-zinc-800 rounded-full overflow-hidden shadow-inner">
             <motion.div
-              className="h-full bg-gradient-to-r from-teal-400 to-blue-500"
+              className="h-full bg-gradient-to-r from-teal-400 to-blue-500 rounded-full"
               style={{ width: `${percentUsed}%` }}
               initial={{ width: 0 }}
               animate={{ width: `${percentUsed}%` }}
               transition={{ duration: 0.7 }}
             />
           </div>
-          <p className="text-right text-xs text-zinc-400 mt-2">{percentUsed.toFixed(1)}% used</p>
+          <p className="text-right text-xs text-zinc-500 mt-2 italic">{percentUsed.toFixed(1)}% used</p>
         </motion.div>
 
+        {/* Profile Overview */}
         <motion.div
-          className="rounded-xl border dark:border-zinc-700 bg-zinc-900 shadow-xl p-6 flex items-center gap-4"
+          className="rounded-2xl border border-zinc-700 bg-zinc-900 shadow-xl p-6 flex items-center gap-5"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
@@ -84,8 +121,55 @@ export default function Dashboard() {
           <div>
             <p className="text-lg font-semibold text-white">{user.name}</p>
             <p className="text-sm text-zinc-400">{user.email}</p>
+            <button className="mt-2 text-teal-400 text-sm hover:underline">Manage Account</button>
           </div>
         </motion.div>
+      </div>
+
+      {/* 📁 Transcript List */}
+      <div className="grid gap-6 mb-14">
+        {mockTranscripts.map((t) => (
+          <motion.div
+            key={t.id}
+            whileHover={{ scale: 1.01 }}
+            className="border border-zinc-700 bg-zinc-900 p-6 rounded-xl shadow-md transition"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-lg font-semibold flex items-center gap-2 text-white">
+                  <FileText className="w-5 h-5 text-teal-400" />
+                  {t.title}
+                </h2>
+                <p className="text-sm text-muted-foreground">{t.date} • {t.duration}</p>
+                <p className="mt-2 text-sm text-zinc-300">{t.summary}</p>
+              </div>
+              <div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => handleDelete(t.id)}
+                >
+                  {loadingId === t.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash className="w-4 h-4 text-red-400" />
+                  )}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* 🧠 Smart Assistant Tip */}
+      <div className="mt-5 p-5 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700">
+        <div className="flex items-center gap-2 mb-1">
+          <Sparkles className="w-4 h-4 text-teal-300" />
+          <p className="text-sm text-teal-300 font-medium">Smart Tip</p>
+        </div>
+        <p className="text-sm text-zinc-400">
+          Try selecting multiple transcripts to generate a smart report or shareable summary using our GPT assistant.
+        </p>
       </div>
     </motion.div>
   );
@@ -94,17 +178,18 @@ export default function Dashboard() {
 function DashboardCard({ icon, label, color }) {
   return (
     <motion.button
-      whileHover={{ scale: 1.03 }}
+      whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.97 }}
-      className={`flex justify-between items-center w-full p-5 rounded-xl shadow-md bg-gradient-to-br ${color} text-white transition-all`}
+      className={`flex justify-between items-center w-full p-5 rounded-2xl shadow-lg bg-gradient-to-br ${color} text-white transition-all group`}
     >
       <div className="flex items-center gap-4">
-        <div className="p-2 bg-white bg-opacity-20 rounded-full">{icon}</div>
-        <span className="text-md font-medium">{label}</span>
+        <div className="p-3 bg-white bg-opacity-20 rounded-full text-white shadow-md">
+          {React.cloneElement(icon, { className: "w-5 h-5" })}
+        </div>
+        <span className="text-md font-semibold">{label}</span>
       </div>
-      <span className="text-sm">→</span>
+      <span className="text-sm text-white/70 group-hover:translate-x-1 transition-transform">→</span>
     </motion.button>
   );
 }
-
 

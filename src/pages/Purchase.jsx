@@ -63,26 +63,28 @@ export default function Purchase() {
 
   const PlanCard = ({ plan }) => (
     <motion.div
-      whileHover={{ scale: 1.03 }}
-      className={`flex-1 rounded-2xl border transition p-6 space-y-4 shadow-sm hover:shadow-xl transform-gpu ${
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 200, damping: 15 }}
+      className={`flex-1 rounded-2xl border p-6 space-y-4 shadow-lg transition ${
         plan.name === "Pro"
           ? "bg-gradient-to-br from-teal-600 to-blue-600 text-white border-none"
-          : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700"
+          : "bg-zinc-900 border border-zinc-800 text-white"
       }`}
     >
       <div>
         <h2 className="text-2xl font-semibold">{plan.name}</h2>
-        <p className="text-sm italic opacity-80">{plan.suggestedFor}</p>
+        <p className="text-sm italic text-teal-300">{plan.suggestedFor}</p>
       </div>
-      <p className="text-3xl font-bold">
+
+      <p className="text-3xl font-bold text-teal-400">
         {plan.price}
         {plan.monthly && <span className="text-base font-light">/mo</span>}
       </p>
 
-      <ul className="space-y-2 text-sm">
+      <ul className="space-y-2 text-sm text-zinc-300">
         {plan.features.map((f, idx) => (
           <li key={idx} className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-green-400 dark:text-green-300" />
+            <CheckCircle className="w-4 h-4 text-green-400" />
             {f}
           </li>
         ))}
@@ -105,25 +107,29 @@ export default function Purchase() {
   );
 
   const Assistant = () => (
-    <div className="sticky top-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 p-6 border border-zinc-200 dark:border-zinc-700 shadow-md space-y-4">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="sticky top-10 rounded-2xl p-6 bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 shadow-md space-y-4"
+    >
       <div className="flex items-center gap-2 mb-2">
-        <Sparkles className="w-5 h-5 text-blue-400" />
-        <h3 className="text-lg font-semibold text-zinc-800 dark:text-zinc-100">
-          AI Plan Assistant
-        </h3>
+        <Sparkles className="w-5 h-5 text-teal-400" />
+        <h3 className="text-lg font-semibold text-white">AI Plan Assistant</h3>
       </div>
-      <p className="text-sm text-zinc-600 dark:text-zinc-300">
-        Not sure which plan to pick? Most users start with <strong>Pro</strong> for advanced features and upgrade to Enterprise when they scale.
+      <p className="text-sm text-zinc-300">
+        Not sure which plan to pick? Most users start with{" "}
+        <strong className="text-teal-300">Pro</strong> for advanced features and scale to Enterprise.
       </p>
-      <ul className="text-xs text-zinc-500 dark:text-zinc-400 list-disc list-inside">
-        <li><strong>Starter</strong> is great for quick testing or students</li>
-        <li><strong>Pro</strong> unlocks transcription power & GPT integration</li>
-        <li><strong>Enterprise</strong> gives full control, API access, and priority support</li>
+      <ul className="text-xs text-zinc-400 list-disc list-inside">
+        <li><strong>Starter</strong> is perfect for testing or students</li>
+        <li><strong>Pro</strong> unlocks full AI tools and exports</li>
+        <li><strong>Enterprise</strong> includes API, branding, and admin analytics</li>
       </ul>
-      <p className="text-sm italic text-blue-500 dark:text-blue-300">
-        Tip: Upgrade or cancel anytime from your dashboard.
+      <p className="text-sm italic text-blue-400">
+        Tip: You can upgrade, downgrade, or cancel anytime.
       </p>
-    </div>
+    </motion.div>
   );
 
   return (
@@ -134,33 +140,33 @@ export default function Purchase() {
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Plan Assistant */}
+      {/* Assistant */}
       {showAssistant && (
         <div className="hidden lg:block col-span-1">
           <Assistant />
         </div>
       )}
 
-      {/* Pricing Cards */}
+      {/* Plans */}
       <div className="col-span-3 flex flex-col lg:flex-row gap-6">
         {pricingPlans.map((plan, idx) => (
           <PlanCard key={idx} plan={plan} />
         ))}
       </div>
 
-      {/* Footer Info */}
-      <div className="col-span-full mt-12 text-sm text-zinc-500 dark:text-zinc-400 text-center flex flex-col gap-3 items-center">
+      {/* Notes */}
+      <div className="col-span-full mt-12 text-sm text-zinc-400 text-center flex flex-col gap-3 items-center">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-green-500" />
-          Secure Stripe checkout — bank-grade encryption
+          <ShieldCheck className="w-4 h-4 text-green-400" />
+          Secure Stripe checkout — encrypted & trusted
         </div>
         <div className="flex items-center gap-2">
-          <CreditCard className="w-4 h-4 text-blue-500" />
-          We never store card details. Cancel anytime.
+          <CreditCard className="w-4 h-4 text-blue-400" />
+          No card data stored — cancel anytime from Dashboard
         </div>
         <button
           onClick={() => setShowAssistant(!showAssistant)}
-          className="mt-2 text-xs hover:underline flex items-center gap-1 text-blue-500 dark:text-blue-300"
+          className="mt-2 text-xs hover:underline flex items-center gap-1 text-teal-400"
         >
           <HelpCircle className="w-3 h-3" />
           {showAssistant ? "Hide Assistant" : "Show Plan Assistant"}
@@ -169,5 +175,4 @@ export default function Purchase() {
     </motion.div>
   );
 }
-
 
