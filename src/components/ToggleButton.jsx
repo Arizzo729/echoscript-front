@@ -31,7 +31,7 @@ export default function ToggleButton({
       className={twMerge(
         `inline-flex items-center justify-center gap-2 rounded-md font-medium transition-all duration-300
          focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal-500
-         ${toggled ? 'bg-teal-600 text-white shadow-md hover:bg-teal-700' : 'bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-white hover:bg-zinc-300 dark:hover:bg-zinc-600'}`,
+         ${toggled ? 'bg-teal-600 text-white shadow-md hover:bg-teal-700' : 'bg-zinc-600 text-white hover:bg-zinc-500'}`,
         sizes[size],
         className
       )}
