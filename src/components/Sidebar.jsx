@@ -1,3 +1,4 @@
+// ✅ EchoScript.AI — Animated, Elegant Sidebar with Tooltip & Glow
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
@@ -83,5 +84,4 @@ export default function Sidebar() {
     </motion.aside>
   );
 }
-
 
