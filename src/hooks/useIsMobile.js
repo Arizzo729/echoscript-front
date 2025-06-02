@@ -1,19 +1,21 @@
 // src/hooks/useIsMobile.js
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function useIsMobile(breakpoint = 768) {
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth < breakpoint : false
-  );
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < breakpoint;
+    }
+    return false;
+  });
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < breakpoint);
     };
 
+    handleResize(); // force initial check
     window.addEventListener("resize", handleResize);
-    handleResize(); // Trigger once on mount
-
     return () => window.removeEventListener("resize", handleResize);
   }, [breakpoint]);
 
