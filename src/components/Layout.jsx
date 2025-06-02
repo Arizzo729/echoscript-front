@@ -41,14 +41,14 @@ export default function Layout() {
         <NotificationContext.Provider value={{ notifications, markAllRead }}>
           <FontSizeContext.Provider value={{ fontSize: clampedFontSize, setFontSize }}>
             <div
-              className={`flex h-screen overflow-hidden bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-all duration-300 ease-in-out`}
+              className={`flex h-screen bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-all duration-300 ease-in-out`}
               style={{ fontSize: `${clampedFontSize}em` }}
             >
               {/* Sidebar (desktop only) */}
               {!isMobile && <Sidebar />}
 
               {/* Main Content Area */}
-              <div className="flex flex-col flex-grow">
+              <div className={`flex flex-col flex-grow ${!isMobile ? "pl-[64px]" : ""}`}>
                 <Header isDarkMode={theme === "dark"} onToggleTheme={toggleTheme} />
 
                 <main className="flex-grow overflow-y-auto px-6 py-4 bg-transparent">
