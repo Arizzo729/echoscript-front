@@ -1,9 +1,7 @@
-// ✅ EchoScript.AI — Interactive OnboardingModal with Lottie Illustrations and Upgraded UX
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import Lottie from "lottie-react";
-import animationData from "../assets/ai-waveform.json";
 import illustration1 from "../assets/onboarding/upload.json";
 import illustration2 from "../assets/onboarding/cleanup.json";
 import illustration3 from "../assets/onboarding/global.json";
@@ -84,26 +82,21 @@ export default function OnboardingModal({ onClose }) {
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* ❌ Close "X" */}
+            {/* ❌ Close Text "X" */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 text-sm text-zinc-400 hover:text-white transition"
+              className="absolute top-4 right-4 text-sm text-zinc-400 hover:text-teal-400 transition bg-transparent"
               aria-label="Close"
             >
               ×
             </button>
 
-            {/* 🌟 Illustration */}
+            {/* Lottie Illustration */}
             <div className="w-full h-48 flex items-center justify-center">
-              <Lottie
-                animationData={STEPS[step].illustration}
-                loop
-                autoplay
-                style={{ width: "90%" }}
-              />
+              <Lottie animationData={STEPS[step].illustration} loop autoplay style={{ width: "90%" }} />
             </div>
 
-            {/* Title & Description */}
+            {/* Text */}
             <motion.div
               key={step}
               className="relative z-10 text-center"
@@ -120,7 +113,7 @@ export default function OnboardingModal({ onClose }) {
               </p>
             </motion.div>
 
-            {/* Step Indicator Dots */}
+            {/* Dot Indicators */}
             <div className="flex justify-center mt-6 space-x-1 z-10">
               {STEPS.map((_, i) => (
                 <div
@@ -132,12 +125,12 @@ export default function OnboardingModal({ onClose }) {
               ))}
             </div>
 
-            {/* Navigation Buttons */}
-            <div className="mt-6 flex justify-center items-center gap-4 z-10">
+            {/* Back + Next Buttons (now both styled and spaced evenly) */}
+            <div className="mt-6 flex justify-center items-center gap-6 z-10">
               {step > 0 && (
                 <button
                   onClick={() => setStep(step - 1)}
-                  className="text-xs text-zinc-400 hover:text-teal-400 transition"
+                  className="text-xs px-4 py-1.5 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 text-white font-medium shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
                 >
                   Back
                 </button>
@@ -150,11 +143,11 @@ export default function OnboardingModal({ onClose }) {
               </button>
             </div>
 
-            {/* ⏭️ Skip Link */}
+            {/* Skip */}
             <div className="text-center mt-4 z-10">
               <button
                 onClick={handleClose}
-                className="text-xs text-zinc-400 hover:text-white underline transition"
+                className="text-xs text-zinc-400 hover:text-teal-400 underline transition bg-transparent"
               >
                 Skip
               </button>
@@ -165,4 +158,5 @@ export default function OnboardingModal({ onClose }) {
     </AnimatePresence>
   );
 }
+
 
