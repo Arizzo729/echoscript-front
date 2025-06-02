@@ -1,4 +1,3 @@
-// ✅ EchoScript.AI — Guaranteed Visible Sidebar (Clean & Working)
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
@@ -31,9 +30,9 @@ export default function Sidebar() {
       initial={{ x: -250 }}
       animate={{ x: 0 }}
       transition={{ type: "spring", stiffness: 70 }}
-      className={`fixed top-0 left-0 h-screen z-40 bg-zinc-950 border-r border-zinc-800 shadow-xl backdrop-blur-md ${
-        collapsed ? "w-16" : "w-52"
-      } transition-all duration-300`}
+      className={`fixed top-0 left-0 h-screen z-40 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 border-r border-zinc-800 shadow-2xl backdrop-blur-lg ${
+        collapsed ? "w-16" : "w-56"
+      } transition-all duration-300 md:block hidden`}
     >
       {/* Toggle Button */}
       <div className="flex items-center justify-end px-3 pt-4">
@@ -56,18 +55,19 @@ export default function Sidebar() {
             className={({ isActive }) =>
               `group relative flex items-center gap-3 px-3 py-2 rounded-xl transition-all text-sm font-medium ${
                 isActive
-                  ? "bg-gradient-to-r from-teal-600 to-blue-500 text-white shadow-md"
+                  ? "bg-gradient-to-r from-teal-500 to-blue-500 text-white shadow-md"
                   : "text-zinc-400 hover:text-white hover:bg-zinc-800"
               }`
             }
           >
-            <Icon className="w-5 h-5" />
+            <Icon className="w-5 h-5 shrink-0" />
             <AnimatePresence>
               {!collapsed && (
                 <motion.span
                   initial={{ opacity: 0, x: -5 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -5 }}
+                  className="truncate"
                 >
                   {label}
                 </motion.span>
@@ -77,7 +77,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Logout */}
+      {/* Footer: Logout */}
       <div className="absolute bottom-6 w-full px-3">
         <button className="flex items-center gap-3 px-3 py-2 w-full text-left rounded-xl text-red-400 hover:bg-red-500/20 hover:text-white transition-all duration-300">
           <LogOut className="w-5 h-5" />
@@ -87,4 +87,5 @@ export default function Sidebar() {
     </motion.aside>
   );
 }
+
 

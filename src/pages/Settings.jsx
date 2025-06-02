@@ -6,7 +6,21 @@ import {
   Moon, Sun, HelpCircle, Mail, Accessibility, Settings2, Info, Text,
   ShieldCheck, FileText, Bell, Globe, Eye, Wand2
 } from "lucide-react";
+// ...other imports...
 import Button from "../components/ui/Button";
+
+export default function SignUp() {
+  return (
+    <div className="p-6 max-w-sm mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Create Account</h2>
+      <input type="text" placeholder="Name" className="mb-2 w-full" />
+      <input type="email" placeholder="Email" className="mb-2 w-full" />
+      <input type="password" placeholder="Password" className="mb-4 w-full" />
+      <Button variant="primary">Sign Up</Button>
+    </div>
+  );
+}
+
 import { FontSizeContext } from "../context/useFontSize.jsx";
 
 const tabs = [

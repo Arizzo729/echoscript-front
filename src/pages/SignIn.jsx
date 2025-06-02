@@ -3,6 +3,21 @@ import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 
+// ...other imports...
+import Button from "../components/ui/Button";
+
+export default function SignUp() {
+  return (
+    <div className="p-6 max-w-sm mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Create Account</h2>
+      <input type="text" placeholder="Name" className="mb-2 w-full" />
+      <input type="email" placeholder="Email" className="mb-2 w-full" />
+      <input type="password" placeholder="Password" className="mb-4 w-full" />
+      <Button variant="primary">Sign Up</Button>
+    </div>
+  );
+}
+
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,21 +40,19 @@ export default function SignIn() {
 
   return (
     <motion.div
-      className="flex items-center justify-center min-h-screen bg-white dark:bg-zinc-900 px-6"
+      className="flex items-center justify-center min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-800 px-6"
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="w-full max-w-md p-8 space-y-6 rounded-xl shadow-2xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
-        <h1 className="text-3xl font-extrabold text-center text-zinc-900 dark:text-white">
-          Welcome Back
-        </h1>
-        <p className="text-sm text-center text-zinc-500 dark:text-zinc-400">
-          Sign in to continue using <span className="text-teal-500 font-medium">EchoScript.AI</span>
+      <div className="w-full max-w-md p-8 space-y-6 rounded-2xl shadow-xl bg-zinc-900 border border-zinc-700">
+        <h1 className="text-3xl font-bold text-center text-white">Welcome Back</h1>
+        <p className="text-sm text-center text-zinc-400">
+          Sign in to continue using <span className="text-teal-400 font-medium">EchoScript.AI</span>
         </p>
 
         {error && (
-          <div className="bg-red-100 text-red-700 px-4 py-2 rounded-md text-sm text-center">
+          <div className="bg-red-500/10 text-red-300 px-4 py-2 rounded-md text-sm text-center">
             {error}
           </div>
         )}
@@ -47,7 +60,7 @@ export default function SignIn() {
         <form onSubmit={handleSignIn} className="space-y-5">
           {/* Email */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="email" className="text-sm font-medium text-zinc-300">
               Email
             </label>
             <div className="relative">
@@ -58,7 +71,7 @@ export default function SignIn() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="w-full px-4 py-2 pr-10 rounded-md border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-4 py-2 pr-10 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
               <Mail className="absolute right-3 top-2.5 w-5 h-5 text-zinc-400" />
             </div>
@@ -66,7 +79,7 @@ export default function SignIn() {
 
           {/* Password */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="password" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label htmlFor="password" className="text-sm font-medium text-zinc-300">
               Password
             </label>
             <div className="relative">
@@ -77,12 +90,12 @@ export default function SignIn() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full px-4 py-2 pr-10 rounded-md border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-4 py-2 pr-10 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-white"
+                className="absolute right-3 top-2.5 text-zinc-400 hover:text-white"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
@@ -90,7 +103,7 @@ export default function SignIn() {
           </div>
 
           {/* Remember Me + Forgot */}
-          <div className="flex items-center justify-between text-sm text-zinc-600 dark:text-zinc-400">
+          <div className="flex items-center justify-between text-sm text-zinc-400">
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
@@ -100,7 +113,7 @@ export default function SignIn() {
               />
               Remember me
             </label>
-            <Link to="/reset" className="text-teal-500 hover:underline">
+            <Link to="/reset" className="text-teal-400 hover:underline">
               Forgot password?
             </Link>
           </div>
@@ -109,16 +122,16 @@ export default function SignIn() {
           <motion.button
             type="submit"
             whileTap={{ scale: 0.97 }}
-            className="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold py-2 rounded-md transition"
+            className="w-full bg-teal-500 hover:bg-teal-400 text-white font-semibold py-2 rounded-lg transition-all duration-300 shadow-md"
           >
             Sign In
           </motion.button>
         </form>
 
         {/* Sign Up Link */}
-        <p className="text-sm text-center text-zinc-500 dark:text-zinc-400">
-          Don’t have an account?{" "}
-          <Link to="/signup" className="text-teal-500 hover:underline">
+        <p className="text-sm text-center text-zinc-400">
+          Don’t have an account?{' '}
+          <Link to="/signup" className="text-teal-400 hover:underline">
             Sign Up
           </Link>
         </p>
