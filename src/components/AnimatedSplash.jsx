@@ -86,14 +86,6 @@ const AnimatedSplash = ({ onComplete }) => {
           <div className="mt-6 w-24 h-24 sm:w-28 sm:h-28 opacity-80">
             <Lottie animationData={animationData} loop autoplay />
           </div>
-
-          {/* Subtle "Skip" Link */}
-          <button
-            onClick={closeSplash}
-            className="absolute bottom-6 right-6 text-sm text-teal-400 hover:text-teal-300 transition"
-          >
-            Skip
-          </button>
         </motion.div>
       )}
     </AnimatePresence>
@@ -101,7 +93,6 @@ const AnimatedSplash = ({ onComplete }) => {
 };
 
 export default AnimatedSplash;
-
 
 
 

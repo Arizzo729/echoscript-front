@@ -84,9 +84,10 @@ export default function OnboardingModal({ onClose }) {
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
+            {/* ❌ Close "X" */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 text-zinc-400 hover:text-teal-400 text-sm"
+              className="absolute top-4 right-4 text-sm text-zinc-400 hover:text-white transition"
               aria-label="Close"
             >
               ×
@@ -94,9 +95,15 @@ export default function OnboardingModal({ onClose }) {
 
             {/* 🌟 Illustration */}
             <div className="w-full h-48 flex items-center justify-center">
-              <Lottie animationData={STEPS[step].illustration} loop autoplay style={{ width: "90%" }} />
+              <Lottie
+                animationData={STEPS[step].illustration}
+                loop
+                autoplay
+                style={{ width: "90%" }}
+              />
             </div>
 
+            {/* Title & Description */}
             <motion.div
               key={step}
               className="relative z-10 text-center"
@@ -113,6 +120,7 @@ export default function OnboardingModal({ onClose }) {
               </p>
             </motion.div>
 
+            {/* Step Indicator Dots */}
             <div className="flex justify-center mt-6 space-x-1 z-10">
               {STEPS.map((_, i) => (
                 <div
@@ -124,6 +132,7 @@ export default function OnboardingModal({ onClose }) {
               ))}
             </div>
 
+            {/* Navigation Buttons */}
             <div className="mt-6 flex justify-center items-center gap-4 z-10">
               {step > 0 && (
                 <button
@@ -141,10 +150,11 @@ export default function OnboardingModal({ onClose }) {
               </button>
             </div>
 
+            {/* ⏭️ Skip Link */}
             <div className="text-center mt-4 z-10">
               <button
                 onClick={handleClose}
-                className="text-xs text-zinc-500 hover:text-teal-400 hover:underline transition"
+                className="text-xs text-zinc-400 hover:text-white underline transition"
               >
                 Skip
               </button>
@@ -155,5 +165,4 @@ export default function OnboardingModal({ onClose }) {
     </AnimatePresence>
   );
 }
-
 
