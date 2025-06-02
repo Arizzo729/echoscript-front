@@ -1,70 +1,66 @@
-// ✅ EchoScript.AI: Layout.jsx — Responsive, Animated, and Smart UI Container
-import React, { useState, useEffect, createContext } from "react";
+import React, { useState, useContext } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import EchoAssistantUltra from "./EchoAssistantUltra";
 import ToastContainer from "./ToastContainer";
 import MobileBottomNav from "./MobileBottomNav";
+import { AnimatePresence, motion } from "framer-motion";
+import { ThemeContext } from "../context/useTheme";
 import useIsMobile from "../hooks/useIsMobile";
 
-export const ThemeContext = createContext();
-export const UserContext = createContext();
-export const NotificationContext = createContext();
-export const FontSizeContext = createContext();
-
 export default function Layout() {
-  const [theme, setTheme] = useState("dark");
-  const toggleTheme = () => setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const { theme } = useContext(ThemeContext);
   const isMobile = useIsMobile();
 
-  const user = { name: "Echo User", avatar: null };
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: "Welcome to EchoScript", read: false },
-    { id: 2, message: "New features have launched!", read: false },
-  ]);
-  const markAllRead = () =>
-    setNotifications((n) => n.map((notif) => ({ ...notif, read: true })));
-
-  const [fontSize, setFontSize] = useState(1);
-  const MIN_FONT_SCALE = 0.85;
-  const MAX_FONT_SCALE = 1.25;
-  const clampedFontSize = Math.min(Math.max(fontSize, MIN_FONT_SCALE), MAX_FONT_SCALE);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
+  const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <UserContext.Provider value={{ user }}>
-        <NotificationContext.Provider value={{ notifications, markAllRead }}>
-          <FontSizeContext.Provider value={{ fontSize: clampedFontSize, setFontSize }}>
-            <div
-              className={`flex h-screen bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark transition-all duration-300 ease-in-out`}
-              style={{ fontSize: `${clampedFontSize}em` }}
-            >
-              {/* Sidebar (desktop only) */}
-              {!isMobile && <Sidebar />}
+    <div className={`relative flex flex-col h-screen w-screen ${theme === "dark" ? "dark bg-gray-950" : "bg-white"}`}>
+      {/* Top header */}
+      <Header toggleDrawer={toggleDrawer} />
 
-              {/* Main Content Area */}
-              <div className={`flex flex-col flex-grow ${!isMobile ? "pl-[64px]" : ""}`}>
-                <Header isDarkMode={theme === "dark"} onToggleTheme={toggleTheme} />
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar only on desktop */}
+        {!isMobile && <Sidebar />}
 
-                <main className="flex-grow overflow-y-auto px-6 py-4 bg-transparent">
-                  <Outlet />
-                </main>
+        {/* Main content area */}
+        <main className="flex-1 overflow-y-auto px-4 py-4 md:px-8 md:py-6">
+          <Outlet />
+        </main>
+      </div>
 
-                {/* Footer & Assistant */}
-                {isMobile && <MobileBottomNav />}
-                <ToastContainer />
-                <EchoAssistantUltra />
-              </div>
+      {/* Echo AI assistant */}
+      <EchoAssistantUltra />
+
+      {/* Mobile navigation */}
+      {isMobile && <MobileBottomNav />}
+
+      {/* Toasts */}
+      <ToastContainer />
+
+      {/* Optional settings drawer animation (for future use) */}
+      <AnimatePresence>
+        {isDrawerOpen && (
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-900 shadow-lg z-[9999]"
+          >
+            <button onClick={toggleDrawer} className="p-4 text-right w-full">
+              ✕
+            </button>
+            <div className="p-6">
+              <h2 className="text-xl font-semibold">Settings</h2>
+              {/* Add your settings content here */}
             </div>
-          </FontSizeContext.Provider>
-        </NotificationContext.Provider>
-      </UserContext.Provider>
-    </ThemeContext.Provider>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
