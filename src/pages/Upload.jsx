@@ -49,7 +49,7 @@ export default function Upload() {
         Drag and drop audio files or click to browse. Supported formats: MP3, WAV, M4A.
       </p>
 
-      {/* Language Selector with Search */}
+      {/* Language Selector */}
       <div className="mb-8">
         <label htmlFor="language" className="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Language
@@ -75,9 +75,9 @@ export default function Upload() {
         </select>
       </div>
 
-      {/* Upload Drop Zone */}
+      {/* Upload Dropzone */}
       <div
-        className={`border-2 border-dashed rounded-lg transition-colors ${
+        className={`border-2 border-dashed rounded-xl transition-all duration-300 cursor-pointer ${
           dragActive
             ? "border-teal-400 bg-teal-50/10"
             : "border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800"
@@ -87,7 +87,7 @@ export default function Upload() {
         onDragLeave={handleDrag}
         onDrop={handleDrop}
       >
-        <label htmlFor="upload-input" className="flex flex-col items-center justify-center p-10 cursor-pointer">
+        <label htmlFor="upload-input" className="flex flex-col items-center justify-center p-10">
           <InboxArrowDownIcon className="w-12 h-12 mb-2 text-teal-400" />
           <p className="mb-1 text-sm font-medium text-zinc-700 dark:text-zinc-300">
             {selectedFile ? "Change File" : "Click to upload or drag and drop"}
@@ -103,9 +103,9 @@ export default function Upload() {
         </label>
       </div>
 
-      {/* File Info + Button */}
+      {/* File Info */}
       {selectedFile && (
-        <div className="mt-6 p-4 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700">
+        <div className="mt-6 p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700">
           <div className="flex items-center gap-3">
             <PaperClipIcon className="w-5 h-5 text-teal-400" />
             <div>
@@ -113,16 +113,20 @@ export default function Upload() {
               <p className="text-xs text-zinc-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
             </div>
           </div>
-          <Button
-            className="mt-4 w-full"
-            onClick={() =>
-              alert(`TODO: send ${selectedFile.name} to backend with lang: ${selectedLanguage}`)
-            }
-          >
-            Transcribe with EchoScript.AI
-          </Button>
+
+          <div className="mt-4">
+            <Button
+              className="w-full"
+              onClick={() =>
+                alert(`TODO: Send ${selectedFile.name} to backend with lang: ${selectedLanguage}`)
+              }
+            >
+              Transcribe with EchoScript.AI
+            </Button>
+          </div>
         </div>
       )}
     </motion.div>
   );
 }
+

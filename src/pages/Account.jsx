@@ -48,8 +48,9 @@ export default function Account() {
   }, []);
 
   const toggleDarkMode = () => {
-    setUser({ ...user, darkMode: !user.darkMode });
-    document.documentElement.classList.toggle("dark");
+    const nextMode = !user.darkMode;
+    setUser({ ...user, darkMode: nextMode });
+    document.documentElement.classList.toggle("dark", nextMode);
   };
 
   return (
@@ -61,12 +62,15 @@ export default function Account() {
       transition={{ duration: 0.4 }}
     >
       {/* Header Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <h1 className="text-3xl font-bold text-primary dark:text-primary-light">
-          Account Overview
-        </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">Account Overview</h1>
         <div className="flex gap-3">
-          <Button onClick={toggleDarkMode} size="sm" variant="ghost" icon={user.darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}>
+          <Button
+            onClick={toggleDarkMode}
+            size="sm"
+            variant="ghost"
+            icon={user.darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          >
             {user.darkMode ? "Light Mode" : "Dark Mode"}
           </Button>
           <Button size="sm" variant="danger" icon={<LogOut className="w-4 h-4" />}>
@@ -75,20 +79,20 @@ export default function Account() {
         </div>
       </div>
 
-      {/* Profile + Usage */}
-      <div className="grid md:grid-cols-2 gap-6 mb-10">
-        <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border dark:border-zinc-700 shadow">
-          <h2 className="text-xl font-semibold mb-3 text-zinc-800 dark:text-white">👤 Profile</h2>
-          <p className="text-zinc-600 dark:text-zinc-300"><strong>Name:</strong> {user.name}</p>
-          <p className="text-zinc-600 dark:text-zinc-300"><strong>Email:</strong> {user.email}</p>
-          <p className="text-zinc-600 dark:text-zinc-300"><strong>Plan:</strong> {user.plan}</p>
-          <Button size="xs" variant="ghost" className="mt-3">Manage Plan</Button>
-        </div>
+      {/* Profile & Usage */}
+      <div className="grid md:grid-cols-2 gap-6 mb-12">
+        <Card title="👤 Profile">
+          <p><strong>Name:</strong> {user.name}</p>
+          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>Plan:</strong> {user.plan}</p>
+          <Button size="xs" variant="outline" className="mt-3">
+            Manage Plan
+          </Button>
+        </Card>
 
-        <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border dark:border-zinc-700 shadow">
-          <h2 className="text-xl font-semibold mb-3 text-zinc-800 dark:text-white">📊 Usage</h2>
-          <p className="text-zinc-600 dark:text-zinc-300"><strong>Minutes Used:</strong> {user.minutesUsed}</p>
-          <p className="text-zinc-600 dark:text-zinc-300"><strong>Sessions:</strong> {user.sessions}</p>
+        <Card title="📊 Usage">
+          <p><strong>Minutes Used:</strong> {user.minutesUsed}</p>
+          <p><strong>Sessions:</strong> {user.sessions}</p>
           <div className="mt-4">
             <label className="text-sm text-zinc-500 dark:text-zinc-400">Monthly Limit Usage</label>
             <div className="w-full bg-zinc-200 dark:bg-zinc-700 h-3 rounded-full mt-1">
@@ -98,24 +102,23 @@ export default function Account() {
               />
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
-      {/* Transcripts */}
-      <div className="mb-10">
-        <h3 className="text-xl font-bold text-zinc-800 dark:text-white mb-4 flex items-center gap-2">
-          <FileText className="w-5 h-5" /> Saved Transcripts
-        </h3>
+      {/* Saved Transcripts */}
+      <div className="mb-12">
+        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-zinc-800 dark:text-white">
+          <FileText className="w-5 h-5" />
+          Saved Transcripts
+        </h2>
         {transcripts.length === 0 ? (
-          <p className="text-zinc-500 dark:text-zinc-400">
-            You haven’t saved any transcripts yet.
-          </p>
+          <p className="text-zinc-500 dark:text-zinc-400">You haven’t saved any transcripts yet.</p>
         ) : (
           <div className="space-y-4">
             {transcripts.map((t) => (
               <div
                 key={t.id}
-                className="flex justify-between items-start bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-md p-4 hover:shadow transition"
+                className="flex justify-between items-start bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-xl p-4 hover:shadow transition"
               >
                 <div>
                   <p className="font-medium text-zinc-900 dark:text-white">{t.title}</p>
@@ -135,8 +138,8 @@ export default function Account() {
         )}
       </div>
 
-      {/* Actions */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Quick Actions */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         <ActionCard icon={<Settings className="w-5 h-5" />} label="Preferences" />
         <ActionCard icon={<UploadCloud className="w-5 h-5" />} label="Upload History" />
         <ActionCard icon={<BarChart2 className="w-5 h-5" />} label="Billing Dashboard" />
@@ -144,9 +147,11 @@ export default function Account() {
         <ActionCard icon={<AlertCircle className="w-5 h-5" />} label="Report a Problem" />
       </div>
 
-      {/* Activity */}
+      {/* Recent Activity */}
       <div className="mt-10">
-        <h3 className="text-xl font-bold text-zinc-800 dark:text-white mb-4">🕓 Recent Activity</h3>
+        <h2 className="text-xl font-semibold text-zinc-800 dark:text-white mb-4">
+          🕓 Recent Activity
+        </h2>
         <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
           <li>🟢 Transcribed “Client Brief” – 3 minutes ago</li>
           <li>🟡 Uploaded “Investor Call.wav” – 2 days ago</li>
@@ -157,10 +162,19 @@ export default function Account() {
   );
 }
 
+function Card({ title, children }) {
+  return (
+    <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border dark:border-zinc-700 shadow-sm space-y-2">
+      <h3 className="text-lg font-semibold text-zinc-800 dark:text-white mb-2">{title}</h3>
+      <div className="text-sm text-zinc-700 dark:text-zinc-300 space-y-1">{children}</div>
+    </div>
+  );
+}
+
 function ActionCard({ icon, label }) {
   return (
     <button
-      className="flex items-center justify-between w-full p-4 rounded-lg border dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition"
+      className="flex items-center justify-between w-full p-4 rounded-xl border dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition"
       title={label}
     >
       <div className="flex items-center gap-3 text-left text-sm font-medium text-zinc-700 dark:text-zinc-200">

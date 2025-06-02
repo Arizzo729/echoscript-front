@@ -1,19 +1,10 @@
-// ✅ FINAL Settings.jsx — Clean, Advanced, and Refined
 import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { Switch } from "@headlessui/react";
 import {
-  Moon,
-  Sun,
-  HelpCircle,
-  Mail,
-  Accessibility,
-  Settings2,
-  Info,
-  Text,
+  Moon, Sun, HelpCircle, Mail, Accessibility, Settings2, Info, Text, ShieldCheck, FileText,
 } from "lucide-react";
-import Button from "../components/ui/Button"; // or adjust path as needed
-
+import Button from "../components/ui/Button";
 import { FontSizeContext } from "../context/useFontSize.jsx";
 
 const tabs = [
@@ -24,9 +15,7 @@ const tabs = [
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState("preferences");
-  const [darkMode, setDarkMode] = useState(
-    document.documentElement.classList.contains("dark")
-  );
+  const [darkMode, setDarkMode] = useState(document.documentElement.classList.contains("dark"));
   const [showHints, setShowHints] = useState(true);
   const [accessibleFonts, setAccessibleFonts] = useState(false);
   const { fontSize, setFontSize } = useContext(FontSizeContext);
@@ -52,7 +41,7 @@ export default function Settings() {
       transition={{ duration: 0.4 }}
     >
       {/* Sidebar Tabs */}
-      <div className="md:w-1/4 border-r dark:border-gray-700 pr-4">
+      <aside className="md:w-1/4 border-r dark:border-gray-700 pr-4">
         <nav className="space-y-3">
           {tabs.map(({ id, label, icon: Icon }) => (
             <button
@@ -60,7 +49,7 @@ export default function Settings() {
               onClick={() => setActiveTab(id)}
               className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition ${
                 activeTab === id
-                  ? "bg-teal-600 text-white dark:bg-teal-500"
+                  ? "bg-gradient-to-br from-teal-500 to-blue-500 text-white shadow-md"
                   : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
               }`}
               aria-current={activeTab === id ? "page" : undefined}
@@ -70,45 +59,40 @@ export default function Settings() {
             </button>
           ))}
         </nav>
-      </div>
+      </aside>
 
-      {/* Tab Content */}
-      <div className="flex-1 space-y-8">
+      {/* Main Content */}
+      <section className="flex-1 space-y-10">
         {activeTab === "preferences" && (
-          <motion.section
-            key="preferences"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
+          <motion.div key="preferences" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
             <h2 className="text-xl font-bold mb-4">User Preferences</h2>
-            <div className="space-y-4">
+            <SettingsGroup title="Appearance & Accessibility">
               <SettingToggle
                 label="Enable Dark Mode"
-                description="Switch between light and dark themes"
+                description="Toggle between light and dark themes"
                 enabled={darkMode}
                 onChange={toggleDarkMode}
                 Icon={darkMode ? Moon : Sun}
               />
               <SettingToggle
-                label="Show Onboarding Hints"
-                description="Display helpful tips during your first use"
-                enabled={showHints}
-                onChange={() => setShowHints(!showHints)}
-                Icon={HelpCircle}
-              />
-              <SettingToggle
-                label="Enable Accessible Fonts"
-                description="Use dyslexia-friendly and high-contrast fonts"
+                label="Accessible Fonts"
+                description="Enable fonts for better readability"
                 enabled={accessibleFonts}
                 onChange={() => setAccessibleFonts(!accessibleFonts)}
                 Icon={Accessibility}
+              />
+              <SettingToggle
+                label="Show Onboarding Hints"
+                description="Helpful tooltips for new users"
+                enabled={showHints}
+                onChange={() => setShowHints(!showHints)}
+                Icon={HelpCircle}
               />
               <div className="bg-zinc-50 dark:bg-zinc-800 px-4 py-3 rounded-lg">
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2 font-medium text-zinc-800 dark:text-white">
                     <Text className="w-5 h-5 text-teal-500" />
-                    <span>Adjust Font Size</span>
+                    <span>Font Size</span>
                   </div>
                   <input
                     type="range"
@@ -117,85 +101,83 @@ export default function Settings() {
                     step="0.01"
                     value={fontSize}
                     onChange={handleFontSizeChange}
-                    className="w-40"
+                    className="w-40 accent-teal-500"
                   />
                 </div>
               </div>
-            </div>
-          </motion.section>
+            </SettingsGroup>
+
+            <SettingsGroup title="Account & Data">
+              <SettingToggle
+                label="End-to-End Encryption"
+                description="Secure transcripts with advanced encryption"
+                enabled
+                disabled
+                Icon={ShieldCheck}
+              />
+              <SettingToggle
+                label="Auto-Save Transcripts"
+                description="Automatically save your work to your account"
+                enabled={true}
+                disabled
+                Icon={FileText}
+              />
+            </SettingsGroup>
+          </motion.div>
         )}
 
         {activeTab === "faq" && (
-          <motion.section
-            key="faq"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
+          <motion.div key="faq" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
             <h2 className="text-xl font-bold mb-4">Frequently Asked Questions</h2>
             <FAQItem question="How accurate are the transcripts?">
-              EchoScript uses state-of-the-art AI (Whisper + GPT) to handle muffled audio, accents, and broken grammar with near-human accuracy.
+              EchoScript uses Whisper + GPT to transcribe even challenging audio with near-human precision.
             </FAQItem>
             <FAQItem question="Can I export transcripts?">
-              Yes — transcripts can be exported as PDF, DOCX, or copied to clipboard. More integrations coming soon.
+              Yes — export to PDF, DOCX, clipboard, Notion, Google Docs, and more (coming soon).
             </FAQItem>
-            <FAQItem question="Do you store audio or data?">
-              By default, we do not store your files. You control what gets saved in your account.
+            <FAQItem question="Is my data stored securely?">
+              By default, EchoScript does not store your files unless you choose to save them.
             </FAQItem>
-          </motion.section>
+          </motion.div>
         )}
 
         {activeTab === "contact" && (
-          <motion.section
-            key="contact"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
+          <motion.div key="contact" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
             <h2 className="text-xl font-bold mb-4">Contact Support</h2>
             <form className="space-y-4 max-w-lg" onSubmit={(e) => e.preventDefault()}>
-              <input
-                type="text"
-                placeholder="Your name"
-                className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm"
-                required
-              />
-              <input
-                type="email"
-                placeholder="Your email"
-                className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm"
-                required
-              />
-              <select
-                className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm"
-                required
-              >
+              <input type="text" placeholder="Your name" required className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm" />
+              <input type="email" placeholder="Your email" required className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm" />
+              <select required className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm">
                 <option value="">Choose a subject</option>
                 <option>Technical Issue</option>
                 <option>Billing Question</option>
                 <option>Feature Request</option>
                 <option>Other</option>
               </select>
-              <textarea
-                rows={4}
-                placeholder="Describe your issue or request"
-                className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm"
-                required
-              ></textarea>
+              <textarea rows={4} placeholder="Describe your issue" required className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm"></textarea>
               <Button variant="primary" type="submit" className="w-full">
                 Send Message
               </Button>
             </form>
-          </motion.section>
+          </motion.div>
         )}
-      </div>
+      </section>
     </motion.div>
   );
 }
 
-function SettingToggle({ label, description, enabled, onChange, Icon }) {
+function SettingsGroup({ title, children }) {
   return (
-    <div className="flex items-center justify-between bg-zinc-50 dark:bg-zinc-800 px-4 py-3 rounded-lg">
+    <div className="space-y-4 mb-8">
+      <h3 className="text-md font-semibold text-zinc-700 dark:text-zinc-200 mb-2">{title}</h3>
+      <div className="space-y-4">{children}</div>
+    </div>
+  );
+}
+
+function SettingToggle({ label, description, enabled, onChange, Icon, disabled = false }) {
+  return (
+    <div className={`flex items-center justify-between bg-zinc-50 dark:bg-zinc-800 px-4 py-3 rounded-lg ${disabled ? "opacity-50 pointer-events-none" : ""}`}>
       <div className="flex flex-col gap-1 text-sm">
         <div className="flex items-center gap-2 font-medium text-zinc-800 dark:text-white">
           <Icon className="w-5 h-5 text-teal-500" />
@@ -238,3 +220,4 @@ function FAQItem({ question, children }) {
     </div>
   );
 }
+

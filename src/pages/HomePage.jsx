@@ -52,8 +52,7 @@ export default function HomePage() {
   });
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-950 text-white overflow-hidden flex flex-col items-center justify-center text-center">
-      {/* Particles */}
+    <div className="relative min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-950 text-white overflow-hidden flex flex-col items-center justify-center text-center px-4">
       <Particles
         id="tsparticles"
         init={particlesInit}
@@ -71,7 +70,6 @@ export default function HomePage() {
         className="absolute inset-0 z-0"
       />
 
-      {/* Logo + Headline */}
       <motion.div
         className="z-10 mb-6"
         initial={{ opacity: 0, y: -30 }}
@@ -84,11 +82,7 @@ export default function HomePage() {
             animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.4, 0.2] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           />
-          <img
-            src="/Icon.png"
-            alt="EchoScript Icon"
-            className="relative w-full drop-shadow-xl"
-          />
+          <img src="/Icon.png" alt="EchoScript Icon" className="relative w-full drop-shadow-xl" />
         </div>
 
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">EchoScript.AI</h1>
@@ -109,18 +103,15 @@ export default function HomePage() {
         <p className="text-sm mt-1 text-zinc-400 font-mono">{formattedTime}</p>
       </motion.div>
 
-      {/* Voice Visuals */}
       <motion.div className="z-10 mt-2 mb-3">
         <AudioWaveform voiceLevel={voiceLevel} />
         <div className="text-xs text-zinc-500 mt-1 font-medium">{micStatus}</div>
       </motion.div>
 
-      {/* GPT Bubble */}
       {gptResponse && showBubble && (
         <LiveGPTBubble message={gptResponse} onClose={() => setShowBubble(false)} />
       )}
 
-      {/* Welcome Box */}
       <motion.div
         className="max-w-2xl mx-auto bg-zinc-800/80 p-6 rounded-2xl border border-teal-700 backdrop-blur-md shadow-lg z-10"
         initial={{ opacity: 0, y: 20 }}
@@ -133,10 +124,8 @@ export default function HomePage() {
         </p>
       </motion.div>
 
-      {/* Timeline Progress */}
       <ProgressTimeline currentStep={introStep} />
 
-      {/* Top-right Buttons */}
       <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
         <motion.button
           onClick={() => setLanguage(language === "en" ? "es" : "en")}
@@ -156,5 +145,4 @@ export default function HomePage() {
     </div>
   );
 }
-
 

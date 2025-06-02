@@ -1,7 +1,7 @@
-// ✅ EchoScript.AI — Join Our Community Page
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { FaDiscord, FaInstagram, FaLinkedin, FaTiktok } from "react-icons/fa";
+import { Sparkles } from "lucide-react";
 
 const communityLinks = [
   {
@@ -31,54 +31,82 @@ const communityLinks = [
 ];
 
 export default function Community() {
+  const [email, setEmail] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // TODO: Add SendGrid or backend hook
+    alert(`Subscribed with ${email}`);
+    setEmail("");
+  };
+
   return (
     <motion.div
-      className="max-w-4xl mx-auto px-6 py-12 text-center"
-      initial={{ opacity: 0, y: 30 }}
+      className="max-w-5xl mx-auto px-6 py-16 text-center"
+      initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
-      <h1 className="text-4xl font-bold mb-4 text-white">Join Our Community</h1>
-      <p className="text-zinc-400 mb-10">
-        Stay connected with EchoScript.AI and join the conversation. We’re building the future of voice AI together.
-      </p>
+      <motion.div
+        className="flex flex-col items-center mb-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
+        <Sparkles className="w-8 h-8 text-teal-400 mb-2 animate-pulse" />
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-white">
+          Join the EchoScript.AI Movement
+        </h1>
+        <p className="text-zinc-400 text-base sm:text-lg mt-4 max-w-2xl">
+          Connect with a global community building the future of voice + AI. Share insights, ask questions, and get early access to features.
+        </p>
+      </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-14">
         {communityLinks.map(({ name, href, icon: Icon, color }) => (
-          <a
+          <motion.a
             key={name}
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className={`flex flex-col items-center justify-center p-6 rounded-xl text-white shadow-md hover:scale-105 transition transform ${color}`}
+            className={`flex flex-col items-center justify-center p-6 rounded-xl text-white shadow-md hover:scale-105 transform transition ${color}`}
+            whileHover={{ scale: 1.1 }}
           >
-            <Icon className="w-8 h-8 mb-2" />
+            <Icon className="w-9 h-9 mb-2" />
             <span className="text-sm font-semibold">{name}</span>
-          </a>
+          </motion.a>
         ))}
       </div>
 
       {/* Newsletter Signup */}
-      <div className="bg-zinc-800 rounded-xl p-6 shadow-md border border-zinc-700 max-w-lg mx-auto">
-        <h2 className="text-xl font-bold text-white mb-2">Stay in the Loop</h2>
-        <p className="text-zinc-400 text-sm mb-4">
-          Subscribe to our newsletter for AI updates, transcription tips, and exclusive invites.
+      <motion.div
+        className="bg-zinc-800 border border-zinc-700 rounded-xl p-8 max-w-xl mx-auto shadow-xl"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        <h2 className="text-2xl font-bold text-white mb-2">Subscribe for Updates</h2>
+        <p className="text-zinc-400 text-sm mb-5">
+          Get the latest AI news, transcription tips, product updates, and community highlights.
         </p>
-        <form onSubmit={(e) => e.preventDefault()} className="flex flex-col sm:flex-row gap-3">
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
           <input
             type="email"
-            placeholder="Your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Your email address"
             required
-            className="flex-1 p-2 rounded-md bg-zinc-900 border border-zinc-700 text-white text-sm"
+            className="flex-1 p-3 rounded-md bg-zinc-900 border border-zinc-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
           <button
             type="submit"
-            className="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-md text-sm transition"
+            className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2.5 rounded-md text-sm transition font-semibold"
           >
             Subscribe
           </button>
         </form>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
+
