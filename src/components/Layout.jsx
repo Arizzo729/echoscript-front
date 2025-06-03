@@ -6,7 +6,6 @@ import Header from "./Header";
 import EchoAssistantUltra from "./EchoAssistantUltra";
 import ToastContainer from "./ToastContainer";
 import MobileBottomNav from "./MobileBottomNav";
-import GlowSVGTrail from "./GlowSVGTrail"; // 🔥 Final active glow trail
 import { AnimatePresence, motion } from "framer-motion";
 
 export const ThemeContext = createContext();
