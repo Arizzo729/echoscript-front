@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { FaDiscord, FaInstagram, FaLinkedin, FaTiktok } from "react-icons/fa";
+import {
+  FaDiscord,
+  FaInstagram,
+  FaLinkedin,
+  FaTiktok,
+} from "react-icons/fa";
 import { Sparkles } from "lucide-react";
 
 const communityLinks = [
@@ -35,18 +40,19 @@ export default function Community() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: Add SendGrid or backend hook
+    // TODO: Integrate with SendGrid or backend API
     alert(`Subscribed with ${email}`);
     setEmail("");
   };
 
   return (
     <motion.div
-      className="max-w-5xl mx-auto px-6 py-16 text-center"
+      className="max-w-6xl mx-auto px-6 py-16 text-center"
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
+      {/* Header */}
       <motion.div
         className="flex flex-col items-center mb-10"
         initial={{ opacity: 0 }}
@@ -58,10 +64,12 @@ export default function Community() {
           Join the EchoScript.AI Movement
         </h1>
         <p className="text-zinc-400 text-base sm:text-lg mt-4 max-w-2xl">
-          Connect with a global community building the future of voice + AI. Share insights, ask questions, and get early access to features.
+          Connect with a global community building the future of voice + AI.
+          Share insights, ask questions, and get early access to features.
         </p>
       </motion.div>
 
+      {/* Social Links */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-14">
         {communityLinks.map(({ name, href, icon: Icon, color }) => (
           <motion.a
@@ -69,7 +77,7 @@ export default function Community() {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className={`flex flex-col items-center justify-center p-6 rounded-xl text-white shadow-md hover:scale-105 transform transition ${color}`}
+            className={`flex flex-col items-center justify-center p-6 rounded-xl text-white shadow-md hover:scale-[1.05] transform transition ${color}`}
             whileHover={{ scale: 1.1 }}
           >
             <Icon className="w-9 h-9 mb-2" />
@@ -85,22 +93,28 @@ export default function Community() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
       >
-        <h2 className="text-2xl font-bold text-white mb-2">Subscribe for Updates</h2>
+        <h2 className="text-2xl font-bold text-white mb-2">
+          Subscribe for Updates
+        </h2>
         <p className="text-zinc-400 text-sm mb-5">
-          Get the latest AI news, transcription tips, product updates, and community highlights.
+          Get the latest AI news, transcription tips, product updates, and
+          community highlights.
         </p>
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row gap-3"
+        >
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Your email address"
             required
-            className="flex-1 p-3 rounded-md bg-zinc-900 border border-zinc-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="flex-1 px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
           <button
             type="submit"
-            className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2.5 rounded-md text-sm transition font-semibold"
+            className="bg-teal-600 hover:bg-teal-500 text-white font-semibold px-6 py-3 rounded-lg text-sm transition"
           >
             Subscribe
           </button>

@@ -1,5 +1,4 @@
-// services/AutomationService.js
-
+// ✅ EchoScript.AI — Unified Automation Service Engine
 const PROVIDERS = {
   BROWSE_AI: "browseAI",
   BARDEEN_AI: "bardeenAI",
@@ -12,7 +11,6 @@ const config = {
     apiBase: "https://api.browse.ai/v1",
     apiKey: import.meta.env.VITE_BROWSE_AI_API_KEY,
   },
-  bardeenAI: {},
   apify: {
     apiBase: "https://api.apify.com/v2",
     token: import.meta.env.VITE_APIFY_API_TOKEN,
@@ -28,6 +26,9 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1500;
 
 class AutomationService {
+  /**
+   * Resilient fetch with retries
+   */
   static async fetchWithRetries(url, options, retries = MAX_RETRIES) {
     try {
       const res = await fetch(url, options);
@@ -41,11 +42,14 @@ class AutomationService {
         await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
         return this.fetchWithRetries(url, options, retries - 1);
       }
-      throw error;
+      throw new Error(`Failed after ${MAX_RETRIES} attempts → ${error.message}`);
     }
   }
 
-  static async runAutomation(provider, automationId, inputData, options = {}) {
+  /**
+   * Dispatches the selected provider and automation logic
+   */
+  static async runAutomation(provider, automationId, inputData = {}, options = {}) {
     switch (provider) {
       case PROVIDERS.BROWSE_AI:
         return await this._runBrowseAI(automationId, inputData, options);
@@ -54,16 +58,20 @@ class AutomationService {
       case PROVIDERS.BRIGHTDATA:
         return await this._runBrightData(inputData);
       case PROVIDERS.BARDEEN_AI:
-        throw new Error("Bardeen.AI requires extension or manual interaction.");
+        throw new Error("Bardeen.AI requires manual extension execution.");
       default:
-        throw new Error(`Unsupported provider: ${provider}`);
+        throw new Error(`❌ Unsupported provider: ${provider}`);
     }
   }
 
+  /**
+   * Browse.AI task runner
+   */
   static async _runBrowseAI(automationId, inputData, { webhookUrl, batchId } = {}) {
     const { apiBase, apiKey } = config.browseAI;
-    const body = { inputData, webhookUrl, batchId };
     const url = `${apiBase}/automations/${automationId}/run`;
+    const body = { inputData, webhookUrl, batchId };
+
     const options = {
       method: "POST",
       headers: {
@@ -72,48 +80,58 @@ class AutomationService {
       },
       body: JSON.stringify(body),
     };
+
     return await this.fetchWithRetries(url, options);
   }
 
+  /**
+   * Apify task runner (sync, returns dataset items)
+   */
   static async _runApify(taskId, token = config.apify.token) {
     const url = `${config.apify.apiBase}/actor-tasks/${taskId}/run-sync-get-dataset-items?token=${token}`;
     const options = { method: "GET" };
     return await this.fetchWithRetries(url, options);
   }
 
+  /**
+   * BrightData proxy-based task (only use server-side)
+   */
   static async _runBrightData(inputData) {
     const { username, password, proxyEndpoint } = config.brightData;
     const proxyUrl = `http://${username}-session-rand:${password}@${proxyEndpoint}`;
 
-    // NOTE: Replace this with your real scraping target URL:
-    const url = "https://target-site.com/api/search";
+    const url = "https://target-site.com/api/search"; // Replace with real scraping target
 
     const options = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        // NOTE: Proxies must be handled via server-side HTTP agent
       },
       body: JSON.stringify({ query: inputData }),
-      // WARNING: Node-only proxy agent (not supported in browser directly)
-      // Use `node-fetch` + `https-proxy-agent` in server-side code
     };
 
     return await this.fetchWithRetries(url, options);
   }
 
-  static async runBatch(provider, automations) {
+  /**
+   * Runs a batch of automations for a provider
+   */
+  static async runBatch(provider, automations = []) {
     const results = [];
+
     for (const { automationId, inputData } of automations) {
       try {
-        const res = await this.runAutomation(provider, automationId, inputData);
-        results.push({ automationId, status: "success", data: res });
+        const result = await this.runAutomation(provider, automationId, inputData);
+        results.push({ automationId, status: "success", data: result });
       } catch (err) {
+        console.error(`Automation failed [${provider} → ${automationId}]`, err);
         results.push({ automationId, status: "error", error: err.message });
       }
     }
+
     return results;
   }
 }
 
 export { AutomationService, PROVIDERS };
-

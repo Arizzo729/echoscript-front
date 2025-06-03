@@ -2,19 +2,26 @@ import React from "react";
 import { useTheme } from "./useTheme";
 import { motion, AnimatePresence } from "framer-motion";
 
+/**
+ * ThemeToggle — animated dark/light mode toggle
+ * - Smooth SVG transitions
+ * - Full accessibility
+ * - Minimalist, elegant, mobile-friendly
+ */
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
+  const isLight = theme === "light";
 
   return (
     <button
-      aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+      aria-label={`Switch to ${isLight ? "dark" : "light"} mode`}
       onClick={toggleTheme}
       className="p-2 rounded-lg bg-transparent hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2"
-      title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+      title={`Switch to ${isLight ? "dark" : "light"} mode`}
       type="button"
     >
       <AnimatePresence mode="wait" initial={false}>
-        {theme === "light" ? (
+        {isLight ? (
           <motion.svg
             key="sun"
             xmlns="http://www.w3.org/2000/svg"
@@ -53,3 +60,4 @@ export function ThemeToggle() {
     </button>
   );
 }
+

@@ -1,4 +1,3 @@
-// ✅ EchoScript.AI — EchoAssistantUltra (Final Polished GPT Assistant)
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Send, X, Loader2, Wand2 } from "lucide-react";
@@ -10,11 +9,11 @@ const persona = {
     "Hi, I'm Echo — your smart assistant. Ask me anything about transcripts, plans, tools, or try commands like `/summarize`, `/clarify`, `/lookup keyword`, `/export`, or `/feedback`.",
 };
 
-const EchoAssistantUltra = ({
+export default function EchoAssistantUltra({
   user = { name: "User", plan: "Free", id: "anon" },
   context = "Dashboard",
   transcript = "",
-}) => {
+}) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [history, setHistory] = useState([{ role: "assistant", content: persona.greeting }]);
@@ -87,8 +86,11 @@ const EchoAssistantUltra = ({
       const data = await res.json();
       const reply = data.response || "⚠️ No response from assistant.";
       setHistory((prev) => [...prev, { role: "assistant", content: reply }]);
-    } catch (err) {
-      setHistory((prev) => [...prev, { role: "assistant", content: "⚠️ Error contacting the assistant." }]);
+    } catch {
+      setHistory((prev) => [
+        ...prev,
+        { role: "assistant", content: "⚠️ Error contacting the assistant." },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -102,6 +104,7 @@ const EchoAssistantUltra = ({
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         whileHover={{ scale: 1.1 }}
+        aria-label="Toggle Echo Assistant"
       >
         <Wand2 className="w-5 h-5" />
       </motion.button>
@@ -114,6 +117,7 @@ const EchoAssistantUltra = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
           >
+            {/* Header */}
             <div className="flex items-center justify-between p-4 border-b dark:border-zinc-700">
               <h2 className="text-base font-semibold text-zinc-900 dark:text-white">
                 Echo AI Assistant
@@ -123,6 +127,7 @@ const EchoAssistantUltra = ({
               </button>
             </div>
 
+            {/* Chat History */}
             <div className="flex-1 overflow-y-auto px-4 py-3 text-sm space-y-3">
               {history.map((msg, idx) => (
                 <motion.div
@@ -147,6 +152,7 @@ const EchoAssistantUltra = ({
               <div ref={scrollRef} />
             </div>
 
+            {/* Input */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -165,6 +171,7 @@ const EchoAssistantUltra = ({
                 type="submit"
                 className="ml-2 p-2 text-white bg-teal-600 hover:bg-teal-700 rounded-md"
                 disabled={loading}
+                aria-label="Send message"
               >
                 <Send size={16} />
               </button>
@@ -174,6 +181,4 @@ const EchoAssistantUltra = ({
       </AnimatePresence>
     </>
   );
-};
-
-export default EchoAssistantUltra;
+}

@@ -1,6 +1,7 @@
-// ✅ EchoScript.AI — Final Polished SmartButton
 import React from "react";
 import { twMerge } from "tailwind-merge";
+import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 
 export default function Button({
   children,
@@ -8,17 +9,18 @@ export default function Button({
   size = "md",
   loading = false,
   icon,
+  fullWidth = false,
   className = "",
   ...props
 }) {
   const base =
-    "relative inline-flex items-center justify-center font-medium select-none rounded-full transition-all duration-300 ease-out group focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 shadow-sm";
+    "relative inline-flex items-center justify-center font-medium select-none transition-all duration-300 ease-out group focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 shadow-sm";
 
   const sizes = {
-    xs: "px-3 py-1 text-xs gap-1.5",
-    sm: "px-4 py-1.5 text-sm gap-2",
-    md: "px-5 py-2 text-sm gap-2.5",
-    lg: "px-6 py-2.5 text-base gap-3",
+    xs: "px-3 py-1 text-xs gap-1.5 rounded-full",
+    sm: "px-4 py-1.5 text-sm gap-2 rounded-full",
+    md: "px-5 py-2 text-sm gap-2.5 rounded-full",
+    lg: "px-6 py-2.5 text-base gap-3 rounded-full",
   };
 
   const variants = {
@@ -49,20 +51,27 @@ export default function Button({
   };
 
   return (
-    <button
+    <motion.button
       disabled={loading || props.disabled}
-      className={twMerge(base, sizes[size], variants[variant], className)}
+      className={twMerge(
+        base,
+        sizes[size],
+        variants[variant],
+        fullWidth && "w-full",
+        className
+      )}
+      aria-busy={loading}
       {...props}
     >
       {loading && (
-        <span className="absolute inset-0 animate-pulse bg-white/10 rounded-full" />
+        <span className="absolute inset-0 flex items-center justify-center bg-white/10 dark:bg-black/10 rounded-full animate-pulse z-0">
+          <Loader2 className="w-4 h-4 text-white animate-spin" />
+        </span>
       )}
       <span className="relative z-10 inline-flex items-center">
-        {icon && <span className="mr-2">{icon}</span>}
+        {icon && <span className={children ? "mr-2" : ""}>{icon}</span>}
         {children}
       </span>
-    </button>
+    </motion.button>
   );
 }
-
-

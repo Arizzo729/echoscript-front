@@ -1,60 +1,74 @@
-import React, { useRef, useState, useEffect } from "react";
-import { useFrame } from "@react-three/fiber";
-import { CatmullRomCurve3, Vector3, Color } from "three";
-import { Line } from "@react-three/drei";
+// ✅ src/components/GlowCanvas.jsx — 3D Ribbon Glow Cursor using Three.js
+import React, { useRef, useEffect, useMemo } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 
-const TRAIL_LENGTH = 20;
-const EASING = 0.15;
-
-export default function GlowRibbon() {
-  const mouse = useRef(new Vector3(0, 0, 0));
-  const pointsRef = useRef(Array.from({ length: TRAIL_LENGTH }, () => new Vector3()));
-  const lineRef = useRef();
-  const [tick, setTick] = useState(0);
-  const [initialized, setInitialized] = useState(false);
-
-  const baseColor = new Color("#00f0ff");
+const RibbonTrail = () => {
+  const trailRef = useRef();
+  const mouse = useRef(new THREE.Vector2());
+  const points = useRef([]);
+  const maxPoints = 80;
 
   useEffect(() => {
-    requestAnimationFrame(() => setInitialized(true));
+    const updateMouse = (e) => {
+      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    };
+    window.addEventListener("pointermove", updateMouse);
+    return () => window.removeEventListener("pointermove", updateMouse);
   }, []);
 
-  useFrame(({ pointer }) => {
-    const target = new Vector3(pointer.x * 10, pointer.y * 10, 0);
-    mouse.current.lerp(target, EASING);
+  const curveMaterial = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        opacity: 0.4,
+      }),
+    []
+  );
 
-    pointsRef.current.shift();
-    pointsRef.current.push(mouse.current.clone());
+  useFrame(({ camera }) => {
+    const vec = new THREE.Vector3(mouse.current.x, mouse.current.y, 0.5);
+    vec.unproject(camera);
+    points.current.push(vec.clone());
+    if (points.current.length > maxPoints) points.current.shift();
 
-    if (!initialized || !lineRef.current) return;
-
-    const curve = new CatmullRomCurve3(pointsRef.current);
-    const trailPoints = curve.getPoints(80);
-
-    if (trailPoints.length && lineRef.current.geometry) {
-      lineRef.current.geometry.setFromPoints(trailPoints);
-
-      const shimmer = baseColor.clone().offsetHSL(((tick % 360) / 360) * 0.1, 0, 0);
-      if (lineRef.current.material?.color) {
-        lineRef.current.material.color.set(shimmer);
-      }
+    if (trailRef.current && points.current.length > 2) {
+      const curve = new THREE.CatmullRomCurve3(points.current);
+      const geometry = new THREE.TubeGeometry(curve, 64, 0.05, 8, false);
+      trailRef.current.geometry.dispose();
+      trailRef.current.geometry = geometry;
     }
-
-    setTick((t) => t + 1);
   });
 
-  if (!initialized) return null;
-
   return (
-    <Line
-      ref={lineRef}
-      points={pointsRef.current}
-      lineWidth={1.5} // lineWidth only works in some setups
-      transparent
-      opacity={0.1}
-      color={"#00f0ff"}
-      toneMapped={false}
-    />
+    <mesh ref={trailRef}>
+      <tubeGeometry args={[new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0, 0)]), 64, 0.05, 8, false]} />
+      <meshBasicMaterial
+        attach="material"
+        color={new THREE.Color("#00fff7")}
+        transparent
+        opacity={0.4}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
+  );
+};
+
+export default function GlowCanvas() {
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[5]">
+      <Canvas
+        camera={{ position: [0, 0, 5], fov: 75 }}
+        gl={{ antialias: true, alpha: true }}
+      >
+        <ambientLight intensity={1.5} />
+        <RibbonTrail />
+      </Canvas>
+    </div>
   );
 }
 

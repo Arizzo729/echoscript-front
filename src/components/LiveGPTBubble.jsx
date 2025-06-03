@@ -16,7 +16,9 @@ export default function LiveGPTBubble({ message, onClose }) {
         <BsStars className="text-teal-500 mt-1" />
         <div className="text-sm font-medium leading-snug">
           <span className="block">{message}</span>
-          <button onClick={onClose} className="text-xs mt-2 text-teal-600 hover:underline">Dismiss</button>
+          <button onClick={onClose} className="text-xs mt-2 text-teal-600 hover:underline">
+            Dismiss
+          </button>
         </div>
       </div>
     </motion.div>

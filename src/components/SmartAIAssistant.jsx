@@ -10,34 +10,38 @@ export default function SmartAIAssistant() {
   const [input, setInput] = useState("");
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { sender: "assistant", text: "Hi there! Need help with transcription?" }
+    { sender: "assistant", text: "Hi there! Need help with transcription?" },
   ]);
 
   const ref = useRef();
   useOnClickOutside(ref, () => setOpen(false));
 
   const handleSend = async () => {
-    if (!input.trim()) return;
-    const userMessage = { sender: "user", text: input };
+    const trimmed = input.trim();
+    if (!trimmed) return;
+
+    const userMessage = { sender: "user", text: trimmed };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
-    // Echo thinking...
-    const thinking = { sender: "assistant", text: "..." };
-    setMessages((prev) => [...prev, thinking]);
+    const thinkingMessage = { sender: "assistant", text: "..." };
+    setMessages((prev) => [...prev, thinkingMessage]);
 
-    const reply = sendPrompt
-      ? await sendPrompt(input).then((res) => res?.reply || "No response.")
-      : "I'm offline right now.";
+    const reply =
+      typeof sendPrompt === "function"
+        ? await sendPrompt(trimmed).then((res) => res?.reply || "No response.")
+        : "I'm offline right now.";
 
-    setMessages((prev) => [
-      ...prev.filter((msg) => msg.text !== "..."),
-      { sender: "assistant", text: reply }
-    ]);
+    setMessages((prev) =>
+      prev.map((m) => (m.text === "..." ? { sender: "assistant", text: reply } : m))
+    );
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") handleSend();
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   return (
@@ -61,6 +65,8 @@ export default function SmartAIAssistant() {
             exit={{ opacity: 0, y: 100 }}
             transition={{ type: "spring", bounce: 0.3, duration: 0.4 }}
             className="fixed bottom-6 right-6 z-50 w-[350px] max-h-[500px] bg-zinc-900 border border-zinc-700 text-white rounded-2xl shadow-2xl flex flex-col"
+            role="dialog"
+            aria-label="Echo Assistant Chat"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-3 border-b border-zinc-700">
@@ -77,8 +83,11 @@ export default function SmartAIAssistant() {
               </button>
             </div>
 
-            {/* Message log */}
-            <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2 scrollbar-thin scrollbar-thumb-zinc-600">
+            {/* Message Log */}
+            <div
+              className="flex-1 overflow-y-auto px-3 py-2 space-y-2 scrollbar-thin scrollbar-thumb-zinc-600"
+              aria-live="polite"
+            >
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
@@ -106,6 +115,7 @@ export default function SmartAIAssistant() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyPress}
+                aria-label="Type your message"
               />
               <button
                 onClick={handleSend}
@@ -126,3 +136,4 @@ export default function SmartAIAssistant() {
     </>
   );
 }
+

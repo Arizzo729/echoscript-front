@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI: Clean Header — Logo Aligned & Responsive
+// ✅ EchoScript.AI: Final Header — Enhanced Search + Responsive + Accessible
 import React, { useState, useEffect, useRef } from "react";
 import {
   BellIcon,
@@ -7,6 +7,7 @@ import {
   SunIcon,
   MoonIcon,
   UserCircleIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Button from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,7 +36,10 @@ export default function Header({
 
   useEffect(() => {
     const close = (e) => {
-      if (!searchRef.current?.contains(e.target)) setShowNotifDropdown(false);
+      if (!searchRef.current?.contains(e.target)) {
+        setShowNotifDropdown(false);
+        setShowUserDropdown(false);
+      }
     };
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
@@ -48,7 +52,7 @@ export default function Header({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      {/* Left */}
+      {/* Logo */}
       <div className="flex items-center gap-3 pl-1 sm:pl-4">
         <Link to="/" className="flex items-center gap-2">
           <img src={Logo} alt="EchoScript.AI" className="h-8 sm:h-10 w-auto object-contain" />
@@ -64,20 +68,32 @@ export default function Header({
           <input
             type="search"
             placeholder="Search transcripts, tools, users..."
-            className="w-full pl-10 pr-4 py-2 text-sm rounded-md bg-zinc-800 border border-zinc-700 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-400"
+            className="w-full pl-10 pr-10 py-2 text-sm rounded-md bg-zinc-800 border border-zinc-700 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-400"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search transcripts"
           />
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 w-5 h-5 -translate-y-1/2 pointer-events-none text-zinc-400" />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-red-400 transition"
+              aria-label="Clear search"
+            >
+              <XMarkIcon className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Right Actions */}
+      {/* Actions */}
       <div className="hidden sm:flex items-center gap-4 justify-end w-full sm:w-auto">
+        {/* Theme toggle */}
         <Button
           variant="ghost"
           size="sm"
           onClick={onToggleTheme}
+          aria-label="Toggle theme"
           icon={
             isDarkMode ? (
               <SunIcon className="w-6 h-6 text-yellow-300" />
@@ -93,7 +109,8 @@ export default function Header({
             variant="ghost"
             size="sm"
             onClick={() => setShowNotifDropdown(!showNotifDropdown)}
-            icon={<BellIcon className="w-6 h-6 text-zinc-300" />}
+            icon={<BellIcon className="w-6 h-6 text-zinc-300 hover:text-white transition" />}
+            aria-label="Notifications"
           />
           <AnimatePresence>
             {showNotifDropdown && (
@@ -102,22 +119,25 @@ export default function Header({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 className="absolute right-0 mt-2 w-72 bg-zinc-900 text-white border border-zinc-700 rounded-md shadow-xl z-50"
+                role="menu"
               >
                 <div className="p-3 font-medium border-b border-zinc-700">Notifications</div>
                 <ul>
-                  {notifications.map((n, i) => (
+                  {notifications.length > 0 ? notifications.map((n, i) => (
                     <li key={i} className="px-4 py-3 border-b border-zinc-800 hover:bg-zinc-800">
                       <p>{n.message}</p>
                       <p className="text-xs text-zinc-500">{n.time}</p>
                     </li>
-                  ))}
+                  )) : (
+                    <li className="px-4 py-3 text-zinc-400 text-sm">No notifications</li>
+                  )}
                 </ul>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* User */}
+        {/* User menu */}
         <div className="relative">
           <motion.div whileHover={{ scale: 1.1, rotate: 3 }} transition={{ type: "spring", stiffness: 300 }}>
             <Button
@@ -125,11 +145,12 @@ export default function Header({
               size="sm"
               onClick={() => setShowUserDropdown(!showUserDropdown)}
               className="flex items-center gap-2"
+              aria-label="User menu"
               icon={
                 user.avatar ? (
                   <img
                     src={user.avatar}
-                    alt="avatar"
+                    alt="User avatar"
                     className="w-8 h-8 rounded-full object-cover border border-teal-400 shadow"
                   />
                 ) : (
@@ -149,11 +170,15 @@ export default function Header({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 className="absolute right-0 mt-2 w-48 bg-zinc-900 text-white border border-zinc-700 rounded-md shadow-lg z-50"
+                role="menu"
               >
                 <a href="/account" className="block px-4 py-2 hover:bg-zinc-800">Profile</a>
                 <a href="/settings" className="block px-4 py-2 hover:bg-zinc-800">Settings</a>
                 <hr className="border-zinc-700" />
-                <button onClick={onLogout} className="w-full text-left px-4 py-2 text-red-500 hover:bg-zinc-800">
+                <button
+                  onClick={onLogout}
+                  className="w-full text-left px-4 py-2 text-red-500 hover:bg-zinc-800"
+                >
                   Logout
                 </button>
               </motion.div>
@@ -164,3 +189,4 @@ export default function Header({
     </motion.header>
   );
 }
+

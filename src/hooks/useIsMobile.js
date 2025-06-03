@@ -1,22 +1,19 @@
-// src/hooks/useIsMobile.js
+// ✅ useIsMobile.js — EchoScript.AI Responsive Breakpoint Hook (Enhanced)
 import { useEffect, useState } from "react";
 
 export default function useIsMobile(breakpoint = 768) {
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.innerWidth < breakpoint;
-    }
-    return false;
-  });
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < breakpoint : false
+  );
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < breakpoint);
-    };
+    const mediaQuery = window.matchMedia(`(max-width: ${breakpoint}px)`);
 
-    handleResize(); // force initial check
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const handleChange = () => setIsMobile(mediaQuery.matches);
+    handleChange(); // initial check
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, [breakpoint]);
 
   return isMobile;

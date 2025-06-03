@@ -5,20 +5,30 @@ import { motion } from "framer-motion";
 export default function NotFound() {
   return (
     <motion.div
-      className="min-h-screen flex items-center justify-center text-center bg-gray-50 dark:bg-gray-900 p-6"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 text-center"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
     >
-      <div>
-        <h1 className="text-6xl font-bold text-primary">404</h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 mt-2 mb-6">
-          Oops! Page not found.
+      <div className="space-y-6 max-w-lg">
+        <motion.h1
+          className="text-7xl font-extrabold bg-gradient-to-r from-teal-400 to-blue-500 text-transparent bg-clip-text"
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          404
+        </motion.h1>
+
+        <p className="text-lg text-zinc-400">
+          Oops! The page you’re looking for doesn’t exist or has moved.
         </p>
+
         <Link
           to="/"
-          className="bg-primary text-white px-6 py-3 rounded-md hover:bg-primary-light transition"
+          className="inline-block px-6 py-3 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-semibold shadow-lg transition duration-300"
         >
-          Back to Home
+          ⬅ Back to Home
         </Link>
       </div>
     </motion.div>

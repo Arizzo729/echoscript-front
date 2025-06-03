@@ -1,3 +1,4 @@
+// ✅ useVoiceInput.js — EchoScript.AI Real-time Voice Input Hook
 import { useEffect, useRef, useState } from "react";
 
 export default function useVoiceInput({ onTranscript = () => {} } = {}) {
@@ -7,7 +8,7 @@ export default function useVoiceInput({ onTranscript = () => {} } = {}) {
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      console.warn("SpeechRecognition not supported");
+      console.warn("🛑 SpeechRecognition not supported in this browser.");
       return;
     }
 
@@ -23,13 +24,15 @@ export default function useVoiceInput({ onTranscript = () => {} } = {}) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
           finalTranscript += transcript + " ";
-          if (onTranscript) onTranscript(transcript);
         }
+      }
+      if (finalTranscript.trim()) {
+        onTranscript(finalTranscript.trim());
       }
     };
 
     recognition.onerror = (event) => {
-      console.error("Speech recognition error:", event.error);
+      console.error("🎤 Speech recognition error:", event.error);
       setListening(false);
     };
 
@@ -40,8 +43,12 @@ export default function useVoiceInput({ onTranscript = () => {} } = {}) {
 
   const startListening = () => {
     if (recognitionRef.current && !listening) {
-      recognitionRef.current.start();
-      setListening(true);
+      try {
+        recognitionRef.current.start();
+        setListening(true);
+      } catch (err) {
+        console.error("❌ Failed to start recognition:", err);
+      }
     }
   };
 

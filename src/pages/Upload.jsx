@@ -61,8 +61,8 @@ export default function Upload() {
       });
 
       if (!res.ok) throw new Error("Transcription failed.");
-
       const data = await res.json();
+
       setTranscript(data.transcript);
       setAiFeedback(data.summary || "Transcript complete. No summary returned.");
     } catch (err) {
@@ -84,7 +84,9 @@ export default function Upload() {
         ← Back to Dashboard
       </Link>
 
-      <h1 className="text-3xl font-bold mb-2 text-zinc-900 dark:text-white">Upload Audio</h1>
+      <h1 className="text-4xl font-extrabold bg-gradient-to-r from-teal-400 to-blue-500 text-transparent bg-clip-text mb-2">
+        Upload Audio
+      </h1>
       <p className="text-zinc-600 dark:text-zinc-400 mb-6">
         Drag and drop audio files or click to browse. Supported formats: MP3, WAV, M4A.
       </p>
@@ -119,7 +121,7 @@ export default function Upload() {
       <div
         className={`border-2 border-dashed rounded-xl transition-all duration-300 cursor-pointer ${
           dragActive
-            ? "border-teal-400 bg-teal-50/10"
+            ? "border-teal-400 bg-teal-50/10 shadow-md"
             : "border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800"
         }`}
         onDragEnter={handleDrag}
@@ -164,10 +166,15 @@ export default function Upload() {
 
       {/* 📄 Transcript Output */}
       {transcript && (
-        <div className="mt-8 p-6 bg-zinc-800 rounded-xl text-white border border-teal-600 shadow-inner">
+        <motion.div
+          className="mt-8 p-6 bg-zinc-800 rounded-xl text-white border border-teal-600 shadow-inner"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
           <h2 className="text-lg font-semibold mb-2 text-teal-400">Transcript:</h2>
           <pre className="whitespace-pre-wrap text-sm text-zinc-200">{transcript}</pre>
-        </div>
+        </motion.div>
       )}
 
       {/* 🧠 AI Feedback Output */}
@@ -184,5 +191,4 @@ export default function Upload() {
     </motion.div>
   );
 }
-
 

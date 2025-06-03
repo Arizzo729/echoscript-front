@@ -19,20 +19,20 @@ const AnimatedSplash = ({ onComplete }) => {
       gsap.to(logoRef.current, {
         backgroundPosition: "200% center",
         duration: 3,
-        ease: "power1.inOut",
+        ease: "power2.inOut",
         repeat: -1,
         yoyo: true,
       });
 
       gsap.to(orbRef.current, {
         rotate: 360,
-        duration: 20,
+        duration: 30,
         ease: "linear",
         repeat: -1,
       });
     });
 
-    const timer = setTimeout(closeSplash, 3000);
+    const timer = setTimeout(closeSplash, 3200);
     return () => {
       ctx.revert();
       clearTimeout(timer);
@@ -48,13 +48,13 @@ const AnimatedSplash = ({ onComplete }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.6 } }}
         >
-          {/* Animated Orb Background */}
+          {/* 🔵 Ambient Orb */}
           <div
             ref={orbRef}
-            className="absolute w-[480px] h-[480px] rounded-full bg-gradient-to-br from-teal-500 via-blue-500 to-teal-400 opacity-20 blur-3xl"
+            className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-teal-500 via-blue-500 to-teal-400 opacity-20 blur-3xl pointer-events-none"
           />
 
-          {/* EchoScript Logo Icon */}
+          {/* 🔊 Logo Mask with Gradient Motion */}
           <div
             ref={logoRef}
             className="w-[200px] h-[200px] bg-no-repeat bg-center"
@@ -72,18 +72,18 @@ const AnimatedSplash = ({ onComplete }) => {
             }}
           />
 
-          {/* Brand Name */}
-          <motion.div
-            className="mt-6 text-4xl font-extrabold tracking-tight"
-            initial={{ opacity: 0, y: 6 }}
+          {/* 🧠 Brand Name */}
+          <motion.h1
+            className="mt-6 text-4xl sm:text-5xl font-extrabold tracking-tight"
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
+            transition={{ delay: 0.7, duration: 0.6 }}
           >
             EchoScript<span className="text-teal-400">.AI</span>
-          </motion.div>
+          </motion.h1>
 
-          {/* Lottie Waveform */}
-          <div className="mt-6 w-24 h-24 sm:w-28 sm:h-28 opacity-80">
+          {/* 📶 AI Pulse Lottie */}
+          <div className="mt-6 w-24 h-24 sm:w-28 sm:h-28 opacity-80 pointer-events-none">
             <Lottie animationData={animationData} loop autoplay />
           </div>
         </motion.div>
@@ -93,6 +93,4 @@ const AnimatedSplash = ({ onComplete }) => {
 };
 
 export default AnimatedSplash;
-
-
 

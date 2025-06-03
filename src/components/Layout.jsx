@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI: Final Unified Layout — Gradient Background + Cinematic Glow Trail
+// ✅ EchoScript.AI: Final Unified Layout — Enhanced with Auto Theme, Media Detection, & Glow
 import React, { useState, useEffect, createContext } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
@@ -7,15 +7,17 @@ import EchoAssistantUltra from "./EchoAssistantUltra";
 import ToastContainer from "./ToastContainer";
 import MobileBottomNav from "./MobileBottomNav";
 import { AnimatePresence, motion } from "framer-motion";
-import GlowCanvas from "./GlowCanvas"; // ✅ not GlowSVGTrail
-
+import GlowCanvas from "./GlowCanvas";
+import { X } from "lucide-react";
 
 export const ThemeContext = createContext();
 
 export default function Layout() {
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState(() =>
+    window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+  );
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(true); // Sidebar starts collapsed
+  const [collapsed, setCollapsed] = useState(true);
 
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
   const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
@@ -27,13 +29,13 @@ export default function Layout() {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <div className="relative flex flex-col h-screen w-screen bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white overflow-hidden">
-        {/* ✨ Final Glow Trail */}
+        {/* ✨ Glow Cursor Canvas */}
         <GlowCanvas />
 
-        {/* 📌 Top Header */}
+        {/* 📌 Header */}
         <Header toggleDrawer={toggleDrawer} />
 
-        {/* 🧭 Sidebar + Page Content */}
+        {/* 🧭 Sidebar + Main Content */}
         <div className="flex flex-1 overflow-hidden">
           <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
           <main
@@ -45,10 +47,12 @@ export default function Layout() {
           </main>
         </div>
 
-        {/* 🤖 Assistant + 📱 Mobile Nav */}
+        {/* 🤖 Echo Assistant (desktop) */}
         <div className="hidden md:block">
           <EchoAssistantUltra />
         </div>
+
+        {/* 📱 Bottom Nav (mobile only) */}
         <div className="md:hidden">
           <MobileBottomNav />
         </div>
@@ -56,7 +60,7 @@ export default function Layout() {
         {/* 🔔 Toast Notifications */}
         <ToastContainer />
 
-        {/* ⚙️ Slide-in Settings Panel */}
+        {/* ⚙️ Drawer Settings Panel */}
         <AnimatePresence>
           {isDrawerOpen && (
             <motion.div
@@ -64,16 +68,18 @@ export default function Layout() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-900 shadow-lg z-[9999]"
+              className="fixed top-0 right-0 h-full w-80 bg-white dark:bg-zinc-900 shadow-lg z-[9999]"
             >
               <button
                 onClick={toggleDrawer}
-                className="p-4 text-right w-full text-zinc-600 dark:text-zinc-300 hover:text-teal-500 transition"
+                className="absolute top-4 right-4 text-zinc-600 dark:text-zinc-300 hover:text-teal-500 transition"
+                aria-label="Close drawer"
               >
-                ✕
+                <X size={20} />
               </button>
-              <div className="p-6">
+              <div className="p-6 mt-10">
                 <h2 className="text-xl font-semibold">Settings</h2>
+                {/* Insert actual settings UI here */}
               </div>
             </motion.div>
           )}
@@ -82,3 +88,4 @@ export default function Layout() {
     </ThemeContext.Provider>
   );
 }
+

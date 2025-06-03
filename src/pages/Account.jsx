@@ -62,6 +62,7 @@ export default function Account() {
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.4 }}
     >
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
         <h1 className="text-4xl font-bold bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent tracking-tight">
           👤 Your Account
@@ -81,6 +82,7 @@ export default function Account() {
         </div>
       </div>
 
+      {/* Profile and Usage */}
       <div className="grid md:grid-cols-2 gap-6 mb-12">
         <Card title="👤 Profile">
           <p><strong>Name:</strong> {user.name}</p>
@@ -112,11 +114,13 @@ export default function Account() {
         </Card>
       </div>
 
+      {/* Transcripts */}
       <div className="mb-12">
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-zinc-800 dark:text-white">
           <FileText className="w-5 h-5 text-blue-500" />
           Saved Transcripts
         </h2>
+
         {transcripts.length === 0 ? (
           <p className="text-zinc-500 dark:text-zinc-400">
             You haven’t saved any transcripts yet.
@@ -148,6 +152,7 @@ export default function Account() {
         )}
       </div>
 
+      {/* Action Cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         <ActionCard icon={<Settings className="w-5 h-5" />} label="Preferences" />
         <ActionCard icon={<UploadCloud className="w-5 h-5" />} label="Upload History" />
@@ -156,6 +161,7 @@ export default function Account() {
         <ActionCard icon={<AlertCircle className="w-5 h-5" />} label="Report a Problem" />
       </div>
 
+      {/* Activity Log */}
       <div className="mt-10">
         <h2 className="text-xl font-semibold text-zinc-800 dark:text-white mb-4">
           🕓 Recent Activity

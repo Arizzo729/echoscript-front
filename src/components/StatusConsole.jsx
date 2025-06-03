@@ -31,7 +31,7 @@ function generateRandomLog() {
   };
   const message = messages[level][Math.floor(Math.random() * messages[level].length)];
   return {
-    id: Math.random().toString(36).substr(2, 9),
+    id: crypto.randomUUID?.() || Math.random().toString(36).substr(2, 9),
     level,
     message,
     timestamp: new Date().toISOString(),
@@ -45,6 +45,7 @@ export function StatusConsole() {
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const scrollRef = useRef(null);
 
+  // Auto-generate logs
   useEffect(() => {
     const interval = setInterval(() => {
       setLogs((prev) => [...prev, generateRandomLog()]);
@@ -52,12 +53,14 @@ export function StatusConsole() {
     return () => clearInterval(interval);
   }, []);
 
+  // Auto-scroll to bottom
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [logs]);
 
+  // Group logs by date
   const groupedLogs = useMemo(() => {
     const groups = {};
     logs.forEach((log) => {
@@ -68,26 +71,27 @@ export function StatusConsole() {
     return groups;
   }, [logs]);
 
+  // Filter logs
   const filteredGroups = useMemo(() => {
-    const filterTextLower = filterText.toLowerCase();
+    const search = filterText.toLowerCase();
     const filtered = {};
-    Object.entries(groupedLogs).forEach(([date, logs]) => {
-      const filteredLogs = logs.filter((log) => {
-        const matchText = log.message.toLowerCase().includes(filterTextLower);
-        const matchLevel = filterLevel === 'all' || log.level === filterLevel;
-        return matchText && matchLevel;
-      });
-      if (filteredLogs.length > 0) filtered[date] = filteredLogs;
-    });
+    for (const [date, logList] of Object.entries(groupedLogs)) {
+      const match = logList.filter(
+        (log) =>
+          log.message.toLowerCase().includes(search) &&
+          (filterLevel === 'all' || log.level === filterLevel)
+      );
+      if (match.length > 0) filtered[date] = match;
+    }
     return filtered;
   }, [filterText, filterLevel, groupedLogs]);
 
-  const toggleGroup = (date) => {
+  const toggleGroup = (date) =>
     setCollapsedGroups((prev) => ({ ...prev, [date]: !prev[date] }));
-  };
 
   return (
     <div className="flex flex-col max-w-4xl mx-auto p-6 bg-white dark:bg-zinc-800 rounded-lg shadow-lg">
+      {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
         <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Status Console</h2>
         <div className="flex gap-3 items-center flex-wrap">
@@ -116,60 +120,66 @@ export function StatusConsole() {
         </div>
       </header>
 
+      {/* Log Viewer */}
       <div
         ref={scrollRef}
         className="h-96 overflow-y-auto bg-zinc-100 dark:bg-zinc-900 rounded-md p-4 font-mono text-sm text-zinc-900 dark:text-zinc-100"
         aria-live="polite"
       >
-        {Object.entries(filteredGroups).length === 0 && (
+        {Object.entries(filteredGroups).length === 0 ? (
           <p className="text-center text-zinc-500 dark:text-zinc-600 italic select-none">No logs found</p>
+        ) : (
+          Object.entries(filteredGroups).map(([date, logList]) => {
+            const isCollapsed = collapsedGroups[date];
+            return (
+              <div key={date} className="mb-6">
+                <button
+                  onClick={() => toggleGroup(date)}
+                  aria-expanded={!isCollapsed}
+                  className="flex justify-between w-full font-semibold text-zinc-800 dark:text-zinc-200 mb-2 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                >
+                  <span>
+                    {new Date(date).toLocaleDateString(undefined, {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </span>
+                  <span>{isCollapsed ? '+' : '-'}</span>
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {!isCollapsed && (
+                    <motion.ul
+                      key="log-list"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2"
+                    >
+                      {logList.map(({ id, level, message, timestamp }) => (
+                        <motion.li
+                          key={id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          className={`flex items-center gap-2 p-2 rounded-md border border-transparent hover:border-zinc-400 dark:hover:border-zinc-600 ${LOG_LEVELS[level].color}`}
+                        >
+                          <span aria-hidden="true">{LOG_LEVELS[level].icon}</span>
+                          <time dateTime={timestamp} className="text-xs flex-shrink-0 w-28 opacity-70">
+                            {new Date(timestamp).toLocaleTimeString()}
+                          </time>
+                          <p className="flex-grow">{message}</p>
+                        </motion.li>
+                      ))}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })
         )}
-
-        {Object.entries(filteredGroups).map(([date, logs]) => {
-          const isCollapsed = collapsedGroups[date];
-          return (
-            <div key={date} className="mb-6">
-              <button
-                onClick={() => toggleGroup(date)}
-                aria-expanded={!isCollapsed}
-                className="flex justify-between w-full font-semibold text-zinc-800 dark:text-zinc-200 mb-2 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-              >
-                <span>{new Date(date).toLocaleDateString(undefined, {
-                  weekday: 'long', year: 'numeric', month: 'short', day: 'numeric'
-                })}</span>
-                <span>{isCollapsed ? '+' : '-'}</span>
-              </button>
-
-              <AnimatePresence initial={false}>
-                {!isCollapsed && (
-                  <motion.ul
-                    key="log-list"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-2"
-                  >
-                    {logs.map(({ id, level, message, timestamp }) => (
-                      <motion.li
-                        key={id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        className={`flex items-center gap-2 p-2 rounded-md border border-transparent hover:border-zinc-400 dark:hover:border-zinc-600 ${LOG_LEVELS[level].color}`}
-                      >
-                        <span aria-hidden="true">{LOG_LEVELS[level].icon}</span>
-                        <time dateTime={timestamp} className="text-xs flex-shrink-0 w-28 opacity-70">
-                          {new Date(timestamp).toLocaleTimeString()}
-                        </time>
-                        <p className="flex-grow">{message}</p>
-                      </motion.li>
-                    ))}
-                  </motion.ul>
-                )}
-              </AnimatePresence>
-            </div>
-          );
-        })}
       </div>
     </div>
   );

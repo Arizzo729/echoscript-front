@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-const BAR_COUNT = 20;
-const MAX_HEIGHT = 60;
+const BAR_COUNT = 24;
+const MAX_HEIGHT = 64;
 
 export default function AIWaveform({ className = "" }) {
-  const [heights, setHeights] = useState(() =>
+  const [heights, setHeights] = useState(
     Array.from({ length: BAR_COUNT }, () => Math.random() * MAX_HEIGHT)
   );
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setHeights(
-        Array.from({ length: BAR_COUNT }, () =>
-          Math.max(10, Math.random() * MAX_HEIGHT)
-        )
+    const animateBars = () => {
+      setHeights((prev) =>
+        prev.map((_, i) => {
+          const base = Math.random() * MAX_HEIGHT;
+          const wave = Math.sin(Date.now() / 500 + i) * 10;
+          return Math.max(8, base + wave);
+        })
       );
-    }, 300);
+    };
 
+    const interval = setInterval(animateBars, 180);
     return () => clearInterval(interval);
   }, []);
-
-  const safeHeights = Array.isArray(heights) ? heights : [];
 
   return (
     <div
@@ -34,35 +35,35 @@ export default function AIWaveform({ className = "" }) {
         className="w-full h-full"
       >
         <defs>
-          <linearGradient id="waveGradient" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0.3" />
+          <linearGradient id="waveGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0.2" />
           </linearGradient>
           <filter id="glow">
-            <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+            <feGaussianBlur stdDeviation="4" result="blur" />
             <feMerge>
-              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
         </defs>
 
-        {safeHeights.map((height, index) => (
+        {heights.map((h, i) => (
           <motion.rect
-            key={index}
-            x={index * 10}
-            y={100 - height}
+            key={i}
+            x={i * 10}
+            y={100 - h}
             width="6"
-            height={height}
-            rx="2"
+            height={h}
+            rx="3"
             fill="url(#waveGradient)"
             filter="url(#glow)"
-            animate={{ height: [height, height * 0.6, height] }}
+            animate={{ height: [h, h * 0.85, h] }}
             transition={{
-              duration: 1.2,
+              duration: 1.4,
               repeat: Infinity,
               ease: "easeInOut",
-              delay: index * 0.03,
+              delay: i * 0.025,
             }}
           />
         ))}

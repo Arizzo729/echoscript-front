@@ -30,7 +30,8 @@ export default function App() {
 
   useEffect(() => {
     if (splashDone && !localStorage.getItem("onboardingComplete")) {
-      setTimeout(() => setShowIntro(true), 300);
+      const timer = setTimeout(() => setShowIntro(true), 300);
+      return () => clearTimeout(timer);
     }
   }, [splashDone]);
 
@@ -38,11 +39,9 @@ export default function App() {
     <ThemeProvider>
       <GPTProvider>
         <FontSizeProvider>
-          {!splashDone && (
+          {!splashDone ? (
             <AnimatedSplash onComplete={() => setSplashDone(true)} />
-          )}
-
-          {splashDone && (
+          ) : (
             <>
               <Routes>
                 <Route element={<Layout />}>

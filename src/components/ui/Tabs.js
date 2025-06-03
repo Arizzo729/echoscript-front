@@ -1,25 +1,19 @@
-// src/components/ui/Tabs.jsx
-
+// ✅ EchoScript.AI — Final Polished Smart Tabs (Horizontal + Vertical + Icon Support)
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
-/**
- * EchoScript.AI Smart Tabs
- * Usage:
- * <Tabs tabs={...} activeTab={...} onTabChange={...} />
- */
 export default function Tabs({
   tabs = [],
   activeTab,
   onTabChange,
-  direction = "horizontal", // or "vertical"
+  direction = "horizontal", // "horizontal" or "vertical"
   className = "",
 }) {
   return (
     <div
       className={twMerge(
         "flex",
-        direction === "vertical" ? "flex-col gap-2" : "flex-row gap-4",
+        direction === "vertical" ? "flex-col gap-2" : "flex-row gap-3 sm:gap-4",
         className
       )}
     >
@@ -30,17 +24,18 @@ export default function Tabs({
             key={id}
             onClick={() => onTabChange(id)}
             className={twMerge(
-              "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition duration-300 ease-in-out",
+              "group flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300",
               isActive
-                ? "text-teal-600 bg-teal-50 dark:text-teal-300 dark:bg-teal-800/20 shadow-primary-glow"
-                : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700"
+                ? "bg-teal-100 text-teal-700 dark:bg-teal-700/30 dark:text-teal-300 shadow-inner shadow-teal-200/40 dark:shadow-none"
+                : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700/40"
             )}
           >
-            {Icon && <Icon className="w-4 h-4" />}
-            {label}
+            {Icon && <Icon className="w-4 h-4 opacity-80 group-hover:opacity-100" />}
+            <span className="truncate">{label}</span>
           </button>
         );
       })}
     </div>
   );
 }
+

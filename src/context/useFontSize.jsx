@@ -1,10 +1,30 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
-export const FontSizeContext = createContext(); // ✅ named export
+const FontSizeContext = createContext();
+
+const MIN = 0.85;
+const MAX = 1.25;
+const STORAGE_KEY = "font-size";
 
 export function FontSizeProvider({ children }) {
   const [fontSize, setFontSize] = useState(1);
-  const MIN = 0.85, MAX = 1.25;
+
+  // Load from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = parseFloat(stored);
+      if (!isNaN(parsed)) {
+        setFontSize(parsed);
+      }
+    }
+  }, []);
+
+  // Save to localStorage
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, fontSize.toFixed(2));
+  }, [fontSize]);
+
   const clampedSize = Math.min(Math.max(fontSize, MIN), MAX);
 
   return (
@@ -14,4 +34,6 @@ export function FontSizeProvider({ children }) {
   );
 }
 
-export const useFontSize = () => useContext(FontSizeContext); // ✅ optional hook
+export function useFontSize() {
+  return useContext(FontSizeContext);
+}

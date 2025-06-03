@@ -63,6 +63,8 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
   };
 
   const uploadAndTranscribe = async (inputFile) => {
+    if (loading || recording) return;
+
     setLoading(true);
     setTranscript("");
     setSummary("");
@@ -96,6 +98,10 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
   };
 
   const copyTranscript = () => {
+    if (!navigator.clipboard) {
+      setError("Clipboard API not supported.");
+      return;
+    }
     navigator.clipboard.writeText(transcript);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -132,6 +138,7 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
             className={`flex items-center gap-2 px-5 py-2 rounded-md font-medium transition ${
               recording ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"
             } text-white`}
+            aria-label={recording ? "Stop recording" : "Start recording"}
           >
             <Mic size={18} />
             {recording ? "Stop" : "Record"}
@@ -153,11 +160,17 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
         )}
 
         {transcript && (
-          <section className="bg-zinc-100 dark:bg-zinc-900 p-4 rounded-md text-sm relative">
+          <motion.section
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-zinc-100 dark:bg-zinc-900 p-4 rounded-md text-sm relative"
+          >
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold text-zinc-800 dark:text-white">Transcript</h3>
               <button
                 onClick={copyTranscript}
+                aria-label="Copy transcript to clipboard"
                 className="text-blue-600 dark:text-blue-400 hover:underline text-xs flex items-center gap-1"
               >
                 <Clipboard size={14} />
@@ -165,7 +178,7 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
               </button>
             </div>
             <p className="whitespace-pre-wrap text-zinc-700 dark:text-zinc-200">{transcript}</p>
-          </section>
+          </motion.section>
         )}
 
         {summary && (
@@ -182,7 +195,7 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
           </section>
         )}
 
-        {keywords.length > 0 && (
+        {Array.isArray(keywords) && keywords.length > 0 && (
           <section className="p-4 bg-zinc-200 dark:bg-zinc-700 rounded-md text-sm">
             <h4 className="font-semibold mb-2 text-zinc-800 dark:text-zinc-100">Keywords</h4>
             <div className="flex flex-wrap gap-2">
@@ -201,3 +214,4 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
     </motion.div>
   );
 }
+

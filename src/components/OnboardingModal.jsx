@@ -82,22 +82,18 @@ export default function OnboardingModal({ onClose }) {
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Close button */}
             <button
               onClick={handleClose}
-              className="absolute top-3.5 right-4 text-lg text-zinc-400 hover:text-teal-400 transition focus:outline-none"
-              style={{ background: "none", border: "none", padding: 0, lineHeight: 1 }}
+              className="absolute top-3.5 right-4 text-lg text-zinc-400 hover:text-teal-400 transition"
               aria-label="Close"
             >
               ×
             </button>
 
-            {/* Lottie animation */}
             <div className="w-full h-48 flex items-center justify-center">
               <Lottie animationData={STEPS[step].illustration} loop autoplay style={{ width: "90%" }} />
             </div>
 
-            {/* Step content */}
             <motion.div
               key={step}
               className="relative z-10 text-center"
@@ -114,7 +110,6 @@ export default function OnboardingModal({ onClose }) {
               </p>
             </motion.div>
 
-            {/* Step indicators */}
             <div className="flex justify-center mt-6 space-x-1 z-10">
               {STEPS.map((_, i) => (
                 <div
@@ -126,7 +121,6 @@ export default function OnboardingModal({ onClose }) {
               ))}
             </div>
 
-            {/* Step nav buttons */}
             <div className="mt-6 flex justify-center items-center gap-6 z-10">
               {step > 0 && (
                 <button
@@ -144,12 +138,10 @@ export default function OnboardingModal({ onClose }) {
               </button>
             </div>
 
-            {/* Skip link */}
             <div className="text-center mt-4 z-10">
               <button
                 onClick={handleClose}
-                className="text-xs text-teal-400 underline hover:text-blue-400 transition focus:outline-none"
-                style={{ background: "none", border: "none", padding: 0 }}
+                className="text-xs text-teal-400 underline hover:text-blue-400 transition"
               >
                 Skip
               </button>
