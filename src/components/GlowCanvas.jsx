@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import { EffectComposer, Bloom } from "@react-three/postprocessing";
-import GlowRibbon from "./GlowRibbon";
+import GlowRibbon from "./GlowRibbon"; // ensure this is still valid
 
 export default function GlowCanvas() {
   return (
@@ -17,13 +16,10 @@ export default function GlowCanvas() {
         background: "transparent",
       }}
     >
+      <ambientLight intensity={1.2} />
       <Suspense fallback={null}>
         <GlowRibbon />
-        <EffectComposer disableNormalPass>
-          <Bloom intensity={0.4} luminanceThreshold={0} luminanceSmoothing={0.9} />
-        </EffectComposer>
       </Suspense>
     </Canvas>
   );
 }
-

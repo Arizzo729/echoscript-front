@@ -1,13 +1,12 @@
-// ✅ src/components/GlowCanvas.jsx — 3D Ribbon Glow Cursor using Three.js
-import React, { useRef, useEffect, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import React, { useRef, useEffect } from "react";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
-const RibbonTrail = () => {
+export default function GlowRibbon() {
   const trailRef = useRef();
-  const mouse = useRef(new THREE.Vector2());
   const points = useRef([]);
   const maxPoints = 80;
+  const mouse = useRef(new THREE.Vector2());
 
   useEffect(() => {
     const updateMouse = (e) => {
@@ -17,18 +16,6 @@ const RibbonTrail = () => {
     window.addEventListener("pointermove", updateMouse);
     return () => window.removeEventListener("pointermove", updateMouse);
   }, []);
-
-  const curveMaterial = useMemo(
-    () =>
-      new THREE.MeshBasicMaterial({
-        side: THREE.DoubleSide,
-        transparent: true,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        opacity: 0.4,
-      }),
-    []
-  );
 
   useFrame(({ camera }) => {
     const vec = new THREE.Vector3(mouse.current.x, mouse.current.y, 0.5);
@@ -46,29 +33,25 @@ const RibbonTrail = () => {
 
   return (
     <mesh ref={trailRef}>
-      <tubeGeometry args={[new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0, 0)]), 64, 0.05, 8, false]} />
+      <tubeGeometry
+        args={[
+          new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0, 0)]),
+          64,
+          0.05,
+          8,
+          false,
+        ]}
+      />
       <meshBasicMaterial
         attach="material"
-        color={new THREE.Color("#00fff7")}
+        color={new THREE.Color("#14f1f9")} // Teal glow
         transparent
         opacity={0.4}
         blending={THREE.AdditiveBlending}
+        toneMapped={false}
       />
     </mesh>
   );
-};
-
-export default function GlowCanvas() {
-  return (
-    <div className="pointer-events-none fixed inset-0 z-[5]">
-      <Canvas
-        camera={{ position: [0, 0, 5], fov: 75 }}
-        gl={{ antialias: true, alpha: true }}
-      >
-        <ambientLight intensity={1.5} />
-        <RibbonTrail />
-      </Canvas>
-    </div>
-  );
 }
+
 
