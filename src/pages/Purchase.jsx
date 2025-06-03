@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — Final Polished Purchase Page with Balanced Styling
+// ✅ EchoScript.AI — Final Polished Purchase Page with Tiered Buttons and Smoother Styling
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -21,8 +21,9 @@ const pricingPlans = [
       "Light GPT cleanup",
     ],
     suggestedFor: "New users or personal use",
-    theme: "from-teal-700 to-teal-800",
+    theme: "from-zinc-800 to-zinc-900",
     text: "text-white",
+    buttonColor: "bg-zinc-700 hover:bg-zinc-600",
   },
   {
     name: "Pro",
@@ -35,8 +36,9 @@ const pricingPlans = [
       "Export to PDF & DOCX",
     ],
     suggestedFor: "Podcasters, teams, businesses",
-    theme: "from-teal-600 to-emerald-500",
+    theme: "from-teal-700 to-emerald-700",
     text: "text-white",
+    buttonColor: "bg-teal-700 hover:bg-teal-600",
   },
   {
     name: "Enterprise",
@@ -49,8 +51,9 @@ const pricingPlans = [
       "Analytics dashboard",
     ],
     suggestedFor: "Organizations & heavy users",
-    theme: "from-emerald-600 to-teal-700",
+    theme: "from-emerald-700 to-cyan-800",
     text: "text-white",
+    buttonColor: "bg-emerald-700 hover:bg-emerald-600",
   },
 ];
 
@@ -70,16 +73,16 @@ export default function Purchase() {
 
   const PlanCard = ({ plan }) => (
     <motion.div
-      whileHover={{ scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 200, damping: 15 }}
-      className={`flex-1 rounded-2xl border p-6 space-y-4 shadow-lg transition bg-gradient-to-br ${plan.theme} ${plan.text}`}
+      whileHover={{ scale: 1.015 }}
+      transition={{ type: "spring", stiffness: 200, damping: 18 }}
+      className={`flex-1 rounded-2xl border border-white/10 p-6 space-y-4 shadow-lg transition bg-gradient-to-br ${plan.theme} ${plan.text}`}
     >
       <div>
         <h2 className="text-2xl font-semibold">{plan.name}</h2>
         <p className="text-sm italic text-teal-200">{plan.suggestedFor}</p>
       </div>
 
-      <p className="text-3xl font-bold text-white">
+      <p className="text-3xl font-bold">
         {plan.price}
         {plan.monthly && <span className="text-base font-light">/mo</span>}
       </p>
@@ -93,19 +96,17 @@ export default function Purchase() {
         ))}
       </ul>
 
-      <Button
+      <button
         onClick={() => handleSelect(plan)}
-        loading={loading && selected === plan.name}
-        variant="primary"
-        size="md"
-        className="w-full mt-2 text-white"
+        disabled={loading && selected === plan.name}
+        className={`w-full text-sm py-2 px-4 rounded-lg font-medium transition-all duration-300 ${plan.buttonColor} border border-white/10 shadow-inner text-white`}
       >
         {loading && selected === plan.name
           ? "Processing..."
           : plan.name === "Starter"
           ? "Use for Free"
           : "Get Started"}
-      </Button>
+      </button>
     </motion.div>
   );
 
@@ -174,3 +175,4 @@ export default function Purchase() {
     </motion.div>
   );
 }
+

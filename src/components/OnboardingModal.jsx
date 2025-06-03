@@ -121,27 +121,28 @@ export default function OnboardingModal({ onClose }) {
               ))}
             </div>
 
-            <div className="mt-6 flex justify-center items-center gap-6 z-10">
-              {step > 0 && (
+            <div className="mt-6 flex justify-between items-center px-4 z-10 text-sm text-teal-400 font-medium">
+              {step > 0 ? (
                 <button
                   onClick={() => setStep(step - 1)}
-                  className="text-xs px-4 py-1.5 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 text-white font-medium shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
+                  className="hover:text-blue-400 transition"
                 >
-                  Back
+                  ← Back
                 </button>
-              )}
+              ) : <span />}
+
               <button
                 onClick={step === STEPS.length - 1 ? handleClose : () => setStep(step + 1)}
-                className="text-xs px-4 py-1.5 rounded-full bg-gradient-to-br from-teal-500 to-blue-500 text-white font-medium shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
+                className="hover:text-blue-400 transition"
               >
-                {step === STEPS.length - 1 ? "Finish" : "Next"}
+                {step === STEPS.length - 1 ? "Finish →" : "Next →"}
               </button>
             </div>
 
             <div className="text-center mt-4 z-10">
               <button
                 onClick={handleClose}
-                className="text-xs text-teal-400 underline hover:text-blue-400 transition"
+                className="text-xs text-zinc-400 hover:text-teal-400 transition underline"
               >
                 Skip
               </button>
@@ -152,5 +153,3 @@ export default function OnboardingModal({ onClose }) {
     </AnimatePresence>
   );
 }
-
-
