@@ -23,7 +23,7 @@ const navItems = [
 ];
 
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false); // Default to expanded for visibility
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <motion.aside
@@ -38,10 +38,10 @@ export default function Sidebar() {
       <div className="flex items-center justify-end px-3 pt-4">
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-zinc-400 hover:text-teal-400 transition"
+          className="p-2 rounded-full bg-zinc-800 hover:bg-teal-600 text-white shadow transition-all duration-300"
           title={collapsed ? "Open Menu" : "Close Menu"}
         >
-          {collapsed ? <Menu size={20} /> : <X size={20} />}
+          {collapsed ? <Menu size={18} /> : <X size={18} />}
         </button>
       </div>
 
