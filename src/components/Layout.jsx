@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI: Final Unified Layout — Gradient Background + SVG Glow Trail
+// ✅ EchoScript.AI: Final Unified Layout — Gradient Background + Cinematic SVG Glow Trail
 import React, { useState, useEffect, createContext } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
@@ -6,7 +6,7 @@ import Header from "./Header";
 import EchoAssistantUltra from "./EchoAssistantUltra";
 import ToastContainer from "./ToastContainer";
 import MobileBottomNav from "./MobileBottomNav";
-import GlowSVGTrail from "./GlowSVGTrail";
+import GlowSVGTrail from "./GlowSVGTrail"; // 🔥 Final active glow trail
 import { AnimatePresence, motion } from "framer-motion";
 
 export const ThemeContext = createContext();
@@ -17,7 +17,7 @@ export default function Layout() {
   const [collapsed, setCollapsed] = useState(true); // Sidebar starts collapsed
 
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
-  const toggleTheme = () => setTheme(prev => (prev === "dark" ? "light" : "dark"));
+  const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
@@ -26,13 +26,13 @@ export default function Layout() {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <div className="relative flex flex-col h-screen w-screen bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white overflow-hidden">
-        {/* ✨ Cinematic Glow Trail */}
+        {/* ✨ Final Glow Trail */}
         <GlowSVGTrail />
 
-        {/* 📌 Header */}
+        {/* 📌 Top Header */}
         <Header toggleDrawer={toggleDrawer} />
 
-        {/* 🧭 Layout with Sidebar */}
+        {/* 🧭 Sidebar + Page Content */}
         <div className="flex flex-1 overflow-hidden">
           <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
           <main
@@ -44,7 +44,7 @@ export default function Layout() {
           </main>
         </div>
 
-        {/* 🤖 Echo Assistant & 📱 Mobile Nav */}
+        {/* 🤖 Assistant + 📱 Mobile Nav */}
         <div className="hidden md:block">
           <EchoAssistantUltra />
         </div>
@@ -52,10 +52,10 @@ export default function Layout() {
           <MobileBottomNav />
         </div>
 
-        {/* 🔔 Global Toasts */}
+        {/* 🔔 Toast Notifications */}
         <ToastContainer />
 
-        {/* ⚙️ Settings Drawer */}
+        {/* ⚙️ Slide-in Settings Panel */}
         <AnimatePresence>
           {isDrawerOpen && (
             <motion.div
@@ -81,4 +81,3 @@ export default function Layout() {
     </ThemeContext.Provider>
   );
 }
-
