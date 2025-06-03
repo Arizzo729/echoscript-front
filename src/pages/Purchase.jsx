@@ -21,9 +21,10 @@ const pricingPlans = [
       "Light GPT cleanup",
     ],
     suggestedFor: "New users or personal use",
-    theme: "from-zinc-800 to-zinc-900",
+    theme: "from-sky-700 to-cyan-800",
     text: "text-white",
-    buttonColor: "bg-zinc-700 hover:bg-zinc-600",
+    buttonColor: "bg-sky-700 hover:bg-sky-600",
+    ring: "ring-1 ring-sky-400/30",
   },
   {
     name: "Pro",
@@ -39,6 +40,7 @@ const pricingPlans = [
     theme: "from-teal-700 to-emerald-700",
     text: "text-white",
     buttonColor: "bg-teal-700 hover:bg-teal-600",
+    ring: "ring-2 ring-teal-400/40",
   },
   {
     name: "Enterprise",
@@ -51,9 +53,10 @@ const pricingPlans = [
       "Analytics dashboard",
     ],
     suggestedFor: "Organizations & heavy users",
-    theme: "from-emerald-700 to-cyan-800",
+    theme: "from-emerald-700 to-indigo-800",
     text: "text-white",
     buttonColor: "bg-emerald-700 hover:bg-emerald-600",
+    ring: "ring-2 ring-indigo-400/30",
   },
 ];
 
@@ -73,9 +76,9 @@ export default function Purchase() {
 
   const PlanCard = ({ plan }) => (
     <motion.div
-      whileHover={{ scale: 1.015 }}
-      transition={{ type: "spring", stiffness: 200, damping: 18 }}
-      className={`flex-1 rounded-2xl border border-white/10 p-6 space-y-4 shadow-lg transition bg-gradient-to-br ${plan.theme} ${plan.text}`}
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 180, damping: 18 }}
+      className={`flex-1 rounded-2xl border border-white/10 p-6 space-y-4 shadow-lg transition bg-gradient-to-br ${plan.theme} ${plan.text} ${plan.ring}`}
     >
       <div>
         <h2 className="text-2xl font-semibold">{plan.name}</h2>
@@ -175,4 +178,5 @@ export default function Purchase() {
     </motion.div>
   );
 }
+
 
