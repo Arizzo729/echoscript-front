@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI: Unified & Enhanced Header — Clean Version
+// ✅ EchoScript.AI: Unified & Enhanced Header — Mobile-Optimized
 import React, { useState, useEffect, useRef } from "react";
 import {
   BellIcon,
@@ -43,7 +43,7 @@ export default function Header({
 
   return (
     <motion.header
-      className="sticky top-0 z-40 flex items-center justify-between px-6 py-3 bg-gradient-to-r from-zinc-900 via-zinc-950 to-zinc-900 text-white backdrop-blur border-b border-zinc-800 shadow-md"
+      className="sticky top-0 z-40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 py-3 bg-gradient-to-r from-zinc-900 via-zinc-950 to-zinc-900 text-white backdrop-blur border-b border-zinc-800 shadow-md"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -59,7 +59,7 @@ export default function Header({
       </div>
 
       {/* Search */}
-      <div className="relative flex-1 max-w-lg mx-6" ref={searchRef}>
+      <div className="relative w-full sm:max-w-md sm:mx-6" ref={searchRef}>
         <div className="relative text-white focus-within:text-teal-300">
           <input
             type="search"
@@ -73,7 +73,7 @@ export default function Header({
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 flex-wrap justify-end w-full sm:w-auto">
         <Button
           variant="ghost"
           size="sm"
@@ -183,4 +183,3 @@ export default function Header({
     </motion.header>
   );
 }
-
