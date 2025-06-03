@@ -1,4 +1,3 @@
-// src/components/AIWaveform.jsx
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
@@ -21,6 +20,8 @@ export default function AIWaveform({ className = "" }) {
 
     return () => clearInterval(interval);
   }, []);
+
+  const safeHeights = Array.isArray(heights) ? heights : [];
 
   return (
     <div
@@ -46,7 +47,7 @@ export default function AIWaveform({ className = "" }) {
           </filter>
         </defs>
 
-        {heights.map((height, index) => (
+        {safeHeights.map((height, index) => (
           <motion.rect
             key={index}
             x={index * 10}
@@ -69,3 +70,4 @@ export default function AIWaveform({ className = "" }) {
     </div>
   );
 }
+

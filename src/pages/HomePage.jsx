@@ -13,8 +13,7 @@ import LiveGPTBubble from "../components/LiveGPTBubble";
 import { GPTContext } from "../context/GPTContext";
 import detectTone from "../utils/EmotionToneDetector";
 import NewsletterSignup from "../components/NewsletterSignup";
-/*import GlowCanvas from "../components/GlowCanvas";*/
-
+import GlowCanvas from "../components/GlowCanvas";
 
 export default function HomePage() {
   const [time, setTime] = useState(new Date());
@@ -34,7 +33,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (shortTranscript) {
+    if ((shortTranscript?.length ?? 0) > 0) {
       const tone = detectTone(shortTranscript);
       const gptMsg =
         tone === "positive"
@@ -57,7 +56,6 @@ export default function HomePage() {
 
   return (
     <div className="relative min-h-screen text-white overflow-x-hidden">
-
       <Particles
         id="tsparticles"
         init={particlesInit}
@@ -102,7 +100,7 @@ export default function HomePage() {
               1500,
               "Understanding everyone",
               1500,
-              shortTranscript ? `You said: ${shortTranscript}` : "Listening to you...",
+              (shortTranscript?.length ?? 0) > 0 ? `You said: ${shortTranscript}` : "Listening to you...",
               2000,
             ]}
             speed={50}
