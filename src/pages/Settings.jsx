@@ -1,5 +1,5 @@
 // ✅ EchoScript.AI — Final Polished Settings Page (Enhanced UI Theme)
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Switch } from "@headlessui/react";
 import {
@@ -7,7 +7,7 @@ import {
   ShieldCheck, FileText, Bell, Globe, Eye, Wand2
 } from "lucide-react";
 import Button from "../components/ui/Button";
-import { FontSizeContext } from "../context/useFontSize.jsx";
+import { useFontSize } from "../context/useFontSize.jsx"; // <-- Correct import
 
 const tabs = [
   { id: "preferences", label: "Preferences", icon: Settings2 },
@@ -23,7 +23,7 @@ export default function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [multiLang, setMultiLang] = useState(true);
   const [aiAssist, setAiAssist] = useState(true);
-  const { fontSize, setFontSize } = useContext(FontSizeContext);
+  const { fontSize, setFontSize } = useFontSize(); // <-- Using hook here
 
   const toggleDarkMode = () => {
     const next = !darkMode;
@@ -198,3 +198,4 @@ function FAQItem({ question, children }) {
     </div>
   );
 }
+
