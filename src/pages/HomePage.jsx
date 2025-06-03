@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — Final Polished HomePage with Glow + All Features
+// ✅ EchoScript.AI — Final Clean HomePage with Glow Behind Logo & No Background Clash
 import React, { useEffect, useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
@@ -55,7 +55,7 @@ export default function HomePage() {
   });
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-950 text-white overflow-x-hidden">
+    <div className="relative min-h-screen text-white overflow-x-hidden">
       <GlowCursor />
 
       <Particles
@@ -83,16 +83,16 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2 }}
         >
-          <div className="relative w-24 sm:w-28 mx-auto mb-4">
+          <div className="relative w-24 sm:w-28 mx-auto mb-4 z-20">
             <motion.div
               className="absolute inset-0 rounded-full bg-teal-400 blur-2xl opacity-30"
               animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.4, 0.2] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             />
-            <img src="/Icon.png" alt="EchoScript Icon" className="relative w-full drop-shadow-xl" />
+            <img src="/Icon.png" alt="EchoScript Icon" className="relative w-full drop-shadow-xl z-20" />
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent animate-pulse">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent animate-pulse z-20">
             EchoScript.AI
           </h1>
 
@@ -108,10 +108,10 @@ export default function HomePage() {
             speed={50}
             wrapper="span"
             repeat={Infinity}
-            className="text-lg mt-4 text-teal-400"
+            className="text-lg mt-4 text-teal-400 z-20"
           />
 
-          <p className="text-sm mt-1 text-zinc-400 font-mono">{formattedTime}</p>
+          <p className="text-sm mt-1 text-zinc-400 font-mono z-20">{formattedTime}</p>
         </motion.div>
 
         {/* Mic Status + Waveform */}
@@ -124,7 +124,6 @@ export default function HomePage() {
           <LiveGPTBubble message={gptResponse} onClose={() => setShowBubble(false)} />
         )}
 
-        {/* Welcome Block */}
         <motion.div
           className="max-w-2xl mx-auto bg-zinc-800/80 p-6 rounded-2xl border border-teal-700 backdrop-blur-md shadow-lg"
           initial={{ opacity: 0, y: 20 }}
@@ -140,8 +139,8 @@ export default function HomePage() {
         <ProgressTimeline currentStep={introStep} />
       </div>
 
-      {/* About */}
-      <section className="relative z-10 py-24 px-6 bg-zinc-900/80 backdrop-blur-xl text-center">
+      {/* Sections */}
+      <section className="relative z-10 py-24 px-6 text-center bg-transparent">
         <h2 className="text-3xl font-bold mb-4 text-white">About EchoScript</h2>
         <p className="max-w-3xl mx-auto text-zinc-400 text-lg">
           We’re building the world’s most intelligent and empathetic transcription platform — one that adapts to
@@ -149,8 +148,7 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* Coming Soon */}
-      <section className="relative z-10 py-24 px-6 bg-zinc-950 border-t border-zinc-800 text-center">
+      <section className="relative z-10 py-24 px-6 text-center border-t border-zinc-800 bg-transparent">
         <h2 className="text-3xl font-bold mb-4 text-white">What’s Coming Soon</h2>
         <p className="max-w-3xl mx-auto text-zinc-400 text-lg">
           EchoScript is evolving — expect real-time collaboration, multi-language exports, GPT voice summarization,
@@ -158,8 +156,7 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* Newsletter Signup */}
-      <section className="relative z-10 py-20 px-6 bg-zinc-900 text-center border-t border-zinc-800">
+      <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800 bg-transparent">
         <h2 className="text-3xl font-bold text-white mb-4">Join Our Newsletter</h2>
         <p className="text-zinc-400 mb-6 max-w-xl mx-auto">
           Get updates on new features, AI improvements, and exclusive insights from EchoScript engineers.
@@ -187,4 +184,5 @@ export default function HomePage() {
     </div>
   );
 }
+
 

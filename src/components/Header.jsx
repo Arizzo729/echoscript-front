@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI: Unified & Enhanced Header — Mobile-Optimized
+// ✅ EchoScript.AI: Clean Header — Logo Aligned & Responsive
 import React, { useState, useEffect, useRef } from "react";
 import {
   BellIcon,
@@ -43,16 +43,16 @@ export default function Header({
 
   return (
     <motion.header
-      className="sticky top-0 z-40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 py-3 bg-gradient-to-r from-zinc-900 via-zinc-950 to-zinc-900 text-white backdrop-blur border-b border-zinc-800 shadow-md"
+      className="sticky top-0 z-40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 py-3 bg-transparent text-white backdrop-blur border-b border-zinc-800 shadow-md"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
       {/* Left */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 pl-1 sm:pl-4">
         <Link to="/" className="flex items-center gap-2">
-          <img src={Logo} alt="EchoScript.AI" className="h-8 w-auto" />
-          <span className="text-xl font-bold tracking-tight">
+          <img src={Logo} alt="EchoScript.AI" className="h-8 sm:h-10 w-auto object-contain" />
+          <span className="text-xl sm:text-2xl font-bold tracking-tight">
             EchoScript<span className="text-teal-400">.AI</span>
           </span>
         </Link>
@@ -72,8 +72,8 @@ export default function Header({
         </div>
       </div>
 
-      {/* Right Actions (hidden on mobile) */}
-      <div className="hidden sm:flex items-center gap-4 flex-wrap justify-end w-full sm:w-auto">
+      {/* Right Actions */}
+      <div className="hidden sm:flex items-center gap-4 justify-end w-full sm:w-auto">
         <Button
           variant="ghost"
           size="sm"
@@ -94,13 +94,7 @@ export default function Header({
             size="sm"
             onClick={() => setShowNotifDropdown(!showNotifDropdown)}
             icon={<BellIcon className="w-6 h-6 text-zinc-300" />}
-          >
-            {!!notifications.length && (
-              <span className="absolute top-0 right-0 px-1.5 py-0.5 text-xs bg-red-600 text-white rounded-full -translate-y-1/2 translate-x-1/2">
-                {notifications.length}
-              </span>
-            )}
-          </Button>
+          />
           <AnimatePresence>
             {showNotifDropdown && (
               <motion.div
@@ -123,12 +117,9 @@ export default function Header({
           </AnimatePresence>
         </div>
 
-        {/* User Profile */}
+        {/* User */}
         <div className="relative">
-          <motion.div
-            whileHover={{ scale: 1.1, rotate: 3 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
+          <motion.div whileHover={{ scale: 1.1, rotate: 3 }} transition={{ type: "spring", stiffness: 300 }}>
             <Button
               variant="ghost"
               size="sm"
@@ -147,13 +138,10 @@ export default function Header({
               }
             >
               <ChevronDownIcon
-                className={`w-5 h-5 transition-transform ${
-                  showUserDropdown ? "rotate-180" : ""
-                }`}
+                className={`w-5 h-5 transition-transform ${showUserDropdown ? "rotate-180" : ""}`}
               />
             </Button>
           </motion.div>
-
           <AnimatePresence>
             {showUserDropdown && (
               <motion.div
@@ -162,17 +150,10 @@ export default function Header({
                 exit={{ opacity: 0, y: -10 }}
                 className="absolute right-0 mt-2 w-48 bg-zinc-900 text-white border border-zinc-700 rounded-md shadow-lg z-50"
               >
-                <a href="/account" className="block px-4 py-2 hover:bg-zinc-800">
-                  Profile
-                </a>
-                <a href="/settings" className="block px-4 py-2 hover:bg-zinc-800">
-                  Settings
-                </a>
+                <a href="/account" className="block px-4 py-2 hover:bg-zinc-800">Profile</a>
+                <a href="/settings" className="block px-4 py-2 hover:bg-zinc-800">Settings</a>
                 <hr className="border-zinc-700" />
-                <button
-                  onClick={onLogout}
-                  className="w-full text-left px-4 py-2 text-red-500 hover:bg-zinc-800"
-                >
+                <button onClick={onLogout} className="w-full text-left px-4 py-2 text-red-500 hover:bg-zinc-800">
                   Logout
                 </button>
               </motion.div>

@@ -1,3 +1,4 @@
+// ✅ EchoScript.AI: Final Unified Layout — Gradient Background + GlowCursor Ready
 import React, { useState, useEffect, createContext } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
@@ -5,6 +6,7 @@ import Header from "./Header";
 import EchoAssistantUltra from "./EchoAssistantUltra";
 import ToastContainer from "./ToastContainer";
 import MobileBottomNav from "./MobileBottomNav";
+import GlowCursor from "./GlowCursor";
 import { AnimatePresence, motion } from "framer-motion";
 
 export const ThemeContext = createContext();
@@ -12,7 +14,7 @@ export const ThemeContext = createContext();
 export default function Layout() {
   const [theme, setTheme] = useState("dark");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false); // 👈 Add sidebar state here
+  const [collapsed, setCollapsed] = useState(false);
 
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
   const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
@@ -23,12 +25,14 @@ export default function Layout() {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <div
-        className={`relative flex flex-col h-screen w-screen ${
-          theme === "dark" ? "dark bg-gray-950" : "bg-white"
-        }`}
-      >
+      <div className="relative flex flex-col h-screen w-screen bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white overflow-hidden">
+        {/* Animated Glow Cursor Effect */}
+        <GlowCursor />
+
+        {/* Header */}
         <Header toggleDrawer={toggleDrawer} />
+
+        {/* Main Content */}
         <div className="flex flex-1 overflow-hidden">
           <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
           <main
@@ -39,13 +43,19 @@ export default function Layout() {
             <Outlet />
           </main>
         </div>
+
+        {/* Assistant + Bottom Nav */}
         <div className="hidden md:block">
           <EchoAssistantUltra />
         </div>
         <div className="md:hidden">
           <MobileBottomNav />
         </div>
+
+        {/* Global Toasts */}
         <ToastContainer />
+
+        {/* Settings Drawer */}
         <AnimatePresence>
           {isDrawerOpen && (
             <motion.div
