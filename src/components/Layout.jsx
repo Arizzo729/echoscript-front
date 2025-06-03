@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI: Final Unified Layout — Gradient Background + Cinematic SVG Glow Trail
+// ✅ EchoScript.AI: Final Unified Layout — Gradient Background + Cinematic Glow Trail
 import React, { useState, useEffect, createContext } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
@@ -7,6 +7,8 @@ import EchoAssistantUltra from "./EchoAssistantUltra";
 import ToastContainer from "./ToastContainer";
 import MobileBottomNav from "./MobileBottomNav";
 import { AnimatePresence, motion } from "framer-motion";
+import GlowCanvas from "./GlowCanvas"; // ✅ not GlowSVGTrail
+
 
 export const ThemeContext = createContext();
 
@@ -26,7 +28,7 @@ export default function Layout() {
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <div className="relative flex flex-col h-screen w-screen bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white overflow-hidden">
         {/* ✨ Final Glow Trail */}
-        <GlowSVGTrail />
+        <GlowCanvas />
 
         {/* 📌 Top Header */}
         <Header toggleDrawer={toggleDrawer} />
