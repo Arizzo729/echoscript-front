@@ -13,6 +13,8 @@ import LiveGPTBubble from "../components/LiveGPTBubble";
 import { GPTContext } from "../context/GPTContext";
 import detectTone from "../utils/EmotionToneDetector";
 import NewsletterSignup from "../components/NewsletterSignup";
+import GlowCanvas from "../components/GlowCanvas";
+
 
 export default function HomePage() {
   const [time, setTime] = useState(new Date());
@@ -55,7 +57,6 @@ export default function HomePage() {
 
   return (
     <div className="relative min-h-screen text-white overflow-x-hidden">
-      <GlowCursor />
 
       <Particles
         id="tsparticles"
