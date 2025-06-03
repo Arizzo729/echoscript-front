@@ -98,7 +98,7 @@ const EchoAssistantUltra = ({
     <>
       <motion.button
         onClick={toggle}
-        className="fixed bottom-6 right-6 z-50 p-3 bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-xl"
+        className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 p-3 bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-xl"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         whileHover={{ scale: 1.1 }}
@@ -109,7 +109,7 @@ const EchoAssistantUltra = ({
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed bottom-24 right-6 w-[360px] max-h-[75vh] bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-2xl shadow-2xl z-50 flex flex-col"
+            className="fixed bottom-28 right-4 sm:bottom-24 sm:right-6 w-[90vw] sm:w-[360px] max-h-[75vh] bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-2xl shadow-2xl z-50 flex flex-col"
             initial={{ opacity: 0, y: 16, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
