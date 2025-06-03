@@ -28,8 +28,6 @@ export default function Layout() {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <div className="relative flex flex-col h-screen w-screen bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white overflow-hidden">
-        {/* ✨ Glow Cursor Canvas */}
-        <GlowCanvas />
 
         {/* 📌 Header */}
         <Header toggleDrawer={toggleDrawer} />
