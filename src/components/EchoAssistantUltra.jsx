@@ -122,7 +122,7 @@ export default function EchoAssistantUltra({
               <h2 className="text-base font-semibold text-zinc-900 dark:text-white">
                 Echo AI Assistant
               </h2>
-              <button onClick={toggle} className="text-zinc-400 hover:text-red-500">
+              <button onClick={toggle} className="text-zinc-400 hover:text-red-500" aria-label="Close assistant panel">
                 <X size={18} />
               </button>
             </div>
@@ -166,6 +166,7 @@ export default function EchoAssistantUltra({
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask Echo or type a command..."
                 className="flex-1 px-3 py-2 text-sm rounded-md bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white focus:outline-none"
+                aria-label="Message input"
               />
               <button
                 type="submit"
@@ -182,3 +183,4 @@ export default function EchoAssistantUltra({
     </>
   );
 }
+
