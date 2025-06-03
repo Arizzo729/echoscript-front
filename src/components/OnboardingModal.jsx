@@ -82,10 +82,10 @@ export default function OnboardingModal({ onClose }) {
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Close Button */}
+            {/* X Button */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-5 text-sm text-teal-400 hover:underline focus:outline-none transition"
+              className="absolute top-4 right-5 text-sm text-zinc-400 hover:text-teal-400 focus:outline-none"
               aria-label="Close"
             >
               ×
@@ -113,7 +113,7 @@ export default function OnboardingModal({ onClose }) {
               </p>
             </motion.div>
 
-            {/* Progress Dots */}
+            {/* Dots */}
             <div className="flex justify-center mt-6 space-x-1 z-10">
               {STEPS.map((_, i) => (
                 <div
@@ -125,29 +125,29 @@ export default function OnboardingModal({ onClose }) {
               ))}
             </div>
 
-            {/* Nav Buttons */}
+            {/* Buttons */}
             <div className="mt-6 flex justify-center items-center gap-6 z-10">
               {step > 0 && (
                 <button
                   onClick={() => setStep(step - 1)}
-                  className="text-xs text-white border border-zinc-600 rounded-full px-4 py-1 hover:border-teal-400 transition"
+                  className="text-xs px-4 py-1.5 rounded-full bg-gradient-to-br from-teal-600 to-teal-400 text-white font-medium shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
                 >
                   Back
                 </button>
               )}
               <button
                 onClick={step === STEPS.length - 1 ? handleClose : () => setStep(step + 1)}
-                className="text-xs text-white border border-teal-500 rounded-full px-4 py-1 hover:bg-teal-700 transition"
+                className="text-xs px-4 py-1.5 rounded-full bg-gradient-to-br from-teal-600 to-teal-400 text-white font-medium shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
               >
                 {step === STEPS.length - 1 ? "Finish" : "Next"}
               </button>
             </div>
 
-            {/* Skip Link */}
+            {/* Skip */}
             <div className="text-center mt-4 z-10">
               <button
                 onClick={handleClose}
-                className="text-xs text-teal-400 hover:underline transition"
+                className="text-xs text-teal-400 hover:underline focus:outline-none"
               >
                 Skip
               </button>
