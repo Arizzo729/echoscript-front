@@ -1,5 +1,5 @@
 import React, { useState, useContext, useRef } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { GPTContext } from "../context/GPTContext";
 import { BsRobot, BsMicFill, BsX } from "react-icons/bs";
 import { IoSend } from "react-icons/io5";

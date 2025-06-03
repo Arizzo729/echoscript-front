@@ -6,7 +6,7 @@ import Header from "./Header";
 import EchoAssistantUltra from "./EchoAssistantUltra";
 import ToastContainer from "./ToastContainer";
 import MobileBottomNav from "./MobileBottomNav";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import GlowCanvas from "./GlowCanvas";
 import { X } from "lucide-react";
 
