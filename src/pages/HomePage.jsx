@@ -13,7 +13,7 @@ import LiveGPTBubble from "../components/LiveGPTBubble";
 import { GPTContext } from "../context/GPTContext";
 import detectTone from "../utils/EmotionToneDetector";
 import NewsletterSignup from "../components/NewsletterSignup";
-import GlowCanvas from "../components/GlowCanvas";
+/*import GlowCanvas from "../components/GlowCanvas";*/
 
 
 export default function HomePage() {
