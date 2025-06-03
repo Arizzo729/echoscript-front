@@ -1,3 +1,4 @@
+// ✅ EchoScript.AI — Final Polished Purchase Page with Balanced Styling
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -20,6 +21,8 @@ const pricingPlans = [
       "Light GPT cleanup",
     ],
     suggestedFor: "New users or personal use",
+    theme: "from-teal-700 to-teal-800",
+    text: "text-white",
   },
   {
     name: "Pro",
@@ -32,6 +35,8 @@ const pricingPlans = [
       "Export to PDF & DOCX",
     ],
     suggestedFor: "Podcasters, teams, businesses",
+    theme: "from-teal-600 to-emerald-500",
+    text: "text-white",
   },
   {
     name: "Enterprise",
@@ -44,6 +49,8 @@ const pricingPlans = [
       "Analytics dashboard",
     ],
     suggestedFor: "Organizations & heavy users",
+    theme: "from-emerald-600 to-teal-700",
+    text: "text-white",
   },
 ];
 
@@ -65,26 +72,22 @@ export default function Purchase() {
     <motion.div
       whileHover={{ scale: 1.02 }}
       transition={{ type: "spring", stiffness: 200, damping: 15 }}
-      className={`flex-1 rounded-2xl border p-6 space-y-4 shadow-lg transition ${
-        plan.name === "Pro"
-          ? "bg-gradient-to-br from-teal-600 to-blue-600 text-white border-none"
-          : "bg-zinc-900 border border-zinc-800 text-white"
-      }`}
+      className={`flex-1 rounded-2xl border p-6 space-y-4 shadow-lg transition bg-gradient-to-br ${plan.theme} ${plan.text}`}
     >
       <div>
         <h2 className="text-2xl font-semibold">{plan.name}</h2>
-        <p className="text-sm italic text-teal-300">{plan.suggestedFor}</p>
+        <p className="text-sm italic text-teal-200">{plan.suggestedFor}</p>
       </div>
 
-      <p className="text-3xl font-bold text-teal-400">
+      <p className="text-3xl font-bold text-white">
         {plan.price}
         {plan.monthly && <span className="text-base font-light">/mo</span>}
       </p>
 
-      <ul className="space-y-2 text-sm text-zinc-300">
+      <ul className="space-y-2 text-sm text-white/90">
         {plan.features.map((f, idx) => (
           <li key={idx} className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-green-400" />
+            <CheckCircle className="w-4 h-4 text-green-300" />
             {f}
           </li>
         ))}
@@ -93,9 +96,9 @@ export default function Purchase() {
       <Button
         onClick={() => handleSelect(plan)}
         loading={loading && selected === plan.name}
-        variant={plan.name === "Pro" ? "secondary" : "primary"}
+        variant="primary"
         size="md"
-        className="w-full mt-2"
+        className="w-full mt-2 text-white"
       >
         {loading && selected === plan.name
           ? "Processing..."
@@ -118,8 +121,7 @@ export default function Purchase() {
         <h3 className="text-lg font-semibold text-white">AI Plan Assistant</h3>
       </div>
       <p className="text-sm text-zinc-300">
-        Not sure which plan to pick? Most users start with{" "}
-        <strong className="text-teal-300">Pro</strong> for advanced features and scale to Enterprise.
+        Not sure which plan to pick? Most users start with <strong className="text-teal-300">Pro</strong> for advanced features and scale to Enterprise.
       </p>
       <ul className="text-xs text-zinc-400 list-disc list-inside">
         <li><strong>Starter</strong> is perfect for testing or students</li>
@@ -140,21 +142,18 @@ export default function Purchase() {
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Assistant */}
       {showAssistant && (
         <div className="hidden lg:block col-span-1">
           <Assistant />
         </div>
       )}
 
-      {/* Plans */}
       <div className="col-span-3 flex flex-col lg:flex-row gap-6">
         {pricingPlans.map((plan, idx) => (
           <PlanCard key={idx} plan={plan} />
         ))}
       </div>
 
-      {/* Notes */}
       <div className="col-span-full mt-12 text-sm text-zinc-400 text-center flex flex-col gap-3 items-center">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-green-400" />
@@ -175,4 +174,3 @@ export default function Purchase() {
     </motion.div>
   );
 }
-

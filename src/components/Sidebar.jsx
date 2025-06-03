@@ -1,6 +1,16 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Home, Upload, User, Settings, ShoppingCart, Users, LogOut, Menu, X } from "lucide-react";
+import {
+  Home,
+  Upload,
+  User,
+  Settings,
+  ShoppingCart,
+  Users,
+  LogOut,
+  Menu,
+  X,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
@@ -64,7 +74,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       </nav>
 
       <div className="absolute bottom-6 w-full px-3">
-        <button className="flex items-center gap-3 px-3 py-2 w-full text-left rounded-xl text-red-400 hover:bg-red-500/20 hover:text-white transition-all duration-300">
+        <button className="flex items-center gap-3 px-3 py-2 w-full text-left rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all duration-300 shadow-md">
           <LogOut className="w-5 h-5" />
           {!collapsed && <span className="text-sm">Log Out</span>}
         </button>
@@ -72,4 +82,3 @@ export default function Sidebar({ collapsed, setCollapsed }) {
     </motion.aside>
   );
 }
-

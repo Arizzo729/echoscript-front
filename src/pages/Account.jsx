@@ -1,4 +1,3 @@
-// ✅ EchoScript.AI — Final Polished Account Page with Enhanced Style
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
@@ -12,6 +11,7 @@ import {
   AlertCircle,
   Moon,
   Sun,
+  BadgeCheck,
 } from "lucide-react";
 import Button from "../components/ui/Button";
 
@@ -63,8 +63,8 @@ export default function Account() {
       transition={{ duration: 0.4 }}
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
-        <h1 className="text-3xl font-bold bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent">
-          Account Overview
+        <h1 className="text-4xl font-bold bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent tracking-tight">
+          👤 Your Account
         </h1>
         <div className="flex gap-3">
           <Button
@@ -85,8 +85,14 @@ export default function Account() {
         <Card title="👤 Profile">
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Plan:</strong> {user.plan}</p>
-          <Button size="xs" variant="outline" className="mt-3">
+          <p className="flex items-center gap-2">
+            <strong>Plan:</strong>
+            <span className="inline-flex items-center text-xs font-medium px-2 py-1 rounded-full bg-teal-600 text-white">
+              <BadgeCheck className="w-3 h-3 mr-1" />
+              {user.plan}
+            </span>
+          </p>
+          <Button size="xs" variant="outline" className="mt-3 hover:border-teal-400 hover:text-teal-400">
             Manage Plan
           </Button>
         </Card>
@@ -95,10 +101,10 @@ export default function Account() {
           <p><strong>Minutes Used:</strong> {user.minutesUsed}</p>
           <p><strong>Sessions:</strong> {user.sessions}</p>
           <div className="mt-4">
-            <label className="text-sm text-zinc-500 dark:text-zinc-400">Monthly Limit Usage</label>
+            <label className="text-sm text-zinc-500 dark:text-zinc-400">Monthly Usage</label>
             <div className="w-full bg-zinc-200 dark:bg-zinc-700 h-3 rounded-full mt-1">
               <div
-                className="h-3 rounded-full bg-gradient-to-r from-teal-400 to-blue-500 shadow-sm"
+                className="h-3 rounded-full bg-gradient-to-r from-teal-400 to-blue-500 transition-all duration-500 ease-in-out"
                 style={{ width: `${Math.min((user.minutesUsed / 500) * 100, 100)}%` }}
               />
             </div>
@@ -108,7 +114,7 @@ export default function Account() {
 
       <div className="mb-12">
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-zinc-800 dark:text-white">
-          <FileText className="w-5 h-5 text-teal-400" />
+          <FileText className="w-5 h-5 text-blue-500" />
           Saved Transcripts
         </h2>
         {transcripts.length === 0 ? (
@@ -189,4 +195,5 @@ function ActionCard({ icon, label }) {
     </button>
   );
 }
+
 

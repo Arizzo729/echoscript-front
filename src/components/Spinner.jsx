@@ -1,12 +1,12 @@
 // src/components/Spinner.jsx
 import React from "react";
 
-export default function Spinner({ size = 5, className = "" }) {
+export default function Spinner({ size = 6, className = "" }) {
   const dimension = `h-${size} w-${size}`;
 
   return (
     <svg
-      className={`text-teal-500 ${dimension} ${className}`}
+      className={`animate-spin-slow text-teal-500 ${dimension} ${className}`}
       viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -25,10 +25,9 @@ export default function Spinner({ size = 5, className = "" }) {
         stroke="url(#spinner-gradient)"
         strokeWidth="10"
         fill="none"
-        strokeDasharray="220"
-        strokeDashoffset="180"
+        strokeDasharray="250"
+        strokeDashoffset="210"
         strokeLinecap="round"
-        className="animate-[dashSpin_1.4s_ease-in-out_infinite]"
       />
     </svg>
   );

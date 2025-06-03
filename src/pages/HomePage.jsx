@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — Final Polished HomePage with Gradient Title + Stylized Layout
+// ✅ EchoScript.AI — Final Polished HomePage with Glow + All Features
 import React, { useEffect, useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
@@ -13,7 +13,7 @@ import LiveGPTBubble from "../components/LiveGPTBubble";
 import { GPTContext } from "../context/GPTContext";
 import detectTone from "../utils/EmotionToneDetector";
 import NewsletterSignup from "../components/NewsletterSignup";
-import Button from "../components/ui/Button";
+import GlowCursor from "../components/GlowCursor";
 
 export default function HomePage() {
   const [time, setTime] = useState(new Date());
@@ -56,6 +56,8 @@ export default function HomePage() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-950 text-white overflow-x-hidden">
+      <GlowCursor />
+
       <Particles
         id="tsparticles"
         init={particlesInit}
@@ -165,7 +167,7 @@ export default function HomePage() {
         <NewsletterSignup />
       </section>
 
-      {/* Top-right controls */}
+      {/* Top-right Controls */}
       <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
         <motion.button
           onClick={() => setLanguage(language === "en" ? "es" : "en")}
