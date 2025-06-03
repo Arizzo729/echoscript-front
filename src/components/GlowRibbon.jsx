@@ -15,7 +15,6 @@ export default function GlowRibbon() {
 
   const baseColor = new Color("#00f0ff");
 
-  // Delay init 1 frame to avoid reading undefined points during Drei init
   useEffect(() => {
     requestAnimationFrame(() => setInitialized(true));
   }, []);
@@ -32,12 +31,12 @@ export default function GlowRibbon() {
     const curve = new CatmullRomCurve3(pointsRef.current);
     const trailPoints = curve.getPoints(80);
 
-    if (Array.isArray(trailPoints) && trailPoints.length > 0 && typeof lineRef.current.setPoints === "function") {
-      lineRef.current.setPoints(trailPoints);
+    if (trailPoints.length && lineRef.current.geometry) {
+      lineRef.current.geometry.setFromPoints(trailPoints);
 
       const shimmer = baseColor.clone().offsetHSL(((tick % 360) / 360) * 0.1, 0, 0);
-      if (lineRef.current.material) {
-        lineRef.current.material.color = shimmer;
+      if (lineRef.current.material?.color) {
+        lineRef.current.material.color.set(shimmer);
       }
     }
 
@@ -50,13 +49,12 @@ export default function GlowRibbon() {
     <Line
       ref={lineRef}
       points={pointsRef.current}
-      lineWidth={3}
+      lineWidth={1.5} // lineWidth only works in some setups
       transparent
-      opacity={0.08}
+      opacity={0.1}
       color={"#00f0ff"}
       toneMapped={false}
     />
   );
 }
-
 
