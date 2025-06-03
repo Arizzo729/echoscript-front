@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 
-const MAX_POINTS = 30;
-const SMOOTHING = 0.2;
-const IDLE_FADE = 0.02;
+const MAX_POINTS = 20;
+const SMOOTHING = 0.18;
 
 export default function GlowSVGTrail() {
   const [points, setPoints] = useState([]);
@@ -25,13 +24,12 @@ export default function GlowSVGTrail() {
 
   useEffect(() => {
     const animate = () => {
-      // Interpolate toward target for fluid catch-up
       current.current.x += (target.current.x - current.current.x) * SMOOTHING;
       current.current.y += (target.current.y - current.current.y) * SMOOTHING;
 
       setPoints((prev) => {
-        const newPoints = [...prev, { x: current.current.x, y: current.current.y }];
-        return newPoints.length > MAX_POINTS ? newPoints.slice(-MAX_POINTS) : newPoints;
+        const next = [...prev, { ...current.current }];
+        return next.length > MAX_POINTS ? next.slice(-MAX_POINTS) : next;
       });
 
       requestAnimationFrame(animate);
@@ -39,36 +37,39 @@ export default function GlowSVGTrail() {
     animate();
   }, []);
 
-  const pathData = points
-    .map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`))
-    .join(" ");
+  const getPathData = (pts) => {
+    if (pts.length < 2) return "";
+    let d = `M ${pts[0].x},${pts[0].y}`;
+    for (let i = 1; i < pts.length - 1; i++) {
+      const xc = (pts[i].x + pts[i + 1].x) / 2;
+      const yc = (pts[i].y + pts[i + 1].y) / 2;
+      d += ` Q ${pts[i].x},${pts[i].y} ${xc},${yc}`;
+    }
+    return d;
+  };
+
+  const pathData = getPathData(points);
 
   return (
     <svg className="pointer-events-none fixed top-0 left-0 z-0 w-full h-full">
       <defs>
-        <filter id="etherealGlow">
-          <feGaussianBlur stdDeviation="12" result="blur" />
-          <feColorMatrix
-            type="matrix"
-            values="0 0 0 0 0.1
-                    0 1 1 0 0.2
-                    0 1 1 0 0.3
-                    0 0 0 0.15 0"
-            result="glow"
-          />
-          <feBlend in="SourceGraphic" in2="glow" mode="screen" />
+        <linearGradient id="tealGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="rgba(0, 255, 255, 0.15)" />
+          <stop offset="100%" stopColor="rgba(0, 200, 255, 0.05)" />
+        </linearGradient>
+        <filter id="blur">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="24" />
         </filter>
       </defs>
 
       <path
         d={pathData}
         fill="none"
-        stroke="hsl(185, 100%, 70%)"
-        strokeWidth="10"
+        stroke="url(#tealGlow)"
+        strokeWidth="22"
+        filter="url(#blur)"
+        opacity="0.07"
         strokeLinecap="round"
-        strokeLinejoin="round"
-        filter="url(#etherealGlow)"
-        opacity="0.1"
       />
     </svg>
   );
