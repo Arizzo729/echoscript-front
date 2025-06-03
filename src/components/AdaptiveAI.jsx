@@ -17,7 +17,7 @@ export default function AdaptiveAI({
     setLog((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
 
   const chooseProviderAdaptive = useCallback(() => {
-    if (inputData && inputData.length > 1000) return PROVIDERS.OCTOPARSE;
+    if (typeof inputData === "string" && inputData.length > 1000) return PROVIDERS.OCTOPARSE;
     return initialProvider;
   }, [inputData, initialProvider]);
 
