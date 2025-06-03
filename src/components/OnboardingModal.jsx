@@ -82,18 +82,26 @@ export default function OnboardingModal({ onClose }) {
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
+            {/* Close X */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-5 text-sm text-zinc-400 hover:text-teal-400 focus:outline-none"
+              className="absolute top-4 right-5 text-sm text-zinc-400 hover:text-teal-400 transition focus:outline-none"
               aria-label="Close"
             >
               ×
             </button>
 
+            {/* Illustration */}
             <div className="w-full h-48 flex items-center justify-center">
-              <Lottie animationData={STEPS[step].illustration} loop autoplay style={{ width: "90%" }} />
+              <Lottie
+                animationData={STEPS[step].illustration}
+                loop
+                autoplay
+                style={{ width: "90%" }}
+              />
             </div>
 
+            {/* Title + Description */}
             <motion.div
               key={step}
               className="relative z-10 text-center"
@@ -110,6 +118,7 @@ export default function OnboardingModal({ onClose }) {
               </p>
             </motion.div>
 
+            {/* Dots */}
             <div className="flex justify-center mt-6 space-x-1 z-10">
               {STEPS.map((_, i) => (
                 <div
@@ -121,27 +130,29 @@ export default function OnboardingModal({ onClose }) {
               ))}
             </div>
 
-            <div className="mt-6 flex justify-center items-center gap-6 z-10">
+            {/* Nav Buttons */}
+            <div className="mt-6 flex justify-center items-center gap-8 z-10">
               {step > 0 && (
                 <button
                   onClick={() => setStep(step - 1)}
-                  className="text-xs text-white border border-zinc-600 rounded-full px-4 py-1 hover:border-teal-400 transition"
+                  className="text-xs text-white hover:text-teal-400 hover:underline transition focus:outline-none"
                 >
                   Back
                 </button>
               )}
               <button
                 onClick={step === STEPS.length - 1 ? handleClose : () => setStep(step + 1)}
-                className="text-xs text-white border border-teal-600 rounded-full px-4 py-1 hover:bg-teal-700 transition"
+                className="text-xs text-white hover:text-teal-400 hover:underline transition focus:outline-none"
               >
                 {step === STEPS.length - 1 ? "Finish" : "Next"}
               </button>
             </div>
 
+            {/* Skip */}
             <div className="text-center mt-4 z-10">
               <button
                 onClick={handleClose}
-                className="text-xs text-teal-400 hover:underline transition"
+                className="text-xs text-teal-400 hover:underline transition focus:outline-none"
               >
                 Skip
               </button>
@@ -152,4 +163,5 @@ export default function OnboardingModal({ onClose }) {
     </AnimatePresence>
   );
 }
+
 
