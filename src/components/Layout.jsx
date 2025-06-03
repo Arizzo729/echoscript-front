@@ -1,4 +1,3 @@
-// src/Layout.jsx
 import React, { useState, useEffect, createContext } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
@@ -13,6 +12,7 @@ export const ThemeContext = createContext();
 export default function Layout() {
   const [theme, setTheme] = useState("dark");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false); // 👈 Add sidebar state here
 
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
   const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
@@ -23,11 +23,19 @@ export default function Layout() {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <div className={`relative flex flex-col h-screen w-screen ${theme === "dark" ? "dark bg-gray-950" : "bg-white"}`}>
+      <div
+        className={`relative flex flex-col h-screen w-screen ${
+          theme === "dark" ? "dark bg-gray-950" : "bg-white"
+        }`}
+      >
         <Header toggleDrawer={toggleDrawer} />
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto px-4 py-4 md:px-8 md:py-6 md:pl-56">
+          <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+          <main
+            className={`flex-1 overflow-y-auto px-4 py-4 md:px-8 md:py-6 transition-all duration-300 ${
+              collapsed ? "md:pl-20" : "md:pl-56"
+            }`}
+          >
             <Outlet />
           </main>
         </div>
@@ -47,7 +55,12 @@ export default function Layout() {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-900 shadow-lg z-[9999]"
             >
-              <button onClick={toggleDrawer} className="p-4 text-right w-full text-zinc-600 dark:text-zinc-300 hover:text-teal-500 transition">✕</button>
+              <button
+                onClick={toggleDrawer}
+                className="p-4 text-right w-full text-zinc-600 dark:text-zinc-300 hover:text-teal-500 transition"
+              >
+                ✕
+              </button>
               <div className="p-6">
                 <h2 className="text-xl font-semibold">Settings</h2>
               </div>
