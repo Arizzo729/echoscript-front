@@ -72,8 +72,8 @@ export default function Header({
         </div>
       </div>
 
-      {/* Right Actions */}
-      <div className="flex items-center gap-4 flex-wrap justify-end w-full sm:w-auto">
+      {/* Right Actions (hidden on mobile) */}
+      <div className="hidden sm:flex items-center gap-4 flex-wrap justify-end w-full sm:w-auto">
         <Button
           variant="ghost"
           size="sm"
