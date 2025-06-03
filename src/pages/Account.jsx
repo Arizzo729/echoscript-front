@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — Final Account Page with Activity, Controls & Saved Transcripts
+// ✅ EchoScript.AI — Final Account Page with Enhanced Style and Theming
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
@@ -62,9 +62,8 @@ export default function Account() {
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.4 }}
     >
-      {/* 🔧 Header Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent">
           Account Overview
         </h1>
         <div className="flex gap-3">
@@ -82,7 +81,6 @@ export default function Account() {
         </div>
       </div>
 
-      {/* 👤 Profile + 📊 Usage */}
       <div className="grid md:grid-cols-2 gap-6 mb-12">
         <Card title="👤 Profile">
           <p><strong>Name:</strong> {user.name}</p>
@@ -100,7 +98,7 @@ export default function Account() {
             <label className="text-sm text-zinc-500 dark:text-zinc-400">Monthly Limit Usage</label>
             <div className="w-full bg-zinc-200 dark:bg-zinc-700 h-3 rounded-full mt-1">
               <div
-                className="h-3 rounded-full bg-gradient-to-r from-teal-400 to-blue-500"
+                className="h-3 rounded-full bg-gradient-to-r from-teal-400 to-blue-500 shadow-sm"
                 style={{ width: `${Math.min((user.minutesUsed / 500) * 100, 100)}%` }}
               />
             </div>
@@ -108,10 +106,9 @@ export default function Account() {
         </Card>
       </div>
 
-      {/* 📁 Saved Transcripts */}
       <div className="mb-12">
         <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-zinc-800 dark:text-white">
-          <FileText className="w-5 h-5" />
+          <FileText className="w-5 h-5 text-teal-400" />
           Saved Transcripts
         </h2>
         {transcripts.length === 0 ? (
@@ -145,7 +142,6 @@ export default function Account() {
         )}
       </div>
 
-      {/* ⚙️ Quick Actions */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         <ActionCard icon={<Settings className="w-5 h-5" />} label="Preferences" />
         <ActionCard icon={<UploadCloud className="w-5 h-5" />} label="Upload History" />
@@ -154,7 +150,6 @@ export default function Account() {
         <ActionCard icon={<AlertCircle className="w-5 h-5" />} label="Report a Problem" />
       </div>
 
-      {/* 🕓 Recent Activity */}
       <div className="mt-10">
         <h2 className="text-xl font-semibold text-zinc-800 dark:text-white mb-4">
           🕓 Recent Activity
@@ -171,8 +166,10 @@ export default function Account() {
 
 function Card({ title, children }) {
   return (
-    <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border dark:border-zinc-700 shadow-sm space-y-2">
-      <h3 className="text-lg font-semibold text-zinc-800 dark:text-white mb-2">{title}</h3>
+    <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border dark:border-zinc-700 shadow-md space-y-2">
+      <h3 className="text-lg font-semibold text-zinc-800 dark:text-white mb-2 bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent">
+        {title}
+      </h3>
       <div className="text-sm text-zinc-700 dark:text-zinc-300 space-y-1">{children}</div>
     </div>
   );
@@ -192,4 +189,3 @@ function ActionCard({ icon, label }) {
     </button>
   );
 }
-

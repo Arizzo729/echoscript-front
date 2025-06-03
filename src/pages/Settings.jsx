@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — Final Polished Settings Page
+// ✅ EchoScript.AI — Final Polished Settings Page (Enhanced UI Theme)
 import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { Switch } from "@headlessui/react";
@@ -65,7 +65,9 @@ export default function Settings() {
       <section className="flex-1 space-y-10">
         {activeTab === "preferences" && (
           <motion.div key="preferences" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-            <h2 className="text-xl font-bold mb-4">User Preferences</h2>
+            <h2 className="text-2xl font-bold text-gradient bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent mb-6">
+              User Preferences
+            </h2>
 
             <SettingsGroup title="Appearance & Accessibility">
               <SettingToggle label="Enable Dark Mode" description="Toggle between light and dark themes" enabled={darkMode} onChange={toggleDarkMode} Icon={darkMode ? Sun : Moon} />
@@ -95,9 +97,6 @@ export default function Settings() {
   );
 }
 
-// ─────────────────────────────────────
-// Components
-// ─────────────────────────────────────
 function SettingsGroup({ title, children }) {
   return (
     <div className="space-y-4 mb-8">
@@ -109,7 +108,7 @@ function SettingsGroup({ title, children }) {
 
 function SettingToggle({ label, description, enabled, onChange, Icon, disabled = false }) {
   return (
-    <div className={`flex items-center justify-between bg-zinc-50 dark:bg-zinc-800 px-4 py-3 rounded-lg transition ${disabled ? "opacity-50 pointer-events-none" : ""}`}>
+    <div className={`flex items-center justify-between bg-zinc-50 dark:bg-zinc-800 px-4 py-3 rounded-lg shadow-sm transition ${disabled ? "opacity-50 pointer-events-none" : "hover:shadow-md"}`}>
       <div className="flex flex-col gap-1 text-sm">
         <div className="flex items-center gap-2 font-medium text-zinc-800 dark:text-white">
           <Icon className="w-5 h-5 text-teal-500" />
@@ -130,7 +129,7 @@ function SettingToggle({ label, description, enabled, onChange, Icon, disabled =
 
 function FontSizeSlider({ value, onChange }) {
   return (
-    <div className="bg-zinc-50 dark:bg-zinc-800 px-4 py-3 rounded-lg">
+    <div className="bg-zinc-50 dark:bg-zinc-800 px-4 py-3 rounded-lg shadow-sm">
       <div className="flex items-center justify-between text-sm">
         <div className="flex items-center gap-2 font-medium text-zinc-800 dark:text-white">
           <Text className="w-5 h-5 text-teal-500" />
@@ -153,7 +152,9 @@ function FontSizeSlider({ value, onChange }) {
 function FAQSection() {
   return (
     <motion.div key="faq" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-      <h2 className="text-xl font-bold mb-4">Frequently Asked Questions</h2>
+      <h2 className="text-2xl font-bold text-gradient bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent mb-4">
+        Frequently Asked Questions
+      </h2>
       <FAQItem question="How accurate is EchoScript?">EchoScript uses Whisper + GPT to deliver transcripts with near-human accuracy, even on noisy or accented audio.</FAQItem>
       <FAQItem question="Can I export my transcripts?">Yes — PDF, DOCX, copy to clipboard, or export to Notion, Google Docs, and more.</FAQItem>
       <FAQItem question="Is EchoScript secure?">All audio and transcripts are encrypted and not stored unless you choose to save them.</FAQItem>
@@ -164,7 +165,9 @@ function FAQSection() {
 function ContactSection() {
   return (
     <motion.div key="contact" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-      <h2 className="text-xl font-bold mb-4">Contact Support</h2>
+      <h2 className="text-2xl font-bold text-gradient bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent mb-4">
+        Contact Support
+      </h2>
       <form className="space-y-4 max-w-lg" onSubmit={(e) => e.preventDefault()}>
         <input type="text" placeholder="Your name" required className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm" />
         <input type="email" placeholder="Your email" required className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm" />
