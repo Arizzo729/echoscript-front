@@ -100,7 +100,7 @@ export default function HomePage() {
               1500,
               "Understanding everyone",
               1500,
-              (shortTranscript?.length ?? 0) > 0 ? `You said: ${shortTranscript}` : "Listening to you...",
+            (shortTranscript?.length ?? 0) > 0 ? `You said: ${shortTranscript}` : "Listening to you...",
               2000,
             ]}
             speed={50}
