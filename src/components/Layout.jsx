@@ -7,7 +7,6 @@ import EchoAssistantUltra from "./EchoAssistantUltra";
 import ToastContainer from "./ToastContainer";
 import MobileBottomNav from "./MobileBottomNav";
 import { motion, AnimatePresence } from "framer-motion";
-import GlowCanvas from "./GlowCanvas";
 import { X } from "lucide-react";
 
 export const ThemeContext = createContext();
