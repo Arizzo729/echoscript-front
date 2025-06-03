@@ -82,10 +82,10 @@ export default function OnboardingModal({ onClose }) {
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* ❌ Close Text "X" */}
+            {/* ❌ Close Button */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 text-sm text-zinc-400 hover:text-teal-400 transition bg-transparent"
+              className="absolute top-3.5 right-3.5 p-2 rounded-full text-lg text-zinc-400 hover:text-teal-400 hover:bg-zinc-800 transition"
               aria-label="Close"
             >
               ×
@@ -96,7 +96,7 @@ export default function OnboardingModal({ onClose }) {
               <Lottie animationData={STEPS[step].illustration} loop autoplay style={{ width: "90%" }} />
             </div>
 
-            {/* Text */}
+            {/* Text Content */}
             <motion.div
               key={step}
               className="relative z-10 text-center"
@@ -125,7 +125,7 @@ export default function OnboardingModal({ onClose }) {
               ))}
             </div>
 
-            {/* Back + Next Buttons (now both styled and spaced evenly) */}
+            {/* Navigation Buttons */}
             <div className="mt-6 flex justify-center items-center gap-6 z-10">
               {step > 0 && (
                 <button
@@ -143,11 +143,11 @@ export default function OnboardingModal({ onClose }) {
               </button>
             </div>
 
-            {/* Skip */}
+            {/* Skip Link */}
             <div className="text-center mt-4 z-10">
               <button
                 onClick={handleClose}
-                className="text-xs text-zinc-400 hover:text-teal-400 underline transition bg-transparent"
+                className="text-xs text-zinc-400 hover:text-teal-400 transition underline px-2 py-1 inline-block rounded hover:bg-zinc-800"
               >
                 Skip
               </button>
