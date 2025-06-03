@@ -1,90 +1,68 @@
 import React, { useEffect, useRef } from "react";
 
-export default function GlowCursor() {
-  const cursorRef = useRef(null);
-  const trailRef = useRef(null);
-  const target = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
-  const position = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
-  const velocity = useRef({ x: 0, y: 0 });
-  const hue = useRef(180);
-  const rafId = useRef(null);
+export default function GlowRibbonCursor() {
+  const canvasRef = useRef(null);
+  const points = useRef([]);
 
   useEffect(() => {
-    const updateMouse = (e) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const maxPoints = 40;
+
+    const addPoint = (x, y) => {
+      points.current.push({ x, y });
+      if (points.current.length > maxPoints) {
+        points.current.shift();
+      }
+    };
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.beginPath();
+      for (let i = 0; i < points.current.length - 1; i++) {
+        const p = points.current[i];
+        const next = points.current[i + 1];
+        ctx.strokeStyle = `hsla(185, 100%, 65%, ${i / maxPoints})`;
+        ctx.lineWidth = 6;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(next.x, next.y);
+        ctx.stroke();
+      }
+
+      requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    const move = (e) => {
       const x = e.clientX ?? e.touches?.[0]?.clientX;
       const y = e.clientY ?? e.touches?.[0]?.clientY;
-      target.current = { x, y };
+      addPoint(x, y);
     };
 
-    window.addEventListener("mousemove", updateMouse);
-    window.addEventListener("touchmove", updateMouse);
-
-    const animate = () => {
-      const dx = target.current.x - position.current.x;
-      const dy = target.current.y - position.current.y;
-
-      velocity.current.x += dx * 0.07;
-      velocity.current.y += dy * 0.07;
-
-      velocity.current.x *= 0.65;
-      velocity.current.y *= 0.65;
-
-      position.current.x += velocity.current.x;
-      position.current.y += velocity.current.y;
-
-      hue.current = (hue.current + 0.4) % 360;
-
-      const speed = Math.sqrt(velocity.current.x ** 2 + velocity.current.y ** 2);
-      const scaleX = 1 + Math.min(speed / 14, 1.8);
-      const scaleY = 1 - Math.min(speed / 30, 0.25);
-
-      if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate(${position.current.x - 40}px, ${position.current.y - 40}px) scale(${scaleX}, ${scaleY})`;
-        cursorRef.current.style.background = `radial-gradient(circle, hsla(${hue.current}, 100%, 70%, 0.14), transparent 60%)`;
-      }
-
-      if (trailRef.current) {
-        trailRef.current.style.transform = `translate(${position.current.x - 40}px, ${position.current.y - 40}px) scale(${1.3}, ${1.3})`;
-        trailRef.current.style.background = `radial-gradient(circle, hsla(${(hue.current + 40) % 360}, 100%, 60%, 0.05), transparent 70%)`;
-      }
-
-      rafId.current = requestAnimationFrame(animate);
-    };
-
-    animate();
-
+    window.addEventListener("mousemove", move);
+    window.addEventListener("touchmove", move);
     return () => {
-      cancelAnimationFrame(rafId.current);
-      window.removeEventListener("mousemove", updateMouse);
-      window.removeEventListener("touchmove", updateMouse);
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("touchmove", move);
     };
   }, []);
 
   return (
-    <>
-      <div
-        ref={trailRef}
-        className="pointer-events-none fixed top-0 left-0 z-0"
-        style={{
-          width: 80,
-          height: 80,
-          borderRadius: "50%",
-          filter: "blur(40px)",
-          mixBlendMode: "screen",
-        }}
-      />
-      <div
-        ref={cursorRef}
-        className="pointer-events-none fixed top-0 left-0 z-0"
-        style={{
-          width: 80,
-          height: 80,
-          borderRadius: "50%",
-          filter: "blur(20px)",
-          mixBlendMode: "screen",
-        }}
-      />
-    </>
+    <canvas
+      ref={canvasRef}
+      className="pointer-events-none fixed top-0 left-0 z-0"
+      style={{
+        width: "100vw",
+        height: "100vh",
+      }}
+    />
   );
 }
 
