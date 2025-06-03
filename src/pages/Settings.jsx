@@ -99,8 +99,10 @@ export default function Settings() {
 
 function SettingsGroup({ title, children }) {
   return (
-    <div className="space-y-4 mb-8">
-      <h3 className="text-md font-semibold text-zinc-700 dark:text-zinc-200 mb-2">{title}</h3>
+    <div className="space-y-4 mb-8 p-6 bg-zinc-50 dark:bg-zinc-900 rounded-lg shadow-md ring-1 ring-zinc-200/50 dark:ring-zinc-800/60">
+      <h3 className="text-md font-semibold text-zinc-700 dark:text-zinc-200 mb-2 border-b pb-1 border-zinc-300/40 dark:border-zinc-700">
+        {title}
+      </h3>
       <div className="space-y-4">{children}</div>
     </div>
   );
@@ -108,7 +110,7 @@ function SettingsGroup({ title, children }) {
 
 function SettingToggle({ label, description, enabled, onChange, Icon, disabled = false }) {
   return (
-    <div className={`flex items-center justify-between bg-zinc-50 dark:bg-zinc-800 px-4 py-3 rounded-lg shadow-sm transition ${disabled ? "opacity-50 pointer-events-none" : "hover:shadow-md"}`}>
+    <div className={`flex items-center justify-between bg-white/80 dark:bg-zinc-800 px-4 py-3 rounded-lg shadow-sm transition ${disabled ? "opacity-50 pointer-events-none" : "hover:shadow-md"}`}>
       <div className="flex flex-col gap-1 text-sm">
         <div className="flex items-center gap-2 font-medium text-zinc-800 dark:text-white">
           <Icon className="w-5 h-5 text-teal-500" />
@@ -129,7 +131,7 @@ function SettingToggle({ label, description, enabled, onChange, Icon, disabled =
 
 function FontSizeSlider({ value, onChange }) {
   return (
-    <div className="bg-zinc-50 dark:bg-zinc-800 px-4 py-3 rounded-lg shadow-sm">
+    <div className="bg-white/80 dark:bg-zinc-800 px-4 py-3 rounded-lg shadow-sm">
       <div className="flex items-center justify-between text-sm">
         <div className="flex items-center gap-2 font-medium text-zinc-800 dark:text-white">
           <Text className="w-5 h-5 text-teal-500" />

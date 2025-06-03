@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — Final Account Page with Enhanced Style and Theming
+// ✅ EchoScript.AI — Final Polished Account Page with Enhanced Style
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
@@ -63,7 +63,7 @@ export default function Account() {
       transition={{ duration: 0.4 }}
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent">
           Account Overview
         </h1>
         <div className="flex gap-3">
@@ -120,7 +120,7 @@ export default function Account() {
             {transcripts.map((t) => (
               <div
                 key={t.id}
-                className="flex justify-between items-start bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-xl p-4 hover:shadow transition-all"
+                className="flex justify-between items-start bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-xl p-4 hover:shadow-md transition-all"
               >
                 <div className="flex-1">
                   <p className="font-medium text-zinc-900 dark:text-white">{t.title}</p>
@@ -167,7 +167,7 @@ export default function Account() {
 function Card({ title, children }) {
   return (
     <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border dark:border-zinc-700 shadow-md space-y-2">
-      <h3 className="text-lg font-semibold text-zinc-800 dark:text-white mb-2 bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent">
+      <h3 className="text-lg font-semibold mb-2 bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent">
         {title}
       </h3>
       <div className="text-sm text-zinc-700 dark:text-zinc-300 space-y-1">{children}</div>
@@ -178,7 +178,7 @@ function Card({ title, children }) {
 function ActionCard({ icon, label }) {
   return (
     <button
-      className="flex items-center justify-between w-full p-4 rounded-xl border dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all"
+      className="flex items-center justify-between w-full p-4 rounded-xl border dark:border-zinc-700 bg-white/80 dark:bg-zinc-800/90 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-all backdrop-blur-sm"
       title={label}
     >
       <div className="flex items-center gap-3 text-left text-sm font-medium text-zinc-700 dark:text-zinc-200">
@@ -188,4 +188,5 @@ function ActionCard({ icon, label }) {
       <span className="text-xs text-zinc-400">→</span>
     </button>
   );
+}
 }
