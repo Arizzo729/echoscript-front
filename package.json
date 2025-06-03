@@ -15,6 +15,8 @@
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "@react-spring/web": "^10.0.1",
+    "@react-three/drei": "^10.1.2",
+    "@react-three/fiber": "^9.1.2",
     "@tailwindcss/vite": "^4.1.8",
     "axios": "^1.9.0",
     "classnames": "^2.5.1",
@@ -36,6 +38,7 @@
     "react-tsparticles": "^2.12.0",
     "react-type-animation": "^3.2.0",
     "tailwind-merge": "^3.3.0",
+    "three": "^0.177.0",
     "tsparticles": "^2.12.0",
     "tsparticles-engine": "^2.12.0"
   },

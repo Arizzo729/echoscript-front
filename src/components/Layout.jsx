@@ -6,7 +6,7 @@ import Header from "./Header";
 import EchoAssistantUltra from "./EchoAssistantUltra";
 import ToastContainer from "./ToastContainer";
 import MobileBottomNav from "./MobileBottomNav";
-import GlowSVGTrail from "./GlowSVGTrail"; // 👈 updated from GlowCursor
+import GlowSVGTrail from "./GlowSVGTrail";
 import { AnimatePresence, motion } from "framer-motion";
 
 export const ThemeContext = createContext();
@@ -17,7 +17,7 @@ export default function Layout() {
   const [collapsed, setCollapsed] = useState(true); // Sidebar starts collapsed
 
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
-  const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  const toggleTheme = () => setTheme(prev => (prev === "dark" ? "light" : "dark"));
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
@@ -26,13 +26,13 @@ export default function Layout() {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <div className="relative flex flex-col h-screen w-screen bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white overflow-hidden">
-        {/* Advanced Glow Trail */}
+        {/* ✨ Cinematic Glow Trail */}
         <GlowSVGTrail />
 
-        {/* Top Header */}
+        {/* 📌 Header */}
         <Header toggleDrawer={toggleDrawer} />
 
-        {/* Page Content Layout */}
+        {/* 🧭 Layout with Sidebar */}
         <div className="flex flex-1 overflow-hidden">
           <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
           <main
@@ -44,7 +44,7 @@ export default function Layout() {
           </main>
         </div>
 
-        {/* Echo Assistant + Mobile Nav */}
+        {/* 🤖 Echo Assistant & 📱 Mobile Nav */}
         <div className="hidden md:block">
           <EchoAssistantUltra />
         </div>
@@ -52,10 +52,10 @@ export default function Layout() {
           <MobileBottomNav />
         </div>
 
-        {/* Toast Notifications */}
+        {/* 🔔 Global Toasts */}
         <ToastContainer />
 
-        {/* Slide-in Settings Drawer */}
+        {/* ⚙️ Settings Drawer */}
         <AnimatePresence>
           {isDrawerOpen && (
             <motion.div
