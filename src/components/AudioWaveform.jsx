@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { Canvas } from "@react-three/fiber";
 
 export default function AudioWaveform({ audioStream }) {
   const canvasRef = useRef(null);
