@@ -4,7 +4,11 @@ import * as THREE from "three";
 
 export default function GlowRibbon() {
   const trailRef = useRef();
-  const points = useRef([]);
+  const points = useRef([
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(0.01, 0.01, 0.01),
+    new THREE.Vector3(0.02, 0.02, 0.02),
+  ]);
   const maxPoints = 80;
   const mouse = useRef(new THREE.Vector2());
 
@@ -23,11 +27,14 @@ export default function GlowRibbon() {
     points.current.push(vec.clone());
     if (points.current.length > maxPoints) points.current.shift();
 
-    if (trailRef.current && points.current.length > 2) {
-      const curve = new THREE.CatmullRomCurve3(points.current);
-      const geometry = new THREE.TubeGeometry(curve, 64, 0.05, 8, false);
-      trailRef.current.geometry.dispose();
-      trailRef.current.geometry = geometry;
+    if (trailRef.current) {
+      const validPoints = points.current.filter((p) => p && p.isVector3);
+      if (validPoints.length > 2) {
+        const curve = new THREE.CatmullRomCurve3(validPoints);
+        const geometry = new THREE.TubeGeometry(curve, 64, 0.05, 8, false);
+        if (trailRef.current.geometry) trailRef.current.geometry.dispose();
+        trailRef.current.geometry = geometry;
+      }
     }
   });
 
@@ -35,7 +42,11 @@ export default function GlowRibbon() {
     <mesh ref={trailRef}>
       <tubeGeometry
         args={[
-          new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0, 0)]),
+          new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, 0, 0),
+            new THREE.Vector3(0.01, 0.01, 0.01),
+            new THREE.Vector3(0.02, 0.02, 0.02),
+          ]),
           64,
           0.05,
           8,
@@ -44,7 +55,7 @@ export default function GlowRibbon() {
       />
       <meshBasicMaterial
         attach="material"
-        color={new THREE.Color("#14f1f9")} // Teal glow
+        color={new THREE.Color("#14f1f9")}
         transparent
         opacity={0.4}
         blending={THREE.AdditiveBlending}
@@ -53,5 +64,6 @@ export default function GlowRibbon() {
     </mesh>
   );
 }
+
 
 
