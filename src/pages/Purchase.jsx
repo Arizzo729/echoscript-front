@@ -1,4 +1,3 @@
-// ✅ EchoScript.AI — Final Polished Purchase Page with Tiered Buttons and Smoother Styling
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -8,7 +7,6 @@ import {
   HelpCircle,
   Sparkles,
 } from "lucide-react";
-import Button from "../components/ui/Button";
 
 const pricingPlans = [
   {
@@ -63,7 +61,7 @@ const pricingPlans = [
 export default function Purchase() {
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showAssistant, setShowAssistant] = useState(true);
+  const [showAssistant, setShowAssistant] = useState(false);
 
   const handleSelect = (plan) => {
     setSelected(plan.name);
@@ -78,7 +76,7 @@ export default function Purchase() {
     <motion.div
       whileHover={{ scale: 1.02 }}
       transition={{ type: "spring", stiffness: 180, damping: 18 }}
-      className={`flex-1 rounded-2xl border border-white/10 p-6 space-y-4 shadow-lg transition bg-gradient-to-br ${plan.theme} ${plan.text} ${plan.ring}`}
+      className={`rounded-2xl border border-white/10 p-6 space-y-4 shadow-lg transition bg-gradient-to-br ${plan.theme} ${plan.text} ${plan.ring}`}
     >
       <div>
         <h2 className="text-2xl font-semibold">{plan.name}</h2>
@@ -118,7 +116,7 @@ export default function Purchase() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="sticky top-10 rounded-2xl p-6 bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 shadow-md space-y-4"
+      className="rounded-2xl p-6 bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 shadow-md space-y-4"
     >
       <div className="flex items-center gap-2 mb-2">
         <Sparkles className="w-5 h-5 text-teal-400" />
@@ -140,24 +138,41 @@ export default function Purchase() {
 
   return (
     <motion.div
-      className="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 lg:grid-cols-4 gap-10"
+      className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14 grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-10"
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.5 }}
     >
+      {/* Desktop Assistant */}
       {showAssistant && (
         <div className="hidden lg:block col-span-1">
           <Assistant />
         </div>
       )}
 
-      <div className="col-span-3 flex flex-col lg:flex-row gap-6">
+      {/* Pricing Cards */}
+      <div className="col-span-3 flex flex-col gap-6 lg:flex-row">
         {pricingPlans.map((plan, idx) => (
-          <PlanCard key={idx} plan={plan} />
+          <div key={idx} className="w-full sm:max-w-md mx-auto">
+            <PlanCard plan={plan} />
+          </div>
         ))}
       </div>
 
+      {/* Show Assistant on mobile button */}
+      {!showAssistant && (
+        <div className="block lg:hidden mt-6 text-center">
+          <button
+            onClick={() => setShowAssistant(true)}
+            className="text-sm text-teal-400 hover:underline"
+          >
+            Show Plan Assistant
+          </button>
+        </div>
+      )}
+
+      {/* Footer */}
       <div className="col-span-full mt-12 text-sm text-zinc-400 text-center flex flex-col gap-3 items-center">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-green-400" />
@@ -178,5 +193,6 @@ export default function Purchase() {
     </motion.div>
   );
 }
+
 
 

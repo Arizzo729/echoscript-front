@@ -1,3 +1,4 @@
+// EchoAssistantUltra.jsx (Mobile-Ready + Polished)
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Send, X, Loader2, Wand2 } from "lucide-react";
@@ -65,7 +66,7 @@ export default function EchoAssistantUltra({
       return;
     }
 
-    const systemPrompt = `You are Echo, a helpful and intelligent assistant in a smart transcription tool. The user is currently on the "${context}" page. Offer responses with precision and empathy. Use the transcript context below for commands like summarize, clarify, or feedback.`;
+    const systemPrompt = `You are Echo, a helpful and intelligent assistant in a smart transcription tool. The user is currently on the "${context}" page. Use the transcript context below for commands like summarize, clarify, or feedback.`;
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_BASE}/assistant/ask`, {
@@ -98,6 +99,7 @@ export default function EchoAssistantUltra({
 
   return (
     <>
+      {/* Floating Open Button */}
       <motion.button
         onClick={toggle}
         className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 p-3 bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-xl"
@@ -109,10 +111,11 @@ export default function EchoAssistantUltra({
         <Wand2 className="w-5 h-5" />
       </motion.button>
 
+      {/* Chat Panel */}
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed bottom-28 right-4 sm:bottom-24 sm:right-6 w-[90vw] sm:w-[360px] max-h-[75vh] bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-2xl shadow-2xl z-50 flex flex-col"
+            className="fixed bottom-28 right-4 sm:bottom-24 sm:right-6 w-[92vw] sm:w-[360px] max-w-sm max-h-[75vh] bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-2xl shadow-2xl z-50 flex flex-col"
             initial={{ opacity: 0, y: 16, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
@@ -152,7 +155,7 @@ export default function EchoAssistantUltra({
               <div ref={scrollRef} />
             </div>
 
-            {/* Input */}
+            {/* Input Area */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();

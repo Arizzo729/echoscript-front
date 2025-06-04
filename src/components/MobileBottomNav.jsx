@@ -1,11 +1,12 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Upload, User, Settings2 } from "lucide-react";
+import { LayoutDashboard, Upload, User, Settings2, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const tabs = [
   { name: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
   { name: "Upload", icon: Upload, to: "/upload" },
+  { name: "Shop", icon: CreditCard, to: "/purchase" },
   { name: "Account", icon: User, to: "/account" },
   { name: "Settings", icon: Settings2, to: "/settings" },
 ];
@@ -50,3 +51,4 @@ export default function MobileBottomNav() {
     </nav>
   );
 }
+

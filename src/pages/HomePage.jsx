@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — Final Clean HomePage with Glow Behind Logo & No Background Clash
+// ✅ EchoScript.AI — Final Polished HomePage with Community + Mobile Optimization
 import React, { useEffect, useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
@@ -13,6 +13,13 @@ import LiveGPTBubble from "../components/LiveGPTBubble";
 import { GPTContext } from "../context/GPTContext";
 import detectTone from "../utils/EmotionToneDetector";
 import NewsletterSignup from "../components/NewsletterSignup";
+import {
+  FaDiscord,
+  FaInstagram,
+  FaLinkedin,
+  FaTiktok,
+} from "react-icons/fa";
+import { Sparkles } from "lucide-react";
 
 export default function HomePage() {
   const [time, setTime] = useState(new Date());
@@ -53,6 +60,33 @@ export default function HomePage() {
     second: "2-digit",
   });
 
+  const communityLinks = [
+    {
+      name: "Discord",
+      href: "https://discord.com/invite/echoscriptai",
+      icon: FaDiscord,
+      color: "bg-indigo-600",
+    },
+    {
+      name: "Instagram",
+      href: "https://instagram.com/echoscriptai",
+      icon: FaInstagram,
+      color: "bg-pink-500",
+    },
+    {
+      name: "LinkedIn",
+      href: "https://linkedin.com/company/echoscriptai",
+      icon: FaLinkedin,
+      color: "bg-blue-700",
+    },
+    {
+      name: "TikTok",
+      href: "https://tiktok.com/@echoscriptai",
+      icon: FaTiktok,
+      color: "bg-black",
+    },
+  ];
+
   return (
     <div className="relative min-h-screen text-white overflow-x-hidden">
       <Particles
@@ -74,17 +108,12 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
-        <motion.div
-          className="mb-6"
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2 }}
-        >
+        <motion.div className="mb-6" initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2 }}>
           <div className="relative w-24 sm:w-28 mx-auto mb-4 z-20">
             <motion.div
               className="absolute inset-0 rounded-full bg-teal-400 blur-2xl opacity-30"
               animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.4, 0.2] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 2, repeat: Infinity }}
             />
             <img src="/Icon.png" alt="EchoScript Icon" className="relative w-full drop-shadow-xl z-20" />
           </div>
@@ -99,7 +128,7 @@ export default function HomePage() {
               1500,
               "Understanding everyone",
               1500,
-            (shortTranscript?.length ?? 0) > 0 ? `You said: ${shortTranscript}` : "Listening to you...",
+              (shortTranscript?.length ?? 0) > 0 ? `You said: ${shortTranscript}` : "Listening to you...",
               2000,
             ]}
             speed={50}
@@ -111,7 +140,6 @@ export default function HomePage() {
           <p className="text-sm mt-1 text-zinc-400 font-mono z-20">{formattedTime}</p>
         </motion.div>
 
-        {/* Mic Status + Waveform */}
         <motion.div className="mt-2 mb-4">
           <AudioWaveform voiceLevel={voiceLevel} />
           <div className="text-xs text-zinc-500 mt-1 font-medium">{micStatus}</div>
@@ -136,8 +164,8 @@ export default function HomePage() {
         <ProgressTimeline currentStep={introStep} />
       </div>
 
-      {/* Sections */}
-      <section className="relative z-10 py-24 px-6 text-center bg-transparent">
+      {/* About */}
+      <section className="relative z-10 py-20 px-6 text-center">
         <h2 className="text-3xl font-bold mb-4 text-white">About EchoScript</h2>
         <p className="max-w-3xl mx-auto text-zinc-400 text-lg">
           We’re building the world’s most intelligent and empathetic transcription platform — one that adapts to
@@ -145,23 +173,51 @@ export default function HomePage() {
         </p>
       </section>
 
-      <section className="relative z-10 py-24 px-6 text-center border-t border-zinc-800 bg-transparent">
-        <h2 className="text-3xl font-bold mb-4 text-white">What’s Coming Soon</h2>
+      {/* Community + Social */}
+      <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800 bg-transparent">
+        <motion.div className="flex flex-col items-center mb-10">
+          <Sparkles className="w-8 h-8 text-teal-400 mb-2 animate-pulse" />
+          <h2 className="text-3xl sm:text-4xl font-bold text-white">Join the EchoScript.AI Movement</h2>
+          <p className="text-zinc-400 mt-4 max-w-2xl">
+            Connect with a global community building the future of voice + AI. Get early access, share feedback, and join the conversation.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 justify-center">
+          {communityLinks.map(({ name, href, icon: Icon, color }) => (
+            <motion.a
+              key={name}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex flex-col items-center justify-center p-4 rounded-xl text-white shadow-md hover:scale-[1.05] transition ${color}`}
+              whileHover={{ scale: 1.1 }}
+            >
+              <Icon className="w-6 h-6 mb-1" />
+              <span className="text-sm font-semibold">{name}</span>
+            </motion.a>
+          ))}
+        </div>
+      </section>
+
+      {/* Coming Soon */}
+      <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800">
+        <h2 className="text-3xl font-bold mb-4 text-white">What’s Coming</h2>
         <p className="max-w-3xl mx-auto text-zinc-400 text-lg">
-          EchoScript is evolving — expect real-time collaboration, multi-language exports, GPT voice summarization,
-          and seamless integrations with Google Drive, Slack, and Notion.
+          Real-time collaboration, AI voice summaries, Slack & Notion export, multi-language support, and more.
         </p>
       </section>
 
-      <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800 bg-transparent">
-        <h2 className="text-3xl font-bold text-white mb-4">Join Our Newsletter</h2>
+      {/* Newsletter */}
+      <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800">
+        <h2 className="text-3xl font-bold text-white mb-4">Subscribe for Updates</h2>
         <p className="text-zinc-400 mb-6 max-w-xl mx-auto">
-          Get updates on new features, AI improvements, and exclusive insights from EchoScript engineers.
+          Get the latest features, insider tips, and early previews of upcoming AI enhancements.
         </p>
         <NewsletterSignup />
       </section>
 
-      {/* Top-right Controls */}
+      {/* Controls */}
       <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
         <motion.button
           onClick={() => setLanguage(language === "en" ? "es" : "en")}
@@ -181,5 +237,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-
