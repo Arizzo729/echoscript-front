@@ -22,7 +22,7 @@ import ApifyTest from "./pages/ApifyTest";
 import Dashboard from "./pages/Dashboard";
 import Upload from "./pages/Upload";
 import AIAssistant from "./pages/AIAssistant";
-import Community from "./pages/Community";
+// ❌ Removed: import Community from "./pages/Community";
 
 export default function App() {
   const [splashDone, setSplashDone] = useState(false);
@@ -49,7 +49,7 @@ export default function App() {
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/upload" element={<Upload />} />
                   <Route path="/assistant" element={<AIAssistant />} />
-                  <Route path="/community" element={<Community />} />
+                  {/* ❌ Removed: <Route path="/community" element={<Community />} /> */}
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/account" element={<Account />} />
                   <Route path="/purchase" element={<Purchase />} />

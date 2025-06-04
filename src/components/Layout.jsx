@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI: Final Unified Layout — Enhanced with Auto Theme, Media Detection, & Glow
+// ✅ EchoScript.AI: Final Unified Layout — Assistant Visible on Mobile
 import React, { useState, useEffect, createContext } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
@@ -44,10 +44,8 @@ export default function Layout() {
           </main>
         </div>
 
-        {/* 🤖 Echo Assistant (desktop) */}
-        <div className="hidden md:block">
-          <EchoAssistantUltra />
-        </div>
+        {/* 🤖 Echo Assistant — now visible on all devices */}
+        <EchoAssistantUltra />
 
         {/* 📱 Bottom Nav (mobile only) */}
         <div className="md:hidden">
