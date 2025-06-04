@@ -18,8 +18,7 @@ const navItems = [
   { path: "/dashboard", label: "Dashboard", icon: Upload },
   { path: "/account", label: "Account", icon: User },
   { path: "/settings", label: "Settings", icon: Settings },
-  { path: "/purchase", label: "Shop", icon: ShoppingCart },
-  { path: "/community", label: "Community", icon: Users },
+  { path: "/purchase", label: "Shop", icon: ShoppingCart }
 ];
 
 export default function Sidebar({ collapsed, setCollapsed }) {
