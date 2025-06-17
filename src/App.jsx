@@ -5,7 +5,7 @@ import { ThemeProvider } from "./context/useTheme";
 import { GPTProvider } from "./context/GPTContext";
 import { FontSizeProvider } from "./context/useFontSize";
 import { LanguageProvider } from "./context/LanguageContext";
-import { AuthProvider } from "./context/AuthContext"; // NEW
+import { AuthProvider } from "./context/AuthContext";
 import AnimatedSplash from "./components/AnimatedSplash";
 import OnboardingModal from "./components/OnboardingModal";
 import "./global.css";
@@ -23,7 +23,7 @@ import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
 import ApifyTest from "./pages/ApifyTest";
 import Dashboard from "./pages/Dashboard";
-import UploadAndTranscribe from "./components/UploadandTranscribe";
+import UploadAndTranscribe from "./components/UploadandTranscribe"; // ✅ Fixed import
 import AIAssistant from "./pages/AIAssistant";
 
 export default function App() {
@@ -51,7 +51,7 @@ export default function App() {
                     <Route element={<Layout />}>
                       <Route path="/" element={<Home />} />
                       <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/upload" element={<Upload />} />
+                      <Route path="/upload" element={<UploadAndTranscribe />} /> {/* ✅ FIXED */}
                       <Route path="/assistant" element={<AIAssistant />} />
                       <Route path="/settings" element={<Settings />} />
                       <Route path="/account" element={<Account />} />
@@ -74,3 +74,4 @@ export default function App() {
     </AuthProvider>
   );
 }
+
