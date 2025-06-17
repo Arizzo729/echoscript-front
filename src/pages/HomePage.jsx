@@ -13,8 +13,14 @@ import { GPTContext } from "../context/GPTContext";
 import detectTone from "../utils/EmotionToneDetector";
 import NewsletterSignup from "../components/NewsletterSignup";
 import { useTranslation } from "react-i18next";
-import { FaDiscord, FaInstagram, FaLinkedin, FaTiktok } from "react-icons/fa";
+import {
+  FaDiscord,
+  FaInstagram,
+  FaLinkedin,
+  FaTiktok,
+} from "react-icons/fa";
 import { Sparkles } from "lucide-react";
+import "../styles/GlareTitle.css"; // new CSS file for glare effect
 
 export default function HomePage() {
   const [time, setTime] = useState(new Date());
@@ -26,9 +32,7 @@ export default function HomePage() {
   const { setContextMessage } = useContext(GPTContext);
   const { t, i18n } = useTranslation();
 
-  const particlesInit = async (main) => {
-    await loadFull(main);
-  };
+  const particlesInit = async (main) => await loadFull(main);
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -36,9 +40,14 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (shortTranscript?.length > 0) {
+    if ((shortTranscript?.length ?? 0) > 0) {
       const tone = detectTone(shortTranscript);
-      const gptMsg = t(`gpt.${tone}`, { transcript: shortTranscript });
+      const gptMsg =
+        tone === "positive"
+          ? t("gpt.positive", { transcript: shortTranscript })
+          : tone === "neutral"
+          ? t("gpt.neutral", { transcript: shortTranscript })
+          : t("gpt.negative", { transcript: shortTranscript });
       setGptResponse(gptMsg);
       setIntroStep(2);
       setShowBubble(true);
@@ -67,30 +76,23 @@ export default function HomePage() {
         options={{
           background: { color: { value: "transparent" } },
           fullScreen: { enable: false },
-          fpsLimit: 60,
+          fpsLimit: 90,
           detectRetina: true,
           particles: {
-            number: { value: 75, density: { enable: true, area: 800 } },
+            number: {
+              value: 60,
+              density: { enable: true, area: 900 }
+            },
             color: { value: "#00f5d4" },
             shape: { type: "circle" },
             opacity: {
-              value: 0.25,
-              random: true,
-              animation: {
-                enable: true,
-                speed: 0.4,
-                minimumValue: 0.1,
-                sync: false,
-              },
+              value: 0.3,
+              anim: { enable: false }
             },
             size: {
-              value: { min: 1, max: 2 },
-              animation: {
-                enable: true,
-                speed: 2,
-                minimumValue: 0.3,
-                sync: false,
-              },
+              value: 1.3,
+              random: { enable: false },
+              anim: { enable: false }
             },
             move: {
               enable: true,
@@ -98,29 +100,80 @@ export default function HomePage() {
               direction: "none",
               random: false,
               straight: false,
-              outModes: { default: "out" },
-              attract: { enable: false },
+              outModes: { default: "out" }
             },
             links: {
               enable: true,
-              distance: 130,
+              distance: 110,
               color: "#00f5d4",
-              opacity: 0.1,
-              width: 1,
-            },
+              opacity: 0.15,
+              width: 1
+            }
           },
           interactivity: {
-            events: {
-              onHover: { enable: false },
-              onClick: { enable: false },
-              resize: true,
-            },
-          },
+            detectsOn: "canvas",
+            events: { resize: true }
+          }
         }}
         className="absolute inset-0 z-0"
       />
 
-      {/* Remaining content continues exactly the same (Hero section, waveform, GPT bubble, sections, controls) */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
+        <motion.div className="mb-6" initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2 }}>
+          <div className="relative w-24 sm:w-28 mx-auto mb-4 z-20">
+            <motion.div
+              className="absolute inset-0 rounded-full bg-teal-400 blur-2xl opacity-30"
+              animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.4, 0.2] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <img src="/Icon.png" alt="EchoScript Icon" className="relative w-full drop-shadow-xl z-20" />
+          </div>
+
+          {/* Glare effect on title */}
+          <h1 className="glare-title text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent z-20">
+            EchoScript.AI
+          </h1>
+
+          <TypeAnimation
+            sequence={[
+              "Crystal clear transcriptions.",
+              2000,
+              "Real-time audio intelligence.",
+              2000,
+              "AI that actually listens.",
+              2000,
+            ]}
+            wrapper="span"
+            speed={50}
+            repeat={Infinity}
+            className="text-lg mt-4 text-teal-400 z-20 font-medium"
+          />
+
+          <p className="text-sm mt-1 text-zinc-400 font-mono z-20">{formattedTime}</p>
+        </motion.div>
+
+        <motion.div className="mt-2 mb-4">
+          <AudioWaveform voiceLevel={voiceLevel} />
+          <div className="text-xs text-zinc-500 mt-1 font-medium">{micStatus}</div>
+        </motion.div>
+
+        {gptResponse && showBubble && (
+          <LiveGPTBubble message={gptResponse} onClose={() => setShowBubble(false)} />
+        )}
+
+        <motion.div
+          className="max-w-2xl mx-auto bg-zinc-800/80 p-6 rounded-2xl border border-teal-700 backdrop-blur-md shadow-lg"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5 }}
+        >
+          <p className="text-lg leading-relaxed">
+            Built by one voice for many—EchoScript.AI was started by a solo creator aiming to make clear, accessible transcriptions for all.
+          </p>
+        </motion.div>
+
+        <ProgressTimeline currentStep={introStep} />
+      </div>
     </div>
   );
 }
