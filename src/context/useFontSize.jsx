@@ -1,15 +1,3 @@
-import os
-import shutil
-
-# Constants
-OUTPUT_DIR = "/mnt/data"
-JSX_FILENAME = "useFontSize.jsx"
-ZIP_FILENAME = "useFontSize_updated.zip"
-JSX_PATH = os.path.join(OUTPUT_DIR, JSX_FILENAME)
-ZIP_PATH = os.path.join(OUTPUT_DIR, ZIP_FILENAME)
-
-# JSX Source Code (cleaned & professional)
-jsx_source = """\
 import { createContext, useContext, useState, useEffect } from "react";
 
 const FontSizeContext = createContext();
@@ -47,18 +35,5 @@ export function useFontSize() {
 }
 
 export { FontSizeContext };
-"""
-
-# Ensure output directory exists
-os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-# Write JSX file
-with open(JSX_PATH, "w", encoding="utf-8") as f:
-    f.write(jsx_source)
-
-# Create zip archive
-shutil.make_archive(ZIP_PATH.replace(".zip", ""), 'zip', OUTPUT_DIR, JSX_FILENAME)
-
-ZIP_PATH
 
 
