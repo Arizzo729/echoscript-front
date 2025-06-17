@@ -78,7 +78,7 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
       formData.append("language", language);
       formData.append("model", model);
 
-      const res = await fetch("/api/transcribe", {
+      const res = await fetch("precious-rejoicing-production.up.railway.app", {
         method: "POST",
         body: formData,
       });
