@@ -22,6 +22,8 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
+  const API_URL = import.meta.env.VITE_API_BASE || "https://precious-rejoicing-production.up.railway.app";
+
   const startRecording = async () => {
     setError(null);
     try {
@@ -78,7 +80,7 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
       formData.append("language", language);
       formData.append("model", model);
 
-      const res = await fetch("precious-rejoicing-production.up.railway.app", {
+      const res = await fetch(`${API_URL}/api/transcribe`, {
         method: "POST",
         body: formData,
       });
