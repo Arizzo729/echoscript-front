@@ -13,6 +13,7 @@ import {
   Bot,
   Bell,
   Eye,
+  Moon,
 } from "lucide-react";
 import Button from "../components/ui/Button";
 import { FontSizeContext } from "../context/useFontSize";
@@ -50,7 +51,6 @@ export default function Settings() {
     <div className="px-6 py-8 max-w-4xl mx-auto text-white">
       <h1 className="text-3xl font-bold mb-6">Settings</h1>
 
-      {/* Tabs */}
       <div className="flex space-x-4 mb-6">
         {tabs.map((tab) => (
           <button
@@ -68,34 +68,16 @@ export default function Settings() {
         ))}
       </div>
 
-      {/* Preferences */}
+      {/* Preferences Tab */}
       {activeTab === "preferences" && (
         <div className="space-y-8">
-
-          {/* Theme + Accessibility */}
           <div className="grid gap-4">
             <h2 className="text-xl font-semibold mb-2">Appearance & Comfort</h2>
-            <ToggleRow
-              label="Dark Mode"
-              value={darkMode}
-              onChange={handleDarkToggle}
-              icon={<Moon />}
-            />
-            <ToggleRow
-              label="Show Helpful Hints"
-              value={showHints}
-              onChange={() => setShowHints(!showHints)}
-              icon={<Eye />}
-            />
-            <ToggleRow
-              label="Accessible Fonts"
-              value={accessibleFonts}
-              onChange={() => setAccessibleFonts(!accessibleFonts)}
-              icon={<Text />}
-            />
+            <ToggleRow label="Dark Mode" value={darkMode} onChange={handleDarkToggle} icon={<Moon />} />
+            <ToggleRow label="Show Helpful Hints" value={showHints} onChange={() => setShowHints(!showHints)} icon={<Eye />} />
+            <ToggleRow label="Accessible Fonts" value={accessibleFonts} onChange={() => setAccessibleFonts(!accessibleFonts)} icon={<Text />} />
           </div>
 
-          {/* Ambient Audio */}
           <div className="grid gap-4">
             <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
               <Speaker className="w-5 h-5" /> Ambient Sound
@@ -128,7 +110,6 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* Font Size */}
           <div>
             <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
               <Text className="w-5 h-5" /> Font Size
@@ -147,45 +128,34 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* Extras */}
           <div className="grid gap-4">
             <h2 className="text-xl font-semibold mb-2">Extras</h2>
-            <ToggleRow
-              label="AI Assistant"
-              value={aiAssistantEnabled}
-              onChange={() => setAiAssistantEnabled(!aiAssistantEnabled)}
-              icon={<Bot />}
-            />
-            <ToggleRow
-              label="Push Notifications"
-              value={notifications}
-              onChange={() => setNotifications(!notifications)}
-              icon={<Bell />}
-            />
-            <ToggleRow
-              label="Enable Multiple Languages"
-              value={multiLang}
-              onChange={() => setMultiLang(!multiLang)}
-              icon={<Languages />}
-            />
+            <ToggleRow label="AI Assistant" value={aiAssistantEnabled} onChange={() => setAiAssistantEnabled(!aiAssistantEnabled)} icon={<Bot />} />
+            <ToggleRow label="Push Notifications" value={notifications} onChange={() => setNotifications(!notifications)} icon={<Bell />} />
+            <ToggleRow label="Enable Multiple Languages" value={multiLang} onChange={() => setMultiLang(!multiLang)} icon={<Languages />} />
           </div>
         </div>
       )}
 
-      {/* FAQ */}
+      {/* FAQ Tab */}
       {activeTab === "faq" && (
         <div className="space-y-5">
-          {["Why won't my file upload?", "What determines the enterprise estimate?", "Can I buy more minutes?", "How secure is my data?", "What formats are supported?"]
-            .map((q, i) => (
-              <div key={i} className="bg-zinc-900 rounded-lg p-4 border border-zinc-700">
-                <p className="text-white font-medium mb-1">{q}</p>
-                <Button size="xs" variant="outline">More info</Button>
-              </div>
-            ))}
+          {[
+            "Why won't my file upload?",
+            "What determines the enterprise estimate?",
+            "Can I buy more minutes?",
+            "How secure is my data?",
+            "What formats are supported?",
+          ].map((q, i) => (
+            <div key={i} className="bg-zinc-900 rounded-lg p-4 border border-zinc-700">
+              <p className="text-white font-medium mb-1">{q}</p>
+              <Button size="xs" variant="outline">More info</Button>
+            </div>
+          ))}
         </div>
       )}
 
-      {/* Contact */}
+      {/* Contact Tab */}
       {activeTab === "contact" && (
         <div className="space-y-6">
           <div className="bg-zinc-900 rounded-lg p-5 border border-zinc-700">
