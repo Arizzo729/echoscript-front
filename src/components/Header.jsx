@@ -8,10 +8,12 @@ import {
   UserCircleIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { Volume2, VolumeX } from "lucide-react";
 import Button from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // ✅
+import { useAuth } from "../context/AuthContext";
+import { useSound } from "../context/SoundContext";
 import Logo from "/Logo.png";
 
 export default function Header({
@@ -23,6 +25,8 @@ export default function Header({
 }) {
   const { user } = useAuth();
   const isGuest = !user || !user.email;
+
+  const { isMuted, toggleMute } = useSound();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -100,6 +104,21 @@ export default function Header({
               <SunIcon className="w-6 h-6 text-yellow-300" />
             ) : (
               <MoonIcon className="w-6 h-6 text-zinc-300" />
+            )
+          }
+        />
+
+        {/* Mute toggle */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleMute}
+          aria-label="Toggle sound"
+          icon={
+            isMuted ? (
+              <VolumeX className="w-6 h-6 text-red-400" />
+            ) : (
+              <Volume2 className="w-6 h-6 text-green-300" />
             )
           }
         />
@@ -193,5 +212,4 @@ export default function Header({
     </motion.header>
   );
 }
-
 

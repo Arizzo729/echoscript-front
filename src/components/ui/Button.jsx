@@ -2,6 +2,7 @@ import React from "react";
 import { twMerge } from "tailwind-merge";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
+import { useSound } from "../../context/SoundContext";
 
 export default function Button({
   children,
@@ -11,8 +12,11 @@ export default function Button({
   icon,
   fullWidth = false,
   className = "",
+  disableSound = false,
   ...props
 }) {
+  const { playPop } = useSound();
+
   const base =
     "relative inline-flex items-center justify-center font-medium select-none transition-all duration-300 ease-out group focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 shadow-sm";
 
@@ -26,10 +30,8 @@ export default function Button({
   const variants = {
     primary: `
       bg-teal-600 text-white
-      hover:bg-teal-500
-      hover:shadow-teal-500/30
-      shadow-md
-      focus-visible:ring-teal-400
+      hover:bg-teal-500 hover:shadow-teal-500/30
+      shadow-md focus-visible:ring-teal-400
       dark:shadow-teal-400/20
     `,
     secondary: `
@@ -50,14 +52,23 @@ export default function Button({
     `,
   };
 
+  const handleClick = (e) => {
+    if (!disableSound) playPop();
+    if (props.onClick) props.onClick(e);
+  };
+
   return (
     <motion.button
+      type="button"
+      onClick={handleClick}
       disabled={loading || props.disabled}
+      whileTap={{ scale: 0.97 }}
       className={twMerge(
         base,
         sizes[size],
         variants[variant],
         fullWidth && "w-full",
+        loading && "opacity-70 cursor-not-allowed",
         className
       )}
       aria-busy={loading}
@@ -75,3 +86,4 @@ export default function Button({
     </motion.button>
   );
 }
+

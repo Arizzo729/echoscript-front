@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Download,
   LogOut,
@@ -22,8 +22,6 @@ export default function Account() {
     isGuest: true,
   });
 
-  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
-
   const toggleDarkMode = () => {
     const nextMode = !user.darkMode;
     setUser((prev) => ({ ...prev, darkMode: nextMode }));
@@ -34,7 +32,7 @@ export default function Account() {
     <motion.div className="max-w-4xl mx-auto px-6 py-12">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
         <h1 className="text-4xl font-bold bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent tracking-tight">
-          👤 Echo Guest
+          👤 {user.name}
         </h1>
         <Button
           onClick={toggleDarkMode}
@@ -55,13 +53,13 @@ export default function Account() {
               className="w-16 h-16 rounded-full border border-zinc-400 dark:border-zinc-600 object-cover"
             />
             <div className="flex flex-col gap-1">
-              <p className="text-lg font-semibold">{user.name}</p>
-              <p className="text-sm text-zinc-500">{user.email}</p>
+              <p className="text-lg font-semibold text-white">{user.name}</p>
+              <p className="text-sm text-zinc-400">{user.email}</p>
             </div>
           </div>
-          <p className="flex items-center gap-2">
+          <p className="flex items-center gap-2 text-zinc-300">
             <strong>Plan:</strong>
-            <span className="inline-flex items-center text-xs font-medium px-2 py-1 rounded-full bg-zinc-600 text-white">
+            <span className="inline-flex items-center text-xs font-medium px-2 py-1 rounded-full bg-zinc-700 text-white">
               <BadgeCheck className="w-3 h-3 mr-1" />
               {user.plan}
             </span>
@@ -94,12 +92,13 @@ export default function Account() {
 
 function Card({ title, children }) {
   return (
-    <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border dark:border-zinc-700 shadow-md space-y-2">
+    <div className="bg-zinc-800/80 dark:bg-zinc-900 p-6 rounded-xl border border-zinc-700 shadow-lg space-y-2">
       <h3 className="text-lg font-semibold mb-2 bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent">
         {title}
       </h3>
-      <div className="text-sm text-zinc-700 dark:text-zinc-300 space-y-1">{children}</div>
+      <div className="text-sm text-zinc-300 space-y-1">{children}</div>
     </div>
   );
 }
+
 

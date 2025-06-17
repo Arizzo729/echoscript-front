@@ -27,6 +27,7 @@ import ApifyTest from "./pages/ApifyTest";
 import Dashboard from "./pages/Dashboard";
 import UploadAndTranscribe from "./components/UploadandTranscribe"; // ✅ Fixed import
 import AIAssistant from "./pages/AIAssistant";
+import { SoundProvider } from "./context/SoundContext";
 
 export default function App() {
   const [splashDone, setSplashDone] = useState(false);
@@ -40,6 +41,9 @@ export default function App() {
   }, [splashDone]);
 
   return (
+<SoundProvider>
+  <App />
+</SoundProvider>
     <AuthProvider>
       <LanguageProvider>
         <ThemeProvider>

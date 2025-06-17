@@ -76,12 +76,26 @@ export default function HomePage() {
         options={{
           background: { color: { value: "transparent" } },
           fpsLimit: 60,
+          detectRetina: true,
           particles: {
-            number: { value: 80 },
-            size: { value: 1.5 },
+            number: { value: 75 },
             color: { value: "#00f5d4" },
-            links: { enable: true, distance: 130, color: "#00f5d4", opacity: 0.1 },
-            move: { enable: true, speed: 0.6 },
+            size: { value: { min: 0.6, max: 1.5 } },
+            move: {
+              enable: true,
+              speed: 0.3,
+              direction: "none",
+              outModes: { default: "bounce" },
+              random: false,
+              straight: false,
+            },
+            links: {
+              enable: true,
+              distance: 130,
+              color: "#00f5d4",
+              opacity: 0.1,
+              width: 1,
+            },
           },
         }}
         className="absolute inset-0 z-0"
@@ -103,9 +117,20 @@ export default function HomePage() {
             EchoScript.AI
           </h1>
 
-          <span className="text-lg mt-4 text-teal-400 z-20 font-medium">
-            The Best Listeners
-          </span>
+          <TypeAnimation
+            sequence={[
+              "Crystal clear transcriptions.",
+              2000,
+              "Real-time audio intelligence.",
+              2000,
+              "AI that actually listens.",
+              2000,
+            ]}
+            wrapper="span"
+            speed={50}
+            repeat={Infinity}
+            className="text-lg mt-4 text-teal-400 z-20 font-medium"
+          />
 
           <p className="text-sm mt-1 text-zinc-400 font-mono z-20">{formattedTime}</p>
         </motion.div>
@@ -210,5 +235,6 @@ export default function HomePage() {
     </div>
   );
 }
+
 
 

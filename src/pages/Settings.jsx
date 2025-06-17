@@ -1,4 +1,3 @@
-// ✅ EchoScript.AI — Final Settings with Ambient Volume, FAQ, and Contact Polished
 import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { Switch } from "@headlessui/react";
@@ -11,6 +10,9 @@ import {
   Text,
   Speaker,
   Languages,
+  Bot,
+  Bell,
+  Eye,
 } from "lucide-react";
 import Button from "../components/ui/Button";
 import { FontSizeContext } from "../context/useFontSize";
@@ -48,6 +50,7 @@ export default function Settings() {
     <div className="px-6 py-8 max-w-4xl mx-auto text-white">
       <h1 className="text-3xl font-bold mb-6">Settings</h1>
 
+      {/* Tabs */}
       <div className="flex space-x-4 mb-6">
         {tabs.map((tab) => (
           <button
@@ -65,66 +68,111 @@ export default function Settings() {
         ))}
       </div>
 
+      {/* Preferences */}
       {activeTab === "preferences" && (
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Appearance & Accessibility</h2>
-            <div className="space-y-3">
-              {/* Toggles omitted for brevity */}
-            </div>
+        <div className="space-y-8">
+
+          {/* Theme + Accessibility */}
+          <div className="grid gap-4">
+            <h2 className="text-xl font-semibold mb-2">Appearance & Comfort</h2>
+            <ToggleRow
+              label="Dark Mode"
+              value={darkMode}
+              onChange={handleDarkToggle}
+              icon={<Moon />}
+            />
+            <ToggleRow
+              label="Show Helpful Hints"
+              value={showHints}
+              onChange={() => setShowHints(!showHints)}
+              icon={<Eye />}
+            />
+            <ToggleRow
+              label="Accessible Fonts"
+              value={accessibleFonts}
+              onChange={() => setAccessibleFonts(!accessibleFonts)}
+              icon={<Text />}
+            />
           </div>
 
-          <div>
+          {/* Ambient Audio */}
+          <div className="grid gap-4">
             <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
               <Speaker className="w-5 h-5" /> Ambient Sound
             </h2>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <p className="text-sm text-zinc-400">Volume</p>
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={ambientVolume}
-                  onChange={(e) => setAmbientVolume(parseFloat(e.target.value))}
-                  className="w-64 h-2 bg-zinc-600 rounded-lg cursor-pointer accent-teal-400"
-                />
-              </div>
-              <div className="flex justify-between items-center">
-                <p className="text-sm text-zinc-400">Style</p>
-                <select
-                  value={ambientStyle}
-                  onChange={(e) => setAmbientStyle(e.target.value)}
-                  className="bg-zinc-800 border border-zinc-700 text-white px-3 py-2 rounded-md w-64"
-                >
-                  <option value="lofi">Lofi</option>
-                  <option value="nature">Nature</option>
-                  <option value="focus">Focus</option>
-                  <option value="ambient">Ambient</option>
-                  <option value="none">None</option>
-                </select>
-              </div>
+            <div className="flex justify-between items-center gap-4">
+              <p className="text-sm text-zinc-400">Volume</p>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={ambientVolume}
+                onChange={(e) => setAmbientVolume(parseFloat(e.target.value))}
+                className="w-48 h-2 bg-zinc-600 rounded-lg cursor-pointer accent-teal-400"
+              />
+            </div>
+            <div className="flex justify-between items-center gap-4">
+              <p className="text-sm text-zinc-400">Style</p>
+              <select
+                value={ambientStyle}
+                onChange={(e) => setAmbientStyle(e.target.value)}
+                className="bg-zinc-800 border border-zinc-700 text-white px-3 py-2 rounded-md w-48"
+              >
+                <option value="lofi">Lofi</option>
+                <option value="nature">Nature</option>
+                <option value="focus">Focus</option>
+                <option value="ambient">Ambient</option>
+                <option value="none">None</option>
+              </select>
             </div>
           </div>
 
+          {/* Font Size */}
           <div>
             <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
               <Text className="w-5 h-5" /> Font Size
             </h2>
-            <input
-              type="range"
-              min={0.8}
-              max={1.4}
-              step={0.05}
-              value={fontSize}
-              onChange={(e) => setFontSize(parseFloat(e.target.value))}
-              className="w-full accent-teal-500"
+            <div className="flex items-center gap-4">
+              <input
+                type="range"
+                min={0.8}
+                max={1.4}
+                step={0.05}
+                value={fontSize}
+                onChange={(e) => setFontSize(parseFloat(e.target.value))}
+                className="w-48 accent-teal-500"
+              />
+              <span className="text-sm text-zinc-400">{fontSize.toFixed(2)}x</span>
+            </div>
+          </div>
+
+          {/* Extras */}
+          <div className="grid gap-4">
+            <h2 className="text-xl font-semibold mb-2">Extras</h2>
+            <ToggleRow
+              label="AI Assistant"
+              value={aiAssistantEnabled}
+              onChange={() => setAiAssistantEnabled(!aiAssistantEnabled)}
+              icon={<Bot />}
+            />
+            <ToggleRow
+              label="Push Notifications"
+              value={notifications}
+              onChange={() => setNotifications(!notifications)}
+              icon={<Bell />}
+            />
+            <ToggleRow
+              label="Enable Multiple Languages"
+              value={multiLang}
+              onChange={() => setMultiLang(!multiLang)}
+              icon={<Languages />}
             />
           </div>
         </div>
       )}
 
+      {/* FAQ */}
       {activeTab === "faq" && (
         <div className="space-y-5">
           {["Why won't my file upload?", "What determines the enterprise estimate?", "Can I buy more minutes?", "How secure is my data?", "What formats are supported?"]
@@ -137,6 +185,7 @@ export default function Settings() {
         </div>
       )}
 
+      {/* Contact */}
       {activeTab === "contact" && (
         <div className="space-y-6">
           <div className="bg-zinc-900 rounded-lg p-5 border border-zinc-700">
@@ -152,3 +201,28 @@ export default function Settings() {
     </div>
   );
 }
+
+function ToggleRow({ label, value, onChange, icon }) {
+  return (
+    <div className="flex items-center justify-between bg-zinc-800 px-4 py-3 rounded-lg border border-zinc-700">
+      <div className="flex items-center gap-3 text-sm text-zinc-300">
+        {icon && <div className="text-teal-400">{icon}</div>}
+        <span>{label}</span>
+      </div>
+      <Switch
+        checked={value}
+        onChange={onChange}
+        className={`${
+          value ? "bg-teal-600" : "bg-zinc-600"
+        } relative inline-flex h-5 w-10 items-center rounded-full transition-colors duration-300`}
+      >
+        <span
+          className={`${
+            value ? "translate-x-5" : "translate-x-1"
+          } inline-block h-3 w-3 transform rounded-full bg-white transition`}
+        />
+      </Switch>
+    </div>
+  );
+}
+
