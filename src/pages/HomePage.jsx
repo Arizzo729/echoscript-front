@@ -74,59 +74,62 @@ export default function HomePage() {
         id="tsparticles"
         init={particlesInit}
         options={{
-  background: { color: { value: "transparent" } },
-  fullScreen: { enable: false },
-  fpsLimit: 120,
-  detectRetina: true,
-  particles: {
-    number: { value: 85, density: { enable: true, value_area: 900 } },
-    color: { value: "#00f5d4" },
-    shape: { type: "circle" },
-    opacity: {
-      value: 0.2,
-      random: true,
-      anim: { enable: true, speed: 0.5, opacity_min: 0.1, sync: false }
-    },
-    size: {
-      value: { min: 0.8, max: 1.5 },
-      random: true,
-      anim: { enable: true, speed: 3, size_min: 0.3, sync: false }
-    },
-    move: {
-      enable: true,
-      speed: 0.2,
-      direction: "none",
-      random: true,
-      straight: false,
-      outModes: { default: "out" },
-      attract: { enable: false }
-    },
-    links: {
-      enable: true,
-      distance: 120,
-      color: "#00f5d4",
-      opacity: 0.15,
-      width: 1
-    }
-  },
-  interactivity: {
-    detectsOn: "canvas",
-    events: {
-      onHover: { enable: false },
-      onClick: { enable: false },
-      resize: true
-    }
-  }
-}}
-
+          background: { color: { value: "transparent" } },
+          fullScreen: { enable: false },
+          fpsLimit: 120,
+          detectRetina: true,
+          particles: {
+            number: {
+              value: 85,
+              density: { enable: true, area: 900 }
+            },
+            color: { value: "#00f5d4" },
+            shape: { type: "circle" },
+            opacity: {
+              value: 0.3,
+              random: true,
+              anim: {
+                enable: true,
+                speed: 0.5,
+                opacity_min: 0.1,
+                sync: false
+              }
+            },
+            size: {
+              value: { min: 1, max: 2 },
+              random: true,
+              anim: {
+                enable: true,
+                speed: 2,
+                size_min: 0.3,
+                sync: false
+              }
+            },
+            move: {
+              enable: true,
+              speed: 0.25,
+              direction: "none",
+              random: true,
+              straight: false,
+              outModes: { default: "out" },
+              attract: { enable: false }
+            },
             links: {
               enable: true,
-              distance: 130,
+              distance: 120,
               color: "#00f5d4",
-              opacity: 0.1,
-              width: 1,
-            },
+              opacity: 0.15,
+              width: 1
+            }
           },
+          interactivity: {
+            detectsOn: "canvas",
+            events: {
+              onHover: { enable: false },
+              onClick: { enable: false },
+              resize: true
+            }
+          }
         }}
         className="absolute inset-0 z-0"
       />
@@ -265,6 +268,4 @@ export default function HomePage() {
     </div>
   );
 }
-
-
 
