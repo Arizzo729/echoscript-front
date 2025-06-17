@@ -1,6 +1,4 @@
-// ✅ EchoScript.AI — Purchase.jsx (i18n-Enabled, Ultra-Polished, Payment-Redirect Enabled)
 import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
   CheckCircle,
@@ -12,7 +10,6 @@ import {
 import { useNavigate } from "react-router-dom";
 
 export default function Purchase() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20,23 +17,37 @@ export default function Purchase() {
 
   const pricingPlans = [
     {
-      key: "starter",
+      key: "guest",
+      name: "Guest Plan",
       price: "$0",
       monthly: true,
-      features: t("purchase.plans.starter.features", { returnObjects: true }),
-      suggestedFor: t("purchase.plans.starter.suggested"),
-      theme: "from-sky-700 to-cyan-800",
+      suggestedFor: "Casual users, first-time visitors",
+      features: [
+        "60 minutes/month transcription",
+        "Ad-supported experience",
+        "Save up to 3 transcripts",
+        "Basic AI summaries",
+        "Community access"
+      ],
+      theme: "from-zinc-700 to-slate-800",
       text: "text-white",
-      buttonColor: "bg-sky-700 hover:bg-sky-600",
-      ring: "ring-1 ring-sky-400/30",
-      route: "/signup?plan=starter",
+      buttonColor: "bg-zinc-700 hover:bg-zinc-600",
+      ring: "ring-1 ring-zinc-400/30",
+      route: "/signup?plan=guest",
     },
     {
       key: "pro",
-      price: "$14",
+      name: "Pro Plan",
+      price: "$9.99",
       monthly: true,
-      features: t("purchase.plans.pro.features", { returnObjects: true }),
-      suggestedFor: t("purchase.plans.pro.suggested"),
+      suggestedFor: "Content creators, professionals",
+      features: [
+        "1,000 minutes/month transcription",
+        "Ad-free experience",
+        "Unlimited transcript storage",
+        "Advanced summaries & formatting",
+        "Priority support"
+      ],
       theme: "from-teal-700 to-emerald-700",
       text: "text-white",
       buttonColor: "bg-teal-700 hover:bg-teal-600",
@@ -45,10 +56,17 @@ export default function Purchase() {
     },
     {
       key: "enterprise",
-      price: t("purchase.plans.enterprise.price"),
+      name: "Enterprise Plan",
+      price: "Custom Pricing",
       monthly: false,
-      features: t("purchase.plans.enterprise.features", { returnObjects: true }),
-      suggestedFor: t("purchase.plans.enterprise.suggested"),
+      suggestedFor: "Teams, agencies, business use",
+      features: [
+        "Unlimited transcription limits",
+        "Team collaboration & admin analytics",
+        "Dedicated support & onboarding",
+        "Private cloud or on-prem options",
+        "Priority API & compute access"
+      ],
       theme: "from-emerald-700 to-indigo-800",
       text: "text-white",
       buttonColor: "bg-emerald-700 hover:bg-emerald-600",
@@ -73,28 +91,23 @@ export default function Purchase() {
       className={`rounded-2xl border border-white/10 p-6 space-y-4 shadow-lg transition bg-gradient-to-br ${plan.theme} ${plan.text} ${plan.ring}`}
     >
       <div>
-        <h2 className="text-2xl font-semibold">{t(`purchase.plans.${plan.key}.name`)}</h2>
+        <h2 className="text-2xl font-semibold">{plan.name}</h2>
         <p className="text-sm italic text-teal-200">{plan.suggestedFor}</p>
       </div>
 
       <p className="text-3xl font-bold">
         {plan.price}
-        {plan.monthly && <span className="text-base font-light">{t("purchase.perMonth")}</span>}
+        {plan.monthly && <span className="text-base font-light"> / month</span>}
       </p>
 
       <ul className="space-y-2 text-sm text-white/90">
-  {Array.isArray(plan.features) ? (
-    plan.features.map((f, idx) => (
-      <li key={idx} className="flex items-center gap-2">
-        <CheckCircle className="w-4 h-4 text-green-300" />
-        {f}
-      </li>
-    ))
-  ) : (
-    <li className="text-red-300 italic">No features listed</li>
-  )}
-</ul>
-
+        {plan.features.map((f, idx) => (
+          <li key={idx} className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-green-300" />
+            {f}
+          </li>
+        ))}
+      </ul>
 
       <button
         onClick={() => handleSelect(plan)}
@@ -102,10 +115,10 @@ export default function Purchase() {
         className={`w-full text-sm py-2 px-4 rounded-lg font-medium transition-all duration-300 ${plan.buttonColor} border border-white/10 shadow-inner text-white`}
       >
         {loading && selected === plan.key
-          ? t("purchase.processing")
-          : plan.key === "starter"
-          ? t("purchase.free")
-          : t("purchase.getStarted")}
+          ? "Redirecting..."
+          : plan.key === "enterprise"
+          ? "Contact Us"
+          : "Get Started"}
       </button>
     </motion.div>
   );
@@ -119,15 +132,19 @@ export default function Purchase() {
     >
       <div className="flex items-center gap-2 mb-2">
         <Sparkles className="w-5 h-5 text-teal-400" />
-        <h3 className="text-lg font-semibold text-white">{t("purchase.assistant.title")}</h3>
+        <h3 className="text-lg font-semibold text-white">Need help choosing a plan?</h3>
       </div>
-      <p className="text-sm text-zinc-300">{t("purchase.assistant.body")}</p>
+      <p className="text-sm text-zinc-300">
+        EchoScript adapts to your needs. Here's how to pick:
+      </p>
       <ul className="text-xs text-zinc-400 list-disc list-inside">
-        {t("purchase.assistant.tips", { returnObjects: true }).map((tip, i) => (
-          <li key={i}>{tip}</li>
-        ))}
+        <li>Guests can try the platform without signing up.</li>
+        <li>Pro is ideal for professionals and creators.</li>
+        <li>Enterprise offers custom infrastructure for teams.</li>
       </ul>
-      <p className="text-sm italic text-blue-400">{t("purchase.assistant.note")}</p>
+      <p className="text-sm italic text-blue-400">
+        Still unsure? Reach out and we’ll guide you.
+      </p>
     </motion.div>
   );
 
@@ -146,8 +163,8 @@ export default function Purchase() {
       )}
 
       <div className="col-span-3 flex flex-col gap-6 lg:flex-row">
-        {pricingPlans.map((plan, idx) => (
-          <div key={idx} className="w-full sm:max-w-md mx-auto">
+        {pricingPlans.map((plan) => (
+          <div key={plan.key} className="w-full sm:max-w-md mx-auto">
             <PlanCard plan={plan} />
           </div>
         ))}
@@ -159,7 +176,7 @@ export default function Purchase() {
             onClick={() => setShowAssistant(true)}
             className="text-sm text-teal-400 hover:underline"
           >
-            {t("purchase.assistant.show")}
+            Help me choose a plan
           </button>
         </div>
       )}
@@ -167,23 +184,24 @@ export default function Purchase() {
       <div className="col-span-full mt-12 text-sm text-zinc-400 text-center flex flex-col gap-3 items-center">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-green-400" />
-          {t("purchase.footer.secure")}
+          Secure checkout & payment protection
         </div>
         <div className="flex items-center gap-2">
           <CreditCard className="w-4 h-4 text-blue-400" />
-          {t("purchase.footer.privacy")}
+          We respect your privacy — no data sold
         </div>
         <button
           onClick={() => setShowAssistant(!showAssistant)}
           className="mt-2 text-xs hover:underline flex items-center gap-1 text-teal-400"
         >
           <HelpCircle className="w-3 h-3" />
-          {showAssistant ? t("purchase.assistant.hide") : t("purchase.assistant.show")}
+          {showAssistant ? "Hide Help" : "Need Help Choosing?"}
         </button>
       </div>
     </motion.div>
   );
 }
+
 
 
 

@@ -1,4 +1,3 @@
-// ✅ EchoScript.AI — Final Ultra-Polished Dashboard.jsx (i18n-enabled)
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
@@ -20,32 +19,16 @@ export default function Dashboard() {
   const [loadingId, setLoadingId] = useState(null);
 
   const user = {
-    name: "Echo User",
-    email: "user@example.com",
-    plan: "Pro",
-    minutesUsed: 227,
-    sessions: 15,
-    limit: 1000,
+    name: "Guest Echo",
+    email: "guest@echoscript.ai",
+    plan: "Free",
+    minutesUsed: 42,
+    sessions: 3,
+    limit: 60,
+    isGuest: true,
   };
 
   const percentUsed = Math.min((user.minutesUsed / user.limit) * 100, 100);
-
-  const mockTranscripts = [
-    {
-      id: 1,
-      title: t("dashboard.transcript1.title"),
-      date: t("dashboard.transcript1.date"),
-      duration: "42:18",
-      summary: t("dashboard.transcript1.summary"),
-    },
-    {
-      id: 2,
-      title: t("dashboard.transcript2.title"),
-      date: t("dashboard.transcript2.date"),
-      duration: "24:06",
-      summary: t("dashboard.transcript2.summary"),
-    },
-  ];
 
   const handleDelete = (id) => {
     setLoadingId(id);
@@ -64,18 +47,21 @@ export default function Dashboard() {
       transition={{ duration: 0.5 }}
     >
       <h1 className="text-4xl font-bold mb-10 text-white tracking-tight">
-        {t("dashboard.welcome")}{" "}
-        <span className="text-teal-400">{user.name.split(" ")[0]}</span> 👋
+        Welcome,{" "}
+        <span className="text-teal-400">
+          {user.isGuest ? "Guest Echo" : user.name.split(" ")[0]}
+        </span>{" "}
+        👋
       </h1>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
         {[
-          { icon: <Mic />, label: t("dashboard.tools.recording"), color: "from-teal-500 to-teal-700" },
-          { icon: <UploadCloud />, label: t("dashboard.tools.upload"), color: "from-blue-500 to-blue-700" },
-          { icon: <FileText />, label: t("dashboard.tools.transcripts"), color: "from-indigo-500 to-indigo-700" },
-          { icon: <Sparkles />, label: t("dashboard.tools.summary"), color: "from-purple-500 to-purple-700" },
-          { icon: <Video />, label: t("dashboard.tools.video"), color: "from-rose-500 to-rose-700" },
-          { icon: <Clock />, label: t("dashboard.tools.history"), color: "from-yellow-400 to-yellow-600" },
+          { icon: <Mic />, label: "Recording", color: "from-teal-500 to-teal-700" },
+          { icon: <UploadCloud />, label: "Upload", color: "from-blue-500 to-blue-700" },
+          { icon: <FileText />, label: "Transcripts", color: "from-indigo-500 to-indigo-700" },
+          { icon: <Sparkles />, label: "Summary", color: "from-purple-500 to-purple-700" },
+          { icon: <Video />, label: "Video", color: "from-rose-500 to-rose-700" },
+          { icon: <Clock />, label: "History", color: "from-yellow-400 to-yellow-600" },
         ].map(({ icon, label, color }) => (
           <DashboardCard key={label} icon={icon} label={label} color={color} />
         ))}
@@ -89,12 +75,12 @@ export default function Dashboard() {
           transition={{ delay: 0.2 }}
         >
           <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            📊 {t("dashboard.usage.title")}
+            📈 Usage Overview
           </h2>
           <ul className="space-y-2 text-sm text-zinc-300">
-            <li><strong className="text-white">{t("dashboard.usage.plan")}:</strong> {user.plan}</li>
-            <li><strong className="text-white">{t("dashboard.usage.minutes")}:</strong> {user.minutesUsed} / {user.limit}</li>
-            <li><strong className="text-white">{t("dashboard.usage.sessions")}:</strong> {user.sessions}</li>
+            <li><strong className="text-white">Plan:</strong> {user.plan}</li>
+            <li><strong className="text-white">Minutes Used:</strong> {user.minutesUsed} / {user.limit}</li>
+            <li><strong className="text-white">Sessions:</strong> {user.sessions}</li>
           </ul>
           <div className="mt-5 h-3 bg-zinc-800 rounded-full overflow-hidden shadow-inner">
             <motion.div
@@ -105,7 +91,7 @@ export default function Dashboard() {
               transition={{ duration: 0.7 }}
             />
           </div>
-          <p className="text-right text-xs text-zinc-500 mt-2 italic">{percentUsed.toFixed(1)}% {t("dashboard.usage.used")}</p>
+          <p className="text-right text-xs text-zinc-500 mt-2 italic">{percentUsed.toFixed(1)}% used</p>
         </motion.div>
 
         <motion.div
@@ -118,54 +104,27 @@ export default function Dashboard() {
             <User className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-lg font-semibold text-white">{user.name}</p>
+            <p className="text-lg font-semibold text-white">
+              {user.name} {user.isGuest && "(Guest)"}
+            </p>
             <p className="text-sm text-zinc-400">{user.email}</p>
-            <button className="mt-2 text-teal-400 text-sm hover:underline">{t("dashboard.manageAccount")}</button>
+            {!user.isGuest && (
+              <button className="mt-2 text-teal-400 text-sm hover:underline">Manage Account</button>
+            )}
           </div>
         </motion.div>
       </div>
 
-      <div className="grid gap-6 mb-14">
-        {mockTranscripts.map((t) => (
-          <motion.div
-            key={t.id}
-            whileHover={{ scale: 1.01 }}
-            className="border border-zinc-700 bg-zinc-900 p-6 rounded-xl shadow-md transition"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <h2 className="text-lg font-semibold flex items-center gap-2 text-white">
-                  <FileText className="w-5 h-5 text-teal-400" />
-                  {t.title}
-                </h2>
-                <p className="text-sm text-muted-foreground">{t.date} • {t.duration}</p>
-                <p className="mt-2 text-sm text-zinc-300">{t.summary}</p>
-              </div>
-              <div>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => handleDelete(t.id)}
-                >
-                  {loadingId === t.id ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Trash className="w-4 h-4 text-red-400" />
-                  )}
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      {/* No more mock transcripts */}
+      {/* Removed section: mockTranscripts.map(...) */}
 
       <div className="mt-5 p-5 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700">
         <div className="flex items-center gap-2 mb-1">
           <Sparkles className="w-4 h-4 text-teal-300" />
-          <p className="text-sm text-teal-300 font-medium">{t("dashboard.tip.title")}</p>
+          <p className="text-sm text-teal-300 font-medium">Pro Tip</p>
         </div>
         <p className="text-sm text-zinc-400">
-          {t("dashboard.tip.body")}
+          Try uploading a video with multiple speakers — EchoScript will auto-label and summarize it.
         </p>
       </div>
     </motion.div>

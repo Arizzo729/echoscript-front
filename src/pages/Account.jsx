@@ -12,13 +12,14 @@ import Button from "../components/ui/Button";
 
 export default function Account() {
   const [user, setUser] = useState({
-    name: "Echo User",
-    email: "user@example.com",
-    plan: "Pro",
-    minutesUsed: 227,
-    sessions: 15,
+    name: "Guest Echo",
+    email: "Not signed in",
+    plan: "Guest",
+    minutesUsed: 0,
+    sessions: 0,
     darkMode: false,
     avatar: "/default-avatar.png",
+    isGuest: true,
   });
 
   const [transcripts, setTranscripts] = useState([]);
@@ -27,32 +28,14 @@ export default function Account() {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
 
   useEffect(() => {
-    setTranscripts([
-      {
-        id: 1,
-        title: "Podcast with John",
-        date: "2025-05-25",
-        summary: "Discussed AI, business, and startup trends.",
-        format: "MP3",
-        size: "24MB",
-      },
-      {
-        id: 2,
-        title: "Sales Meeting",
-        date: "2025-05-22",
-        summary: "Client call outlining sales roadmap.",
-        format: "WAV",
-        size: "13MB",
-      },
-    ]);
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/security/2fa-status")
-      .then((res) => res.json())
-      .then((data) => setTwoFactorEnabled(data.enabled))
-      .catch(console.error);
-  }, []);
+    if (!user.isGuest) {
+      setTranscripts([]); // could fetch saved transcripts for logged-in users
+      fetch("/api/security/2fa-status")
+        .then((res) => res.json())
+        .then((data) => setTwoFactorEnabled(data.enabled))
+        .catch(console.error);
+    }
+  }, [user.isGuest]);
 
   const toggleDarkMode = () => {
     const nextMode = !user.darkMode;
@@ -64,7 +47,7 @@ export default function Account() {
     <motion.div className="max-w-6xl mx-auto px-6 py-10">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
         <h1 className="text-4xl font-bold bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent tracking-tight">
-          👤 Your Account
+          👤 {user.isGuest ? "Echo Guest" : "Your Account"}
         </h1>
         <div className="flex gap-3">
           <Button
@@ -75,9 +58,11 @@ export default function Account() {
           >
             {user.darkMode ? "Light Mode" : "Dark Mode"}
           </Button>
-          <Button size="sm" variant="danger" icon={<LogOut className="w-4 h-4" />}>
-            Sign Out
-          </Button>
+          {!user.isGuest && (
+            <Button size="sm" variant="danger" icon={<LogOut className="w-4 h-4" />}>
+              Sign Out
+            </Button>
+          )}
         </div>
       </div>
 
@@ -90,108 +75,122 @@ export default function Account() {
               className="w-16 h-16 rounded-full border border-zinc-400 dark:border-zinc-600 object-cover"
             />
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-teal-500 hover:underline cursor-pointer">
-                Upload
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setUser((prev) => ({ ...prev, avatar: reader.result }));
-                    };
-                    reader.readAsDataURL(file);
-                  }}
-                  className="hidden"
-                />
-              </label>
-              <Button size="xs" variant="outline" onClick={() => setShowAvatarPicker(true)}>
-                Choose Avatar
-              </Button>
+              {!user.isGuest && (
+                <>
+                  <label className="text-sm text-teal-500 hover:underline cursor-pointer">
+                    Upload
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setUser((prev) => ({ ...prev, avatar: reader.result }));
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                  <Button size="xs" variant="outline" onClick={() => setShowAvatarPicker(true)}>
+                    Choose Avatar
+                  </Button>
+                </>
+              )}
             </div>
           </div>
           <p><strong>Name:</strong> {user.name}</p>
           <p><strong>Email:</strong> {user.email}</p>
           <p className="flex items-center gap-2">
             <strong>Plan:</strong>
-            <span className="inline-flex items-center text-xs font-medium px-2 py-1 rounded-full bg-teal-600 text-white">
+            <span className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-full ${
+              user.plan === "Pro" ? "bg-teal-600" : "bg-zinc-600"
+            } text-white`}>
               <BadgeCheck className="w-3 h-3 mr-1" />
               {user.plan}
             </span>
           </p>
-          <Button size="xs" variant="outline" className="mt-3 hover:border-teal-400 hover:text-teal-400">
-            Manage Plan
-          </Button>
+          {!user.isGuest && (
+            <Button size="xs" variant="outline" className="mt-3 hover:border-teal-400 hover:text-teal-400">
+              Manage Plan
+            </Button>
+          )}
         </Card>
 
-        <Card title="📊 Usage">
-          <p><strong>Minutes Used:</strong> {user.minutesUsed}</p>
-          <p><strong>Sessions:</strong> {user.sessions}</p>
-          <div className="mt-4">
-            <label className="text-sm text-zinc-500 dark:text-zinc-400">Monthly Usage</label>
-            <div className="w-full bg-zinc-200 dark:bg-zinc-700 h-3 rounded-full mt-1">
-              <div
-                className="h-3 rounded-full bg-gradient-to-r from-teal-400 to-blue-500"
-                style={{ width: `${Math.min((user.minutesUsed / 500) * 100, 100)}%` }}
-              />
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      <div className="mb-12">
-        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-zinc-800 dark:text-white">
-          <FileText className="w-5 h-5 text-blue-500" />
-          Saved Transcripts
-        </h2>
-        {transcripts.length === 0 ? (
-          <p className="text-zinc-500 dark:text-zinc-400">You haven’t saved any transcripts yet.</p>
-        ) : (
-          <div className="space-y-4">
-            {transcripts.map((t) => (
-              <div
-                key={t.id}
-                className="flex justify-between items-start bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-xl p-4 hover:shadow-md"
-              >
-                <div className="flex-1">
-                  <p className="font-medium text-zinc-900 dark:text-white">{t.title}</p>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    {t.date} • {t.format} • {t.size}
-                  </p>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-300">{t.summary}</p>
-                  <div className="flex gap-3 mt-2">
-                    <Button variant="ghost" size="xs">Copy</Button>
-                    <Button variant="ghost" size="xs">Summarize</Button>
-                  </div>
-                </div>
-                <Button variant="ghost" size="xs" icon={<Download className="w-4 h-4" />}>
-                  Download
-                </Button>
+        {!user.isGuest && (
+          <Card title="📊 Usage">
+            <p><strong>Minutes Used:</strong> {user.minutesUsed}</p>
+            <p><strong>Sessions:</strong> {user.sessions}</p>
+            <div className="mt-4">
+              <label className="text-sm text-zinc-500 dark:text-zinc-400">Monthly Usage</label>
+              <div className="w-full bg-zinc-200 dark:bg-zinc-700 h-3 rounded-full mt-1">
+                <div
+                  className="h-3 rounded-full bg-gradient-to-r from-teal-400 to-blue-500"
+                  style={{ width: `${Math.min((user.minutesUsed / 1000) * 100, 100)}%` }}
+                />
               </div>
-            ))}
-          </div>
+            </div>
+          </Card>
         )}
       </div>
 
-      <div className="mt-12">
-        <Card title="🔒 Security & Privacy">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Two-Factor Authentication</p>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                  Add extra security via email or authenticator app.
-                </p>
-              </div>
-              <Button size="xs" variant="outline" onClick={() => setShow2FA(true)}>
-                {twoFactorEnabled ? "Manage" : "Enable"}
-              </Button>
+      {!user.isGuest && (
+        <div className="mb-12">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-zinc-800 dark:text-white">
+            <FileText className="w-5 h-5 text-blue-500" />
+            Saved Transcripts
+          </h2>
+          {transcripts.length === 0 ? (
+            <p className="text-zinc-500 dark:text-zinc-400">You haven’t saved any transcripts yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {transcripts.map((t) => (
+                <div
+                  key={t.id}
+                  className="flex justify-between items-start bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-xl p-4 hover:shadow-md"
+                >
+                  <div className="flex-1">
+                    <p className="font-medium text-zinc-900 dark:text-white">{t.title}</p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      {t.date} • {t.format} • {t.size}
+                    </p>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-300">{t.summary}</p>
+                    <div className="flex gap-3 mt-2">
+                      <Button variant="ghost" size="xs">Copy</Button>
+                      <Button variant="ghost" size="xs">Summarize</Button>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="xs" icon={<Download className="w-4 h-4" />}>
+                    Download
+                  </Button>
+                </div>
+              ))}
             </div>
-          </div>
-        </Card>
-      </div>
+          )}
+        </div>
+      )}
+
+      {!user.isGuest && (
+        <div className="mt-12">
+          <Card title="🔒 Security & Privacy">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Two-Factor Authentication</p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    Add extra security via email or authenticator app.
+                  </p>
+                </div>
+                <Button size="xs" variant="outline" onClick={() => setShow2FA(true)}>
+                  {twoFactorEnabled ? "Manage" : "Enable"}
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       <AnimatePresence>
         {show2FA && (

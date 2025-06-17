@@ -1,4 +1,3 @@
-// ✅ EchoScript.AI — Final Polished HomePage with Community + Mobile Optimization + i18n Translation
 import React, { useEffect, useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
@@ -90,6 +89,7 @@ export default function HomePage() {
 
   return (
     <div className="relative min-h-screen text-white overflow-x-hidden">
+      {/* Background Particles */}
       <Particles
         id="tsparticles"
         init={particlesInit}
@@ -129,7 +129,9 @@ export default function HomePage() {
               1500,
               t("hero.slogan2"),
               1500,
-              (shortTranscript?.length ?? 0) > 0 ? `${t("hero.slogan3", { transcript: shortTranscript })}` : t("hero.slogan4"),
+              (shortTranscript?.length ?? 0) > 0
+                ? `${t("hero.slogan3", { transcript: shortTranscript })}`
+                : t("hero.slogan4"),
               2000,
             ]}
             speed={50}
@@ -156,21 +158,19 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.5 }}
         >
-          <p className="text-lg leading-relaxed">
-            {t("hero.intro")}
-          </p>
+          <p className="text-lg leading-relaxed">{t("hero.intro")}</p>
         </motion.div>
 
         <ProgressTimeline currentStep={introStep} />
       </div>
 
-      {/* About */}
+      {/* About Section */}
       <section className="relative z-10 py-20 px-6 text-center">
         <h2 className="text-3xl font-bold mb-4 text-white">{t("about.title")}</h2>
         <p className="max-w-3xl mx-auto text-zinc-400 text-lg">{t("about.description")}</p>
       </section>
 
-      {/* Community */}
+      {/* Community Section */}
       <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800 bg-transparent">
         <motion.div className="flex flex-col items-center mb-10">
           <Sparkles className="w-8 h-8 text-teal-400 mb-2 animate-pulse" />
@@ -201,7 +201,7 @@ export default function HomePage() {
         <p className="max-w-3xl mx-auto text-zinc-400 text-lg">{t("coming.description")}</p>
       </section>
 
-      {/* Newsletter */}
+      {/* Newsletter Signup */}
       <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800">
         <h2 className="text-3xl font-bold text-white mb-4">{t("newsletter.title")}</h2>
         <p className="text-zinc-400 mb-6 max-w-xl mx-auto">{t("newsletter.description")}</p>
@@ -220,11 +220,11 @@ export default function HomePage() {
 
         <motion.button
           onClick={toggleAudio}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-300
-            ${isPlaying 
-              ? 'bg-teal-100/30 text-teal-300 border-teal-400 hover:bg-teal-200/40' 
-              : 'bg-zinc-700/30 text-zinc-300 border-zinc-600 hover:bg-zinc-600/50'}
-          `}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-300 ${
+            isPlaying
+              ? "bg-teal-100/30 text-teal-300 border-teal-400 hover:bg-teal-200/40"
+              : "bg-zinc-700/30 text-zinc-300 border-zinc-600 hover:bg-zinc-600/50"
+          }`}
           whileTap={{ scale: 0.95 }}
         >
           {isPlaying ? "🔊 Ambient On" : "🔈 Ambient Off"}
@@ -233,3 +233,4 @@ export default function HomePage() {
     </div>
   );
 }
+
