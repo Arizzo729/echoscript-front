@@ -1,3 +1,8 @@
+import shutil
+
+# Create a zip of the corrected frontend context file for download
+output_path = "/mnt/data/useFontSize_updated.zip"
+source_code = """
 import { createContext, useContext, useState, useEffect } from "react";
 
 const FontSizeContext = createContext();
@@ -9,7 +14,6 @@ const STORAGE_KEY = "font-size";
 export function FontSizeProvider({ children }) {
   const [fontSize, setFontSize] = useState(1);
 
-  // Load from localStorage
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
@@ -20,7 +24,6 @@ export function FontSizeProvider({ children }) {
     }
   }, []);
 
-  // Save to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, fontSize.toFixed(2));
   }, [fontSize]);
@@ -37,3 +40,14 @@ export function FontSizeProvider({ children }) {
 export function useFontSize() {
   return useContext(FontSizeContext);
 }
+
+export { FontSizeContext };
+"""
+
+with open("/mnt/data/useFontSize.jsx", "w") as f:
+    f.write(source_code)
+
+shutil.make_archive("/mnt/data/useFontSize_updated", 'zip', "/mnt/data", "useFontSize.jsx")
+
+output_path
+
