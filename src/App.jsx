@@ -1,4 +1,6 @@
 // ✅ EchoScript.AI — Final App with i18n + AuthContext Support
+// src/main.jsx or src/index.jsx
+import "./i18n";
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./context/useTheme";

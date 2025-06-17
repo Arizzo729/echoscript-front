@@ -1,13 +1,39 @@
-// src/i18n/en.js
 export default {
-  home_title: "EchoScript.AI",
-  home_subtitle: "The Best Listener",
-  home_description: "Understanding everyone",
-  get_started: "Get Started",
-  try_now: "Try Now",
-  settings: "Settings",
-  upload_audio: "Upload Audio",
-  transcribe: "Transcribe",
-  footer_rights: "All rights reserved.",
-  // ...expand this with full site coverage
+  // ...
+  purchase: {
+    perMonth: "/mo",
+    free: "Free",
+    getStarted: "Get Started",
+    processing: "Processing...",
+    assistant: {
+      title: "Need Help Choosing?",
+      body: "Here's what to consider when picking a plan.",
+      tips: ["Starter is great for trying things out.", "Pro includes premium transcription & faster speeds."],
+      note: "These are general suggestions based on usage patterns.",
+      show: "Show Assistant",
+      hide: "Hide Assistant",
+    },
+    footer: {
+      secure: "Secure checkout",
+      privacy: "No sensitive data stored",
+    },
+    plans: {
+      starter: {
+        name: "Starter",
+        features: ["Basic Transcription", "Limited Uploads"],
+        suggested: "Ideal for light use",
+      },
+      pro: {
+        name: "Pro",
+        features: ["Unlimited Transcription", "Fast Queue", "AI Summarization"],
+        suggested: "Perfect for creators",
+      },
+      enterprise: {
+        name: "Enterprise",
+        price: "Custom",
+        features: ["Dedicated Support", "On-Prem Hosting", "Team Access"],
+        suggested: "For teams or companies",
+      },
+    },
+  },
 };
