@@ -1,41 +1,82 @@
-// src/main.jsx
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
 
-// Context providers
+// Context Providers
+import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/useTheme";
 import { GPTProvider } from "./context/GPTContext";
 import { FontSizeProvider } from "./context/useFontSize";
 import { LanguageProvider } from "./context/LanguageContext";
-import { AuthProvider } from "./context/AuthContext";
 import { SoundProvider } from "./context/SoundContext";
 
-// Setup i18n + global styles
-import "./i18n";
-import "./global.css";
+// Layout & Shared UI
+import AnimatedSplash from "./components/AnimatedSplash";
+import OnboardingModal from "./components/OnboardingModal";
+import Layout from "./components/Layout";
 
-// App
-import App from "./App";
+// Pages
+import Home from "./pages/HomePage";
+import Settings from "./pages/Settings";
+import Account from "./pages/Account";
+import Purchase from "./pages/Purchase";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import NotFound from "./pages/NotFound";
+import ApifyTest from "./pages/ApifyTest";
+import Dashboard from "./pages/Dashboard";
+import UploadAndTranscribe from "./components/UploadandTranscribe";
+import AIAssistant from "./pages/AIAssistant";
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <SoundProvider>
-      <AuthProvider>
-        <LanguageProvider>
-          <ThemeProvider>
-            <GPTProvider>
-              <FontSizeProvider>
-                <BrowserRouter>
-                  <App />
-                </BrowserRouter>
-              </FontSizeProvider>
-            </GPTProvider>
-          </ThemeProvider>
-        </LanguageProvider>
-      </AuthProvider>
-    </SoundProvider>
-  </React.StrictMode>
-);
+export default function App() {
+  const [splashDone, setSplashDone] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
 
+  useEffect(() => {
+    if (splashDone && !localStorage.getItem("onboardingComplete")) {
+      const timer = setTimeout(() => setShowIntro(true), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [splashDone]);
+
+  const AppRoutes = (
+    <>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/upload" element={<UploadAndTranscribe />} />
+          <Route path="/assistant" element={<AIAssistant />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="/purchase" element={<Purchase />} />
+          <Route path="/apify" element={<ApifyTest />} />
+        </Route>
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      {showIntro && <OnboardingModal onClose={() => setShowIntro(false)} />}
+    </>
+  );
+
+  return (
+    <AuthProvider>
+      <LanguageProvider>
+        <ThemeProvider>
+          <GPTProvider>
+            <FontSizeProvider>
+              <SoundProvider>
+                {!splashDone ? (
+                  <AnimatedSplash onComplete={() => setSplashDone(true)} />
+                ) : (
+                  AppRoutes
+                )}
+              </SoundProvider>
+            </FontSizeProvider>
+          </GPTProvider>
+        </ThemeProvider>
+      </LanguageProvider>
+    </AuthProvider>
+  );
+}
 
