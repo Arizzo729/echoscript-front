@@ -78,7 +78,7 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
       formData.append("language", language);
       formData.append("model", model);
 
-      const res = await fetch("/api/transcribe-enhanced", {
+      const res = await fetch("/api/transcribe", {
         method: "POST",
         body: formData,
       });
