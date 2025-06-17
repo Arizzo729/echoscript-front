@@ -1,30 +1,21 @@
-# Use a lightweight Python base image
-FROM python:3.11-slim
-
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# Set working directory
-WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    ffmpeg \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy project files
-COPY . .
-
-# Expose port
-EXPOSE 8000
-
-# Run the app with uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+{
+  "welcome": "Welcome to EchoScript.AI",
+  "upload_prompt": "Upload an audio or video file",
+  "record_button": "Record",
+  "stop_button": "Stop",
+  "transcribing": "Transcribing...",
+  "transcript_ready": "Transcript is ready",
+  "copy": "Copy",
+  "copied": "Copied!",
+  "summary": "Summary",
+  "sentiment": "Sentiment",
+  "keywords": "Keywords",
+  "settings": "Settings",
+  "account": "Account",
+  "sign_in": "Sign In",
+  "sign_up": "Sign Up",
+  "not_found": "Page not found",
+  "dashboard": "Dashboard",
+  "purchase": "Purchase",
+  "assistant": "AI Assistant"
+}
