@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — Final Polished HomePage with Community + Mobile Optimization
+// ✅ EchoScript.AI — Final Polished HomePage with Community + Mobile Optimization + i18n Translation
 import React, { useEffect, useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
@@ -13,6 +13,7 @@ import LiveGPTBubble from "../components/LiveGPTBubble";
 import { GPTContext } from "../context/GPTContext";
 import detectTone from "../utils/EmotionToneDetector";
 import NewsletterSignup from "../components/NewsletterSignup";
+import { useTranslation } from "react-i18next";
 import {
   FaDiscord,
   FaInstagram,
@@ -23,13 +24,13 @@ import { Sparkles } from "lucide-react";
 
 export default function HomePage() {
   const [time, setTime] = useState(new Date());
-  const [language, setLanguage] = useState("en");
   const [introStep, setIntroStep] = useState(0);
   const [gptResponse, setGptResponse] = useState(null);
   const [showBubble, setShowBubble] = useState(false);
   const { voiceLevel, transcriptLive, micStatus, shortTranscript } = useVoiceInput();
   const { isPlaying, toggleAudio } = useAmbientAudio("/ambient-loop.mp3");
   const { setContextMessage } = useContext(GPTContext);
+  const { t, i18n } = useTranslation();
 
   const particlesInit = async (main) => await loadFull(main);
 
@@ -43,16 +44,16 @@ export default function HomePage() {
       const tone = detectTone(shortTranscript);
       const gptMsg =
         tone === "positive"
-          ? `You sound excited! You said: “${shortTranscript}.” Let’s make something great.`
+          ? t("gpt.positive", { transcript: shortTranscript })
           : tone === "neutral"
-          ? `Got it — you said: “${shortTranscript}.” Let’s begin.`
-          : `You said: “${shortTranscript}.” Don’t worry, I’ve got your back.`;
+          ? t("gpt.neutral", { transcript: shortTranscript })
+          : t("gpt.negative", { transcript: shortTranscript });
       setGptResponse(gptMsg);
       setIntroStep(2);
       setShowBubble(true);
       setContextMessage(shortTranscript);
     }
-  }, [shortTranscript, setContextMessage]);
+  }, [shortTranscript, setContextMessage, t]);
 
   const formattedTime = time.toLocaleTimeString([], {
     hour: "2-digit",
@@ -124,11 +125,11 @@ export default function HomePage() {
 
           <TypeAnimation
             sequence={[
-              "The Best Listener",
+              t("hero.slogan1"),
               1500,
-              "Understanding everyone",
+              t("hero.slogan2"),
               1500,
-              (shortTranscript?.length ?? 0) > 0 ? `You said: ${shortTranscript}` : "Listening to you...",
+              (shortTranscript?.length ?? 0) > 0 ? `${t("hero.slogan3", { transcript: shortTranscript })}` : t("hero.slogan4"),
               2000,
             ]}
             speed={50}
@@ -156,8 +157,7 @@ export default function HomePage() {
           transition={{ delay: 1.5 }}
         >
           <p className="text-lg leading-relaxed">
-            Welcome to <span className="text-teal-400 font-semibold">EchoScript.AI</span>. This AI isn’t just
-            listening — it’s learning your voice, your tone, and what matters to you.
+            {t("hero.intro")}
           </p>
         </motion.div>
 
@@ -166,21 +166,16 @@ export default function HomePage() {
 
       {/* About */}
       <section className="relative z-10 py-20 px-6 text-center">
-        <h2 className="text-3xl font-bold mb-4 text-white">About EchoScript</h2>
-        <p className="max-w-3xl mx-auto text-zinc-400 text-lg">
-          We’re building the world’s most intelligent and empathetic transcription platform — one that adapts to
-          accents, emotions, and even muffled voices. Our goal is to make voice truly accessible.
-        </p>
+        <h2 className="text-3xl font-bold mb-4 text-white">{t("about.title")}</h2>
+        <p className="max-w-3xl mx-auto text-zinc-400 text-lg">{t("about.description")}</p>
       </section>
 
-      {/* Community + Social */}
+      {/* Community */}
       <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800 bg-transparent">
         <motion.div className="flex flex-col items-center mb-10">
           <Sparkles className="w-8 h-8 text-teal-400 mb-2 animate-pulse" />
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">Join the EchoScript.AI Movement</h2>
-          <p className="text-zinc-400 mt-4 max-w-2xl">
-            Connect with a global community building the future of voice + AI. Get early access, share feedback, and join the conversation.
-          </p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white">{t("community.title")}</h2>
+          <p className="text-zinc-400 mt-4 max-w-2xl">{t("community.description")}</p>
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 justify-center">
@@ -202,36 +197,37 @@ export default function HomePage() {
 
       {/* Coming Soon */}
       <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800">
-        <h2 className="text-3xl font-bold mb-4 text-white">What’s Coming</h2>
-        <p className="max-w-3xl mx-auto text-zinc-400 text-lg">
-          Real-time collaboration, AI voice summaries, Slack & Notion export, multi-language support, and more.
-        </p>
+        <h2 className="text-3xl font-bold mb-4 text-white">{t("coming.title")}</h2>
+        <p className="max-w-3xl mx-auto text-zinc-400 text-lg">{t("coming.description")}</p>
       </section>
 
       {/* Newsletter */}
       <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800">
-        <h2 className="text-3xl font-bold text-white mb-4">Subscribe for Updates</h2>
-        <p className="text-zinc-400 mb-6 max-w-xl mx-auto">
-          Get the latest features, insider tips, and early previews of upcoming AI enhancements.
-        </p>
+        <h2 className="text-3xl font-bold text-white mb-4">{t("newsletter.title")}</h2>
+        <p className="text-zinc-400 mb-6 max-w-xl mx-auto">{t("newsletter.description")}</p>
         <NewsletterSignup />
       </section>
 
       {/* Controls */}
       <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
         <motion.button
-          onClick={() => setLanguage(language === "en" ? "es" : "en")}
+          onClick={() => i18n.changeLanguage(i18n.language === "en" ? "es" : "en")}
           className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm text-white border border-zinc-600 transition-all duration-300"
           whileTap={{ scale: 0.95 }}
         >
-          <TbLanguage /> {language === "en" ? "Español" : "English"}
+          <TbLanguage /> {i18n.language === "en" ? "Español" : "English"}
         </motion.button>
+
         <motion.button
           onClick={toggleAudio}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-600 hover:bg-blue-500 text-sm text-white shadow-md transition-all duration-500"
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-300
+            ${isPlaying 
+              ? 'bg-teal-100/30 text-teal-300 border-teal-400 hover:bg-teal-200/40' 
+              : 'bg-zinc-700/30 text-zinc-300 border-zinc-600 hover:bg-zinc-600/50'}
+          `}
           whileTap={{ scale: 0.95 }}
         >
-          {isPlaying ? "Mute" : "Ambient"}
+          {isPlaying ? "🔊 Ambient On" : "🔈 Ambient Off"}
         </motion.button>
       </div>
     </div>

@@ -1,12 +1,20 @@
-import React, { useState } from "react";
+// ✅ EchoScript.AI — Final Settings with Ambient Volume & Style
+import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { Switch } from "@headlessui/react";
 import {
-  Moon, Sun, HelpCircle, Mail, Accessibility, Settings2, Info, Text,
-  ShieldCheck, FileText, Bell, Globe, Eye, Wand2
+  Volume2,
+  Music2,
+  Settings2,
+  Info,
+  Mail,
+  Text,
+  Speaker,
+  Languages,
 } from "lucide-react";
 import Button from "../components/ui/Button";
-import { useFontSize } from "../context/useFontSize.jsx";
+import { FontSizeContext } from "../context/useFontSize";
+import { useTranslation } from "react-i18next";
 
 const tabs = [
   { id: "preferences", label: "Preferences", icon: Settings2 },
@@ -15,185 +23,159 @@ const tabs = [
 ];
 
 export default function Settings() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("preferences");
-  const [darkMode, setDarkMode] = useState(document.documentElement.classList.contains("dark"));
+
+  const [darkMode, setDarkMode] = useState(
+    document.documentElement.classList.contains("dark")
+  );
   const [showHints, setShowHints] = useState(true);
   const [accessibleFonts, setAccessibleFonts] = useState(false);
+  const [aiAssistantEnabled, setAiAssistantEnabled] = useState(true);
   const [notifications, setNotifications] = useState(true);
   const [multiLang, setMultiLang] = useState(true);
-  const [aiAssist, setAiAssist] = useState(true);
-  const { fontSize, setFontSize } = useFontSize();
+  const { fontSize, setFontSize } = useContext(FontSizeContext);
 
-  const toggleDarkMode = () => {
-    const next = !darkMode;
-    setDarkMode(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
+  // Ambient audio settings
+  const [ambientVolume, setAmbientVolume] = useState(0.5);
+  const [ambientStyle, setAmbientStyle] = useState("lofi");
+
+  const handleDarkToggle = () => {
+    document.documentElement.classList.toggle("dark");
+    setDarkMode(!darkMode);
   };
 
   return (
-    <motion.div
-      className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col md:flex-row gap-8"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.4 }}
-    >
-      {/* Sidebar Tabs */}
-      <aside className="md:w-1/4 border-r dark:border-gray-700 pr-4">
-        <nav className="space-y-3">
-          {tabs.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === id
-                  ? "bg-gradient-to-br from-teal-500 to-blue-500 text-white shadow-md"
-                  : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-              }`}
-              aria-current={activeTab === id ? "page" : undefined}
-            >
-              <Icon className="w-5 h-5" />
-              {label}
-            </button>
-          ))}
-        </nav>
-      </aside>
+    <div className="px-6 py-8 max-w-4xl mx-auto text-white">
+      <h1 className="text-3xl font-bold mb-6">{t("User Preferences")}</h1>
 
-      {/* Main Content */}
-      <section className="flex-1 space-y-10">
-        {activeTab === "preferences" && (
-          <motion.div key="preferences" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-            <h2 className="text-2xl font-bold text-gradient bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent mb-6">
-              User Preferences
+      <div className="flex space-x-4 mb-6">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+              activeTab === tab.id
+                ? "bg-teal-600 text-white"
+                : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+            }`}
+          >
+            <tab.icon className="w-5 h-5" />
+            {t(tab.label)}
+          </button>
+        ))}
+      </div>
+
+      {/* Preferences Panel */}
+      {activeTab === "preferences" && (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-xl font-semibold mb-2">
+              {t("Appearance & Accessibility")}
             </h2>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-medium">{t("Enable Dark Mode")}</p>
+                  <p className="text-sm text-zinc-400">{t("Toggle between light and dark themes")}</p>
+                </div>
+                <Switch
+                  checked={darkMode}
+                  onChange={handleDarkToggle}
+                  className={`${darkMode ? "bg-teal-500" : "bg-zinc-700"} relative inline-flex h-6 w-11 items-center rounded-full`}
+                >
+                  <span className="sr-only">{t("Enable Dark Mode")}</span>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${darkMode ? "translate-x-6" : "translate-x-1"}`} />
+                </Switch>
+              </div>
 
-            <SettingsGroup title="Appearance & Accessibility">
-              <SettingToggle label="Enable Dark Mode" description="Toggle between light and dark themes" enabled={darkMode} onChange={toggleDarkMode} Icon={darkMode ? Sun : Moon} />
-              <SettingToggle label="Accessible Fonts" description="Enable fonts for better readability" enabled={accessibleFonts} onChange={() => setAccessibleFonts(!accessibleFonts)} Icon={Accessibility} />
-              <SettingToggle label="Show Onboarding Hints" description="Helpful tooltips and walkthroughs" enabled={showHints} onChange={() => setShowHints(!showHints)} Icon={HelpCircle} />
-              <SettingToggle label="Enable AI Assistant" description="Smart guidance and feature explanations" enabled={aiAssist} onChange={() => setAiAssist(!aiAssist)} Icon={Wand2} />
-              <FontSizeSlider value={fontSize} onChange={(e) => setFontSize(Math.min(1.25, Math.max(0.85, parseFloat(e.target.value))))} />
-            </SettingsGroup>
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-medium">{t("Accessible Fonts")}</p>
+                  <p className="text-sm text-zinc-400">{t("Enable fonts for better readability")}</p>
+                </div>
+                <Switch
+                  checked={accessibleFonts}
+                  onChange={setAccessibleFonts}
+                  className={`${accessibleFonts ? "bg-teal-500" : "bg-zinc-700"} relative inline-flex h-6 w-11 items-center rounded-full`}
+                >
+                  <span className="sr-only">{t("Accessible Fonts")}</span>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${accessibleFonts ? "translate-x-6" : "translate-x-1"}`} />
+                </Switch>
+              </div>
 
-            <SettingsGroup title="Notifications & Language">
-              <SettingToggle label="App Notifications" description="Get reminders and updates from EchoScript" enabled={notifications} onChange={() => setNotifications(!notifications)} Icon={Bell} />
-              <SettingToggle label="Multi-Language Mode" description="Enable translation and detection support" enabled={multiLang} onChange={() => setMultiLang(!multiLang)} Icon={Globe} />
-            </SettingsGroup>
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="font-medium">{t("Show Onboarding Hints")}</p>
+                  <p className="text-sm text-zinc-400">{t("Helpful tooltips and walkthroughs")}</p>
+                </div>
+                <Switch
+                  checked={showHints}
+                  onChange={setShowHints}
+                  className={`${showHints ? "bg-teal-500" : "bg-zinc-700"} relative inline-flex h-6 w-11 items-center rounded-full`}
+                >
+                  <span className="sr-only">{t("Show Onboarding Hints")}</span>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${showHints ? "translate-x-6" : "translate-x-1"}`} />
+                </Switch>
+              </div>
+            </div>
+          </div>
 
-            <SettingsGroup title="Account & Data">
-              <SettingToggle label="End-to-End Encryption" description="Secure your transcripts with encryption" enabled disabled Icon={ShieldCheck} />
-              <SettingToggle label="Auto-Save Transcripts" description="Automatically save to your account" enabled disabled Icon={FileText} />
-              <SettingToggle label="Private Mode" description="Disables cloud sync for sensitive projects" enabled={false} onChange={() => {}} Icon={Eye} disabled />
-            </SettingsGroup>
-          </motion.div>
-        )}
+          {/* Ambient Sound Section */}
+          <div>
+            <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+              <Speaker className="w-5 h-5" />
+              Ambient Sound
+            </h2>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <p className="text-sm text-zinc-400">Volume</p>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={ambientVolume}
+                  onChange={(e) => setAmbientVolume(parseFloat(e.target.value))}
+                  className="w-64 h-2 bg-zinc-600 rounded-lg cursor-pointer accent-teal-400"
+                />
+              </div>
 
-        {activeTab === "faq" && <FAQSection />}
-        {activeTab === "contact" && <ContactSection />}
-      </section>
-    </motion.div>
-  );
-}
+              <div className="flex justify-between items-center">
+                <p className="text-sm text-zinc-400">Style</p>
+                <select
+                  value={ambientStyle}
+                  onChange={(e) => setAmbientStyle(e.target.value)}
+                  className="bg-zinc-800 border border-zinc-700 text-white px-3 py-2 rounded-md w-64"
+                >
+                  <option value="lofi">Lofi</option>
+                  <option value="nature">Nature</option>
+                  <option value="focus">Focus</option>
+                  <option value="ambient">Ambient</option>
+                  <option value="none">None</option>
+                </select>
+              </div>
+            </div>
+          </div>
 
-function SettingsGroup({ title, children }) {
-  return (
-    <div className="space-y-4 mb-8 p-6 bg-zinc-50 dark:bg-zinc-900 rounded-lg shadow-md ring-1 ring-zinc-200/50 dark:ring-zinc-800/60">
-      <h3 className="text-md font-semibold text-zinc-700 dark:text-zinc-200 mb-2 border-b pb-1 border-zinc-300/40 dark:border-zinc-700">
-        {title}
-      </h3>
-      <div className="space-y-4">{children}</div>
-    </div>
-  );
-}
-
-function SettingToggle({ label, description, enabled, onChange, Icon, disabled = false }) {
-  return (
-    <div className={`flex items-center justify-between bg-white/80 dark:bg-zinc-800 px-4 py-3 rounded-lg shadow-sm transition ${disabled ? "opacity-50 pointer-events-none" : "hover:shadow-md"}`}>
-      <div className="flex flex-col gap-1 text-sm">
-        <div className="flex items-center gap-2 font-medium text-zinc-800 dark:text-white">
-          <Icon className="w-5 h-5 text-teal-500" />
-          <span>{label}</span>
+          {/* Font size */}
+          <div>
+            <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+              <Text className="w-5 h-5" />
+              {t("Font Size")}
+            </h2>
+            <input
+              type="range"
+              min={0.8}
+              max={1.4}
+              step={0.05}
+              value={fontSize}
+              onChange={(e) => setFontSize(parseFloat(e.target.value))}
+              className="w-full accent-teal-500"
+            />
+          </div>
         </div>
-        <span className="text-zinc-500 dark:text-zinc-400">{description}</span>
-      </div>
-      <Switch
-        checked={enabled}
-        onChange={onChange}
-        className={`${enabled ? "bg-teal-500" : "bg-zinc-400"} relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300`}
-      >
-        <span className={`${enabled ? "translate-x-6" : "translate-x-1"} inline-block h-4 w-4 transform bg-white rounded-full transition-transform`} />
-      </Switch>
-    </div>
-  );
-}
-
-function FontSizeSlider({ value, onChange }) {
-  return (
-    <div className="bg-white/80 dark:bg-zinc-800 px-4 py-3 rounded-lg shadow-sm">
-      <div className="flex items-center justify-between text-sm">
-        <div className="flex items-center gap-2 font-medium text-zinc-800 dark:text-white">
-          <Text className="w-5 h-5 text-teal-500" />
-          <span>Font Size</span>
-        </div>
-        <input
-          type="range"
-          min="0.85"
-          max="1.25"
-          step="0.01"
-          value={value}
-          onChange={onChange}
-          className="w-40 accent-teal-500"
-        />
-      </div>
-    </div>
-  );
-}
-
-function FAQSection() {
-  return (
-    <motion.div key="faq" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-      <h2 className="text-2xl font-bold text-gradient bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent mb-4">
-        Frequently Asked Questions
-      </h2>
-      <FAQItem question="How accurate is EchoScript?">EchoScript uses Whisper + GPT to deliver transcripts with near-human accuracy, even on noisy or accented audio.</FAQItem>
-      <FAQItem question="Can I export my transcripts?">Yes — PDF, DOCX, copy to clipboard, or export to Notion, Google Docs, and more.</FAQItem>
-      <FAQItem question="Is EchoScript secure?">All audio and transcripts are encrypted and not stored unless you choose to save them.</FAQItem>
-    </motion.div>
-  );
-}
-
-function ContactSection() {
-  return (
-    <motion.div key="contact" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-      <h2 className="text-2xl font-bold text-gradient bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent mb-4">
-        Contact Support
-      </h2>
-      <form className="space-y-4 max-w-lg" onSubmit={(e) => e.preventDefault()}>
-        <input type="text" placeholder="Your name" required className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm" />
-        <input type="email" placeholder="Your email" required className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm" />
-        <select required className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm">
-          <option value="">Choose a subject</option>
-          <option>Technical Issue</option>
-          <option>Billing Question</option>
-          <option>Feature Request</option>
-        </select>
-        <textarea rows={4} placeholder="Describe your issue" required className="w-full p-2 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm"></textarea>
-        <Button variant="primary" type="submit" className="w-full">Send Message</Button>
-      </form>
-    </motion.div>
-  );
-}
-
-function FAQItem({ question, children }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border border-zinc-200 dark:border-zinc-700 rounded-md">
-      <button onClick={() => setOpen(!open)} className="w-full px-4 py-3 flex justify-between items-center text-left font-medium text-zinc-700 dark:text-white" aria-expanded={open}>
-        <span>{question}</span>
-        <span>{open ? "−" : "+"}</span>
-      </button>
-      {open && <div className="px-4 pb-4 text-zinc-600 dark:text-zinc-400">{children}</div>}
+      )}
     </div>
   );
 }

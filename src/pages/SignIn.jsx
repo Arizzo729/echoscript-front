@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function SignIn() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -12,15 +14,12 @@ export default function SignIn() {
 
   const handleSignIn = (e) => {
     e.preventDefault();
-
     if (!email.includes("@") || password.length < 6) {
-      setError("Enter a valid email and password with 6+ characters.");
+      setError(t("signin_error"));
       return;
     }
-
     setError("");
     console.log("Sign In →", { email, password, rememberMe });
-    // 🔐 TODO: Replace with actual auth integration
   };
 
   return (
@@ -31,9 +30,10 @@ export default function SignIn() {
       transition={{ duration: 0.5 }}
     >
       <div className="w-full max-w-md p-8 space-y-6 rounded-2xl shadow-xl bg-zinc-900 border border-zinc-700">
-        <h1 className="text-3xl font-bold text-center text-white">Welcome Back</h1>
+        <h1 className="text-3xl font-bold text-center text-white">{t("signin_title")}</h1>
         <p className="text-sm text-center text-zinc-400">
-          Sign in to continue using <span className="text-teal-400 font-medium">EchoScript.AI</span>
+          {t("signin_subtitle")}{" "}
+          <span className="text-teal-400 font-medium">EchoScript.AI</span>
         </p>
 
         {error && (
@@ -46,7 +46,7 @@ export default function SignIn() {
           {/* Email */}
           <div className="flex flex-col gap-1">
             <label htmlFor="email" className="text-sm font-medium text-zinc-300">
-              Email
+              {t("email_label")}
             </label>
             <div className="relative">
               <input
@@ -54,7 +54,7 @@ export default function SignIn() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder={t("email_placeholder")}
                 required
                 className="w-full px-4 py-2 pr-10 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
@@ -65,7 +65,7 @@ export default function SignIn() {
           {/* Password */}
           <div className="flex flex-col gap-1">
             <label htmlFor="password" className="text-sm font-medium text-zinc-300">
-              Password
+              {t("password_label")}
             </label>
             <div className="relative">
               <input
@@ -73,7 +73,7 @@ export default function SignIn() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder={t("password_placeholder")}
                 required
                 className="w-full px-4 py-2 pr-10 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
@@ -96,10 +96,10 @@ export default function SignIn() {
                 onChange={() => setRememberMe(!rememberMe)}
                 className="accent-teal-500"
               />
-              Remember me
+              {t("remember_me")}
             </label>
             <Link to="/reset" className="text-teal-400 hover:underline">
-              Forgot password?
+              {t("forgot_password")}
             </Link>
           </div>
 
@@ -109,15 +109,15 @@ export default function SignIn() {
             whileTap={{ scale: 0.97 }}
             className="w-full bg-teal-500 hover:bg-teal-400 text-white font-semibold py-2 rounded-lg transition-all duration-300 shadow-md"
           >
-            Sign In
+            {t("sign_in_button")}
           </motion.button>
         </form>
 
-        {/* Sign Up Link */}
+        {/* Sign Up */}
         <p className="text-sm text-center text-zinc-400">
-          Don’t have an account?{' '}
+          {t("no_account")}{" "}
           <Link to="/signup" className="text-teal-400 hover:underline">
-            Sign Up
+            {t("sign_up_link")}
           </Link>
         </p>
       </div>

@@ -1,5 +1,6 @@
-// ✅ EchoScript.AI — Final Ultra-Polished Dashboard.jsx
+// ✅ EchoScript.AI — Final Ultra-Polished Dashboard.jsx (i18n-enabled)
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
   Mic,
@@ -15,6 +16,7 @@ import {
 import Button from "../components/ui/Button";
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const [loadingId, setLoadingId] = useState(null);
 
   const user = {
@@ -31,17 +33,17 @@ export default function Dashboard() {
   const mockTranscripts = [
     {
       id: 1,
-      title: "Podcast Interview with Sarah",
-      date: "June 1, 2025",
+      title: t("dashboard.transcript1.title"),
+      date: t("dashboard.transcript1.date"),
       duration: "42:18",
-      summary: "Key highlights from the product launch interview.",
+      summary: t("dashboard.transcript1.summary"),
     },
     {
       id: 2,
-      title: "Team Sync May Recap",
-      date: "May 28, 2025",
+      title: t("dashboard.transcript2.title"),
+      date: t("dashboard.transcript2.date"),
       duration: "24:06",
-      summary: "Discussion on Q2 planning and deliverables.",
+      summary: t("dashboard.transcript2.summary"),
     },
   ];
 
@@ -49,7 +51,7 @@ export default function Dashboard() {
     setLoadingId(id);
     setTimeout(() => {
       setLoadingId(null);
-      alert(`Transcript ${id} deleted.`);
+      alert(t("dashboard.deleteAlert", { id }));
     }, 1000);
   };
 
@@ -62,26 +64,24 @@ export default function Dashboard() {
       transition={{ duration: 0.5 }}
     >
       <h1 className="text-4xl font-bold mb-10 text-white tracking-tight">
-        Welcome back, <span className="text-teal-400">{user.name.split(" ")[0]}</span> 👋
+        {t("dashboard.welcome")}{" "}
+        <span className="text-teal-400">{user.name.split(" ")[0]}</span> 👋
       </h1>
 
-      {/* 🚀 Quick Tools */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
         {[
-          { icon: <Mic />, label: "New Recording", color: "from-teal-500 to-teal-700" },
-          { icon: <UploadCloud />, label: "Upload Audio", color: "from-blue-500 to-blue-700" },
-          { icon: <FileText />, label: "Saved Transcripts", color: "from-indigo-500 to-indigo-700" },
-          { icon: <Sparkles />, label: "GPT Summary", color: "from-purple-500 to-purple-700" },
-          { icon: <Video />, label: "Transcribe Video", color: "from-rose-500 to-rose-700" },
-          { icon: <Clock />, label: "History", color: "from-yellow-400 to-yellow-600" },
+          { icon: <Mic />, label: t("dashboard.tools.recording"), color: "from-teal-500 to-teal-700" },
+          { icon: <UploadCloud />, label: t("dashboard.tools.upload"), color: "from-blue-500 to-blue-700" },
+          { icon: <FileText />, label: t("dashboard.tools.transcripts"), color: "from-indigo-500 to-indigo-700" },
+          { icon: <Sparkles />, label: t("dashboard.tools.summary"), color: "from-purple-500 to-purple-700" },
+          { icon: <Video />, label: t("dashboard.tools.video"), color: "from-rose-500 to-rose-700" },
+          { icon: <Clock />, label: t("dashboard.tools.history"), color: "from-yellow-400 to-yellow-600" },
         ].map(({ icon, label, color }) => (
           <DashboardCard key={label} icon={icon} label={label} color={color} />
         ))}
       </div>
 
-      {/* 📊 Usage & Profile */}
       <div className="grid md:grid-cols-2 gap-6 mb-16">
-        {/* Usage Snapshot */}
         <motion.div
           className="rounded-2xl border border-zinc-700 bg-zinc-900 shadow-xl p-6"
           initial={{ opacity: 0, y: 20 }}
@@ -89,12 +89,12 @@ export default function Dashboard() {
           transition={{ delay: 0.2 }}
         >
           <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            📊 Usage Snapshot
+            📊 {t("dashboard.usage.title")}
           </h2>
           <ul className="space-y-2 text-sm text-zinc-300">
-            <li><strong className="text-white">Plan:</strong> {user.plan}</li>
-            <li><strong className="text-white">Minutes Used:</strong> {user.minutesUsed} / {user.limit}</li>
-            <li><strong className="text-white">Sessions:</strong> {user.sessions}</li>
+            <li><strong className="text-white">{t("dashboard.usage.plan")}:</strong> {user.plan}</li>
+            <li><strong className="text-white">{t("dashboard.usage.minutes")}:</strong> {user.minutesUsed} / {user.limit}</li>
+            <li><strong className="text-white">{t("dashboard.usage.sessions")}:</strong> {user.sessions}</li>
           </ul>
           <div className="mt-5 h-3 bg-zinc-800 rounded-full overflow-hidden shadow-inner">
             <motion.div
@@ -105,10 +105,9 @@ export default function Dashboard() {
               transition={{ duration: 0.7 }}
             />
           </div>
-          <p className="text-right text-xs text-zinc-500 mt-2 italic">{percentUsed.toFixed(1)}% used</p>
+          <p className="text-right text-xs text-zinc-500 mt-2 italic">{percentUsed.toFixed(1)}% {t("dashboard.usage.used")}</p>
         </motion.div>
 
-        {/* Profile Overview */}
         <motion.div
           className="rounded-2xl border border-zinc-700 bg-zinc-900 shadow-xl p-6 flex items-center gap-5"
           initial={{ opacity: 0, y: 20 }}
@@ -121,12 +120,11 @@ export default function Dashboard() {
           <div>
             <p className="text-lg font-semibold text-white">{user.name}</p>
             <p className="text-sm text-zinc-400">{user.email}</p>
-            <button className="mt-2 text-teal-400 text-sm hover:underline">Manage Account</button>
+            <button className="mt-2 text-teal-400 text-sm hover:underline">{t("dashboard.manageAccount")}</button>
           </div>
         </motion.div>
       </div>
 
-      {/* 📁 Transcript List */}
       <div className="grid gap-6 mb-14">
         {mockTranscripts.map((t) => (
           <motion.div
@@ -161,14 +159,13 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* 🧠 Smart Assistant Tip */}
       <div className="mt-5 p-5 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700">
         <div className="flex items-center gap-2 mb-1">
           <Sparkles className="w-4 h-4 text-teal-300" />
-          <p className="text-sm text-teal-300 font-medium">Smart Tip</p>
+          <p className="text-sm text-teal-300 font-medium">{t("dashboard.tip.title")}</p>
         </div>
         <p className="text-sm text-zinc-400">
-          Try selecting multiple transcripts to generate a smart report or shareable summary using our GPT assistant.
+          {t("dashboard.tip.body")}
         </p>
       </div>
     </motion.div>
@@ -192,4 +189,3 @@ function DashboardCard({ icon, label, color }) {
     </motion.button>
   );
 }
-

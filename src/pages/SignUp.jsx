@@ -1,34 +1,52 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function SignUp() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
 
     if (!email.includes("@")) {
-      setError("Please enter a valid email.");
+      setError(t("signup_error_invalid_email"));
       return;
     }
     if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+      setError(t("signup_error_short_password"));
       return;
     }
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      setError(t("signup_error_password_mismatch"));
       return;
     }
 
-    setError("");
-    console.log("Sign Up →", { email, password });
-    // 🔐 TODO: Replace with backend signup API
+    try {
+      const res = await fetch("http://localhost:8000/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Signup failed");
+
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("guest", "false");
+
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -40,10 +58,11 @@ export default function SignUp() {
     >
       <div className="w-full max-w-md p-8 space-y-6 rounded-xl shadow-2xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
         <h1 className="text-3xl font-extrabold text-center text-zinc-900 dark:text-white">
-          Create Your Account
+          {t("signup_title")}
         </h1>
         <p className="text-sm text-center text-zinc-500 dark:text-zinc-400">
-          Start transcribing with <span className="text-teal-500 font-medium">EchoScript.AI</span>
+          {t("signup_subtitle")}{" "}
+          <span className="text-teal-500 font-medium">EchoScript.AI</span>
         </p>
 
         {error && (
@@ -56,7 +75,7 @@ export default function SignUp() {
           {/* Email */}
           <div className="flex flex-col gap-1">
             <label htmlFor="email" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Email
+              {t("email_label")}
             </label>
             <div className="relative">
               <input
@@ -65,7 +84,7 @@ export default function SignUp() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="you@example.com"
+                placeholder={t("email_placeholder")}
                 className="w-full px-4 py-2 pr-10 rounded-md border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
               <Mail className="absolute right-3 top-2.5 w-5 h-5 text-zinc-400" />
@@ -75,7 +94,7 @@ export default function SignUp() {
           {/* Password */}
           <div className="flex flex-col gap-1">
             <label htmlFor="password" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Password
+              {t("password_label")}
             </label>
             <div className="relative">
               <input
@@ -84,7 +103,7 @@ export default function SignUp() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="••••••••"
+                placeholder={t("password_placeholder")}
                 className="w-full px-4 py-2 pr-10 rounded-md border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
               <button
@@ -100,7 +119,7 @@ export default function SignUp() {
           {/* Confirm Password */}
           <div className="flex flex-col gap-1">
             <label htmlFor="confirm" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Confirm Password
+              {t("confirm_password_label")}
             </label>
             <div className="relative">
               <input
@@ -109,27 +128,28 @@ export default function SignUp() {
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 required
-                placeholder="••••••••"
+                placeholder={t("password_placeholder")}
                 className="w-full px-4 py-2 pr-10 rounded-md border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
               <Lock className="absolute right-3 top-2.5 w-5 h-5 text-zinc-400" />
             </div>
           </div>
 
-          {/* Sign Up Button */}
+          {/* Submit */}
           <motion.button
             type="submit"
             whileTap={{ scale: 0.97 }}
             className="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold py-2 rounded-md transition"
           >
-            Create Account
+            {t("create_account_button")}
           </motion.button>
         </form>
 
+        {/* Already have an account */}
         <p className="text-sm text-center text-zinc-500 dark:text-zinc-400">
-          Already have an account?{" "}
+          {t("already_have_account")}{" "}
           <Link to="/signin" className="text-teal-500 hover:underline">
-            Sign In
+            {t("sign_in_link")}
           </Link>
         </p>
       </div>

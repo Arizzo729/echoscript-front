@@ -1,4 +1,3 @@
-// ✅ EchoScript.AI: Final Header — Enhanced Search + Responsive + Accessible
 import React, { useState, useEffect, useRef } from "react";
 import {
   BellIcon,
@@ -12,17 +11,19 @@ import {
 import Button from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // ✅
 import Logo from "/Logo.png";
 
 export default function Header({
-  sidebarOpen,
-  user = { name: "Guest", avatar: null },
   onLogout = () => {},
   onSearch = () => {},
   notifications = [],
   onToggleTheme = () => {},
   isDarkMode = false,
 }) {
+  const { user } = useAuth();
+  const isGuest = !user || !user.email;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -147,17 +148,16 @@ export default function Header({
               className="flex items-center gap-2"
               aria-label="User menu"
               icon={
-                user.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt="User avatar"
-                    className="w-8 h-8 rounded-full object-cover border border-teal-400 shadow"
-                  />
-                ) : (
-                  <UserCircleIcon className="w-8 h-8 text-teal-400" />
-                )
+                <div className="relative flex items-center justify-center w-8 h-8 rounded-full border border-teal-400 bg-zinc-800 shadow">
+                  <span className="text-xs font-bold text-teal-300">
+                    {isGuest ? "GU" : "EU"}
+                  </span>
+                </div>
               }
             >
+              <span className="text-sm text-white font-medium">
+                {isGuest ? "Welcome, Guest" : user.email}
+              </span>
               <ChevronDownIcon
                 className={`w-5 h-5 transition-transform ${showUserDropdown ? "rotate-180" : ""}`}
               />
@@ -172,14 +172,18 @@ export default function Header({
                 className="absolute right-0 mt-2 w-48 bg-zinc-900 text-white border border-zinc-700 rounded-md shadow-lg z-50"
                 role="menu"
               >
-                <a href="/account" className="block px-4 py-2 hover:bg-zinc-800">Profile</a>
-                <a href="/settings" className="block px-4 py-2 hover:bg-zinc-800">Settings</a>
-                <hr className="border-zinc-700" />
+                {!isGuest && (
+                  <>
+                    <a href="/account" className="block px-4 py-2 hover:bg-zinc-800">Profile</a>
+                    <a href="/settings" className="block px-4 py-2 hover:bg-zinc-800">Settings</a>
+                    <hr className="border-zinc-700" />
+                  </>
+                )}
                 <button
                   onClick={onLogout}
                   className="w-full text-left px-4 py-2 text-red-500 hover:bg-zinc-800"
                 >
-                  Logout
+                  {isGuest ? "Sign In" : "Logout"}
                 </button>
               </motion.div>
             )}
@@ -189,4 +193,5 @@ export default function Header({
     </motion.header>
   );
 }
+
 

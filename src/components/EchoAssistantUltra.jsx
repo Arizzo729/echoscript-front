@@ -100,10 +100,9 @@ export default function EchoAssistantUltra({
   return (
     <>
       {/* Floating Open Button */}
-     <motion.button
-  onClick={toggle}
-  className="fixed bottom-[4.5rem] right-4 sm:bottom-6 sm:right-6 z-50 p-3 bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-xl"
-
+      <motion.button
+        onClick={toggle}
+        className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 p-3 bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-xl"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         whileHover={{ scale: 1.1 }}

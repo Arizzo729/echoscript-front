@@ -1,0 +1,13 @@
+{
+  "upload_title": "Subir audio",
+  "upload_subtitle": "Arrastra y suelta archivos de audio o haz clic para buscar. Formatos compatibles: MP3, WAV, M4A.",
+  "language_label": "Idioma",
+  "search_languages": "Buscar idiomas...",
+  "click_to_upload": "Haz clic para subir o arrastra y suelta",
+  "file_max": "Máx 100MB, un archivo a la vez",
+  "change_file": "Cambiar archivo",
+  "transcribe_button": "Transcribir con EchoScript.AI",
+  "transcribing": "Transcribiendo...",
+  "transcript_title": "Transcripción:",
+  "ai_feedback_title": "Comentarios de la IA:"
+}
