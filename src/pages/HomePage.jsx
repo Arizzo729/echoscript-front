@@ -61,30 +61,10 @@ export default function HomePage() {
   });
 
   const communityLinks = [
-    {
-      name: "Discord",
-      href: "https://discord.com/invite/echoscriptai",
-      icon: FaDiscord,
-      color: "bg-indigo-600",
-    },
-    {
-      name: "Instagram",
-      href: "https://instagram.com/echoscriptai",
-      icon: FaInstagram,
-      color: "bg-pink-500",
-    },
-    {
-      name: "LinkedIn",
-      href: "https://linkedin.com/company/echoscriptai",
-      icon: FaLinkedin,
-      color: "bg-blue-700",
-    },
-    {
-      name: "TikTok",
-      href: "https://tiktok.com/@echoscriptai",
-      icon: FaTiktok,
-      color: "bg-black",
-    },
+    { name: "Discord", href: "https://discord.com/invite/echoscriptai", icon: FaDiscord, color: "bg-indigo-600" },
+    { name: "Instagram", href: "https://instagram.com/echoscriptai", icon: FaInstagram, color: "bg-pink-500" },
+    { name: "LinkedIn", href: "https://linkedin.com/company/echoscriptai", icon: FaLinkedin, color: "bg-blue-700" },
+    { name: "TikTok", href: "https://tiktok.com/@echoscriptai", icon: FaTiktok, color: "bg-black" },
   ];
 
   return (
@@ -97,11 +77,11 @@ export default function HomePage() {
           background: { color: { value: "transparent" } },
           fpsLimit: 60,
           particles: {
-            number: { value: 40 },
-            size: { value: 2 },
+            number: { value: 80 },
+            size: { value: 1.5 },
             color: { value: "#00f5d4" },
-            links: { enable: true, distance: 150, color: "#00f5d4", opacity: 0.2 },
-            move: { enable: true, speed: 1 },
+            links: { enable: true, distance: 130, color: "#00f5d4", opacity: 0.1 },
+            move: { enable: true, speed: 0.6 },
           },
         }}
         className="absolute inset-0 z-0"
@@ -123,22 +103,9 @@ export default function HomePage() {
             EchoScript.AI
           </h1>
 
-          <TypeAnimation
-            sequence={[
-              t("hero.slogan1"),
-              1500,
-              t("hero.slogan2"),
-              1500,
-              (shortTranscript?.length ?? 0) > 0
-                ? `${t("hero.slogan3", { transcript: shortTranscript })}`
-                : t("hero.slogan4"),
-              2000,
-            ]}
-            speed={50}
-            wrapper="span"
-            repeat={Infinity}
-            className="text-lg mt-4 text-teal-400 z-20"
-          />
+          <span className="text-lg mt-4 text-teal-400 z-20 font-medium">
+            The Best Listeners
+          </span>
 
           <p className="text-sm mt-1 text-zinc-400 font-mono z-20">{formattedTime}</p>
         </motion.div>
@@ -158,7 +125,9 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.5 }}
         >
-          <p className="text-lg leading-relaxed">{t("hero.intro")}</p>
+          <p className="text-lg leading-relaxed">
+            Built by one voice for many—EchoScript.AI was started by a solo creator aiming to make clear, accessible transcriptions for all. From students to podcasters to businesses, this service is for everyone who values their voice.
+          </p>
         </motion.div>
 
         <ProgressTimeline currentStep={introStep} />
@@ -166,16 +135,20 @@ export default function HomePage() {
 
       {/* About Section */}
       <section className="relative z-10 py-20 px-6 text-center">
-        <h2 className="text-3xl font-bold mb-4 text-white">{t("about.title")}</h2>
-        <p className="max-w-3xl mx-auto text-zinc-400 text-lg">{t("about.description")}</p>
+        <h2 className="text-3xl font-bold mb-4 text-white">ABOUT US</h2>
+        <p className="max-w-3xl mx-auto text-zinc-400 text-lg">
+          EchoScript.AI is a modern transcription platform driven by AI and inspired by human needs. We deliver accurate, fast, and user-friendly audio-to-text experiences—making communication accessible, archivable, and smart.
+        </p>
       </section>
 
       {/* Community Section */}
       <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800 bg-transparent">
         <motion.div className="flex flex-col items-center mb-10">
           <Sparkles className="w-8 h-8 text-teal-400 mb-2 animate-pulse" />
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">{t("community.title")}</h2>
-          <p className="text-zinc-400 mt-4 max-w-2xl">{t("community.description")}</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white">Check us out on social!</h2>
+          <p className="text-zinc-400 mt-4 max-w-2xl">
+            Follow us for updates, behind-the-scenes, product news, and other surprises.
+          </p>
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 justify-center">
@@ -197,14 +170,18 @@ export default function HomePage() {
 
       {/* Coming Soon */}
       <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800">
-        <h2 className="text-3xl font-bold mb-4 text-white">{t("coming.title")}</h2>
-        <p className="max-w-3xl mx-auto text-zinc-400 text-lg">{t("coming.description")}</p>
+        <h2 className="text-3xl font-bold mb-4 text-white">What’s Next?</h2>
+        <p className="max-w-3xl mx-auto text-zinc-400 text-lg">
+          We’re building smarter features, better integrations, and new ways to understand your audio. Stay tuned—EchoScript is just getting started.
+        </p>
       </section>
 
       {/* Newsletter Signup */}
       <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800">
-        <h2 className="text-3xl font-bold text-white mb-4">{t("newsletter.title")}</h2>
-        <p className="text-zinc-400 mb-6 max-w-xl mx-auto">{t("newsletter.description")}</p>
+        <h2 className="text-3xl font-bold text-white mb-4">Newsletter</h2>
+        <p className="text-zinc-400 mb-6 max-w-xl mx-auto">
+          Subscribe for updates, feature announcements, and stories from behind the mic.
+        </p>
         <NewsletterSignup />
       </section>
 
@@ -233,4 +210,5 @@ export default function HomePage() {
     </div>
   );
 }
+
 

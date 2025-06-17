@@ -1,0 +1,143 @@
+from pathlib import Path
+
+# Directory to save the file
+output_dir = Path("/mnt/data/BuyMinutesPage")
+output_dir.mkdir(parents=True, exist_ok=True)
+
+# Create React file for Buy Extra Minutes page
+buy_minutes_code = """\
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Gift, XCircle, CheckCircle } from "lucide-react";
+import Button from "../components/ui/Button";
+
+const bundles = [
+  { id: 1, price: 0.99, minutes: 5, bonus: 0 },
+  { id: 2, price: 4.99, minutes: 25, bonus: 5 },
+  { id: 3, price: 9.99, minutes: 50, bonus: 10 },
+  { id: 4, price: 19.99, minutes: 100, bonus: 20 },
+  { id: 5, price: 49.99, minutes: 200, bonus: 40 },
+  { id: 6, price: 99.99, minutes: 400, bonus: 50 },
+];
+
+export default function BuyMinutes() {
+  const [cart, setCart] = useState([]);
+  const [gifting, setGifting] = useState(false);
+  const [recipient, setRecipient] = useState("");
+
+  const toggleBundle = (id) => {
+    if (cart.includes(id)) {
+      setCart(cart.filter((b) => b !== id));
+    } else {
+      setCart([...cart, id]);
+    }
+  };
+
+  const total = cart.reduce(
+    (acc, id) => {
+      const b = bundles.find((x) => x.id === id);
+      return {
+        price: acc.price + b.price,
+        minutes: acc.minutes + b.minutes + b.bonus,
+      };
+    },
+    { price: 0, minutes: 0 }
+  );
+
+  return (
+    <div className="max-w-5xl mx-auto px-6 py-10 text-white">
+      <h1 className="text-3xl font-bold mb-6">Buy Extra Minutes</h1>
+
+      <div className="grid md:grid-cols-3 gap-6">
+        {bundles.map((bundle) => {
+          const isSelected = cart.includes(bundle.id);
+          return (
+            <motion.div
+              key={bundle.id}
+              className={\`rounded-xl p-5 bg-gradient-to-br from-zinc-800 to-zinc-900 border \${isSelected ? "border-teal-400 ring-2 ring-teal-500" : "border-zinc-700"} shadow-lg space-y-3 transition\`}
+              whileHover={{ scale: 1.02 }}
+            >
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">${bundle.price.toFixed(2)}</h2>
+                {bundle.bonus > 0 && (
+                  <span className="text-xs text-teal-300 bg-zinc-700 px-2 py-0.5 rounded-full">
+                    +{bundle.bonus} bonus
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-zinc-400">
+                {bundle.minutes + bundle.bonus} minutes total
+              </p>
+              <Button
+                size="sm"
+                variant={isSelected ? "success" : "outline"}
+                onClick={() => toggleBundle(bundle.id)}
+              >
+                {isSelected ? <CheckCircle className="w-4 h-4 mr-1" /> : null}
+                {isSelected ? "Added" : "Add to Cart"}
+              </Button>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {cart.length > 0 && (
+        <motion.div
+          className="mt-10 p-6 rounded-xl bg-zinc-900 border border-teal-500 space-y-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <h3 className="text-xl font-semibold text-teal-300">Cart Summary</h3>
+          <p>You’re buying <strong>{total.minutes}</strong> minutes for <strong>${total.price.toFixed(2)}</strong></p>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="gift"
+              checked={gifting}
+              onChange={() => setGifting(!gifting)}
+              className="accent-teal-500"
+            />
+            <label htmlFor="gift" className="text-sm text-zinc-300 flex items-center gap-2">
+              <Gift className="w-4 h-4" />
+              Gift to a friend
+            </label>
+          </div>
+
+          <AnimatePresence>
+            {gifting && (
+              <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 5 }}
+              >
+                <input
+                  type="email"
+                  placeholder="Recipient email"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value)}
+                  className="mt-2 w-full px-4 py-2 rounded-md bg-zinc-800 border border-zinc-600 text-white placeholder-zinc-500"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <Button
+            size="lg"
+            className="mt-4 bg-teal-600 hover:bg-teal-500 w-full"
+            onClick={() => alert("Stripe checkout would trigger here")}
+          >
+            Checkout with Stripe
+          </Button>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+"""
+
+# Write the code to a file
+(output_dir / "BuyMinutes.jsx").write_text(buy_minutes_code)
+
+# Confirm path
+output_dir

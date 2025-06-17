@@ -182,6 +182,14 @@ export default function Purchase() {
       )}
 
       <div className="col-span-full mt-12 text-sm text-zinc-400 text-center flex flex-col gap-3 items-center">
+<div className="col-span-full mt-8 flex justify-center">
+  <button
+    onClick={() => navigate("/buy-minutes")}
+    className="bg-teal-600 hover:bg-teal-500 text-white text-sm font-semibold px-5 py-2 rounded-full shadow-md transition"
+  >
+    Need More Minutes? Click Here!
+  </button>
+</div>
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-green-400" />
           Secure checkout & payment protection

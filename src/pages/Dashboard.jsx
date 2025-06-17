@@ -9,8 +9,6 @@ import {
   Video,
   Clock,
   User,
-  Trash,
-  Loader2,
 } from "lucide-react";
 import Button from "../components/ui/Button";
 
@@ -18,12 +16,13 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const [loadingId, setLoadingId] = useState(null);
 
+  // Guest fallback for unauthenticated users
   const user = {
     name: "Guest Echo",
     email: "guest@echoscript.ai",
-    plan: "Free",
-    minutesUsed: 42,
-    sessions: 3,
+    plan: "Guest Plan",
+    minutesUsed: 0,
+    sessions: 0,
     limit: 60,
     isGuest: true,
   };
@@ -47,11 +46,7 @@ export default function Dashboard() {
       transition={{ duration: 0.5 }}
     >
       <h1 className="text-4xl font-bold mb-10 text-white tracking-tight">
-        Welcome,{" "}
-        <span className="text-teal-400">
-          {user.isGuest ? "Guest Echo" : user.name.split(" ")[0]}
-        </span>{" "}
-        👋
+        Welcome, <span className="text-teal-400">{user.name}</span> 👋
       </h1>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
@@ -114,9 +109,6 @@ export default function Dashboard() {
           </div>
         </motion.div>
       </div>
-
-      {/* No more mock transcripts */}
-      {/* Removed section: mockTranscripts.map(...) */}
 
       <div className="mt-5 p-5 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700">
         <div className="flex items-center gap-2 mb-1">
