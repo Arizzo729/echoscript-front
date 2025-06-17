@@ -8,7 +8,7 @@ ZIP_FILENAME = "useFontSize_updated.zip"
 JSX_PATH = os.path.join(OUTPUT_DIR, JSX_FILENAME)
 ZIP_PATH = os.path.join(OUTPUT_DIR, ZIP_FILENAME)
 
-# JSX Source Code
+# JSX Source Code (cleaned & professional)
 jsx_source = """\
 import { createContext, useContext, useState, useEffect } from "react";
 
@@ -37,7 +37,7 @@ export function FontSizeProvider({ children }) {
 
   return (
     <FontSizeContext.Provider value={{ fontSize: clampedSize, setFontSize }}>
-      <div style={{ fontSize: \`\${clampedSize}em\` }}>{children}</div>
+      <div style={{ fontSize: `${clampedSize}em` }}>{children}</div>
     </FontSizeContext.Provider>
   );
 }
@@ -53,8 +53,8 @@ export { FontSizeContext };
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Write JSX file
-with open(JSX_PATH, "w", encoding="utf-8") as file:
-    file.write(jsx_source)
+with open(JSX_PATH, "w", encoding="utf-8") as f:
+    f.write(jsx_source)
 
 # Create zip archive
 shutil.make_archive(ZIP_PATH.replace(".zip", ""), 'zip', OUTPUT_DIR, JSX_FILENAME)
