@@ -83,13 +83,18 @@ export default function Purchase() {
       </p>
 
       <ul className="space-y-2 text-sm text-white/90">
-        {plan.features.map((f, idx) => (
-          <li key={idx} className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-green-300" />
-            {f}
-          </li>
-        ))}
-      </ul>
+  {Array.isArray(plan.features) ? (
+    plan.features.map((f, idx) => (
+      <li key={idx} className="flex items-center gap-2">
+        <CheckCircle className="w-4 h-4 text-green-300" />
+        {f}
+      </li>
+    ))
+  ) : (
+    <li className="text-red-300 italic">No features listed</li>
+  )}
+</ul>
+
 
       <button
         onClick={() => handleSelect(plan)}
