@@ -1,8 +1,15 @@
+import os
 import shutil
 
-# Create a zip of the corrected frontend context file for download
-output_path = "/mnt/data/useFontSize_updated.zip"
-source_code = """
+# Constants
+OUTPUT_DIR = "/mnt/data"
+JSX_FILENAME = "useFontSize.jsx"
+ZIP_FILENAME = "useFontSize_updated.zip"
+JSX_PATH = os.path.join(OUTPUT_DIR, JSX_FILENAME)
+ZIP_PATH = os.path.join(OUTPUT_DIR, ZIP_FILENAME)
+
+# JSX Source Code
+jsx_source = """\
 import { createContext, useContext, useState, useEffect } from "react";
 
 const FontSizeContext = createContext();
@@ -18,9 +25,7 @@ export function FontSizeProvider({ children }) {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = parseFloat(stored);
-      if (!isNaN(parsed)) {
-        setFontSize(parsed);
-      }
+      if (!isNaN(parsed)) setFontSize(parsed);
     }
   }, []);
 
@@ -32,7 +37,7 @@ export function FontSizeProvider({ children }) {
 
   return (
     <FontSizeContext.Provider value={{ fontSize: clampedSize, setFontSize }}>
-      <div style={{ fontSize: `${clampedSize}em` }}>{children}</div>
+      <div style={{ fontSize: \`\${clampedSize}em\` }}>{children}</div>
     </FontSizeContext.Provider>
   );
 }
@@ -44,10 +49,16 @@ export function useFontSize() {
 export { FontSizeContext };
 """
 
-with open("/mnt/data/useFontSize.jsx", "w") as f:
-    f.write(source_code)
+# Ensure output directory exists
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-shutil.make_archive("/mnt/data/useFontSize_updated", 'zip', "/mnt/data", "useFontSize.jsx")
+# Write JSX file
+with open(JSX_PATH, "w", encoding="utf-8") as file:
+    file.write(jsx_source)
 
-output_path
+# Create zip archive
+shutil.make_archive(ZIP_PATH.replace(".zip", ""), 'zip', OUTPUT_DIR, JSX_FILENAME)
+
+ZIP_PATH
+
 
