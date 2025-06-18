@@ -33,15 +33,12 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
       audioChunksRef.current = [];
-      let stopped = false;
 
       mediaRecorderRef.current.ondataavailable = (e) => {
         if (e.data.size > 0) audioChunksRef.current.push(e.data);
       };
 
       mediaRecorderRef.current.onstop = async () => {
-        if (stopped) return;
-        stopped = true;
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         stream.getTracks().forEach((track) => track.stop());
         await uploadAndTranscribe(audioBlob);
@@ -49,8 +46,9 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
 
       mediaRecorderRef.current.start();
       setRecording(true);
-    } catch {
-      setError("Microphone access denied or unsupported.");
+    } catch (err) {
+      console.error(err);
+      setError("🎙️ Microphone access denied or unsupported.");
     }
   };
 
@@ -62,10 +60,7 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
     setRecording(false);
   };
 
-  const handleCountdownStart = () => {
-    setShowCountdown(true);
-  };
-
+  const handleCountdownStart = () => setShowCountdown(true);
   const handleCountdownComplete = () => {
     setShowCountdown(false);
     startRecording();
@@ -74,8 +69,9 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
   const handleFileChange = async (e) => {
     const selected = e.target.files[0];
     if (!selected) return;
+
     if (!selected.type.startsWith("audio") && !selected.type.startsWith("video")) {
-      setError("Only audio or video files are allowed.");
+      setError("❌ Only audio or video files are allowed.");
       return;
     }
 
@@ -105,7 +101,10 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Server error during transcription.");
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("⚠️ Server returned invalid response. Check backend availability.");
+      }
 
       const data = await res.json();
       setTranscript(data.transcript || "");
@@ -114,7 +113,7 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
       setKeywords(data.keywords || []);
     } catch (err) {
       console.error(err);
-      setError(err?.message || "Something went wrong. Please try again.");
+      setError(err?.message || "❌ An unexpected error occurred.");
     } finally {
       setLoading(false);
     }

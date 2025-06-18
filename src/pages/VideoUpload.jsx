@@ -1,5 +1,3 @@
-// pages/VideoUpload.jsx — EchoScript.AI Advanced Video Upload Page
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -60,19 +58,27 @@ export default function VideoUpload() {
     formData.append("language", language);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/video-task`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/video-task`, {
         method: "POST",
         body: formData,
       });
 
-      const data = await response.json();
-      if (response.ok) {
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server returned HTML instead of JSON");
+      }
+
+      const data = await res.json();
+
+      if (res.ok) {
         setResultText(data?.result || t("Task completed successfully."));
         setStatus("success");
       } else {
+        console.error("Server error:", data);
         setStatus("error");
       }
-    } catch {
+    } catch (err) {
+      console.error("Fetch failed:", err);
       setStatus("error");
     }
   };
@@ -108,19 +114,12 @@ export default function VideoUpload() {
         </div>
 
         <form onSubmit={handleSubmit} className="grid gap-6 bg-zinc-900 p-6 rounded-xl border border-zinc-800 shadow-lg">
-          {/* File Upload */}
           <label className="flex items-center gap-3 p-4 border border-zinc-700 rounded-lg bg-zinc-800 cursor-pointer hover:bg-zinc-700">
             <FileVideo className="w-5 h-5 text-teal-400" />
             <span>{videoFile ? videoFile.name : t("Choose a video file")}</span>
-            <input
-              type="file"
-              accept="video/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
+            <input type="file" accept="video/*" onChange={handleFileChange} className="hidden" />
           </label>
 
-          {/* Task Type */}
           <div className="flex gap-4">
             <button
               type="button"
@@ -146,7 +145,6 @@ export default function VideoUpload() {
             </button>
           </div>
 
-          {/* Language Switch */}
           <div className="flex items-center justify-between bg-zinc-800 px-4 py-3 rounded-lg border border-zinc-700">
             <div className="flex items-center gap-3 text-sm text-zinc-300">
               <Languages className="text-teal-400 w-4 h-4" />
@@ -161,7 +159,6 @@ export default function VideoUpload() {
             </button>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="bg-teal-600 hover:bg-teal-700 text-white py-2 px-6 rounded-lg flex items-center justify-center gap-2"
@@ -171,7 +168,6 @@ export default function VideoUpload() {
             {status === "processing" ? t("Processing...") : t("Submit")}
           </button>
 
-          {/* Result & Download */}
           {status === "success" && (
             <div className="space-y-3">
               <p className="text-green-400">✅ {t("Video processed successfully.")}</p>
@@ -206,7 +202,6 @@ export default function VideoUpload() {
           )}
         </form>
 
-        {/* Info Footer */}
         <div className="text-sm text-zinc-400 bg-zinc-800 border border-zinc-700 rounded-lg p-4 space-y-2">
           <p>
             <Info className="inline-block w-4 h-4 text-blue-400 mr-1" />
@@ -221,3 +216,4 @@ export default function VideoUpload() {
     </motion.div>
   );
 }
+

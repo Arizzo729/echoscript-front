@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Listbox } from "@headlessui/react";
 import { ChevronsUpDown } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+
 
 const groupedLanguages = {
   Popular: [
