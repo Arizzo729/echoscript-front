@@ -1,41 +1,34 @@
+@keyframes moving-gradient {
+  0% {
+    background-position: 200% 0%;
+  }
+  50% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
 .glare-title {
   position: relative;
   display: inline-block;
-  font-weight: 800;
-  background: linear-gradient(to right, #14b8a6, #3b82f6);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  overflow: hidden;
-}
-
-.glare-title::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 200%;
-  height: 100%;
+  font-weight: 700;
+  font-size: 2.5rem;
   background: linear-gradient(
-    to right,
-    transparent 0%,
-    rgba(255, 255, 255, 0.2) 50%,
-    transparent 100%
+    120deg,
+    #0fd9d9 0%,
+    #38bdf8 25%,
+    #0fd9d9 50%,
+    #38bdf8 75%,
+    #0fd9d9 100%
   );
-  animation: glare 6s ease-in-out infinite;
-  pointer-events: none;
+  background-size: 200% 100%;
+  background-repeat: repeat;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: moving-gradient 6s ease-in-out infinite;
 }
 
-@keyframes glare {
-  0% {
-    left: -100%;
-  }
-  50% {
-    left: 100%;
-  }
-  100% {
-    left: -100%;
-  }
-}
 
