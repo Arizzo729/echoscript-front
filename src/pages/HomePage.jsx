@@ -132,15 +132,27 @@ export default function HomePage() {
         )}
 
         <motion.div
-          className="max-w-2xl mx-auto bg-zinc-800/80 p-6 rounded-2xl border border-teal-700 backdrop-blur-md shadow-lg"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5 }}
-        >
-          <p className="text-lg leading-relaxed">
-            Built by one voice for many—EchoScript.AI was started by a solo creator aiming to make clear, accessible transcriptions for all.
-          </p>
-        </motion.div>
+  className="relative max-w-3xl mx-auto px-8 py-6 mt-10 rounded-2xl overflow-hidden backdrop-blur-xl border border-teal-600/50 shadow-2xl"
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 1.5 }}
+>
+  <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 via-transparent to-blue-500/10 pointer-events-none animate-pulse-slow" />
+  <div className="absolute -inset-1 rounded-[2rem] border border-teal-500/30 blur-[3px] z-0" />
+  
+  <p className="relative z-10 text-lg sm:text-xl font-medium text-white leading-relaxed text-center tracking-wide">
+    <motion.span
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 2 }}
+      className="bg-gradient-to-r from-teal-400 to-blue-400 bg-clip-text text-transparent"
+    >
+      Built by one voice for many
+    </motion.span>
+    —EchoScript.AI began as a solo dream to give clarity and accessibility to every voice. Now it’s a platform where voices echo, together.
+  </p>
+</motion.div>
+
 
         {/* Hints Carousel */}
         <HintCarousel />
