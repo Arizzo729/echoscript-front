@@ -10,6 +10,10 @@ export default function RecordingWaveform({ isRecording }) {
   useEffect(() => {
     if (!isRecording) {
       cancelAnimationFrame(animationIdRef.current);
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
       return;
     }
 
@@ -20,8 +24,8 @@ export default function RecordingWaveform({ isRecording }) {
         const analyser = audioContext.createAnalyser();
         const source = audioContext.createMediaStreamSource(stream);
 
-        analyser.fftSize = 1024;
-        const bufferLength = analyser.frequencyBinCount;
+        analyser.fftSize = 2048;
+        const bufferLength = analyser.fftSize;
         const dataArray = new Uint8Array(bufferLength);
 
         source.connect(analyser);
@@ -40,9 +44,20 @@ export default function RecordingWaveform({ isRecording }) {
 
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-          ctx.beginPath();
+          // Background
+          ctx.fillStyle = "#09090b";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          // Gradient stroke
+          const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+          gradient.addColorStop(0, "#14b8a6");
+          gradient.addColorStop(1, "#0ea5e9");
+
           ctx.lineWidth = 2;
-          ctx.strokeStyle = "#0af"; // Teal waveform color
+          ctx.strokeStyle = gradient;
+          ctx.shadowColor = "#14b8a6";
+          ctx.shadowBlur = 18;
+          ctx.beginPath();
 
           const sliceWidth = canvas.width / bufferLength;
           let x = 0;
@@ -51,12 +66,7 @@ export default function RecordingWaveform({ isRecording }) {
             const v = dataArray[i] / 128.0;
             const y = (v * canvas.height) / 2;
 
-            if (i === 0) {
-              ctx.moveTo(x, y);
-            } else {
-              ctx.lineTo(x, y);
-            }
-
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
             x += sliceWidth;
           }
 
@@ -73,16 +83,23 @@ export default function RecordingWaveform({ isRecording }) {
     init();
 
     return () => {
+      cancelAnimationFrame(animationIdRef.current);
       if (audioContextRef.current) {
         audioContextRef.current.close();
+        audioContextRef.current = null;
       }
-      cancelAnimationFrame(animationIdRef.current);
     };
   }, [isRecording]);
 
   return (
-    <div className="w-full h-24 bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden shadow-inner">
-      <canvas ref={canvasRef} width={800} height={100} className="w-full h-full" />
+    <div className="w-full h-28 bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden shadow-inner">
+      <canvas
+        ref={canvasRef}
+        width={window.innerWidth * 0.8}
+        height={112}
+        className="w-full h-full"
+      />
     </div>
   );
 }
+

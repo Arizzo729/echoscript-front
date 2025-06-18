@@ -13,6 +13,7 @@ export default function WaveformVisualizer({ isRecording }) {
       cancelAnimationFrame(animationRef.current);
       if (audioContextRef.current) {
         audioContextRef.current.close();
+        audioContextRef.current = null;
       }
       return;
     }
@@ -22,68 +23,72 @@ export default function WaveformVisualizer({ isRecording }) {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 2048;
+
         const source = audioCtx.createMediaStreamSource(stream);
-
-        analyser.fftSize = 1024;
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-
         source.connect(analyser);
 
-        audioContextRef.current = audioCtx;
+        const bufferLength = analyser.fftSize;
+        const dataArray = new Uint8Array(bufferLength);
+
         analyserRef.current = analyser;
         dataArrayRef.current = dataArray;
+        audioContextRef.current = audioCtx;
         sourceRef.current = source;
 
-        drawWaveform();
+        draw();
       } catch (error) {
         console.error("Microphone access denied or error:", error);
       }
     };
 
-    const drawWaveform = () => {
+    const draw = () => {
       const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
+      if (!canvas) return;
 
-      const draw = () => {
-        animationRef.current = requestAnimationFrame(draw);
-        const analyser = analyserRef.current;
-        const dataArray = dataArrayRef.current;
+      const ctx = canvas.getContext("2d");
+      const analyser = analyserRef.current;
+      const dataArray = dataArrayRef.current;
+      const width = canvas.width;
+      const height = canvas.height;
+
+      const gradient = ctx.createLinearGradient(0, 0, width, 0);
+      gradient.addColorStop(0, "#0ea5e9"); // sky blue
+      gradient.addColorStop(1, "#14b8a6"); // teal
+
+      const renderFrame = () => {
+        animationRef.current = requestAnimationFrame(renderFrame);
+
         analyser.getByteTimeDomainData(dataArray);
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, width, height);
+
         ctx.fillStyle = "#09090b";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, width, height);
 
         ctx.lineWidth = 2;
-        ctx.strokeStyle = "#14b8a6"; // Teal
+        ctx.strokeStyle = gradient;
         ctx.beginPath();
 
-        const sliceWidth = canvas.width / dataArray.length;
+        const sliceWidth = width / dataArray.length;
         let x = 0;
 
         for (let i = 0; i < dataArray.length; i++) {
           const v = dataArray[i] / 128.0;
-          const y = (v * canvas.height) / 2;
+          const y = (v * height) / 2;
 
-          if (i === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
-          }
-
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
           x += sliceWidth;
         }
 
-        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.lineTo(width, height / 2);
         ctx.stroke();
 
-        // Glow effect
         ctx.shadowColor = "#14b8a6";
-        ctx.shadowBlur = 20;
+        ctx.shadowBlur = 25;
       };
 
-      draw();
+      renderFrame();
     };
 
     initAudio();
@@ -92,14 +97,19 @@ export default function WaveformVisualizer({ isRecording }) {
       cancelAnimationFrame(animationRef.current);
       if (audioContextRef.current) {
         audioContextRef.current.close();
+        audioContextRef.current = null;
       }
     };
   }, [isRecording]);
 
   return (
-    <div className="w-full h-28 rounded-lg bg-zinc-800 overflow-hidden shadow-lg border border-zinc-700">
-      <canvas ref={canvasRef} width={800} height={112} className="w-full h-full" />
+    <div className="w-full h-28 rounded-lg bg-zinc-900 overflow-hidden border border-zinc-700">
+      <canvas
+        ref={canvasRef}
+        width={window.innerWidth * 0.8}
+        height={112}
+        className="w-full h-full"
+      />
     </div>
   );
 }
-

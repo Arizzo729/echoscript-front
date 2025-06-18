@@ -11,6 +11,7 @@ module.exports = {
       padding: {
         DEFAULT: '1rem',
         sm: '2rem',
+        md: '2rem',
         lg: '4rem',
         xl: '5rem',
         '2xl': '6rem',
@@ -21,9 +22,8 @@ module.exports = {
         primary: {
           DEFAULT: 'hsl(var(--color-primary-h) / 1)',
           hover: 'hsl(var(--color-primary-hover-h) / 1)',
-          light: 'hsl(var(--color-primary-h) / 1)',
-          dark: 'hsl(var(--color-primary-h) / 0.8)',
-          active: 'hsl(var(--color-primary-h) / 0.6)',
+          light: 'hsl(var(--color-primary-h) / 0.9)',
+          dark: 'hsl(var(--color-primary-h) / 0.7)',
           disabled: 'hsl(var(--color-primary-h) / 0.3)',
         },
         background: {
@@ -43,24 +43,13 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: [
-          'Inter',
-          'system-ui',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          '"Segoe UI"',
-          'Roboto',
-          '"Helvetica Neue"',
-          'Arial',
-          '"Noto Sans"',
-          'sans-serif',
-        ],
+        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
         mono: ['Fira Code', 'monospace'],
       },
       boxShadow: {
-        'primary-glow': '0 0 12px hsl(var(--color-primary-h) / 0.6)',
+        'primary-glow': '0 0 12px hsl(var(--color-primary-h) / 0.5)',
         'focus-ring': '0 0 0 3px hsl(var(--color-primary-h) / 0.4)',
-        card: '0 2px 10px rgba(0, 0, 0, 0.08)',
+        card: '0 2px 12px rgba(0,0,0,0.08)',
       },
       borderRadius: {
         lg: '0.5rem',
@@ -70,14 +59,16 @@ module.exports = {
       spacing: {
         18: '4.5rem',
         22: '5.5rem',
+        26: '6.5rem',
       },
       transitionTimingFunction: {
-        custom: 'cubic-bezier(0.4, 0, 0.2, 1)',
-        'ease-in-out-expo': 'cubic-bezier(0.87, 0, 0.13, 1)',
+        'soft': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'expo': 'cubic-bezier(0.87, 0, 0.13, 1)',
       },
       transitionDuration: {
         400: '400ms',
         600: '600ms',
+        800: '800ms',
       },
       maxWidth: {
         'screen-sm': '640px',
@@ -87,11 +78,23 @@ module.exports = {
         'screen-2xl': '1536px',
       },
       zIndex: {
+        base: 1,
+        dropdown: 50,
+        sticky: 100,
         modal: 1050,
         popover: 1100,
         tooltip: 1200,
+        top: 9999,
       },
       keyframes: {
+        fadeIn: {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+        pulseGlow: {
+          '0%, 100%': { boxShadow: '0 0 12px hsl(var(--color-primary-h) / 0.4)' },
+          '50%': { boxShadow: '0 0 24px hsl(var(--color-primary-h) / 0.8)' },
+        },
         dashSpin: {
           '0%': { strokeDashoffset: '220', transform: 'rotate(0deg)' },
           '50%': { strokeDashoffset: '60', transform: 'rotate(180deg)' },
@@ -99,6 +102,8 @@ module.exports = {
         },
       },
       animation: {
+        fadeIn: 'fadeIn 0.8s ease-out forwards',
+        pulseGlow: 'pulseGlow 2s ease-in-out infinite',
         dashSpin: 'dashSpin 1.4s ease-in-out infinite',
       },
     },
