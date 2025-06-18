@@ -15,6 +15,8 @@ import { FaDiscord, FaInstagram, FaLinkedin, FaTiktok } from "react-icons/fa";
 import { Sparkles } from "lucide-react";
 import HintCarousel from "../components/HintCarousel"; // New slideshow component
 import "../styles/GlareTitle.css";
+import { useTranslation } from "react-i18next";
+
 
 export default function HomePage() {
   const [time, setTime] = useState(new Date());
