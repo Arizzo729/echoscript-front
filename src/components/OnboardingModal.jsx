@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import Lottie from "lottie-react";
-import illustration1 from "src/assets/onboarding/upload.json";
-import illustration2 from "src/assets/onboarding/cleanup.json";
-import illustration3 from "src/assets/onboarding/global.json";
-import illustration4 from "src/assets/onboarding/security.json";
-import illustration5 from "src/assets/onboarding/integrations.json";
-import illustration6 from "src/assets/onboarding/start.json";
+import illustration1 from "../assets/onboarding/upload.json";
+import illustration2 from "../assets/onboarding/cleanup.json";
+import illustration3 from "../assets/onboarding/global.json";
+import illustration4 from "../assets/onboarding/security.json";
+import illustration5 from "../assets/onboarding/integrations.json";
+import illustration6 from "../assets/onboarding/start.json";
+
 
 const STEPS = [
   {
