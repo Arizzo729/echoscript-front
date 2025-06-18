@@ -10,24 +10,19 @@
     "queuePriority": "standard"
   },
   "storage": {
-    "provider": "local",  // options: "local", "s3", "gcs"
-
-    // === Local-only options
+    "provider": "local",
     "uploadPath": "/mnt/data/uploads",
     "retentionPolicyDays": 14,
-
-    // === S3-compatible (only used if provider = "s3")
     "s3": {
       "bucket": "echoscript-ai-uploads",
       "region": "us-east-1",
       "accessKey": "YOUR_ACCESS_KEY",
       "secretKey": "YOUR_SECRET_KEY"
     },
-
-    // === GCS-compatible (only used if provider = "gcs")
     "gcs": {
       "bucket": "echoscript-uploads",
       "credentialsPath": "/path/to/credentials.json"
     }
   }
 }
+
