@@ -9,14 +9,16 @@ import {
   Video,
   Clock,
   User,
+  Settings2,
 } from "lucide-react";
 import Button from "../components/ui/Button";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [loadingId, setLoadingId] = useState(null);
 
-  // Guest fallback for unauthenticated users
   const user = {
     name: "Guest Echo",
     email: "guest@echoscript.ai",
@@ -29,12 +31,30 @@ export default function Dashboard() {
 
   const percentUsed = Math.min((user.minutesUsed / user.limit) * 100, 100);
 
-  const handleDelete = (id) => {
-    setLoadingId(id);
-    setTimeout(() => {
-      setLoadingId(null);
-      alert(t("dashboard.deleteAlert", { id }));
-    }, 1000);
+  const handleRedirect = (label) => {
+    switch (label.toLowerCase()) {
+      case "recording":
+      case "upload":
+        navigate("/upload");
+        break;
+      case "transcripts":
+        navigate("/transcripts");
+        break;
+      case "summary":
+        navigate("/summary");
+        break;
+      case "video":
+        navigate("/video");
+        break;
+      case "history":
+        navigate("/history");
+        break;
+      case "settings":
+        navigate("/settings");
+        break;
+      default:
+        break;
+    }
   };
 
   return (
@@ -57,8 +77,15 @@ export default function Dashboard() {
           { icon: <Sparkles />, label: "Summary", color: "from-purple-500 to-purple-700" },
           { icon: <Video />, label: "Video", color: "from-rose-500 to-rose-700" },
           { icon: <Clock />, label: "History", color: "from-yellow-400 to-yellow-600" },
+          { icon: <Settings2 />, label: "Settings", color: "from-zinc-600 to-zinc-800" },
         ].map(({ icon, label, color }) => (
-          <DashboardCard key={label} icon={icon} label={label} color={color} />
+          <DashboardCard
+            key={label}
+            icon={icon}
+            label={label}
+            color={color}
+            onClick={() => handleRedirect(label)}
+          />
         ))}
       </div>
 
@@ -123,11 +150,12 @@ export default function Dashboard() {
   );
 }
 
-function DashboardCard({ icon, label, color }) {
+function DashboardCard({ icon, label, color, onClick }) {
   return (
     <motion.button
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.97 }}
+      onClick={onClick}
       className={`flex justify-between items-center w-full p-5 rounded-2xl shadow-lg bg-gradient-to-br ${color} text-white transition-all group`}
     >
       <div className="flex items-center gap-4">
@@ -140,3 +168,4 @@ function DashboardCard({ icon, label, color }) {
     </motion.button>
   );
 }
+

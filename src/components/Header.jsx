@@ -5,7 +5,6 @@ import {
   ChevronDownIcon,
   SunIcon,
   MoonIcon,
-  UserCircleIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Volume2, VolumeX } from "lucide-react";
@@ -82,10 +81,10 @@ export default function Header({
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-red-400 transition"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-red-400 transition p-1 rounded-sm"
               aria-label="Clear search"
             >
-              <XMarkIcon className="w-4 h-4" />
+              <XMarkIcon className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
@@ -138,18 +137,25 @@ export default function Header({
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="absolute right-0 mt-2 w-72 bg-zinc-900 text-white border border-zinc-700 rounded-md shadow-xl z-50"
+                className="absolute right-0 mt-2 w-64 bg-zinc-900 text-white border border-zinc-700 rounded-lg shadow-lg z-50"
                 role="menu"
               >
-                <div className="p-3 font-medium border-b border-zinc-700">Notifications</div>
-                <ul>
+                <div className="px-4 py-2 text-sm font-semibold border-b border-zinc-700">
+                  Notifications
+                </div>
+                <ul className="max-h-60 overflow-y-auto">
                   {notifications.length > 0 ? notifications.map((n, i) => (
-                    <li key={i} className="px-4 py-3 border-b border-zinc-800 hover:bg-zinc-800">
-                      <p>{n.message}</p>
+                    <li
+                      key={i}
+                      className="px-4 py-2 text-sm border-b border-zinc-800 hover:bg-zinc-800 transition"
+                    >
+                      <p className="text-zinc-300">{n.message}</p>
                       <p className="text-xs text-zinc-500">{n.time}</p>
                     </li>
                   )) : (
-                    <li className="px-4 py-3 text-zinc-400 text-sm">No notifications</li>
+                    <li className="px-4 py-3 text-zinc-400 text-sm text-center">
+                      No notifications
+                    </li>
                   )}
                 </ul>
               </motion.div>
@@ -193,8 +199,20 @@ export default function Header({
               >
                 {!isGuest && (
                   <>
-                    <a href="/account" className="block px-4 py-2 hover:bg-zinc-800">Profile</a>
-                    <a href="/settings" className="block px-4 py-2 hover:bg-zinc-800">Settings</a>
+                    <Link
+                      to="/account"
+                      className="block px-4 py-2 hover:bg-zinc-800 transition"
+                      onClick={() => setShowUserDropdown(false)}
+                    >
+                      Account
+                    </Link>
+                    <Link
+                      to="/settings"
+                      className="block px-4 py-2 hover:bg-zinc-800 transition"
+                      onClick={() => setShowUserDropdown(false)}
+                    >
+                      Settings
+                    </Link>
                     <hr className="border-zinc-700" />
                   </>
                 )}
@@ -212,4 +230,3 @@ export default function Header({
     </motion.header>
   );
 }
-
