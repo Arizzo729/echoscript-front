@@ -5,7 +5,7 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import popSfx from "src/public/assets/audio/pop-39222.mp3";
+import popSfx from "src/public/assets/audio/playPop.mp3";
 
 // 🎵 Ambient playlist (add more tracks here)
 import ambient1 from "/public/assets/audio/ambient-loop-1.mp3";
