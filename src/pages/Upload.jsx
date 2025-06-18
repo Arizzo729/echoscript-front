@@ -12,7 +12,7 @@ import {
   FileAudio2,
   Timer,
   Download,
-  Translate,
+  Globe, // ✅ Use this instead of Translate
   Sparkles,
   FileText,
   Subtitles,
@@ -70,7 +70,7 @@ export default function UploadPage() {
             <CountdownSelector value={countdown} onChange={setCountdown} />
           </div>
           <div className="flex items-center gap-3">
-            <Translate className="w-5 h-5 text-yellow-400" />
+            <Globe className="w-5 h-5 text-yellow-400" />
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
