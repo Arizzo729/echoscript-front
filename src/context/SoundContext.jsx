@@ -5,12 +5,12 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import popSfx from "../assets/audio/pop-39222.mp3";
+import popSfx from "src/public/assets/audio/pop-39222.mp3";
 
 // 🎵 Ambient playlist (add more tracks here)
-import ambient1 from "../assets/audio/ambient-loop-1.mp3";
-import ambient2 from "../assets/audio/ambient-loop-2.mp3";
-import ambient3 from "../assets/audio/ambient-loop-3.mp3";
+import ambient1 from "/public/assets/audio/ambient-loop-1.mp3";
+import ambient2 from "/public/assets/audio/ambient-loop-2.mp3";
+import ambient3 from "/public/assets/audio/ambient-loop-3.mp3";
 
 const ambientPlaylist = [ambient1, ambient2, ambient3];
 
