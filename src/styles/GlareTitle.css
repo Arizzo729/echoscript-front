@@ -1,72 +1,43 @@
-from pathlib import Path
-
-# Create the updated GlareTitle.css file content
-glare_title_css = """
 .glare-title {
   position: relative;
   display: inline-block;
-  background-image: linear-gradient(to right, #00f5d4, #3b82f6);
+  background: linear-gradient(to right, #00f5d4, #0ea5e9);
   background-clip: text;
+  -webkit-background-clip: text;
   color: transparent;
-  font-weight: bold;
-  overflow: hidden;
+  animation: fadeInLetters 2s ease-out forwards;
 }
 
 .glare-title::before {
-  content: attr(data-text);
+  content: "";
   position: absolute;
   top: 0;
-  left: -100%;
-  width: 300%;
+  left: -50%;
+  width: 200%;
   height: 100%;
-  background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 40%, white 50%, transparent 60%);
-  -webkit-mask-image: linear-gradient(to right, transparent 40%, white 50%, transparent 60%);
-  animation: glare-loop 6s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(255,255,255,0.15), transparent 70%);
+  animation: slowGlare 6s ease-in-out infinite;
+  pointer-events: none;
 }
 
-@keyframes glare-loop {
+@keyframes fadeInLetters {
   0% {
-    left: -100%;
+    opacity: 0;
+    transform: translateY(10px);
+    letter-spacing: -0.05em;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    letter-spacing: 0;
+  }
+}
+
+@keyframes slowGlare {
+  0%, 100% {
+    left: -50%;
   }
   50% {
     left: 100%;
   }
-  100% {
-    left: -100%;
-  }
 }
-
-.glare-fade span {
-  opacity: 0;
-  display: inline-block;
-  transform: translateY(10px);
-  animation: fadeInLetter 1s forwards;
-}
-
-.glare-fade span:nth-child(1) { animation-delay: 0.05s; }
-.glare-fade span:nth-child(2) { animation-delay: 0.1s; }
-.glare-fade span:nth-child(3) { animation-delay: 0.15s; }
-.glare-fade span:nth-child(4) { animation-delay: 0.2s; }
-.glare-fade span:nth-child(5) { animation-delay: 0.25s; }
-.glare-fade span:nth-child(6) { animation-delay: 0.3s; }
-.glare-fade span:nth-child(7) { animation-delay: 0.35s; }
-.glare-fade span:nth-child(8) { animation-delay: 0.4s; }
-.glare-fade span:nth-child(9) { animation-delay: 0.45s; }
-.glare-fade span:nth-child(10) { animation-delay: 0.5s; }
-.glare-fade span:nth-child(11) { animation-delay: 0.55s; }
-.glare-fade span:nth-child(12) { animation-delay: 0.6s; }
-
-@keyframes fadeInLetter {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-"""
-
-# Write the CSS file to disk (simulated as output)
-glare_title_css_path = Path("/mnt/data/GlareTitle.css")
-glare_title_css_path.write_text(glare_title_css)
-
-glare_title_css_path.name
