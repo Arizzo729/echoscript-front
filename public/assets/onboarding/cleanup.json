@@ -1,1 +1,22 @@
-{"v":"5.5.8","fr":30,"ip":0,"op":60,"w":100,"h":100,"nm":"placeholder","ddd":0,"assets":[],"layers":[]}
+// 5. cleanup.json
+{
+  "policies": {
+    "fileRetentionDays": 7,
+    "transcriptRetentionDays": 30,
+    "inactiveUserPurgeDays": 365
+  },
+  "tasks": [
+    {
+      "name": "deleteExpiredFiles",
+      "schedule": "0 3 * * *",
+      "type": "daily",
+      "enabled": true
+    },
+    {
+      "name": "purgeOrphanedTranscripts",
+      "schedule": "0 4 * * *",
+      "type": "daily",
+      "enabled": true
+    }
+  ]
+}

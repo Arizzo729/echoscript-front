@@ -1,1 +1,18 @@
-{"v":"5.5.8","fr":30,"ip":0,"op":60,"w":100,"h":100,"nm":"placeholder","ddd":0,"assets":[],"layers":[]}
+// 6. upload.json
+{
+  "limits": {
+    "maxFileSizeMB": 300,
+    "maxFilesPerUpload": 5,
+    "acceptedFormats": ["mp3", "mp4", "m4a", "wav", "webm"]
+  },
+  "processing": {
+    "autoTranscribe": true,
+    "languageDetection": true,
+    "queuePriority": "standard"
+  },
+  "storage": {
+    "provider": "local",
+    "uploadPath": "/mnt/data/uploads",
+    "retentionPolicyDays": 14
+  }
+}
