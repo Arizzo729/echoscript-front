@@ -13,6 +13,9 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+const ACCEPTED_FORMATS = ["mp4", "mkv", "avi", "mov", "webm"];
+const MAX_FILE_SIZE_MB = 300;
+
 export default function VideoUpload() {
   const { t, i18n } = useTranslation();
   const [videoFile, setVideoFile] = useState(null);
@@ -22,7 +25,26 @@ export default function VideoUpload() {
   const [resultText, setResultText] = useState("");
 
   const handleFileChange = (e) => {
-    setVideoFile(e.target.files[0]);
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const ext = file.name.split(".").pop().toLowerCase();
+    const tooLarge = file.size > MAX_FILE_SIZE_MB * 1024 * 1024;
+    const invalid = !ACCEPTED_FORMATS.includes(ext);
+
+    if (tooLarge) {
+      setStatus("file_too_large");
+      setVideoFile(null);
+      return;
+    }
+
+    if (invalid) {
+      setStatus("invalid_format");
+      setVideoFile(null);
+      return;
+    }
+
+    setVideoFile(file);
     setStatus(null);
     setResultText("");
   };
@@ -169,6 +191,18 @@ export default function VideoUpload() {
 
           {status === "error" && (
             <p className="text-red-400">❌ {t("There was an error. Please try again.")}</p>
+          )}
+
+          {status === "file_too_large" && (
+            <p className="text-red-400">
+              ⚠️ {t("File is too large. Max size is")} {MAX_FILE_SIZE_MB}MB.
+            </p>
+          )}
+
+          {status === "invalid_format" && (
+            <p className="text-red-400">
+              ⚠️ {t("Unsupported file format. Accepted formats:")} {ACCEPTED_FORMATS.join(", ").toUpperCase()}
+            </p>
           )}
         </form>
 

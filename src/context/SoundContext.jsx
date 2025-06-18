@@ -26,7 +26,7 @@ export function SoundProvider({ children }) {
   const ambientAudio = useRef(new Audio(ambientPlaylist[0]));
   const fadeInterval = useRef(null);
 
-  // === Load settings from localStorage
+  // === Load saved settings
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("sound-settings") || "{}");
     if (saved) {
@@ -37,7 +37,7 @@ export function SoundProvider({ children }) {
     }
   }, []);
 
-  // === Save settings to localStorage
+  // === Save settings
   useEffect(() => {
     localStorage.setItem(
       "sound-settings",
@@ -45,7 +45,7 @@ export function SoundProvider({ children }) {
     );
   }, [isMuted, ambientEnabled, volume, trackIndex]);
 
-  // === Fade Audio Smoothly
+  // === Smooth volume transition
   const fadeAudio = (targetVolume, fadeTime = 800) => {
     const audio = ambientAudio.current;
     clearInterval(fadeInterval.current);
@@ -67,33 +67,46 @@ export function SoundProvider({ children }) {
     }, stepTime);
   };
 
-  // === Main Ambient Audio Logic
+  // === Ambient control
   useEffect(() => {
     const audio = ambientAudio.current;
-    audio.loop = true;
-    audio.src = ambientPlaylist[trackIndex];
-    audio.load();
 
-    if (!isMuted && ambientEnabled) {
-      audio.volume = 0;
-      audio
-        .play()
-        .then(() => fadeAudio(volume * 0.3)) // Normalize to avoid ear damage
-        .catch(() => setShowSoundPrompt(true));
-    } else {
+    const playTrack = () => {
+      const newSrc = ambientPlaylist[trackIndex];
+      if (audio.src !== newSrc) {
+        audio.src = newSrc;
+        audio.load();
+      }
+
+      audio.loop = true;
+
+      if (!isMuted && ambientEnabled) {
+        audio.volume = 0;
+        audio
+          .play()
+          .then(() => fadeAudio(volume * 0.3))
+          .catch(() => setShowSoundPrompt(true));
+      } else {
+        fadeAudio(0);
+        setTimeout(() => audio.pause(), 600);
+      }
+    };
+
+    playTrack();
+    return () => {
       fadeAudio(0);
       setTimeout(() => audio.pause(), 600);
-    }
-
-    return () => audio.pause();
+    };
   }, [ambientEnabled, isMuted, trackIndex]);
 
+  // === Toggle between ambient tracks
   const toggleAmbient = () => {
     const nextIndex = (trackIndex + 1) % ambientPlaylist.length;
     setTrackIndex(nextIndex);
     setAmbientEnabled(true);
   };
 
+  // === Click sound
   const playClickSound = () => {
     if (!isMuted) {
       const audio = popAudio.current;
@@ -103,8 +116,10 @@ export function SoundProvider({ children }) {
     }
   };
 
+  // === Mute toggle
   const toggleMute = () => setIsMuted((prev) => !prev);
 
+  // === Manual user confirmation fallback
   const enableSoundManually = () => {
     setIsMuted(false);
     setAmbientEnabled(true);
@@ -164,3 +179,4 @@ export function SoundProvider({ children }) {
 }
 
 export const useSound = () => useContext(SoundContext);
+

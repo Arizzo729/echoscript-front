@@ -1,18 +1,35 @@
-// src/components/Spinner.jsx
 import React from "react";
+import { twMerge } from "tailwind-merge";
 
-export default function Spinner({ size = 6, className = "", label = "Loading…" }) {
-  // Allow both numbers or Tailwind-safe strings like "6", "8", "10"
-  const safeSize = typeof size === "number" ? `h-${size} w-${size}` : `h-[${size}] w-[${size}]`;
+export default function Spinner({
+  size = 6,
+  className = "",
+  label = "Loading…",
+  speed = "slow", // accepts "slow", "normal", or "fast"
+}) {
+  const sizeClass =
+    typeof size === "number"
+      ? `h-${size} w-${size}`
+      : `h-[${size}] w-[${size}]`;
+
+  const speedClass = {
+    slow: "animate-spin-slow",
+    normal: "animate-spin",
+    fast: "animate-spin-fast",
+  }[speed] || "animate-spin-slow";
 
   return (
     <div
-      className={`inline-flex items-center justify-center ${safeSize} ${className}`}
+      className={twMerge(
+        "inline-flex items-center justify-center",
+        sizeClass,
+        className
+      )}
       role="status"
       aria-label={label}
     >
       <svg
-        className="animate-spin-slow text-teal-500"
+        className={twMerge(speedClass, "text-teal-500")}
         viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -39,5 +56,7 @@ export default function Spinner({ size = 6, className = "", label = "Loading…"
       </svg>
     </div>
   );
+}
+
 }
 

@@ -6,14 +6,38 @@ export default function RecordingWaveform({ isRecording }) {
   const analyserRef = useRef(null);
   const dataArrayRef = useRef(null);
   const animationIdRef = useRef(null);
+  const resizeObserverRef = useRef(null);
+
+  const setupCanvas = (canvas) => {
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+  };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) setupCanvas(canvas);
+
+    // Watch for size changes
+    resizeObserverRef.current = new ResizeObserver(() => {
+      if (canvas) setupCanvas(canvas);
+    });
+    resizeObserverRef.current.observe(canvas);
+
+    return () => {
+      resizeObserverRef.current?.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     if (!isRecording) {
       cancelAnimationFrame(animationIdRef.current);
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-        audioContextRef.current = null;
-      }
+      audioContextRef.current?.close();
+      audioContextRef.current = null;
       return;
     }
 
@@ -42,35 +66,37 @@ export default function RecordingWaveform({ isRecording }) {
 
           analyser.getByteTimeDomainData(dataArray);
 
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          const width = canvas.clientWidth;
+          const height = canvas.clientHeight;
+
+          ctx.clearRect(0, 0, width, height);
 
           // Background
           ctx.fillStyle = "#09090b";
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillRect(0, 0, width, height);
 
-          // Gradient stroke
-          const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+          // Line gradient
+          const gradient = ctx.createLinearGradient(0, 0, width, 0);
           gradient.addColorStop(0, "#14b8a6");
           gradient.addColorStop(1, "#0ea5e9");
 
           ctx.lineWidth = 2;
           ctx.strokeStyle = gradient;
           ctx.shadowColor = "#14b8a6";
-          ctx.shadowBlur = 18;
-          ctx.beginPath();
+          ctx.shadowBlur = 14;
 
-          const sliceWidth = canvas.width / bufferLength;
+          ctx.beginPath();
+          const sliceWidth = width / bufferLength;
           let x = 0;
 
           for (let i = 0; i < bufferLength; i++) {
             const v = dataArray[i] / 128.0;
-            const y = (v * canvas.height) / 2;
-
+            const y = (v * height) / 2;
             i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
             x += sliceWidth;
           }
 
-          ctx.lineTo(canvas.width, canvas.height / 2);
+          ctx.lineTo(width, height / 2);
           ctx.stroke();
         };
 
@@ -84,10 +110,8 @@ export default function RecordingWaveform({ isRecording }) {
 
     return () => {
       cancelAnimationFrame(animationIdRef.current);
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-        audioContextRef.current = null;
-      }
+      audioContextRef.current?.close();
+      audioContextRef.current = null;
     };
   }, [isRecording]);
 
@@ -95,9 +119,8 @@ export default function RecordingWaveform({ isRecording }) {
     <div className="w-full h-28 bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden shadow-inner">
       <canvas
         ref={canvasRef}
-        width={window.innerWidth * 0.8}
-        height={112}
-        className="w-full h-full"
+        className="w-full h-full block"
+        style={{ width: "100%", height: "100%" }}
       />
     </div>
   );

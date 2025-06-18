@@ -18,6 +18,9 @@ import {
   Info,
 } from "lucide-react";
 
+const ACCEPTED_AUDIO_FORMATS = ["mp3", "wav", "flac", "m4a", "aac", "ogg"];
+const MAX_AUDIO_SIZE_MB = 100;
+
 export default function UploadPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [countdown, setCountdown] = useState(3);
@@ -25,14 +28,18 @@ export default function UploadPage() {
   const [translated, setTranslated] = useState("");
   const [enableTranslation, setEnableTranslation] = useState(false);
 
-  const handleTranscript = useCallback((text) => {
-    setTranscript(text);
-    if (enableTranslation) {
-      setTranslated(`🌍 [Translated] ${text}`);
-    }
-  }, [enableTranslation]);
+  const handleTranscript = useCallback(
+    (text) => {
+      setTranscript(text);
+      if (enableTranslation) {
+        setTranslated(text ? `🌍 [Translated] ${text}` : "");
+      }
+    },
+    [enableTranslation]
+  );
 
   const handleDownload = useCallback((text, filename) => {
+    if (!text) return;
     const blob = new Blob([text], { type: "text/plain" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -70,12 +77,13 @@ export default function UploadPage() {
           </div>
           <div className="flex items-center gap-3">
             <Globe className="w-5 h-5 text-yellow-400" />
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input
                 type="checkbox"
                 className="form-checkbox accent-teal-600"
                 checked={enableTranslation}
                 onChange={() => setEnableTranslation(!enableTranslation)}
+                aria-label="Enable translation"
               />
               Enable Translation
             </label>
@@ -110,10 +118,13 @@ export default function UploadPage() {
               <h3 className="font-semibold text-lg text-white flex gap-2 items-center">
                 <FileText className="w-5 h-5 text-teal-400" /> Transcript
               </h3>
-              <pre className="text-zinc-300 text-sm whitespace-pre-wrap max-h-64 overflow-auto">{transcript}</pre>
+              <pre className="text-zinc-300 text-sm whitespace-pre-wrap max-h-64 overflow-auto">
+                {transcript}
+              </pre>
               <button
                 onClick={() => handleDownload(transcript, "transcript.txt")}
                 className="text-sm text-teal-400 flex items-center gap-2 hover:underline"
+                disabled={!transcript}
               >
                 <Download className="w-4 h-4" /> Download Transcript
               </button>
@@ -124,10 +135,13 @@ export default function UploadPage() {
                 <h3 className="font-semibold text-lg text-white flex gap-2 items-center">
                   <Subtitles className="w-5 h-5 text-yellow-400" /> Translated Output
                 </h3>
-                <pre className="text-zinc-300 text-sm whitespace-pre-wrap max-h-64 overflow-auto">{translated}</pre>
+                <pre className="text-zinc-300 text-sm whitespace-pre-wrap max-h-64 overflow-auto">
+                  {translated}
+                </pre>
                 <button
                   onClick={() => handleDownload(translated, "translated_transcript.txt")}
                   className="text-sm text-yellow-300 flex items-center gap-2 hover:underline"
+                  disabled={!translated}
                 >
                   <Download className="w-4 h-4" /> Download Translation
                 </button>
@@ -152,7 +166,3 @@ export default function UploadPage() {
     </motion.div>
   );
 }
-
-
-
-

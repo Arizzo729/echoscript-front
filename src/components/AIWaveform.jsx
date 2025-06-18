@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 const BAR_COUNT = 24;
@@ -9,25 +9,29 @@ export default function AIWaveform({ className = "" }) {
     Array.from({ length: BAR_COUNT }, () => Math.random() * MAX_HEIGHT)
   );
 
+  const animationRef = useRef(null);
+
   useEffect(() => {
-    const animateBars = () => {
+    const animate = () => {
       setHeights((prev) =>
         prev.map((_, i) => {
-          const base = Math.random() * MAX_HEIGHT;
-          const wave = Math.sin(Date.now() / 500 + i) * 10;
-          return Math.max(8, base + wave);
+          const wave = Math.sin(Date.now() / 350 + i * 0.5) * 12;
+          const noise = Math.random() * 8;
+          const h = Math.max(8, Math.min(MAX_HEIGHT, wave + noise + MAX_HEIGHT / 2));
+          return h;
         })
       );
     };
 
-    const interval = setInterval(animateBars, 180);
-    return () => clearInterval(interval);
+    animationRef.current = setInterval(animate, 180);
+    return () => clearInterval(animationRef.current);
   }, []);
 
   return (
     <div
       className={`w-full h-24 flex items-center justify-center ${className}`}
       aria-hidden="true"
+      role="presentation"
     >
       <svg
         viewBox={`0 0 ${BAR_COUNT * 10} 100`}
@@ -63,7 +67,7 @@ export default function AIWaveform({ className = "" }) {
               duration: 1.4,
               repeat: Infinity,
               ease: "easeInOut",
-              delay: i * 0.025,
+              delay: i * 0.02,
             }}
           />
         ))}
