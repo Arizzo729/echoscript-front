@@ -1,10 +1,9 @@
-// vite.config.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import environmentPlugin from 'vite-plugin-environment';
 
 export default defineConfig({
-  base: "/", // ✅ '/' is correct for root domains like echoscriptai.com
+  base: "/", // ✅ root is fine
   plugins: [
     react(),
     environmentPlugin({
@@ -18,11 +17,15 @@ export default defineConfig({
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
   },
+  server: {
+    historyApiFallback: true, // ✅ crucial for dev routing
+  },
   build: {
     rollupOptions: {
-      input: './index.html', // ✅ ensure it uses your root HTML file
+      input: './index.html',
     },
-    outDir: 'dist', // default is fine, but explicitly set if needed
+    outDir: 'dist',
     emptyOutDir: true,
   },
 });
+
