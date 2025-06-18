@@ -1,4 +1,4 @@
-// 5. cleanup.json
+
 {
   "policies": {
     "fileRetentionDays": 7,

@@ -1,4 +1,4 @@
-// 3. security.json
+
 {
   "auth": {
     "2FA": true,

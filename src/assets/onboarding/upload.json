@@ -1,4 +1,4 @@
-// 6. upload.json
+
 {
   "limits": {
     "maxFileSizeMB": 300,
