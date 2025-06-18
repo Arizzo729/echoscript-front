@@ -9,34 +9,43 @@ import MobileBottomNav from "./MobileBottomNav";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
+// 🌗 Theme Context (Global)
 export const ThemeContext = createContext();
 
 export default function Layout() {
-  const [theme, setTheme] = useState(() =>
-    window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-  );
+  const [theme, setTheme] = useState(() => {
+    const stored = localStorage.getItem("theme");
+    if (stored) return stored;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(true);
 
-  const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
-  const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  const toggleTheme = () => setTheme(prev => (prev === "dark" ? "light" : "dark"));
+  const toggleDrawer = () => setIsDrawerOpen(prev => !prev);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      <div className="relative flex flex-col h-screen w-screen bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white overflow-hidden">
+      <div className="relative flex flex-col h-screen w-screen overflow-hidden bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white">
 
         {/* 📌 Header */}
-        <Header toggleDrawer={toggleDrawer} />
+        <Header
+          toggleDrawer={toggleDrawer}
+          onToggleTheme={toggleTheme}
+          isDarkMode={theme === "dark"}
+        />
 
         {/* 🧭 Sidebar + Main Content */}
         <div className="flex flex-1 overflow-hidden">
           <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
           <main
-            className={`flex-1 overflow-y-auto px-4 py-4 md:px-8 md:py-6 transition-all duration-300 ${
+            className={`flex-1 overflow-y-auto transition-all duration-300 px-4 py-4 md:px-8 md:py-6 ${
               collapsed ? "md:pl-20" : "md:pl-56"
             }`}
           >
@@ -44,10 +53,10 @@ export default function Layout() {
           </main>
         </div>
 
-        {/* 🤖 Echo Assistant — now visible on all devices */}
+        {/* 🤖 Echo Assistant */}
         <EchoAssistantUltra />
 
-        {/* 📱 Bottom Nav (mobile only) */}
+        {/* 📱 Mobile Bottom Navigation */}
         <div className="md:hidden">
           <MobileBottomNav />
         </div>
@@ -55,7 +64,7 @@ export default function Layout() {
         {/* 🔔 Toast Notifications */}
         <ToastContainer />
 
-        {/* ⚙️ Drawer Settings Panel */}
+        {/* ⚙️ Settings Drawer */}
         <AnimatePresence>
           {isDrawerOpen && (
             <motion.div
@@ -63,7 +72,7 @@ export default function Layout() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 h-full w-80 bg-white dark:bg-zinc-900 shadow-lg z-[9999]"
+              className="fixed top-0 right-0 z-[9999] h-full w-80 bg-white dark:bg-zinc-900 shadow-lg"
             >
               <button
                 onClick={toggleDrawer}
@@ -83,4 +92,3 @@ export default function Layout() {
     </ThemeContext.Provider>
   );
 }
-
