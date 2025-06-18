@@ -27,7 +27,7 @@ import Dashboard from "./pages/Dashboard";
 import UploadPage from "./pages/Upload"; // ✅ Proper page wrapper for upload
 import AIAssistant from "./pages/AIAssistant";
 import Contact from "./pages/Contact";
-import VideoUpload from "./pages/VideoUpload";
+import VideoUpload from "./pages/VideoUpload"; // ✅ Ensure this file exists in /pages
 
 export default function App() {
   const [splashDone, setSplashDone] = useState(false);
@@ -46,7 +46,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/upload" element={<UploadPage />} /> {/* ✅ Now properly routed */}
+          <Route path="/upload" element={<UploadPage />} />
           <Route path="/assistant" element={<AIAssistant />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/account" element={<Account />} />

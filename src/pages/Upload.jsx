@@ -1,6 +1,6 @@
 // src/pages/Upload.jsx — EchoScript.AI Advanced Upload Page
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import UploadAndTranscribe from "../components/UploadandTranscribe";
 import LanguageDropdown from "../components/LanguageDropdown";
@@ -13,7 +13,6 @@ import {
   Timer,
   Download,
   Globe,
-  Sparkles,
   FileText,
   Subtitles,
   Info,
@@ -26,20 +25,20 @@ export default function UploadPage() {
   const [translated, setTranslated] = useState("");
   const [enableTranslation, setEnableTranslation] = useState(false);
 
-  const handleTranscript = (text) => {
+  const handleTranscript = useCallback((text) => {
     setTranscript(text);
     if (enableTranslation) {
       setTranslated(`🌍 [Translated] ${text}`);
     }
-  };
+  }, [enableTranslation]);
 
-  const handleDownload = (text, filename) => {
+  const handleDownload = useCallback((text, filename) => {
     const blob = new Blob([text], { type: "text/plain" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = filename;
     link.click();
-  };
+  }, []);
 
   return (
     <motion.div
@@ -153,6 +152,7 @@ export default function UploadPage() {
     </motion.div>
   );
 }
+
 
 
 
