@@ -7,13 +7,12 @@ import React, {
 } from "react";
 import popSfx from "../assets/sounds/playPop.mp3";
 
-// 🎵 Ambient playlist (add more tracks here)
+// Ambient Playlist
 import ambient1 from "../assets/sounds/ambient-loop-1.mp3";
 import ambient2 from "../assets/sounds/ambient-loop-2.mp3";
 import ambient3 from "../assets/sounds/ambient-loop-3.mp3";
 
 const ambientPlaylist = [ambient1, ambient2, ambient3];
-
 const SoundContext = createContext();
 
 export function SoundProvider({ children }) {
@@ -27,7 +26,7 @@ export function SoundProvider({ children }) {
   const ambientAudio = useRef(new Audio(ambientPlaylist[0]));
   const fadeInterval = useRef(null);
 
-  // === Load Preferences from localStorage
+  // === Load settings from localStorage
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("sound-settings") || "{}");
     if (saved) {
@@ -38,7 +37,7 @@ export function SoundProvider({ children }) {
     }
   }, []);
 
-  // === Save Preferences
+  // === Save settings to localStorage
   useEffect(() => {
     localStorage.setItem(
       "sound-settings",
@@ -46,7 +45,7 @@ export function SoundProvider({ children }) {
     );
   }, [isMuted, ambientEnabled, volume, trackIndex]);
 
-  // === Fade In/Out Utility
+  // === Fade Audio Smoothly
   const fadeAudio = (targetVolume, fadeTime = 800) => {
     const audio = ambientAudio.current;
     clearInterval(fadeInterval.current);
@@ -68,7 +67,7 @@ export function SoundProvider({ children }) {
     }, stepTime);
   };
 
-  // === Handle Ambient Audio Logic
+  // === Main Ambient Audio Logic
   useEffect(() => {
     const audio = ambientAudio.current;
     audio.loop = true;
@@ -79,24 +78,22 @@ export function SoundProvider({ children }) {
       audio.volume = 0;
       audio
         .play()
-        .then(() => fadeAudio(volume * 0.3))
+        .then(() => fadeAudio(volume * 0.3)) // Normalize to avoid ear damage
         .catch(() => setShowSoundPrompt(true));
     } else {
       fadeAudio(0);
       setTimeout(() => audio.pause(), 600);
     }
 
-    return () => audio.pause(); // Cleanup
+    return () => audio.pause();
   }, [ambientEnabled, isMuted, trackIndex]);
 
-  // === Cycle Tracks on Toggle
   const toggleAmbient = () => {
     const nextIndex = (trackIndex + 1) % ambientPlaylist.length;
     setTrackIndex(nextIndex);
     setAmbientEnabled(true);
   };
 
-  // === Pop Sound
   const playClickSound = () => {
     if (!isMuted) {
       const audio = popAudio.current;
@@ -106,7 +103,8 @@ export function SoundProvider({ children }) {
     }
   };
 
-  // === Manual Sound Prompt Unlock
+  const toggleMute = () => setIsMuted((prev) => !prev);
+
   const enableSoundManually = () => {
     setIsMuted(false);
     setAmbientEnabled(true);
@@ -114,7 +112,12 @@ export function SoundProvider({ children }) {
     ambientAudio.current.play().catch(() => {});
   };
 
-  const toggleMute = () => setIsMuted((prev) => !prev);
+  const disableSoundManually = () => {
+    setIsMuted(true);
+    setAmbientEnabled(false);
+    setShowSoundPrompt(false);
+    ambientAudio.current.pause();
+  };
 
   return (
     <SoundContext.Provider
@@ -128,22 +131,30 @@ export function SoundProvider({ children }) {
         playClickSound,
         showSoundPrompt,
         enableSoundManually,
+        disableSoundManually,
       }}
     >
       {showSoundPrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
-          <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-xl shadow-xl text-white text-center max-w-md">
-            <h2 className="text-xl font-semibold mb-3">🔈 Enable Audio</h2>
-            <p className="mb-4 text-sm text-zinc-300">
-              Your browser blocked autoplay. Click below to activate audio and
-              ambient music.
+          <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-xl shadow-xl text-white text-center max-w-md space-y-4">
+            <h2 className="text-xl font-semibold">🔈 Enable Audio</h2>
+            <p className="text-sm text-zinc-300">
+              Your browser blocked autoplay. Choose below to set your audio preferences.
             </p>
-            <button
-              onClick={enableSoundManually}
-              className="bg-teal-500 hover:bg-teal-600 text-white font-medium py-2 px-4 rounded"
-            >
-              Enable Sound
-            </button>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={enableSoundManually}
+                className="bg-teal-500 hover:bg-teal-600 text-white font-medium py-2 px-4 rounded"
+              >
+                Enable Sound
+              </button>
+              <button
+                onClick={disableSoundManually}
+                className="bg-zinc-700 hover:bg-zinc-600 text-white font-medium py-2 px-4 rounded"
+              >
+                Disable Sound
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -153,6 +164,3 @@ export function SoundProvider({ children }) {
 }
 
 export const useSound = () => useContext(SoundContext);
-
-
-

@@ -12,7 +12,7 @@ import {
   FileAudio2,
   Timer,
   Download,
-  Globe, // ✅ Use this instead of Translate
+  Globe,
   Sparkles,
   FileText,
   Subtitles,
