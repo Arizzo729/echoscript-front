@@ -1,24 +1,27 @@
+// Sidebar.jsx — EchoScript.AI Sidebar Navigation (Polished + Future-Proof)
+
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
   Home,
   Upload,
-  User,
-  Settings,
   ShoppingCart,
-  Users,
   LogOut,
   Menu,
   X,
+  Video,
+  MessageCircle,
+  LayoutDashboard,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
   { path: "/", label: "Home", icon: Home },
-  { path: "/dashboard", label: "Dashboard", icon: Upload },
-  { path: "/account", label: "Account", icon: User },
-  { path: "/settings", label: "Settings", icon: Settings },
-  { path: "/purchase", label: "Shop", icon: ShoppingCart }
+  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/upload", label: "Upload", icon: Upload },
+  { path: "/video", label: "Video Tools", icon: Video },
+  { path: "/purchase", label: "Shop", icon: ShoppingCart },
+  { path: "/contact", label: "Contact Us", icon: MessageCircle },
 ];
 
 export default function Sidebar({ collapsed, setCollapsed }) {
@@ -32,7 +35,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       }`}
       aria-label="Sidebar Navigation"
     >
-      {/* Toggle */}
+      {/* Toggle Button */}
       <div className="flex items-center justify-end px-3 pt-4">
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -44,7 +47,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
         </button>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation Links */}
       <nav className="mt-6 flex flex-col gap-1 px-2">
         {navItems.map(({ path, label, icon: Icon }) => (
           <NavLink
@@ -90,3 +93,4 @@ export default function Sidebar({ collapsed, setCollapsed }) {
     </motion.aside>
   );
 }
+

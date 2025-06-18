@@ -71,8 +71,7 @@ export default function Dashboard() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
         {[
-          { icon: <Mic />, label: "Recording", color: "from-teal-500 to-teal-700" },
-          { icon: <UploadCloud />, label: "Upload", color: "from-blue-500 to-blue-700" },
+          { icon: <Mic />, label: "Record / Upload", color: "from-teal-500 to-teal-700" },
           { icon: <FileText />, label: "Transcripts", color: "from-indigo-500 to-indigo-700" },
           { icon: <Sparkles />, label: "Summary", color: "from-purple-500 to-purple-700" },
           { icon: <Video />, label: "Video", color: "from-rose-500 to-rose-700" },

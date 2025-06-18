@@ -1,3 +1,4 @@
+// ✅ EchoScript.AI — Advanced Global Button Component with Sound Integration
 import React from "react";
 import { twMerge } from "tailwind-merge";
 import { motion } from "framer-motion";
@@ -86,4 +87,5 @@ export default function Button({
     </motion.button>
   );
 }
+
 

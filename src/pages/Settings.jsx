@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Switch } from "@headlessui/react";
 import {
@@ -61,6 +61,10 @@ export default function Settings() {
     localStorage.setItem("i18nextLng", newLang);
   };
 
+  useEffect(() => {
+    document.documentElement.style.setProperty("--base-font-scale", fontSize.toString());
+  }, [fontSize]);
+
   return (
     <div className="px-6 py-8 max-w-4xl mx-auto text-white">
       <h1 className="text-3xl font-bold mb-6">{t("Settings")}</h1>
@@ -82,12 +86,11 @@ export default function Settings() {
         ))}
       </div>
 
-      {/* Preferences Tab */}
       {activeTab === "preferences" && (
         <div className="space-y-8">
           <div className="grid gap-4">
             <h2 className="text-xl font-semibold mb-2">{t("Appearance & Comfort")}</h2>
-            <ToggleRow label={t("Dark Mode") } value={darkMode} onChange={handleDarkToggle} icon={<Moon />} />
+            <ToggleRow label={t("Dark Mode")} value={darkMode} onChange={handleDarkToggle} icon={<Moon />} />
             <ToggleRow label={t("Show Helpful Hints")} value={showHints} onChange={() => setShowHints(!showHints)} icon={<Eye />} />
             <ToggleRow label={t("Accessible Fonts")} value={accessibleFonts} onChange={() => setAccessibleFonts(!accessibleFonts)} icon={<Text />} />
           </div>
@@ -114,11 +117,12 @@ export default function Settings() {
             </div>
           </div>
 
-          <div>
-            <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
               <Text className="w-5 h-5" /> {t("Font Size")}
             </h2>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-full">
+              <span className="text-xs text-zinc-500 w-10 text-left">0.8x</span>
               <input
                 type="range"
                 min={0.8}
@@ -126,9 +130,12 @@ export default function Settings() {
                 step={0.05}
                 value={fontSize}
                 onChange={(e) => setFontSize(parseFloat(e.target.value))}
-                className="w-full accent-teal-500"
+                className="flex-1 appearance-none h-2 bg-zinc-700 rounded-full cursor-pointer accent-teal-500"
               />
-              <span className="text-sm text-zinc-400 w-12 text-right">{fontSize.toFixed(2)}x</span>
+              <span className="text-xs text-zinc-500 w-10 text-right">1.4x</span>
+            </div>
+            <div className="mt-2 text-sm text-zinc-400 italic text-right">
+              {t("Current Size")}: <span className="text-white font-medium">{fontSize.toFixed(2)}x</span>
             </div>
           </div>
 
@@ -138,18 +145,12 @@ export default function Settings() {
             <ToggleRow label={t("Push Notifications")} value={notifications} onChange={() => setNotifications(!notifications)} icon={<Bell />} />
             <ToggleRow label={t("Enable Multiple Languages")} value={multiLang} onChange={() => setMultiLang(!multiLang)} icon={<Languages />} />
 
-            {/* Language Toggle */}
             <div className="flex items-center justify-between bg-zinc-800 px-4 py-3 rounded-lg border border-zinc-700">
               <div className="flex items-center gap-3 text-sm text-zinc-300">
                 <Languages className="text-teal-400 w-4 h-4" />
                 <span>{t("Language")}</span>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={switchLanguage}
-                className="min-w-[90px] text-sm"
-              >
+              <Button size="sm" variant="outline" onClick={switchLanguage} className="min-w-[90px] text-sm">
                 {currentLang === "en" ? "Español" : "English"}
               </Button>
             </div>
@@ -157,7 +158,6 @@ export default function Settings() {
         </div>
       )}
 
-      {/* FAQ Tab */}
       {activeTab === "faq" && (
         <div className="space-y-5">
           {["Why won't my file upload?", "What determines the enterprise estimate?", "Can I buy more minutes?", "How secure is my data?", "What formats are supported?"].map((q, i) => (
@@ -169,7 +169,6 @@ export default function Settings() {
         </div>
       )}
 
-      {/* Contact Tab */}
       {activeTab === "contact" && (
         <div className="space-y-6">
           <div className="bg-zinc-900 rounded-lg p-5 border border-zinc-700">
@@ -209,3 +208,4 @@ function ToggleRow({ label, value, onChange, icon }) {
     </div>
   );
 }
+
