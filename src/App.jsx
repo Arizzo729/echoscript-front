@@ -24,10 +24,10 @@ import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
 import ApifyTest from "./pages/ApifyTest";
 import Dashboard from "./pages/Dashboard";
-import UploadAndTranscribe from "./components/UploadandTranscribe";
+import UploadPage from "./pages/Upload"; // ✅ Proper page wrapper for upload
 import AIAssistant from "./pages/AIAssistant";
-import Contact from "./pages/Contact";                     // ✅ NEW
-import VideoUpload from "./pages/VideoUpload";             // ✅ NEW
+import Contact from "./pages/Contact";
+import VideoUpload from "./pages/VideoUpload";
 
 export default function App() {
   const [splashDone, setSplashDone] = useState(false);
@@ -46,14 +46,14 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/upload" element={<UploadAndTranscribe />} />
+          <Route path="/upload" element={<UploadPage />} /> {/* ✅ Now properly routed */}
           <Route path="/assistant" element={<AIAssistant />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/account" element={<Account />} />
           <Route path="/purchase" element={<Purchase />} />
           <Route path="/apify" element={<ApifyTest />} />
-          <Route path="/contact" element={<Contact />} />                 {/* ✅ NEW */}
-          <Route path="/video-upload" element={<VideoUpload />} />       {/* ✅ NEW */}
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/video-upload" element={<VideoUpload />} />
         </Route>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
@@ -83,5 +83,4 @@ export default function App() {
     </AuthProvider>
   );
 }
-
 
