@@ -7,28 +7,21 @@ import { loadSlim } from "tsparticles-slim";
 import AudioWaveform from "../components/AudioWaveform";
 import useVoiceInput from "../hooks/useVoiceInput";
 import useAmbientAudio from "../hooks/useAmbientAudio";
-import ProgressTimeline from "../components/ProgressTimeline";
 import LiveGPTBubble from "../components/LiveGPTBubble";
 import { GPTContext } from "../context/GPTContext";
 import detectTone from "../utils/EmotionToneDetector";
 import NewsletterSignup from "../components/NewsletterSignup";
-import { useTranslation } from "react-i18next";
-import {
-  FaDiscord,
-  FaInstagram,
-  FaLinkedin,
-  FaTiktok,
-} from "react-icons/fa";
+import { FaDiscord, FaInstagram, FaLinkedin, FaTiktok } from "react-icons/fa";
 import { Sparkles } from "lucide-react";
+import HintCarousel from "../components/HintCarousel"; // New slideshow component
 import "../styles/GlareTitle.css";
 
 export default function HomePage() {
   const [time, setTime] = useState(new Date());
-  const [introStep, setIntroStep] = useState(0);
   const [gptResponse, setGptResponse] = useState(null);
   const [showBubble, setShowBubble] = useState(false);
   const { voiceLevel, micStatus, shortTranscript } = useVoiceInput();
-  const { isPlaying, toggleAudio } = useAmbientAudio("/ambient-loop.mp3");
+  const { isPlaying, toggleAudio, currentTrackName } = useAmbientAudio();
   const { setContextMessage } = useContext(GPTContext);
   const { t, i18n } = useTranslation();
 
@@ -47,7 +40,6 @@ export default function HomePage() {
           ? t("gpt.neutral", { transcript: shortTranscript })
           : t("gpt.negative", { transcript: shortTranscript });
       setGptResponse(gptMsg);
-      setIntroStep(2);
       setShowBubble(true);
       setContextMessage(shortTranscript);
     }
@@ -68,7 +60,6 @@ export default function HomePage() {
 
   return (
     <div className="relative min-h-screen text-white overflow-x-hidden">
-      {/* Background Particles */}
       <Particles
         id="tsparticles"
         init={loadSlim}
@@ -87,66 +78,46 @@ export default function HomePage() {
               enable: true,
               speed: 0.15,
               direction: "none",
-              random: false,
-              straight: false,
-              outModes: { default: "out" }
+              outModes: { default: "out" },
             },
             links: {
               enable: true,
               distance: 120,
               color: "#00f5d4",
               opacity: 0.1,
-              width: 1
-            }
+              width: 1,
+            },
           },
-          interactivity: {
-            detectsOn: "canvas",
-            events: { resize: true }
-          }
         }}
         className="absolute inset-0 z-0"
       />
 
-      {/* Hero Section */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
-        <motion.div
-          className="mb-6"
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2 }}
-        >
-          <div className="relative w-24 sm:w-28 mx-auto mb-4 z-20">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4 pt-20">
+        <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2 }}>
+          <div className="w-24 sm:w-28 mx-auto mb-4 relative">
             <motion.div
               className="absolute inset-0 rounded-full bg-teal-400 blur-2xl opacity-30"
               animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.4, 0.2] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
-            <img src="/Icon.png" alt="EchoScript Icon" className="relative w-full drop-shadow-xl z-20" />
+            <img src="/Icon.png" alt="EchoScript Icon" className="relative w-full drop-shadow-xl" />
           </div>
 
-          <h1 className="glare-title text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent z-20">
+          <h1 className="glare-title text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
             EchoScript.AI
           </h1>
 
-          {/* Typewriter below the title */}
           <div className="mt-3">
             <TypeAnimation
-              sequence={[
-                "Crystal clear transcriptions.",
-                2000,
-                "Real-time audio intelligence.",
-                2000,
-                "AI that actually listens.",
-                2000,
-              ]}
+              sequence={["Crystal clear transcriptions.", 2000, "Real-time audio intelligence.", 2000, "AI that actually listens.", 2000]}
               wrapper="span"
               speed={50}
               repeat={Infinity}
-              className="text-lg text-teal-400 z-20 font-medium"
+              className="text-lg text-teal-400 font-medium"
             />
           </div>
 
-          <p className="text-sm mt-1 text-zinc-400 font-mono z-20">{formattedTime}</p>
+          <p className="text-sm mt-1 text-zinc-400 font-mono">{formattedTime}</p>
         </motion.div>
 
         <motion.div className="mt-2 mb-4">
@@ -169,10 +140,10 @@ export default function HomePage() {
           </p>
         </motion.div>
 
-        <ProgressTimeline currentStep={introStep} />
+        {/* Hints Carousel */}
+        <HintCarousel />
       </div>
 
-      {/* About Section */}
       <section className="relative z-10 py-20 px-6 text-center">
         <h2 className="text-3xl font-bold mb-4 text-white">ABOUT US</h2>
         <p className="max-w-3xl mx-auto text-zinc-400 text-lg">
@@ -180,8 +151,7 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* Community Section */}
-      <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800 bg-transparent">
+      <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800">
         <motion.div className="flex flex-col items-center mb-10">
           <Sparkles className="w-8 h-8 text-teal-400 mb-2 animate-pulse" />
           <h2 className="text-3xl sm:text-4xl font-bold text-white">Check us out on social!</h2>
@@ -207,7 +177,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Newsletter Section */}
       <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800">
         <h2 className="text-3xl font-bold text-white mb-4">Newsletter</h2>
         <p className="text-zinc-400 mb-6 max-w-xl mx-auto">
@@ -216,7 +185,6 @@ export default function HomePage() {
         <NewsletterSignup />
       </section>
 
-      {/* Controls */}
       <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
         <motion.button
           onClick={() => i18n.changeLanguage(i18n.language === "en" ? "es" : "en")}
@@ -235,10 +203,11 @@ export default function HomePage() {
           }`}
           whileTap={{ scale: 0.95 }}
         >
-          {isPlaying ? "🔊 Ambient On" : "🔈 Ambient Off"}
+          🎵 {isPlaying ? `Now Playing: ${currentTrackName}` : "Music Off"}
         </motion.button>
       </div>
     </div>
   );
 }
+
 
