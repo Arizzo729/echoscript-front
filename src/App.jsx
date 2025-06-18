@@ -26,6 +26,8 @@ import ApifyTest from "./pages/ApifyTest";
 import Dashboard from "./pages/Dashboard";
 import UploadAndTranscribe from "./components/UploadandTranscribe";
 import AIAssistant from "./pages/AIAssistant";
+import Contact from "./pages/Contact";                     // ✅ NEW
+import VideoUpload from "./pages/VideoUpload";             // ✅ NEW
 
 export default function App() {
   const [splashDone, setSplashDone] = useState(false);
@@ -50,6 +52,8 @@ export default function App() {
           <Route path="/account" element={<Account />} />
           <Route path="/purchase" element={<Purchase />} />
           <Route path="/apify" element={<ApifyTest />} />
+          <Route path="/contact" element={<Contact />} />                 {/* ✅ NEW */}
+          <Route path="/video-upload" element={<VideoUpload />} />       {/* ✅ NEW */}
         </Route>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
@@ -79,4 +83,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
 

@@ -7,10 +7,13 @@ import {
   AlertCircle,
   Clipboard,
 } from "lucide-react";
+import CountdownTimer from "./CountdownTimer";
+import RecordingWaveform from "./RecordingWaveform";
 
 export default function UploadAndTranscribe({ language = "auto", model = "medium" }) {
   const [file, setFile] = useState(null);
   const [recording, setRecording] = useState(false);
+  const [showCountdown, setShowCountdown] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [summary, setSummary] = useState("");
   const [sentiment, setSentiment] = useState(null);
@@ -50,6 +53,15 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
   const stopRecording = () => {
     mediaRecorderRef.current?.stop();
     setRecording(false);
+  };
+
+  const handleCountdownStart = () => {
+    setShowCountdown(true);
+  };
+
+  const handleCountdownComplete = () => {
+    setShowCountdown(false);
+    startRecording();
   };
 
   const handleFileChange = async (e) => {
@@ -116,6 +128,8 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
+      {showCountdown && <CountdownTimer seconds={3} onComplete={handleCountdownComplete} />}
+
       <div className="space-y-6">
         <label className="block text-sm font-medium text-zinc-800 dark:text-zinc-300">
           Upload audio/video file or record live:
@@ -135,7 +149,7 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
           </label>
 
           <button
-            onClick={recording ? stopRecording : startRecording}
+            onClick={recording ? stopRecording : handleCountdownStart}
             disabled={loading}
             className={`flex items-center gap-2 px-5 py-2 rounded-md font-medium transition ${
               recording ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"
@@ -146,6 +160,8 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
             {recording ? "Stop" : "Record"}
           </button>
         </div>
+
+        {recording && <RecordingWaveform isRecording={recording} />}
 
         {error && (
           <div className="flex items-center text-red-600 gap-2 text-sm">
@@ -216,4 +232,3 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
     </motion.div>
   );
 }
-

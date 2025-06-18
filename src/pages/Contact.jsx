@@ -1,8 +1,6 @@
-// pages/Contact.jsx — EchoScript.AI Contact Us Page (Advanced, Future-Proof)
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Send, Info, Phone } from "lucide-react";
+import { Mail, Send, Info, Phone, MapPin } from "lucide-react";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -42,15 +40,15 @@ export default function Contact() {
 
   return (
     <motion.div
-      className="max-w-3xl mx-auto px-6 py-16 text-white"
+      className="max-w-4xl mx-auto px-6 py-16 text-white"
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
-      <h1 className="text-3xl font-bold mb-6">Contact Us</h1>
+      <h1 className="text-4xl font-bold mb-6 text-teal-400">Contact Us</h1>
 
-      <p className="mb-6 text-zinc-400">
-        Have a question, bug report, or feedback? Fill out the form below or reach us directly.
+      <p className="mb-8 text-zinc-400 text-lg">
+        Have a question, bug report, or feedback? Fill out the form below or reach out through one of our official channels.
       </p>
 
       <form onSubmit={handleSubmit} className="grid gap-4">
@@ -108,16 +106,19 @@ export default function Contact() {
         )}
       </form>
 
-      <div className="mt-12 space-y-3 text-sm text-zinc-400">
-        <p className="flex items-center gap-2">
-          <Mail className="w-4 h-4 text-teal-400" /> support@echoscript.ai
-        </p>
-        <p className="flex items-center gap-2">
-          <Phone className="w-4 h-4 text-teal-400" /> +1 (800) 555-9246
-        </p>
-        <p className="flex items-center gap-2">
-          <Info className="w-4 h-4 text-teal-400" /> Mon–Fri, 9am–5pm EST
-        </p>
+      <div className="mt-16 grid gap-4 text-sm text-zinc-400">
+        <div className="flex items-center gap-3">
+          <Mail className="w-5 h-5 text-teal-400" /> <span>support@echoscript.ai</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Phone className="w-5 h-5 text-teal-400" /> <span>+1 (800) 555-9246</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Info className="w-5 h-5 text-teal-400" /> <span>Mon–Fri, 9am–5pm EST</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <MapPin className="w-5 h-5 text-teal-400" /> <span>123 Echo Lane, Tech City, CA 90000</span>
+        </div>
       </div>
     </motion.div>
   );
