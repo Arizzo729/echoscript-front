@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import Lottie from "lottie-react";
-import animationData from "../assets/ai-waveform.json";
+import animationData from "public/assets/ai-waveform.json";
 
 const AnimatedSplash = ({ onComplete }) => {
   const [visible, setVisible] = useState(true);
