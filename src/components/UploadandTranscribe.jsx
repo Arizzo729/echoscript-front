@@ -33,13 +33,17 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
       audioChunksRef.current = [];
+      let stopped = false;
 
       mediaRecorderRef.current.ondataavailable = (e) => {
         if (e.data.size > 0) audioChunksRef.current.push(e.data);
       };
 
       mediaRecorderRef.current.onstop = async () => {
+        if (stopped) return;
+        stopped = true;
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        stream.getTracks().forEach((track) => track.stop());
         await uploadAndTranscribe(audioBlob);
       };
 
@@ -51,7 +55,10 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
   };
 
   const stopRecording = () => {
-    mediaRecorderRef.current?.stop();
+    if (mediaRecorderRef.current?.state !== "inactive") {
+      mediaRecorderRef.current.stop();
+    }
+    mediaRecorderRef.current?.stream?.getTracks()?.forEach((track) => track.stop());
     setRecording(false);
   };
 
@@ -84,6 +91,7 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
     setSummary("");
     setSentiment(null);
     setKeywords([]);
+    setCopied(false);
     setError(null);
 
     try {
@@ -105,7 +113,8 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
       setSentiment(data.sentiment || "");
       setKeywords(data.keywords || []);
     } catch (err) {
-      setError(err.message || "Unknown error occurred.");
+      console.error(err);
+      setError(err?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -129,6 +138,9 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
       transition={{ duration: 0.4 }}
     >
       {showCountdown && <CountdownTimer seconds={3} onComplete={handleCountdownComplete} />}
+      {showCountdown && (
+        <div className="text-center text-zinc-400 text-sm mb-2">Recording in 3...2...1</div>
+      )}
 
       <div className="space-y-6">
         <label className="block text-sm font-medium text-zinc-800 dark:text-zinc-300">
@@ -168,9 +180,14 @@ export default function UploadAndTranscribe({ language = "auto", model = "medium
             <AlertCircle size={16} /> {error}
           </div>
         )}
+
         {loading && (
-          <div className="text-sm text-zinc-500 dark:text-zinc-400">Transcribing...</div>
+          <div className="flex items-center gap-2 text-sm text-blue-400">
+            <span className="animate-spin rounded-full h-3 w-3 border-t-2 border-blue-400"></span>
+            Transcribing audio...
+          </div>
         )}
+
         {!loading && transcript && !error && (
           <div className="text-sm text-green-600 flex items-center gap-2">
             <CheckCircle size={16} /> Transcript ready
