@@ -2,10 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { gsap } from "gsap";
 import Lottie from "lottie-react";
-import animationData from "public/assets/ai-waveform.json";
 
 const AnimatedSplash = ({ onComplete }) => {
   const [visible, setVisible] = useState(true);
+  const [animationData, setAnimationData] = useState(null);
+
   const logoRef = useRef(null);
   const orbRef = useRef(null);
 
@@ -15,6 +16,12 @@ const AnimatedSplash = ({ onComplete }) => {
   };
 
   useEffect(() => {
+    // Load Lottie animation from public folder
+    fetch("/assets/ai-waveform.json")
+      .then((res) => res.json())
+      .then(setAnimationData)
+      .catch(console.error);
+
     const ctx = gsap.context(() => {
       gsap.to(logoRef.current, {
         backgroundPosition: "200% center",
@@ -33,6 +40,7 @@ const AnimatedSplash = ({ onComplete }) => {
     });
 
     const timer = setTimeout(closeSplash, 3200);
+
     return () => {
       ctx.revert();
       clearTimeout(timer);
@@ -83,9 +91,11 @@ const AnimatedSplash = ({ onComplete }) => {
           </motion.h1>
 
           {/* 📶 AI Pulse Lottie */}
-          <div className="mt-6 w-24 h-24 sm:w-28 sm:h-28 opacity-80 pointer-events-none">
-            <Lottie animationData={animationData} loop autoplay />
-          </div>
+          {animationData && (
+            <div className="mt-6 w-24 h-24 sm:w-28 sm:h-28 opacity-80 pointer-events-none">
+              <Lottie animationData={animationData} loop autoplay />
+            </div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>
@@ -93,4 +103,5 @@ const AnimatedSplash = ({ onComplete }) => {
 };
 
 export default AnimatedSplash;
+
 
