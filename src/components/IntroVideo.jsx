@@ -10,39 +10,25 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
 
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [userMuted, setUserMuted] = useState(true); // start muted to pass autoplay
+  const [userMuted, setUserMuted] = useState(true);
   const [interacted, setInteracted] = useState(false);
-  const defaultVolume = 0.3;
+  const defaultVolume = 0.1; // 🔉 quieter
 
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-
     v.src = introVideo;
     v.playsInline = true;
     v.muted = true;
     v.volume = defaultVolume;
     v.load();
-    attemptPlay(v);
-
-    const retryOnTabFocus = () => {
-      if (document.visibilityState === 'visible') {
-        attemptPlay(v);
-      }
-    };
-    document.addEventListener('visibilitychange', retryOnTabFocus);
-
-    return () => {
-      document.removeEventListener('visibilitychange', retryOnTabFocus);
-    };
+    v.play().catch(() => {});
   }, []);
 
-  const attemptPlay = (v, retries = 3) => {
-    if (!v || retries <= 0) return;
-    v.play().catch(() => {
-      setTimeout(() => attemptPlay(v, retries - 1), 500);
-    });
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
+    return () => clearTimeout(timer);
+  }, [skipAfter]);
 
   const handleCanPlay = () => {
     setLoading(false);
@@ -50,7 +36,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     if (v && interacted) {
       v.muted = userMuted;
       v.volume = userMuted ? 0 : defaultVolume;
-      attemptPlay(v);
+      v.play().catch(() => {});
     }
   };
 
@@ -61,15 +47,16 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     const next = !userMuted;
     v.muted = next;
     v.volume = next ? 0 : defaultVolume;
-    attemptPlay(v);
+    v.play().catch(() => {});
     setUserMuted(next);
   };
 
   const handleSkip = () => {
     const v = videoRef.current;
-    if (!v) return;
-    setInteracted(true);
-    v.pause();
+    if (v) {
+      setInteracted(true);
+      v.pause();
+    }
     finishIntro();
   };
 
@@ -82,11 +69,6 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
       onFinish?.();
     }
   };
-
-  useEffect(() => {
-    const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
-    return () => clearTimeout(timer);
-  }, [skipAfter]);
 
   return (
     <AnimatePresence>
