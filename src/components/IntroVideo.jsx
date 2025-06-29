@@ -1,85 +1,71 @@
-// src/components/IntroVideo.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import ReactPlayer from 'react-player/lazy';
+import ReactPlayer from 'react-player';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, X } from 'lucide-react';
 
-/**
- * IntroVideo component — rock-solid fullscreen intro using react-player.
- * Guarantees playback via user click, supports resolution fallback,
- * shows loading indicator, handles errors, and provides a skip button.
- *
- * Props:
- * - sources: string[] — list of video URLs (highest-res first)
- * - onFinish?: () => void — callback when video ends or skip is pressed
- * - skipAfter?: number — seconds before skip button appears (default: 3)
- * - skipLabel?: string — text for the skip button (default: 'Skip Intro')
- */
 export default function IntroVideo({
   sources = [],
   onFinish,
   skipAfter = 3,
   skipLabel = 'Skip Intro',
 }) {
-  const [playing, setPlaying] = useState(false);
+  const [stage, setStage] = useState('idle');
   const [canSkip, setCanSkip] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
 
-  // Reveal skip after delay
+  // Show skip button after delay once playing
   useEffect(() => {
-    const t = setTimeout(() => setCanSkip(true), skipAfter * 1000);
-    return () => clearTimeout(t);
-  }, [skipAfter]);
+    if (stage === 'playing') {
+      const timer = setTimeout(() => setCanSkip(true), skipAfter * 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [stage, skipAfter]);
 
-  // Start playback after user click
   const handleStart = useCallback(() => {
-    if (!sources.length) return;
-    setLoading(true);
-    setPlaying(true);
+    if (!sources || sources.length === 0) return;
+    setStage('playing');
   }, [sources]);
 
-  // Called when video ends or skip pressed
-  const finish = useCallback(() => {
-    setPlaying(false);
+  const handleFinish = useCallback(() => {
+    setStage('finished');
     onFinish?.();
   }, [onFinish]);
 
-  // Loading and error states
-  const handleReady = () => setLoading(false);
-  const handleError = () => {
-    setError(true);
-    finish();
-  };
+  // Prepare URL list for ReactPlayer
+  const urls = sources.map(source => (typeof source === 'string' ? source : source.src));
 
   return (
-    <AnimatePresence>
-      {!playing && !error && (
+    <AnimatePresence mode="wait">
+      {stage === 'idle' && (
         <motion.div
+          key="idle"
           className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
-          <div className="flex flex-col items-center cursor-pointer" onClick={handleStart}>
+          <button onClick={handleStart} className="flex flex-col items-center">
             <Play size={72} className="text-white animate-pulse" />
             <span className="text-white mt-2">Click to start intro</span>
-          </div>
+          </button>
         </motion.div>
       )}
 
-      {playing && !error && (
+      {stage === 'playing' && (
         <motion.div
+          key="playing"
           className="fixed inset-0 z-[9999] bg-black"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
           <ReactPlayer
-            url={sources}
-            playing={playing}
+            url={urls}
+            playing
             width="100%"
             height="100%"
             volume={0.4}
-            onReady={handleReady}
-            onError={handleError}
-            onEnded={finish}
+            onEnded={handleFinish}
+            onError={handleFinish}
             config={{
               file: {
                 attributes: {
@@ -91,18 +77,19 @@ export default function IntroVideo({
             }}
           />
 
-          {loading && (
+          {!canSkip && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="animate-spin border-4 border-teal-400 border-t-transparent rounded-full h-12 w-12" />
             </div>
           )}
 
-          {canSkip && !loading && (
+          {canSkip && (
             <button
-              onClick={finish}
-              className="absolute bottom-4 right-4 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold py-1 px-2 rounded"
+              onClick={handleFinish}
+              className="absolute bottom-4 right-4 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold py-1 px-2 rounded flex items-center space-x-1"
             >
-              {skipLabel}
+              <X size={12} />
+              <span>{skipLabel}</span>
             </button>
           )}
         </motion.div>
