@@ -15,28 +15,30 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
   const [isMuted, setIsMuted] = useState(false);
   const defaultVolume = 0.3;
 
+  // mount: set source, mute for autoplay, play, show controls
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
-    vid.playsInline = true;
     vid.src = intro1080;
+    vid.playsInline = true;
+    vid.muted = true; // allow autoplay
     vid.load();
-    vid.muted = true; // mute initially to allow autoplay
     vid.play().catch(() => {});
-
     const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
     return () => clearTimeout(timer);
   }, [skipAfter]);
 
+  // when video can play: unmute per state, set volume
   const handleCanPlay = () => {
     setLoading(false);
     const vid = videoRef.current;
     if (vid) {
-      vid.muted = isMuted;     // apply desired mute state
+      vid.muted = isMuted;
       vid.volume = defaultVolume;
     }
   };
 
+  // finish intro sequence
   const finishIntro = () => {
     const overlay = overlayRef.current;
     if (overlay) {
@@ -47,12 +49,14 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     }
   };
 
+  // skip button
   const handleSkip = () => {
     const vid = videoRef.current;
     if (vid) vid.pause();
     finishIntro();
   };
 
+  // toggle mute/unmute
   const toggleMute = () => {
     const vid = videoRef.current;
     const newMuted = !isMuted;
@@ -78,7 +82,11 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
             <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
           </div>
         )}
-        <video$1 muted playsInline
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover"
+          muted
+          playsInline
           preload="metadata"
           poster={poster}
           onCanPlay={handleCanPlay}
