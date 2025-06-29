@@ -11,14 +11,14 @@ import {
 } from "../components/ui/Card";
 import { useSound } from "../context/SoundContext";
 
-// Updated bundles: id 5 is now 200 + 40 bonus
+// Clean, optimized pricing with even bonus intervals and upsell-friendly logic
 const bundles = [
   { id: 1, price: 0.99, minutes: 5, bonus: 0 },
-  { id: 2, price: 4.99, minutes: 25, bonus: 5 },
-  { id: 3, price: 9.99, minutes: 50, bonus: 10 },
-  { id: 4, price: 19.99, minutes: 100, bonus: 20 },
-  { id: 5, price: 49.99, minutes: 200, bonus: 40 },
-  { id: 6, price: 99.99, minutes: 500, bonus: 0 },
+  { id: 2, price: 3.99, minutes: 25, bonus: 15 },
+  { id: 3, price: 7.49, minutes: 50, bonus: 30 },
+  { id: 4, price: 14.99, minutes: 100, bonus: 60 },
+  { id: 5, price: 29.99, minutes: 200, bonus: 120 },
+  { id: 6, price: 59.99, minutes: 500, bonus: 240 },
 ];
 
 export default function BuyExtraMinutes() {
@@ -70,6 +70,10 @@ export default function BuyExtraMinutes() {
     { price: 0, minutes: 0 }
   );
 
+  const suggestedId = Object.keys(cart).length === 1
+    ? Math.min(...Object.keys(cart).map((i) => parseInt(i))) + 1
+    : null;
+
   return (
     <div className="flex flex-col lg:flex-row max-w-7xl mx-auto px-6 py-12 gap-10">
       {/* Bundles Grid */}
@@ -87,10 +91,12 @@ export default function BuyExtraMinutes() {
                     ${bundle.price.toFixed(2)}
                   </CardTitle>
                   <CardDescription className="text-sm text-zinc-400">
-                    {bundle.minutes} min{' '}
+                    <span className="text-teal-200 font-bold">
+                      {bundle.minutes + bundle.bonus} min
+                    </span>
                     {bundle.bonus > 0 && (
-                      <span className="text-teal-300 font-medium ml-1">
-                        +{bundle.bonus} bonus
+                      <span className="italic text-xs text-teal-300 ml-2">
+                        ({bundle.minutes} + {bundle.bonus} bonus)
                       </span>
                     )}
                   </CardDescription>
@@ -194,11 +200,16 @@ export default function BuyExtraMinutes() {
               </div>
               <div className="flex justify-between">
                 <span>Total Cost:</span>
-                <span className="font-bold">
-                  ${total.price.toFixed(2)}
-                </span>
+                <span className="font-bold">${total.price.toFixed(2)}</span>
               </div>
             </div>
+
+            {/* Suggested Upsell */}
+            {suggestedId && suggestedId <= bundles.length && (
+              <div className="mt-4 text-xs text-teal-300 italic">
+                Consider upgrading to a larger bundle for more value!
+              </div>
+            )}
 
             {/* Gift Option */}
             <div className="flex items-center gap-2 pt-2">
@@ -238,7 +249,7 @@ export default function BuyExtraMinutes() {
               size="lg"
               className="w-full bg-teal-600 hover:bg-teal-500 mt-4"
               onClick={() => {
-                // TODO: Stripe integration
+                // TODO: Stripe integration & discount logic
               }}
             >
               Checkout

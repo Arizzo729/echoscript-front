@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import Lottie from "lottie-react";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
-import { useSound } from "../context/SoundContext"; // ✅ integrate sound context
+import { useSound } from "../context/SoundContext";
 
 const STEPS = [
   { id: "upload", title: "Welcome to EchoScript.AI", description: "Upload or record audio—Echo gives you perfect transcripts in seconds.", filename: "upload.json" },
@@ -16,7 +16,7 @@ const STEPS = [
 ];
 
 export default function OnboardingModal({ onClose }) {
-  const { enableSound } = useSound(); // ✅ use SoundContext directly
+  const { enableSound } = useSound();
   const [step, setStep] = useState(0);
   const [typedDesc, setTypedDesc] = useState("");
   const [animData, setAnimData] = useState(null);
@@ -88,14 +88,16 @@ export default function OnboardingModal({ onClose }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
         >
+          {/* Close Button */}
           <button
             onClick={finishOnboarding}
             aria-label="Close onboarding"
-            className="absolute top-3 right-3 text-teal-400 hover:text-teal-200 transition-colors"
+            className="absolute top-2.5 right-2.5 text-teal-400 hover:text-teal-200 bg-transparent p-1"
           >
             <X className="w-5 h-5" />
           </button>
 
+          {/* Progress Bar */}
           <div className="px-6 pt-4 flex justify-between items-center">
             <span className="text-xs text-zinc-400">Step {step + 1} of {STEPS.length}</span>
             <div className="flex-1 h-1 bg-zinc-700 mx-3 rounded-full overflow-hidden">
@@ -103,6 +105,7 @@ export default function OnboardingModal({ onClose }) {
             </div>
           </div>
 
+          {/* Animation + Description */}
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
@@ -128,32 +131,32 @@ export default function OnboardingModal({ onClose }) {
             </motion.div>
           </AnimatePresence>
 
+          {/* Navigation Buttons */}
           <div className="flex justify-between items-center px-6 pb-4">
             <button
               onClick={prev}
               disabled={step === 0}
-              className="flex items-center gap-1 text-xs text-zinc-300 hover:text-white transition disabled:opacity-40"
+              className="text-sm text-zinc-300 hover:text-white transition disabled:opacity-40"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back
+              ← Back
             </button>
             {step < STEPS.length - 1 && (
               <button
                 onClick={next}
-                className="flex items-center gap-1 text-xs text-teal-300 hover:text-teal-100 transition"
+                className="text-sm text-teal-300 hover:text-teal-100 transition"
               >
-                Next
-                <ArrowRight className="w-4 h-4" />
+                Next →
               </button>
             )}
           </div>
 
+          {/* Enable Audio Step */}
           {currentStep.id === "audio" && (
             <div className="px-6 pb-4 text-center">
               <button
                 onClick={() => {
                   try {
-                    enableSound(); // ✅ call actual context function
+                    enableSound();
                   } catch (err) {
                     console.warn("Audio enable error:", err);
                   }
@@ -172,6 +175,7 @@ export default function OnboardingModal({ onClose }) {
             </div>
           )}
 
+          {/* Final Step */}
           {currentStep.id === "start" && (
             <div className="px-6 pb-5 flex flex-col items-center text-center space-y-2">
               <button
@@ -182,9 +186,9 @@ export default function OnboardingModal({ onClose }) {
               </button>
               <button
                 onClick={finishOnboarding}
-                className="text-xs text-teal-300 hover:underline"
+                className="text-xs text-teal-300 hover:underline bg-transparent p-0"
               >
-                Finish and do not ask again
+                Do not ask again
               </button>
             </div>
           )}
@@ -193,5 +197,6 @@ export default function OnboardingModal({ onClose }) {
     </AnimatePresence>
   );
 }
+
 
 

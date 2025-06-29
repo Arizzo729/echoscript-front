@@ -1,4 +1,3 @@
-// ✅ EchoScript.AI — Optimized SoundContext with Track Cycling, Fade, Autoplay Fix
 import React, {
   createContext,
   useContext,
@@ -12,10 +11,10 @@ import React, {
 const SoundContext = createContext();
 
 export function SoundProvider({ children, initialVolume = 0.4 }) {
-  const [isMuted, setIsMuted] = useState(false);
-  const [trackIndex, setTrackIndex] = useState(1); // 0 = Off
+  const [isMuted, setIsMuted] = useState(true);           // Default = muted
+  const [sfxMuted, setSfxMuted] = useState(false);        // Separate toggle for button clicks
+  const [trackIndex, setTrackIndex] = useState(0);        // 0 = Off
   const [volume, setVolume] = useState(initialVolume);
-  const [showPrompt, setShowPrompt] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [nowPlaying, setNowPlaying] = useState("Off");
 
@@ -83,53 +82,67 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
       setNowPlaying(`Music ${trackIndex}`);
     }).catch(err => {
       console.warn("Autoplay blocked", err);
-      setShowPrompt(true);
     });
   }, [ambientTracks, trackIndex, isMuted, isUnlocked, volume, fadeTo]);
 
   const enableSound = () => {
     setIsMuted(false);
     setIsUnlocked(true);
-    setShowPrompt(false);
     playAmbient();
   };
 
   const disableSound = () => {
     setIsMuted(true);
+    setTrackIndex(0); // Force ambient to "Off"
     setNowPlaying("Off");
     fadeTo(mainAudioRef.current, 0);
     setTimeout(() => mainAudioRef.current.pause(), 600);
-    setShowPrompt(false);
   };
 
   const toggleAmbient = () => {
     setTrackIndex((prev) => {
       const next = (prev + 1) % ambientTracks.length;
       setNowPlaying(next === 0 ? "Off" : `Music ${next}`);
+      if (next === 0) {
+        setIsMuted(true);
+      } else {
+        setIsMuted(false);
+      }
       return next;
     });
   };
 
+  const toggleMute = () => {
+    if (isMuted) {
+      enableSound();
+    } else {
+      disableSound();
+    }
+  };
+
   const playClick = () => {
-    if (!clickRef.current || isMuted || !isUnlocked) return;
+    if (!clickRef.current || sfxMuted || !isUnlocked) return;
     const click = clickRef.current;
     click.currentTime = 0;
     click.volume = volume;
     click.play().catch(err => console.warn("Click sound error", err));
   };
 
+  // Load saved settings
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("sound-settings") || "{}");
-    setIsMuted(saved.isMuted ?? false);
+    setIsMuted(saved.isMuted ?? true);
+    setSfxMuted(saved.sfxMuted ?? false);
     setVolume(saved.volume ?? initialVolume);
-    setTrackIndex(saved.trackIndex ?? 1);
+    setTrackIndex(saved.trackIndex ?? 0);
   }, [initialVolume]);
 
+  // Persist settings
   useEffect(() => {
     localStorage.setItem("sound-settings", JSON.stringify({
-      isMuted, volume, trackIndex
+      isMuted, sfxMuted, volume, trackIndex
     }));
-  }, [isMuted, volume, trackIndex]);
+  }, [isMuted, sfxMuted, volume, trackIndex]);
 
   useEffect(() => {
     const unlock = () => {
@@ -148,46 +161,23 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     <SoundContext.Provider
       value={{
         isMuted,
+        sfxMuted,
         volume,
         setVolume,
         playClick,
         toggleAmbient,
         enableSound,
         disableSound,
+        toggleMute,
         nowPlaying,
         trackIndex,
+        setSfxMuted,
       }}
     >
-      {showPrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75">
-          <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-lg shadow-xl text-white text-center max-w-sm">
-            <h2 className="text-lg font-bold mb-2">🔈 Enable Audio</h2>
-            <p className="mb-4 text-sm text-zinc-400">
-              Click anywhere to enable sound playback and ambient music.
-            </p>
-            <div className="flex justify-center space-x-4">
-              <button
-                onClick={enableSound}
-                className="px-4 py-2 bg-teal-500 rounded hover:bg-teal-600 transition"
-              >
-                Enable
-              </button>
-              <button
-                onClick={disableSound}
-                className="px-4 py-2 bg-zinc-700 rounded hover:bg-zinc-600 transition"
-              >
-                Disable
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       {children}
     </SoundContext.Provider>
   );
 }
 
 export const useSound = () => useContext(SoundContext);
-
-
 

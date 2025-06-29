@@ -1,5 +1,5 @@
-// Updated UploadPage.jsx with integrated LiveWaveform for recording
-import React, { useState, useCallback } from "react";
+// UploadPage.jsx — Final polished version
+import React, { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import UploadAndTranscribe from "../components/UploadAndTranscribe";
@@ -25,7 +25,6 @@ const MAX_FILE_SIZE_MB = 500;
 
 export default function UploadPage() {
   const { t } = useTranslation();
-
   const [isRecording, setIsRecording] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
   const [countdown, setCountdown] = useState(3);
@@ -112,7 +111,9 @@ export default function UploadPage() {
               {t("Upload or Record Audio/Video")}
             </h1>
             <p className="text-zinc-400 text-sm md:text-base">
-              {t("Supports")} MP3, WAV, MP4, MKV, MOV, FLAC — {t("click or drag to upload, or record live.")}
+              {t("Supports")} MP3, WAV, MP4, MKV, MOV, FLAC — {t(
+                "click or drag to upload, or record live."
+              )}
             </p>
           </div>
 
@@ -148,16 +149,24 @@ export default function UploadPage() {
             <div
               onDrop={handleDrop}
               onDragOver={(e) => e.preventDefault()}
-              onClick={() => document.getElementById("hiddenFileInput")?.click()}
+              onClick={() =>
+                document.getElementById("hiddenFileInput")?.click()
+              }
               className="p-6 border-2 border-dashed border-teal-600 bg-zinc-800 rounded-lg text-sm text-zinc-300 text-center cursor-pointer hover:bg-zinc-700 transition"
             >
               {file ? file.name : t("Click or drag your audio/video file here")}
               <input
                 id="hiddenFileInput"
                 type="file"
-                accept={ACCEPTED_AUDIO_FORMATS.concat(ACCEPTED_VIDEO_FORMATS).map((f) => `.${f}`).join(",")}
+                accept={
+                  ACCEPTED_AUDIO_FORMATS.concat(ACCEPTED_VIDEO_FORMATS)
+                    .map((f) => `.${f}`)
+                    .join(",")
+                }
                 className="hidden"
-                onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
+                onChange={(e) =>
+                  e.target.files?.[0] && handleFileUpload(e.target.files[0])
+                }
               />
             </div>
 
@@ -176,7 +185,9 @@ export default function UploadPage() {
                     if (isRecording) {
                       setIsRecording(false);
                     } else {
-                      countdown > 0 ? setShowCountdown(true) : setIsRecording(true);
+                      countdown > 0
+                        ? setShowCountdown(true)
+                        : setIsRecording(true);
                     }
                   }}
                   className="flex items-center gap-2 px-5 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700 transition"
@@ -250,7 +261,9 @@ export default function UploadPage() {
           <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-5 text-sm text-zinc-400 space-y-3 mt-8">
             <p className="flex items-center gap-2">
               <Mic className="w-4 h-4 text-teal-400" />
-              {t("Record or upload your voice or video — EchoScript will auto-clean and transcribe it.")}
+              {t(
+                "Record or upload your voice or video — EchoScript will auto-clean and transcribe it."
+              )}
             </p>
             <p className="flex items-center gap-2">
               <Info className="w-4 h-4 text-zinc-400" />
