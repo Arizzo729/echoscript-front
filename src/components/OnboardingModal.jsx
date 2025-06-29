@@ -28,7 +28,9 @@ export default function OnboardingModal({ onClose }) {
     onClose?.();
   }, [onClose]);
 
-  useEffect(() => { modalRef.current?.focus(); }, []);
+  useEffect(() => {
+    modalRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     const handler = (e) => {
@@ -47,7 +49,9 @@ export default function OnboardingModal({ onClose }) {
       .then(r => r.ok ? r.json() : Promise.reject(`Status ${r.status}`))
       .then(data => !cancelled && setAnimData(data))
       .catch(console.error);
-    if (step + 1 < STEPS.length) fetch(`/assets/onboarding/${STEPS[step + 1].filename}`);
+    if (step + 1 < STEPS.length) {
+      fetch(`/assets/onboarding/${STEPS[step + 1].filename}`);
+    }
     return () => { cancelled = true; };
   }, [step]);
 
@@ -72,11 +76,15 @@ export default function OnboardingModal({ onClose }) {
 
   return (
     <AnimatePresence>
+      { /* Modal Overlay */ }
       <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         {...swipeHandlers}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
       >
+        { /* Content Container */ }
         <motion.div
           ref={modalRef}
           role="dialog"
@@ -84,21 +92,19 @@ export default function OnboardingModal({ onClose }) {
           aria-labelledby="onboarding-title"
           aria-describedby="onboarding-desc"
           tabIndex={-1}
-          className="relative w-full max-w-md bg-zinc-900/80 text-white rounded-2xl shadow-2xl overflow-hidden outline-none border border-zinc-700 backdrop-blur"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
+          className="relative w-full max-w-md bg-zinc-900/80 text-white rounded-2xl shadow-2xl overflow-hidden border border-zinc-700 backdrop-blur"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -20, opacity: 0 }}
         >
-          {/* Close Button */}
           <button
             onClick={finishOnboarding}
             aria-label="Close onboarding"
-            className="absolute top-2.5 right-2.5 text-teal-400 hover:text-teal-200 bg-transparent p-1"
+            className="absolute top-2.5 right-2.5 text-teal-400 hover:text-teal-200 p-1"
           >
             <X className="w-5 h-5" />
           </button>
 
-          {/* Progress Bar */}
           <div className="px-6 pt-4 flex justify-between items-center">
             <span className="text-xs text-zinc-400">Step {step + 1} of {STEPS.length}</span>
             <div className="flex-1 h-1 bg-zinc-700 mx-3 rounded-full overflow-hidden">
@@ -106,15 +112,14 @@ export default function OnboardingModal({ onClose }) {
             </div>
           </div>
 
-          {/* Animation + Description */}
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
+              className="px-6 py-5 flex flex-col items-center text-center"
               initial={{ x: 100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -100, opacity: 0 }}
               transition={{ duration: 0.35, ease: "easeInOut" }}
-              className="px-6 py-5 flex flex-col items-center text-center"
             >
               <div className="w-full h-52 bg-zinc-800 rounded-xl flex items-center justify-center mb-4 shadow-inner">
                 {animData ? (
@@ -132,7 +137,6 @@ export default function OnboardingModal({ onClose }) {
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation Buttons */}
           <div className="flex justify-between items-center px-6 pb-4">
             <button
               onClick={prev}
@@ -151,22 +155,13 @@ export default function OnboardingModal({ onClose }) {
             )}
           </div>
 
-          {/* Enable Audio Step */}
           {currentStep.id === "audio" && (
             <div className="px-6 pb-4 text-center">
               <button
                 onClick={() => {
-                  try {
-                    enableSound();
-                  } catch (err) {
-                    console.warn("Audio enable error:", err);
-                  }
+                  enableSound();
                   setTimeout(() => {
-                    if (step < STEPS.length - 1) {
-                      setStep(step + 1);
-                    } else {
-                      finishOnboarding();
-                    }
+                    step < STEPS.length - 1 ? next() : finishOnboarding();
                   }, 150);
                 }}
                 className="px-5 py-2 text-sm font-semibold rounded-full bg-teal-500 hover:bg-teal-400 transition w-full"
@@ -176,7 +171,6 @@ export default function OnboardingModal({ onClose }) {
             </div>
           )}
 
-          {/* Final Step */}
           {currentStep.id === "start" && (
             <div className="px-6 pb-5 flex flex-col items-center text-center space-y-2">
               <button
@@ -187,13 +181,15 @@ export default function OnboardingModal({ onClose }) {
               </button>
               <button
                 onClick={finishOnboarding}
-                className="text-xs text-teal-300 hover:underline bg-transparent p-0"
+                className="text-xs text-teal-300 hover:underline p-0"
               >
                 Do not ask again
               </button>
             </div>
           )}
         </motion.div>
-      </AnimatePresence>
-    );
+      </motion.div>
+    </AnimatePresence>
+  );
 }
+
