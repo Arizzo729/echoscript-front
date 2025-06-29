@@ -1,3 +1,4 @@
+// src/components/OnboardingModal.jsx
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
@@ -193,10 +194,6 @@ export default function OnboardingModal({ onClose }) {
             </div>
           )}
         </motion.div>
-      </motion.div>
-    </AnimatePresence>
-  );
+      </AnimatePresence>
+    );
 }
-
-
-

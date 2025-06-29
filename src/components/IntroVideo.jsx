@@ -1,9 +1,9 @@
 // src/components/IntroVideo.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * IntroVideo component — plays a fullscreen intro clip on login
+ * IntroVideo component — plays a fullscreen intro clip on login with subtle audio fade-in
  *
  * Props:
  * - src: string — URL/path to the video file (e.g., '/videos/intro.mp4')
@@ -14,6 +14,29 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function IntroVideo({ src, onFinish, skipLabel = 'Skip Intro', skipAfter = 0 }) {
   const [visible, setVisible] = useState(true);
   const [canSkip, setCanSkip] = useState(skipAfter === 0);
+  const videoRef = useRef(null);
+
+  // Autoplay with audio fade-in
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (vid) {
+      vid.muted = false;
+      vid.volume = 0;
+      vid.play().catch(err => console.warn('IntroVideo playback failed:', err));
+      // fade volume to 40% over 1 second
+      const target = 0.4;
+      const duration = 1000;
+      const interval = 50;
+      const step = target / (duration / interval);
+      let vol = 0;
+      const ramp = setInterval(() => {
+        vol = Math.min(vol + step, target);
+        vid.volume = vol;
+        if (vol >= target) clearInterval(ramp);
+      }, interval);
+      return () => clearInterval(ramp);
+    }
+  }, []);
 
   // Reveal skip button after delay
   useEffect(() => {
@@ -28,7 +51,7 @@ export default function IntroVideo({ src, onFinish, skipLabel = 'Skip Intro', sk
     onFinish?.();
   };
 
-  // Prevent background scroll while visible
+  // Block background scroll
   useEffect(() => {
     document.body.style.overflow = visible ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -39,20 +62,22 @@ export default function IntroVideo({ src, onFinish, skipLabel = 'Skip Intro', sk
       {visible && (
         <motion.div
           key="intro-video"
-          className="fixed inset-0 z-[9999] overflow-hidden bg-black"
+          className="fixed inset-0 z-[9999] bg-black"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <video
-            className="absolute inset-0 w-full h-full object-cover"
-            src={src}
-            autoPlay
-            muted
-            playsInline
-            controls={false}
-            onEnded={finish}
-          />
+          <div className="absolute inset-0 overflow-hidden">
+            <video
+              ref={videoRef}
+              src={src}
+              autoPlay
+              playsInline
+              controls={false}
+              onEnded={finish}
+              className="absolute top-0 left-0 w-full h-full object-cover object-top"
+            />
+          </div>
 
           {canSkip && (
             <motion.button
