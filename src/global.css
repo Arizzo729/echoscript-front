@@ -30,7 +30,8 @@ html {
   color-scheme: light dark;
   background-color: rgb(var(--color-bg-light, 255 255 255));
   color: rgb(var(--color-text-light, 17 24 39));
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
   font-size: 100%;
   line-height: 1.5;
   transition:
@@ -117,6 +118,19 @@ input[type="reset"]:hover {
 }
 
 /* --------------------------------------------- */
+/* Hide native clear (“×”) on search inputs */
+/* --------------------------------------------- */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+input[type="search"]::-ms-clear,
+input[type="search"]::-ms-reveal {
+  display: none;
+}
+
+/* --------------------------------------------- */
 /* Utility Styles */
 /* --------------------------------------------- */
 .container {
@@ -198,3 +212,4 @@ html.dark #root {
   background-color: rgb(var(--color-bg-dark)) !important;
   color: rgb(var(--color-text-dark));
 }
+
