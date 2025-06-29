@@ -15,12 +15,12 @@ export default function IntroVideo({
 }) {
   const videoRef = useRef(null);
   const overlayRef = useRef(null);
+
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const defaultVolume = 0.3;
+  const [isMuted, setIsMuted] = useState(true);
 
-  // Original play logic
+  // Play muted on mount exactly as your original snippet did
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
@@ -29,48 +29,44 @@ export default function IntroVideo({
     vid.src = intro1080;
     vid.load();
 
-    // *** THIS was working before ***
-    vid.muted = true;      // start muted so autoplay will succeed
-    vid.play().catch(() => {});
+    vid.muted = true;           // start muted for autoplay
+    vid.play().catch(() => {}); // original autoplay call
 
     const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
     return () => clearTimeout(timer);
   }, [skipAfter]);
 
-  // When the video fires canplay, clear spinner and unmute if desired
+  // Fired when the video can actually play through
   const handleCanPlay = () => {
     setLoading(false);
-    const vid = videoRef.current;
-    if (vid) {
-      vid.muted = isMuted;    // if isMuted=false, this un-mutes
-      vid.volume = defaultVolume;
-    }
   };
 
+  // Fade-out overlay then signal done
   const finishIntro = () => {
-    const overlay = overlayRef.current;
-    if (overlay) {
-      overlay.classList.add('opacity-0');
-      overlay.addEventListener('transitionend', () => onFinish?.(), { once: true });
+    const ov = overlayRef.current;
+    if (ov) {
+      ov.classList.add('opacity-0');
+      ov.addEventListener('transitionend', () => onFinish?.(), { once: true });
     } else {
       onFinish?.();
     }
   };
 
+  // Skip button pauses & finishes
   const handleSkip = () => {
     const vid = videoRef.current;
     if (vid) vid.pause();
     finishIntro();
   };
 
-  // ** Only this toggle button is new **
+  // ** New toggleMute replacing handleUnmute **
   const toggleMute = () => {
     const vid = videoRef.current;
-    const nextMuted = !isMuted;
-    setIsMuted(nextMuted);
+    const next = !isMuted;
+    setIsMuted(next);
     if (vid) {
-      vid.muted = nextMuted;
-      vid.volume = nextMuted ? 0 : defaultVolume;
+      vid.muted = next;
+      if (!next) vid.volume = 1; // on unmute, restore full volume
     }
   };
 
@@ -86,14 +82,14 @@ export default function IntroVideo({
       >
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
+            <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12"/>
           </div>
         )}
 
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
-          muted      /* leave this here so autoplay works */
+          muted      /* keep this static so autoplay always works */
           playsInline
           preload="metadata"
           poster={poster}
@@ -122,7 +118,7 @@ export default function IntroVideo({
               onClick={toggleMute}
               className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg transition flex items-center space-x-1"
             >
-              {isMuted ? <Volume2 size={16} /> : <VolumeX size={16} />}
+              {isMuted ? <Volume2 size={16}/> : <VolumeX size={16}/>}
               <span>{isMuted ? 'Unmute' : 'Mute'}</span>
             </button>
           </motion.div>
@@ -133,11 +129,12 @@ export default function IntroVideo({
 }
 
 IntroVideo.propTypes = {
-  poster: PropTypes.string,
+  poster:    PropTypes.string,
   skipAfter: PropTypes.number,
   skipLabel: PropTypes.string,
-  onFinish: PropTypes.func,
+  onFinish:  PropTypes.func,
 };
+
 
 
 
