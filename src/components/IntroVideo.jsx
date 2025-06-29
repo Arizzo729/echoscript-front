@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Volume2 } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-import intro1440 from '../assets/videos/intro.mp4';
+import intro1440 from '../src/assets/videos/intro.mp4';
 
 const defaultSources = [
   { src: intro1440, type: 'video/mp4', resolution: 1440 },,
