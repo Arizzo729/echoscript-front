@@ -120,7 +120,8 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
           </motion.div>
         )}
       </motion.div>
-    </AnimatePresence>;
+    </AnimatePresence>
+  );
 }
 
 IntroVideo.propTypes = {
