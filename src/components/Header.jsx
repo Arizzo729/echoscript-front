@@ -1,4 +1,3 @@
-// src/components/Header.jsx
 import React, { useState, useEffect, useRef } from "react";
 import {
   BellIcon,
@@ -7,7 +6,7 @@ import {
   SunIcon,
   MoonIcon,
 } from "@heroicons/react/24/outline";
-import { Volume2, VolumeX, X } from "lucide-react"; // we can keep X import in case it’s used elsewhere
+import { Volume2, VolumeX, X, Cog } from "lucide-react"; // Added Cog icon
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "./ui/Button";
@@ -47,6 +46,8 @@ export default function Header({
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const searchRef = useRef(null);
+  const notifRef = useRef(null);
+  const userRef = useRef(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("echo-muted");
@@ -55,17 +56,21 @@ export default function Header({
   }, []);
 
   useEffect(() => {
-    const close = (e) => {
-      if (!searchRef.current?.contains(e.target)) {
+    const closeAll = (e) => {
+      if (
+        !searchRef.current?.contains(e.target) &&
+        !notifRef.current?.contains(e.target) &&
+        !userRef.current?.contains(e.target)
+      ) {
         setShowNotifDropdown(false);
         setShowUserDropdown(false);
       }
     };
-    const esc = (e) => e.key === "Escape" && close(e);
-    document.addEventListener("mousedown", close);
+    const esc = (e) => e.key === "Escape" && closeAll(e);
+    document.addEventListener("mousedown", closeAll);
     document.addEventListener("keydown", esc);
     return () => {
-      document.removeEventListener("mousedown", close);
+      document.removeEventListener("mousedown", closeAll);
       document.removeEventListener("keydown", esc);
     };
   }, []);
@@ -201,7 +206,7 @@ export default function Header({
             }
           />
 
-          <div className="relative">
+          <div ref={notifRef} className="relative">
             <Button
               variant="ghost"
               size="sm"
@@ -230,7 +235,16 @@ export default function Header({
             </AnimatePresence>
           </div>
 
-          <div className="relative">
+          {/* Settings cog button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/settings')}
+            aria-label={t("Settings")}
+            icon={<Cog className="w-5 h-5 text-zinc-300" />} 
+          />
+
+          <div ref={userRef} className="relative">
             <Button
               variant="ghost"
               size="sm"
@@ -239,19 +253,13 @@ export default function Header({
                 setShowNotifDropdown(false);
               }}
               className="flex items-center gap-2"
-              icon={
-                <div className="w-8 h-8 rounded-full border border-teal-400 bg-zinc-800 flex items-center justify-center text-xs font-bold text-teal-300">
-                  {isGuest ? "GU" : "EU"}
-                </div>
-              }
+              icon={<div className="w-8 h-8 rounded-full border border-teal-400 bg-zinc-800 flex items-center justify-center text-xs font-bold text-teal-300">{isGuest ? "GU" : "EU"}</div>}
             >
               <span className="text-sm text-white">
                 {isGuest ? t("Welcome, Guest") : user.email}
               </span>
               <ChevronDownIcon
-                className={`w-4 h-4 transition-transform ${
-                  showUserDropdown ? "rotate-180" : ""
-                }`}
+                className={`w-4 h-4 transition-transform ${showUserDropdown ? "rotate-180" : ""}`}
               />
             </Button>
             <AnimatePresence>
@@ -303,4 +311,5 @@ export default function Header({
     </motion.header>
   );
 }
+
 
