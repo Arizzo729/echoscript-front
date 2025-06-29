@@ -16,7 +16,6 @@ import { useSound } from "../context/SoundContext";
 import Logo from "/Logo.png";
 import { useTranslation } from "react-i18next";
 
-// Fallback local data
 const LOCAL_SEARCH_INDEX = [
   { type: "Page", name: "Dashboard", path: "/dashboard" },
   { type: "Page", name: "Upload Audio", path: "/upload" },
@@ -49,14 +48,12 @@ export default function Header({
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const searchRef = useRef(null);
 
-  // Persist mute preference
   useEffect(() => {
     const stored = localStorage.getItem("echo-muted");
     if (stored === "true" && !isMuted) toggleMute();
     if (stored !== "true" && isMuted) toggleMute();
   }, []);
 
-  // Close dropdowns on outside click or Escape
   useEffect(() => {
     const closeHandlers = (e) => {
       if (!searchRef.current?.contains(e.target)) {
@@ -73,18 +70,15 @@ export default function Header({
     };
   }, []);
 
-  // Debounced backend search
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSuggestions([]);
       setIsLoading(false);
       return;
     }
-
     let active = true;
     const controller = new AbortController();
     setIsLoading(true);
-
     const timeout = setTimeout(() => {
       fetch("/api/search", {
         method: "POST",
@@ -99,15 +93,16 @@ export default function Header({
         .then((data) => {
           if (active && Array.isArray(data.results)) {
             setSuggestions(
-              data.results.length > 0 ? data.results : LOCAL_SEARCH_INDEX.filter((item) =>
-                item.name.toLowerCase().includes(searchQuery.toLowerCase())
-              )
+              data.results.length > 0
+                ? data.results
+                : LOCAL_SEARCH_INDEX.filter((item) =>
+                    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
             );
           }
         })
         .catch(() => {
           if (active) {
-            // Fallback to local
             setSuggestions(
               LOCAL_SEARCH_INDEX.filter((item) =>
                 item.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -133,15 +128,12 @@ export default function Header({
       transition={{ duration: 0.3 }}
     >
       <div className="flex items-center justify-between gap-4 px-4 sm:px-6 py-3">
-        {/* Logo */}
         <Link to="/" className="flex items-center gap-2 min-w-[150px]">
           <img src={Logo} alt="EchoScript.AI" className="h-8 sm:h-10" />
           <span className="text-xl font-bold text-white">
             EchoScript<span className="text-teal-400">.AI</span>
           </span>
         </Link>
-
-        {/* Search */}
         <div ref={searchRef} className="relative flex-1 max-w-lg">
           <div className="relative">
             <input
@@ -152,16 +144,15 @@ export default function Header({
               className="w-full py-2 pl-10 pr-10 text-sm rounded bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
             />
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-
-          {searchQuery && (
-  <button
-    onClick={() => setSearchQuery("")}
-    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-zinc-800 transition"
-    aria-label={t("Clear search")}
-  >
-    <X className="w-4 h-4 text-zinc-400 hover:text-red-400" />
-  </button>
-)}
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-zinc-800 transition"
+                aria-label={t("Clear search")}
+              >
+                <X className="w-4 h-4 text-zinc-400 hover:text-red-400" />
+              </button>
+            )}
             <AnimatePresence>
               {(suggestions.length > 0 || isLoading) && (
                 <motion.ul
@@ -196,8 +187,6 @@ export default function Header({
             </AnimatePresence>
           </div>
         </div>
-
-        {/* Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
           <Button
             variant="ghost"
@@ -225,8 +214,6 @@ export default function Header({
               )
             }
           />
-
-          {/* Notifications */}
           <div className="relative">
             <Button
               variant="ghost"
@@ -255,8 +242,6 @@ export default function Header({
               )}
             </AnimatePresence>
           </div>
-
-          {/* User Menu */}
           <div className="relative">
             <Button
               variant="ghost"
@@ -336,4 +321,3 @@ export default function Header({
     </motion.header>
   );
 }
-
