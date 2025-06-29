@@ -1,12 +1,9 @@
-// File: src/components/IntroVideo.jsx
+// src/components/IntroVideo.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Volume2 } from 'lucide-react';
+import PropTypes from 'prop-types';
 
-/**
- * IntroVideo — Fullscreen intro with reliable playback, loading indicator,
- * skip & unmute controls, and fade transition.
- */
 import intro1440 from '../assets/videos/intro-1440p.mp4';
 import intro720 from '../assets/videos/intro-720p.mp4';
 import intro480 from '../assets/videos/intro-480p.mp4';
@@ -17,70 +14,79 @@ const defaultSources = [
   { src: intro480,  type: 'video/mp4', resolution:  480 }
 ];
 
-export default function IntroVideo({
-  sources = defaultSources,
-  poster,
-  skipAfter = 3,
-  skipLabel = 'Skip Intro',
-  onFinish
-}) {
+export default function IntroVideo({ sources = defaultSources, poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish }) {
   const videoRef = useRef(null);
   const overlayRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
+  const [srcIndex, setSrcIndex] = useState(0);
 
-  // Sort sources by resolution (highest first)
-  const sorted = [...sources].sort((a, b) => b.resolution - a.resolution);
+  // Sort once on mount
+  const sorted = React.useMemo(() => [...sources].sort((a, b) => b.resolution - a.resolution), [sources]);
 
-  // Attempt autoplay muted on mount and schedule controls
+  // Attempt play & schedule controls visibility
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
-
     vid.muted = true;
     vid.playsInline = true;
-    // set the highest-res source
-    vid.src = sorted[0].src;
+    vid.src = sorted[srcIndex].src;
     vid.load();
 
-    const playPromise = vid.play();
-    if (playPromise?.catch) playPromise.catch(() => {});
+    vid
+      .play()
+      .catch(() => {
+        // on autoplay failure, keep loading spinner
+      });
 
     const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
     return () => clearTimeout(timer);
-  }, [skipAfter, sorted]);
+  }, [sorted, srcIndex, skipAfter]);
 
-  // hide loading spinner once the video can play
+  // Hide spinner when ready
   const handleCanPlay = () => setLoading(false);
 
-  // fade out the overlay and then call onFinish
+  // On error, fallback to next source
+  const handleError = () => {
+    if (srcIndex + 1 < sorted.length) {
+      setSrcIndex((i) => i + 1);
+      setLoading(true);
+    } else {
+      // no more sources, finish
+      finishIntro();
+    }
+  };
+
+  // Fade out & finish
   const finishIntro = () => {
     const overlay = overlayRef.current;
     if (overlay) {
       overlay.classList.add('opacity-0');
-      overlay.addEventListener(
-        'transitionend',
-        () => onFinish?.(),
-        { once: true }
-      );
+      overlay.addEventListener('transitionend', () => onFinish?.(), { once: true });
     } else {
       onFinish?.();
     }
   };
 
-  // skip button handler
   const handleSkip = () => {
-    const vid = videoRef.current;
-    vid.pause();
+    videoRef.current.pause();
     finishIntro();
   };
 
-  // unmute button handler
+  // Unmute with fade-in
   const handleUnmute = () => {
     const vid = videoRef.current;
     if (vid) {
       vid.muted = false;
-      vid.volume = 1;
+      let vol = 0;
+      vid.volume = 0;
+      const fade = setInterval(() => {
+        vol += 0.05;
+        if (vol >= 1) {
+          vid.volume = 1;
+          clearInterval(fade);
+        } else vid.volume = vol;
+      }, 100);
     }
   };
 
@@ -102,26 +108,28 @@ export default function IntroVideo({
 
         <video
           ref={videoRef}
-          className="w-full h-full object-cover bg-black"
+          className="w-full h-full object-cover"
           muted
           playsInline
           preload="metadata"
           poster={poster}
           onCanPlay={handleCanPlay}
           onEnded={finishIntro}
-          onError={finishIntro}
-          controls={false}
+          onError={handleError}
         >
-          {sorted.map((s, idx) => (
-            <source key={idx} src={s.src} type={s.type} />
+          {sorted.map((s, i) => (
+            <source key={i} src={s.src} type={s.type} />
           ))}
-          <p className="text-white">
-            Your browser does not support embedded videos.
-          </p>
+          <p className="text-white">Your browser does not support embedded videos.</p>
         </video>
 
         {controlsVisible && (
-          <div className="absolute bottom-6 right-6 flex space-x-3">
+          <motion.div
+            className="absolute bottom-6 right-6 flex space-x-3"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+          >
             <button
               onClick={handleSkip}
               className="bg-teal-500/60 hover:bg-teal-500/80 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg transition"
@@ -135,9 +143,17 @@ export default function IntroVideo({
               <Volume2 size={16} />
               <span>Unmute</span>
             </button>
-          </div>
+          </motion.div>
         )}
       </motion.div>
     </AnimatePresence>
   );
 }
+
+IntroVideo.propTypes = {
+  sources: PropTypes.array,
+  poster: PropTypes.string,
+  skipAfter: PropTypes.number,
+  skipLabel: PropTypes.string,
+  onFinish: PropTypes.func,
+};
