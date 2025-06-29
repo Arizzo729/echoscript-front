@@ -3,16 +3,15 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { X, Volume2 } from 'lucide-react';
 
 /**
- * IntroVideo — High-resolution, fullscreen intro with optional audio.
- * Autoplays muted for browser compliance, then offers Unmute and Skip UI.
- * Uses native <video> with multiple <source> fallbacks and themed controls.
+ * IntroVideo — Reliable fullscreen intro with automatic play, correct MIME types,
+ * optional audio controls, loading state, multiple fallbacks, and a themed skip button.
  *
  * Props:
  * - sources: Array<string | { src: string; type?: string }> (highest priority first)
- * - poster?: string — preview image before load
+ * - poster?: string — preview image (optional)
  * - skipAfter?: number — seconds until controls appear (default: 3)
  * - skipLabel?: string — text for skip button (default: 'Skip Intro')
- * - onFinish?: () => void — callback when video ends or is skipped
+ * - onFinish?: () => void — callback when video ends or skip is pressed
  */
 export default function IntroVideo({
   sources = [],
@@ -25,15 +24,24 @@ export default function IntroVideo({
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
 
-  // Show Skip & Unmute after delay
+  // Infer MIME type from file extension
+  const inferType = (src) => {
+    const ext = src.split('?')[0].split('.').pop().toLowerCase();
+    switch (ext) {
+      case 'mp4': return 'video/mp4';
+      case 'webm': return 'video/webm';
+      case 'ogg': return 'video/ogg';
+      default: return '';
+    }
+  };
+
+  // Show controls (skip/unmute) after skipAfter seconds
   useEffect(() => {
     const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
     return () => clearTimeout(timer);
   }, [skipAfter]);
 
-  const handleLoaded = () => {
-    setLoading(false);
-  };
+  const handleLoaded = () => setLoading(false);
   const handleError = (e) => {
     console.warn('IntroVideo load error:', e);
     onFinish?.();
@@ -42,9 +50,10 @@ export default function IntroVideo({
 
   // Unmute on user click
   const handleUnmute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = false;
-      videoRef.current.volume = 1;
+    const vid = videoRef.current;
+    if (vid) {
+      vid.muted = false;
+      vid.volume = 1;
     }
   };
 
@@ -57,14 +66,12 @@ export default function IntroVideo({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        {/* Loading spinner */}
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
           </div>
         )}
 
-        {/* Native video element */}
         <video
           ref={videoRef}
           className="w-full h-full object-contain bg-black"
@@ -78,22 +85,17 @@ export default function IntroVideo({
           onEnded={handleFinish}
         >
           {sources.map((source, idx) => {
-            if (typeof source === 'string') {
-              return <source key={idx} src={source} />;
-            } else {
-              return (
-                <source
-                  key={idx}
-                  src={source.src}
-                  type={source.type || ''}
-                />
-              );
-            }
+            const srcUrl = typeof source === 'string' ? source : source.src;
+            const type = typeof source === 'string'
+              ? inferType(srcUrl)
+              : source.type || inferType(srcUrl);
+            return (
+              <source key={idx} src={srcUrl} type={type} />
+            );
           })}
           <p className="text-white">Your browser does not support embedded videos.</p>
         </video>
 
-        {/* Skip & Unmute Controls */}
         {controlsVisible && (
           <div className="absolute bottom-6 right-6 flex space-x-3">
             <button
@@ -115,5 +117,6 @@ export default function IntroVideo({
     </AnimatePresence>
   );
 }
+
 
 
