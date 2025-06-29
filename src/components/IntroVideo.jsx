@@ -24,7 +24,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     if (!v) return;
     v.src = introVideo;
     v.playsInline = true;
-    v.muted = true;
+    v.muted = false; // Start with audio ON
     v.volume = defaultVolume;
     v.load();
     v.play().catch(() => {});
@@ -34,13 +34,23 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     setLoading(false);
     const v = videoRef.current;
     if (v) {
-      // apply mute state and volume without re-playing
       v.muted = userMuted;
-      if (!userMuted) v.volume = defaultVolume;
+      v.volume = userMuted ? 0 : defaultVolume;
     }
   };
 
-  const finishIntro = () => {
+  const toggleMute = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    const muted = !userMuted;
+    v.muted = muted;
+    v.volume = muted ? 0 : defaultVolume;
+    setUserMuted(muted);
+  };
+
+  const handleSkip = () => {
+    const v = videoRef.current;
+    if (v) v.pause();
     const ov = overlayRef.current;
     if (ov) {
       ov.classList.add('opacity-0');
@@ -48,24 +58,6 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     } else {
       onFinish?.();
     }
-  };
-
-  const handleSkip = () => {
-    const v = videoRef.current;
-    if (v) v.pause();
-    finishIntro();
-  };
-
-  const toggleMute = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    const next = !v.muted;
-    v.muted = next;
-    if (!next) {
-      v.volume = defaultVolume;
-      v.play().catch(() => {});
-    }
-    setUserMuted(next);
   };
 
   return (
@@ -88,12 +80,11 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
           ref={videoRef}
           className="w-full h-full object-cover"
           autoPlay
-          muted
           playsInline
-          preload="metadata"
+          preload="auto"
           poster={poster}
           onCanPlay={handleCanPlay}
-          onEnded={finishIntro}
+          onEnded={handleSkip}
           onError={handleCanPlay}
         >
           <source src={introVideo} type="video/mp4" />
@@ -117,7 +108,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
               onClick={toggleMute}
               className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg flex items-center space-x-1"
             >
-              {userMuted ? <Volume2 size={16} /> : <VolumeX size={16} />}
+              {userMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
               <span>{userMuted ? 'Unmute' : 'Mute'}</span>
             </button>
           </motion.div>
