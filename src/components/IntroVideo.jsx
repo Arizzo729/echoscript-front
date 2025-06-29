@@ -4,41 +4,44 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-// Single 1080p source
-import intro1080 from '../assets/videos/intro.mp4';
+// Single intro video
+import introVideo from '../assets/videos/intro.mp4';
 
-export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish }) {
+export default function IntroVideo({
+  poster,
+  skipAfter = 3,
+  skipLabel = 'Skip Intro',
+  onFinish
+}) {
   const videoRef = useRef(null);
   const overlayRef = useRef(null);
+
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const defaultVolume = 0.3;
 
-  // mount: set source, mute for autoplay, play, show controls
+  // Show controls after delay
   useEffect(() => {
-    const vid = videoRef.current;
-    if (!vid) return;
-    vid.src = intro1080;
-    vid.playsInline = true;
-    vid.muted = true; // allow autoplay
-    vid.load();
-    vid.play().catch(() => {});
     const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
     return () => clearTimeout(timer);
   }, [skipAfter]);
 
-  // when video can play: unmute per state, set volume
+  // Called when the video is ready to play
   const handleCanPlay = () => {
     setLoading(false);
     const vid = videoRef.current;
     if (vid) {
+      // retry play if paused
+      if (vid.paused) {
+        vid.play().catch(() => {});
+      }
+      // apply mute/volume state
       vid.muted = isMuted;
       vid.volume = defaultVolume;
     }
   };
 
-  // finish intro sequence
   const finishIntro = () => {
     const overlay = overlayRef.current;
     if (overlay) {
@@ -49,14 +52,12 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     }
   };
 
-  // skip button
   const handleSkip = () => {
     const vid = videoRef.current;
     if (vid) vid.pause();
     finishIntro();
   };
 
-  // toggle mute/unmute
   const toggleMute = () => {
     const vid = videoRef.current;
     const newMuted = !isMuted;
@@ -82,16 +83,23 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
             <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
           </div>
         )}
-        <video$1 autoPlay muted playsInline onCanPlay={() => {
-            const vid = videoRef.current;
-            if (vid && vid.paused) vid.play().catch(() => {});
-          }} onError={() => {
-            const vid = videoRef.current;
-            if (vid && vid.paused) vid.play().catch(() => {});
-          }}>
-          <source src={intro1080} type="video/mp4" />
+
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover"
+          autoPlay
+          muted
+          playsInline
+          preload="metadata"
+          poster={poster}
+          onCanPlay={handleCanPlay}
+          onEnded={finishIntro}
+          onError={handleCanPlay}  /* retry on error */
+        >
+          <source src={introVideo} type="video/mp4" />
           <p className="text-white">Your browser does not support embedded videos.</p>
         </video>
+
         {controlsVisible && (
           <motion.div
             className="absolute bottom-6 right-6 flex space-x-3"
@@ -125,3 +133,4 @@ IntroVideo.propTypes = {
   skipLabel: PropTypes.string,
   onFinish: PropTypes.func,
 };
+
