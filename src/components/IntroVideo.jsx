@@ -14,6 +14,8 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
   const [controlsVisible, setControlsVisible] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const defaultVolume = 0.3;
+  const [isMuted, setIsMuted] = useState(false);
+  const defaultVolume = 0.3;
 
   // Initialize playback
   useEffect(() => {
