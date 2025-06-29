@@ -3,21 +3,26 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { X, Volume2 } from 'lucide-react';
 
 /**
- * IntroVideo — Cross-browser fullscreen intro with auto-play, multiple fallbacks,
- * muting for autoplay compliance, playsInline support for iOS, and custom controls.
+ * IntroVideo — Fullscreen cross-browser intro with auto-play, multiple fallbacks,
+ * muted for autoplay compliance, inline playback on iOS, and custom controls.
  * Works on Chrome, Edge, Firefox, Safari (desktop & mobile).
  *
  * Props:
- * - sources: Array<
- *     string | { src: string; type?: string; resolution?: number }
- *   > (highest priority first; resolution = height in px)
- * - poster?: string              // preview image
- * - skipAfter?: number           // seconds until skip/unmute appear (default: 3)
+ * - sources: Array<{ src: string; type: string; resolution: number }>
+ *   (resolution = height in px; highest first)
+ * - poster?: string              // preview image URL
+ * - skipAfter?: number           // seconds until controls appear (default: 3)
  * - skipLabel?: string           // skip button text (default: 'Skip Intro')
  * - onFinish?: () => void        // callback when video ends or skip pressed
  */
+const defaultSources = [
+  { src: '/videos/intro-1440p.mp4', type: 'video/mp4', resolution: 1440 },
+  { src: '/videos/intro-720p.mp4',  type: 'video/mp4', resolution: 720 },
+  { src: '/videos/intro-480p.mp4',  type: 'video/mp4', resolution: 480 },
+];
+
 export default function IntroVideo({
-  sources = [],
+  sources = defaultSources,
   poster,
   skipAfter = 3,
   skipLabel = 'Skip Intro',
@@ -27,43 +32,18 @@ export default function IntroVideo({
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
 
-  // Guard empty sources
-  if (!sources || sources.length === 0) {
-    console.error('IntroVideo: no sources provided');
-    return null;
-  }
-
-  // Infer MIME from extension
-  const inferType = (url) => {
-    const ext = url.split('?')[0].split('.').pop().toLowerCase();
-    if (ext === 'mp4') return 'video/mp4';
-    if (ext === 'webm') return 'video/webm';
-    if (ext === 'ogv' || ext === 'ogg') return 'video/ogg';
-    return '';
-  };
-
-  // Normalize and sort by resolution descending
-  const normalized = sources.map((s) => {
-    if (typeof s === 'string') {
-      return { src: s, type: inferType(s), resolution: 360 };
-    }
-    return {
-      src: s.src,
-      type: s.type || inferType(s.src),
-      resolution: s.resolution || 360,
-    };
-  }).sort((a, b) => (b.resolution || 0) - (a.resolution || 0));
-
-  const bestSource = normalized[0];
+  // Sort sources by resolution descending
+  const sorted = [...sources].sort((a, b) => b.resolution - a.resolution);
 
   // Attempt autoplay (muted) on mount for browsers
   useEffect(() => {
     const vid = videoRef.current;
     if (vid) {
       vid.muted = true;
+      vid.playsInline = true;
       const playPromise = vid.play();
-      if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch((err) => console.warn('Autoplay prevented:', err));
+      if (playPromise?.catch) {
+        playPromise.catch((e) => console.warn('Autoplay prevented:', e));
       }
     }
   }, []);
@@ -98,33 +78,29 @@ export default function IntroVideo({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        {/* Loading spinner */}
+        {/* Spinner while video loads */}
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
           </div>
         )}
 
-        {/* Responsive, full-bleed video */}
+        {/* Video element with multiple <source> fallbacks */}
         <video
           ref={videoRef}
           className="w-full h-full object-cover bg-black"
-          src={bestSource.src}
-          type={bestSource.type}
           autoPlay
           muted
           playsInline
-          webkit-playsinline="true"
           preload="auto"
           poster={poster}
           onLoadedData={handleLoaded}
           onEnded={handleFinish}
           onError={handleError}
-          disablePictureInPicture
           controls={false}
+          disablePictureInPicture
         >
-          {/* Additional fallbacks for older browsers */}
-          {normalized.slice(1).map((s, idx) => (
+          {sorted.map((s, idx) => (
             <source key={idx} src={s.src} type={s.type} />
           ))}
           <p className="text-white">Your browser does not support embedded videos.</p>
@@ -152,6 +128,7 @@ export default function IntroVideo({
     </AnimatePresence>
   );
 }
+
 
 
 
