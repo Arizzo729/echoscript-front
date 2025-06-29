@@ -30,11 +30,7 @@ const LOCAL_SEARCH_INDEX = [
   { type: "Page", name: "Contact Us", path: "/contact" },
 ];
 
-export default function Header({
-  onLogout = () => {},
-  onToggleTheme = () => {},
-  isDarkMode = false,
-}) {
+export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, isDarkMode = false }) {
   const { user } = useAuth();
   const { t } = useTranslation();
   const { isMuted, toggleMute } = useSound();
@@ -55,18 +51,18 @@ export default function Header({
   }, []);
 
   useEffect(() => {
-    const closeHandlers = (e) => {
+    const close = (e) => {
       if (!searchRef.current?.contains(e.target)) {
         setShowNotifDropdown(false);
         setShowUserDropdown(false);
       }
     };
-    const escHandler = (e) => e.key === "Escape" && closeHandlers(e);
-    document.addEventListener("mousedown", closeHandlers);
-    document.addEventListener("keydown", escHandler);
+    const esc = (e) => e.key === "Escape" && close(e);
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", esc);
     return () => {
-      document.removeEventListener("mousedown", closeHandlers);
-      document.removeEventListener("keydown", escHandler);
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", esc);
     };
   }, []);
 
@@ -86,28 +82,19 @@ export default function Header({
         body: JSON.stringify({ query: searchQuery }),
         signal: controller.signal,
       })
-        .then((res) => {
-          if (!res.ok) throw new Error("Network error");
-          return res.json();
-        })
+        .then((res) => res.json())
         .then((data) => {
           if (active && Array.isArray(data.results)) {
-            setSuggestions(
-              data.results.length > 0
-                ? data.results
-                : LOCAL_SEARCH_INDEX.filter((item) =>
-                    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-                  )
-            );
+            setSuggestions(data.results.length ? data.results : LOCAL_SEARCH_INDEX.filter((item) =>
+              item.name.toLowerCase().includes(searchQuery.toLowerCase())
+            ));
           }
         })
         .catch(() => {
           if (active) {
-            setSuggestions(
-              LOCAL_SEARCH_INDEX.filter((item) =>
-                item.name.toLowerCase().includes(searchQuery.toLowerCase())
-              )
-            );
+            setSuggestions(LOCAL_SEARCH_INDEX.filter((item) =>
+              item.name.toLowerCase().includes(searchQuery.toLowerCase())
+            ));
           }
         })
         .finally(() => active && setIsLoading(false));
@@ -127,7 +114,7 @@ export default function Header({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="flex items-center justify-between gap-4 px-4 sm:px-6 py-3">
+      <div className="flex items-center justify-between gap-4 px-4 sm:px-6 py-3 flex-wrap">
         <Link to="/" className="flex items-center gap-2 min-w-[150px]">
           <img src={Logo} alt="EchoScript.AI" className="h-8 sm:h-10" />
           <span className="text-xl font-bold text-white">
@@ -135,7 +122,7 @@ export default function Header({
           </span>
         </Link>
 
-        <div ref={searchRef} className="relative flex-1 max-w-lg">
+        <div ref={searchRef} className="relative flex-1 max-w-lg min-w-[200px]">
           <div className="relative">
             <input
               type="search"
@@ -148,13 +135,12 @@ export default function Header({
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-red-500 transition"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full hover:text-red-500 transition"
                 aria-label={t("Clear search")}
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 text-zinc-400" />
               </button>
             )}
-
             <AnimatePresence>
               {(suggestions.length > 0 || isLoading) && (
                 <motion.ul
@@ -164,9 +150,7 @@ export default function Header({
                   className="absolute left-0 mt-1 w-full bg-zinc-900 border border-zinc-700 rounded shadow z-50 overflow-hidden"
                 >
                   {isLoading ? (
-                    <li className="px-4 py-2 text-sm text-zinc-400">
-                      {t("Loading…")}
-                    </li>
+                    <li className="px-4 py-2 text-sm text-zinc-400">{t("Loading…")}</li>
                   ) : (
                     suggestions.map((s, idx) => (
                       <li
@@ -177,10 +161,7 @@ export default function Header({
                         }}
                         className="px-4 py-2 text-sm hover:bg-zinc-800 cursor-pointer"
                       >
-                        <span className="text-teal-400 font-medium">
-                          {s.type}
-                        </span>
-                        : {s.name}
+                        <span className="text-teal-400 font-medium">{s.type}</span>: {s.name}
                       </li>
                     ))
                   )}
@@ -190,9 +171,103 @@ export default function Header({
           </div>
         </div>
 
-        {/* The rest of the header remains unchanged */}
-        {/* Controls, Notifications, and User Dropdowns are handled correctly */}
+        <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleTheme}
+            aria-label={t("Toggle theme")}
+            icon={isDarkMode ? <SunIcon className="w-5 h-5 text-yellow-300" /> : <MoonIcon className="w-5 h-5 text-blue-300" />}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleMute}
+            aria-label={t("Toggle sound")}
+            icon={isMuted ? <VolumeX className="w-5 h-5 text-red-500" /> : <Volume2 className="w-5 h-5 text-teal-400" />}
+          />
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowNotifDropdown((prev) => !prev);
+                setShowUserDropdown(false);
+              }}
+              icon={<BellIcon className="w-5 h-5 text-zinc-300" />}
+            />
+            <AnimatePresence>
+              {showNotifDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-700 rounded shadow z-50"
+                >
+                  <div className="px-4 py-2 text-sm font-semibold border-b border-zinc-700">{t("Updates")}</div>
+                  <div className="p-4 text-sm text-zinc-400">🚧 {t("In development — check back soon!")}</div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowUserDropdown((prev) => !prev);
+                setShowNotifDropdown(false);
+              }}
+              className="flex items-center gap-2"
+              icon={
+                <div className="w-8 h-8 rounded-full border border-teal-400 bg-zinc-800 flex items-center justify-center text-xs font-bold text-teal-300">
+                  {isGuest ? "GU" : "EU"}
+                </div>
+              }
+            >
+              <span className="text-sm text-white">
+                {isGuest ? t("Welcome, Guest") : user.email}
+              </span>
+              <ChevronDownIcon className={`w-4 h-4 transition-transform ${showUserDropdown ? "rotate-180" : ""}`} />
+            </Button>
+            <AnimatePresence>
+              {showUserDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute right-0 mt-2 w-48 bg-zinc-900 border border-zinc-700 rounded shadow z-50"
+                >
+                  {!isGuest ? (
+                    <>
+                      <Link to="/profile" className="block px-4 py-2 text-white hover:bg-zinc-800">
+                        {t("Profile")}
+                      </Link>
+                      <Link to="/privacy" className="block px-4 py-2 text-white hover:bg-zinc-800">
+                        {t("Privacy Settings")}
+                      </Link>
+                      <hr className="border-zinc-700" />
+                      <button onClick={onLogout} className="w-full text-left px-4 py-2 text-red-500 hover:bg-zinc-800">
+                        {t("Log Out")}
+                      </button>
+                    </>
+                  ) : (
+                    <div className="p-3 space-y-2">
+                      <Link to="/signin" className="block w-full text-center px-4 py-2 text-sm font-medium bg-teal-600 hover:bg-teal-700 text-white rounded">
+                        {t("Sign In")}
+                      </Link>
+                      <Link to="/signup" className="block w-full text-center px-4 py-2 text-sm font-medium bg-zinc-700 hover:bg-zinc-600 text-white rounded">
+                        {t("Sign Up")}
+                      </Link>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </div>
     </motion.header>
   );
 }
+
