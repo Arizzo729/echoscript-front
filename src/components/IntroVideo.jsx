@@ -6,25 +6,35 @@ import { motion, AnimatePresence } from 'framer-motion';
  * IntroVideo component — plays a fullscreen intro clip on login with audio fade-in
  *
  * Props:
- * - sources: Array<{ src: string, type: string }> — list of video sources for resolution fallback
+ * - sources?: Array<{ src: string, type: string }> — list of video sources for resolution fallback
+ * - src?: string — single video URL fallback
+ * - type?: string — MIME type when using single src (default 'video/mp4')
  * - onFinish?: () => void — callback when video ends or is skipped
  * - skipLabel?: string — text for the skip button (default: 'Skip Intro')
  * - skipAfter?: number — seconds before the skip button appears (default: 0)
  */
-export default function IntroVideo({ sources, onFinish, skipLabel = 'Skip Intro', skipAfter = 0 }) {
+export default function IntroVideo({ sources, src, type = 'video/mp4', onFinish, skipLabel = 'Skip Intro', skipAfter = 0 }) {
   const [visible, setVisible] = useState(true);
   const [canSkip, setCanSkip] = useState(skipAfter === 0);
   const videoRef = useRef(null);
 
+  // Determine sources array
+  const videoSources = Array.isArray(sources)
+    ? sources
+    : src
+    ? [{ src, type }]
+    : [];
+
   useEffect(() => {
     const vid = videoRef.current;
-    if (!vid) return;
+    if (!vid || videoSources.length === 0) return;
+
     vid.muted = true;
     vid.volume = 0;
     vid.preload = 'auto';
+
     const handleCanPlay = () => {
       vid.play().catch(err => console.warn('IntroVideo play failed:', err));
-      // Fade volume to 40% then unmute
       const targetVol = 0.4;
       const duration = 1000;
       const interval = 50;
@@ -39,10 +49,12 @@ export default function IntroVideo({ sources, onFinish, skipLabel = 'Skip Intro'
         }
       }, interval);
     };
+
     vid.addEventListener('canplaythrough', handleCanPlay);
     return () => vid.removeEventListener('canplaythrough', handleCanPlay);
-  }, []);
+  }, [videoSources]);
 
+  // Reveal skip button after delay
   useEffect(() => {
     if (skipAfter > 0) {
       const timer = setTimeout(() => setCanSkip(true), skipAfter * 1000);
@@ -55,6 +67,7 @@ export default function IntroVideo({ sources, onFinish, skipLabel = 'Skip Intro'
     onFinish?.();
   };
 
+  // Prevent background scroll while visible
   useEffect(() => {
     document.body.style.overflow = visible ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -78,10 +91,9 @@ export default function IntroVideo({ sources, onFinish, skipLabel = 'Skip Intro'
               onEnded={finish}
               className="absolute top-0 left-0 w-full h-full object-cover object-top"
             >
-              {sources.map(({ src, type }) => (
+              {videoSources.map(({ src, type }) => (
                 <source key={src} src={src} type={type} />
               ))}
-              {/* Fallback text */}
               Your browser does not support the video tag.
             </video>
           </div>
