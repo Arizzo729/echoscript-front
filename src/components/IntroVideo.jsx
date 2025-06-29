@@ -1,15 +1,17 @@
+```jsx
+// File: src/components/IntroVideo.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Volume2, X } from 'lucide-react';
+import { Volume2 } from 'lucide-react';
 
 /**
- * IntroVideo — Fullscreen, cross-browser intro with autoplay, fallbacks,
- * muted autoplay, playsInline support, skip/unmute controls, and fade transition.
+ * IntroVideo — Fullscreen intro with reliable playback, loading indicator,
+ * skip & unmute controls, and fade transition.
  */
 const defaultSources = [
   { src: '/videos/intro-1440p.mp4', type: 'video/mp4', resolution: 1440 },
   { src: '/videos/intro-720p.mp4',  type: 'video/mp4', resolution:  720 },
-  { src: '/videos/intro-480p.mp4',  type: 'video/mp4', resolution:  480 },
+  { src: '/videos/intro-480p.mp4',  type: 'video/mp4', resolution:  480 }
 ];
 
 export default function IntroVideo({
@@ -24,24 +26,30 @@ export default function IntroVideo({
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
 
-  // Sort sources by resolution (highest first)
+  // Sort sources by resolution
   const sorted = [...sources].sort((a, b) => b.resolution - a.resolution);
 
-  // Autoplay muted on mount and schedule controls
+  // Attempt autoplay muted on mount
   useEffect(() => {
     const vid = videoRef.current;
-    if (vid) {
-      vid.muted = true;
-      vid.playsInline = true;
-      const p = vid.play();
-      if (p?.catch) p.catch(() => {});
-    }
+    if (!vid) return;
+    vid.muted = true;
+    vid.playsInline = true;
+    // Set primary src
+    vid.src = sorted[0].src;
+    vid.load();
+    const playPromise = vid.play();
+    if (playPromise?.catch) playPromise.catch(() => {});
+
+    // Show controls after delay
     const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
     return () => clearTimeout(timer);
-  }, [skipAfter]);
+  }, [skipAfter, sorted]);
 
-  const handleLoaded = () => setLoading(false);
+  // Hide spinner when video can play
+  const handleCanPlay = () => setLoading(false);
 
+  // Fade out overlay and then call onFinish
   const finishIntro = () => {
     const overlay = overlayRef.current;
     if (overlay) {
@@ -52,17 +60,18 @@ export default function IntroVideo({
     }
   };
 
+  // Skip handler
   const handleSkip = () => {
-    videoRef.current?.pause();
+    const vid = videoRef.current;
+    vid.pause();
     finishIntro();
   };
 
+  // Unmute handler
   const handleUnmute = () => {
     const vid = videoRef.current;
-    if (vid) {
-      vid.muted = false;
-      vid.volume = 1;
-    }
+    vid.muted = false;
+    vid.volume = 1;
   };
 
   return (
@@ -84,21 +93,18 @@ export default function IntroVideo({
         <video
           ref={videoRef}
           className="w-full h-full object-cover bg-black"
-          autoPlay
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
           poster={poster}
-          onLoadedData={handleLoaded}
+          onCanPlay={handleCanPlay}
           onEnded={finishIntro}
           onError={finishIntro}
           controls={false}
-          disablePictureInPicture
         >
           {sorted.map((s, idx) => (
             <source key={idx} src={s.src} type={s.type} />
           ))}
-          <p className="text-white">Your browser does not support embedded videos.</p>
         </video>
 
         {controlsVisible && (
@@ -122,3 +128,4 @@ export default function IntroVideo({
     </AnimatePresence>
   );
 }
+```
