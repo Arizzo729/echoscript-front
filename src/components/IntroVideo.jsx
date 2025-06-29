@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, SpeakerHigh } from 'lucide-react';
 
 /**
- * IntroVideo — Professional, auto-start fullscreen intro using native <video>.
- * Automatically plays on mount (muted for autoplay compliance), handles loading state,
- * multiple <source> fallbacks, errors, and a themed skip button.
- * 
+ * IntroVideo — High-resolution, fullscreen intro with optional audio.
+ * Autoplays muted for browser compliance, then offers Unmute and Skip UI.
+ * Uses native <video> with multiple <source> fallbacks and themed controls.
+ *
  * Props:
- * - sources: Array<{ src: string; type: string }> (highest priority first)
- * - poster?: string — preview image (optional)
- * - skipAfter?: number — seconds until skip button appears (default: 3)
+ * - sources: Array<string | { src: string; type?: string }> (highest priority first)
+ * - poster?: string — preview image before load
+ * - skipAfter?: number — seconds until controls appear (default: 3)
  * - skipLabel?: string — text for skip button (default: 'Skip Intro')
- * - onFinish?: () => void — callback when video ends or skip is pressed
+ * - onFinish?: () => void — callback when video ends or is skipped
  */
 export default function IntroVideo({
   sources = [],
@@ -21,21 +21,32 @@ export default function IntroVideo({
   skipLabel = 'Skip Intro',
   onFinish,
 }) {
-  const [canSkip, setCanSkip] = useState(false);
+  const videoRef = useRef(null);
   const [loading, setLoading] = useState(true);
+  const [controlsVisible, setControlsVisible] = useState(false);
 
-  // Enable skip button after delay
+  // Show Skip & Unmute after delay
   useEffect(() => {
-    const timer = setTimeout(() => setCanSkip(true), skipAfter * 1000);
+    const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
     return () => clearTimeout(timer);
   }, [skipAfter]);
 
-  const handleLoaded = () => setLoading(false);
+  const handleLoaded = () => {
+    setLoading(false);
+  };
   const handleError = (e) => {
     console.warn('IntroVideo load error:', e);
     onFinish?.();
   };
   const handleFinish = () => onFinish?.();
+
+  // Unmute on user click
+  const handleUnmute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = false;
+      videoRef.current.volume = 1;
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -53,36 +64,57 @@ export default function IntroVideo({
           </div>
         )}
 
-        {/* Fullscreen video */}
+        {/* Native video element */}
         <video
+          ref={videoRef}
           className="w-full h-full object-contain bg-black"
           autoPlay
           muted
           playsInline
           preload="auto"
           poster={poster}
-          onEnded={handleFinish}
-          onError={handleError}
           onLoadedData={handleLoaded}
+          onError={handleError}
+          onEnded={handleFinish}
         >
-          {sources.map(({ src, type }, idx) => (
-            <source key={idx} src={src} type={type} />
-          ))}
+          {sources.map((source, idx) => {
+            if (typeof source === 'string') {
+              return <source key={idx} src={source} />;
+            } else {
+              return (
+                <source
+                  key={idx}
+                  src={source.src}
+                  type={source.type || ''}
+                />
+              );
+            }
+          })}
           <p className="text-white">Your browser does not support embedded videos.</p>
         </video>
 
-        {/* Themed skip button */}
-        {canSkip && (
-          <button
-            onClick={handleFinish}
-            className="absolute bottom-6 right-6 bg-teal-500/40 hover:bg-teal-500/60 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg transition"
-          >
-            {skipLabel}
-          </button>
+        {/* Skip & Unmute Controls */}
+        {controlsVisible && (
+          <div className="absolute bottom-6 right-6 flex space-x-3">
+            <button
+              onClick={handleFinish}
+              className="bg-teal-500/60 hover:bg-teal-500/80 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg transition "
+            >
+              {skipLabel}
+            </button>
+            <button
+              onClick={handleUnmute}
+              className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg transition flex items-center space-x-1"
+            >
+              <SpeakerHigh size={16} />
+              <span>Unmute</span>
+            </button>
+          </div>
         )}
       </motion.div>
     </AnimatePresence>
   );
 }
+
 
 
