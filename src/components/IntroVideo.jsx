@@ -78,10 +78,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
             <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
           </div>
         )}
-        <video
-          ref={videoRef}
-          className="w-full h-full object-cover"
-          playsInline
+        <video$1 muted playsInline
           preload="metadata"
           poster={poster}
           onCanPlay={handleCanPlay}
