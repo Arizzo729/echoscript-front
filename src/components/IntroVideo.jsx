@@ -4,8 +4,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-// Single intro video file
-import introVideo from '../assets/videos/intro.mp4';
+// Single 1080p source
+import intro1080 from '../assets/videos/intro.mp4';
 
 export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish }) {
   const videoRef = useRef(null);
@@ -14,31 +14,20 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
   const [controlsVisible, setControlsVisible] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const defaultVolume = 0.3;
-  const [isMuted, setIsMuted] = useState(false);
-  const defaultVolume = 0.3;
 
-  // Initialize playback
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
     vid.playsInline = true;
-    vid.src = introVideo;
+    vid.src = intro1080;
     vid.load();
     vid.volume = defaultVolume;
-    vid.muted = false;
+    vid.muted = isMuted;
     vid.play().catch(() => {});
 
     const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
     return () => clearTimeout(timer);
-  }, [skipAfter]);
-
-  // Update mute state without reloading
-  useEffect(() => {
-    const vid = videoRef.current;
-    if (!vid) return;
-    vid.muted = isMuted;
-    vid.volume = isMuted ? 0 : defaultVolume;
-  }, [isMuted]);
+  }, [skipAfter, isMuted]);
 
   const handleCanPlay = () => setLoading(false);
 
@@ -57,9 +46,9 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     finishIntro();
   };
 
-  // Toggle mute and preserve playback
+  // Toggle between muted and unmuted
   const toggleMute = () => {
-    setIsMuted((m) => !m);
+    setIsMuted((prev) => !prev);
   };
 
   return (
@@ -79,6 +68,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
+          muted={isMuted}
           playsInline
           preload="metadata"
           poster={poster}
@@ -86,7 +76,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
           onEnded={finishIntro}
           onError={finishIntro}
         >
-          <source src={introVideo} type="video/mp4" />
+          <source src={intro1080} type="video/mp4" />
           <p className="text-white">Your browser does not support embedded videos.</p>
         </video>
 
