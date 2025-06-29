@@ -1,5 +1,6 @@
 // src/components/OnboardingModal.jsx
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import IntroVideo from "./IntroVideo";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import Lottie from "lottie-react";
@@ -13,11 +14,31 @@ const STEPS = [
   { id: "security", title: "Privacy First", description: "End-to-end encryption, CAPTCHA, and 2FA—your data stays yours.", filename: "security.json" },
   { id: "integrations", title: "Seamless Uploads", description: "Use drag-and-drop, Google Drive, or Dropbox—it's all built in.", filename: "integrations.json" },
   { id: "audio", title: "Enable Audio", description: "Turn on microphone support for live recording and voice features.", filename: "start.json" },
-  { id: "start", title: "Let's Transcribe", description: "You're ready. Pick a plan and explore EchoScript.AI.", filename: "start.json" },
+  { id: "start", title: "Let's Transcribe", description: "You're ready. Pick a plan and explore EchoScript.AI.", filename: "start.json" }
 ];
 
 export default function OnboardingModal({ onClose }) {
   const { enableSound } = useSound();
+  const [showVideo, setShowVideo] = useState(true);
+
+  // Handler when intro video finishes
+  const handleVideoFinish = useCallback(() => {
+    setShowVideo(false);
+  }, []);
+
+  // If still showing video, render IntroVideo
+  if (showVideo) {
+    return (
+      <IntroVideo
+        src="/videos/intro-1440p.mp4"
+        onFinish={handleVideoFinish}
+        skipLabel="Skip Intro"
+        skipAfter={3}
+      />
+    );
+  }
+
+  // After video, proceed with onboarding steps
   const [step, setStep] = useState(0);
   const [typedDesc, setTypedDesc] = useState("");
   const [animData, setAnimData] = useState(null);
@@ -60,12 +81,12 @@ export default function OnboardingModal({ onClose }) {
     let i = 0;
     setTypedDesc("");
     const speed = 12;
-    const interval = setInterval(() => {
+    const intervalID = setInterval(() => {
       i++;
       setTypedDesc(fullText.slice(0, i));
-      if (i >= fullText.length) clearInterval(interval);
+      if (i >= fullText.length) clearInterval(intervalID);
     }, speed);
-    return () => clearInterval(interval);
+    return () => clearInterval(intervalID);
   }, [step]);
 
   const prev = useCallback(() => setStep(s => Math.max(s - 1, 0)), []);
@@ -76,7 +97,6 @@ export default function OnboardingModal({ onClose }) {
 
   return (
     <AnimatePresence>
-      { /* Modal Overlay */ }
       <motion.div
         {...swipeHandlers}
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
@@ -84,7 +104,6 @@ export default function OnboardingModal({ onClose }) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        { /* Content Container */ }
         <motion.div
           ref={modalRef}
           role="dialog"
@@ -192,4 +211,5 @@ export default function OnboardingModal({ onClose }) {
     </AnimatePresence>
   );
 }
+
 
