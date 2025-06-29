@@ -5,36 +5,39 @@ import { Volume2, VolumeX } from 'lucide-react';
 import PropTypes from 'prop-types';
 import introVideo from '../assets/videos/intro.mp4';
 
-export default function IntroVideo({
-  poster,
-  skipAfter = 3,
-  skipLabel = 'Skip Intro',
-  onFinish
-}) {
+export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish }) {
   const videoRef = useRef(null);
   const overlayRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [mutedByUser, setMutedByUser] = useState(false);
-  const DEFAULT_VOL = 0.3;
+  const [userMuted, setUserMuted] = useState(false);
+  const defaultVolume = 0.3;
 
-  // show skip/mute controls after a delay
   useEffect(() => {
-    const id = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
-    return () => clearTimeout(id);
+    const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
+    return () => clearTimeout(timer);
   }, [skipAfter]);
 
-  // once metadata is loaded, the browser has enough to play
-  // so we unmute to DEFAULT_VOL (unless user already muted)
-  const onLoadedMeta = () => {
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.src = introVideo;
+    v.playsInline = true;
+    v.muted = true;
+    v.volume = defaultVolume;
+    v.load();
+    v.play().catch(() => {});
+  }, []);
+
+  const handleCanPlay = () => {
     setLoading(false);
     const v = videoRef.current;
     if (!v) return;
-    if (!mutedByUser) {
-      v.muted = false;
-      v.volume = DEFAULT_VOL;
-    }
+    // Unmute and set to default volume when ready
+    v.muted = userMuted;
+    v.volume = defaultVolume;
+    if (!userMuted && v.paused) v.play().catch(() => {});
   };
 
   const finishIntro = () => {
@@ -53,22 +56,24 @@ export default function IntroVideo({
     finishIntro();
   };
 
-  // user-requested mute/unmute
   const toggleMute = () => {
     const v = videoRef.current;
     if (!v) return;
-    const nowMuted = !v.muted;
-    v.muted = nowMuted;
-    if (!nowMuted) v.volume = DEFAULT_VOL;
-    setMutedByUser(nowMuted);
+    const next = !v.muted;
+    v.muted = next;
+    if (!next) {
+      v.volume = defaultVolume;
+      v.play().catch(() => {});
+    }
+    setUserMuted(next);
   };
 
   return (
     <AnimatePresence>
       <motion.div
         ref={overlayRef}
-        key="intro"
-        className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
+        key="intro-overlay"
+        className="fixed inset-0 z-[9999] bg-black flex items-center justify-center transition-opacity duration-700"
         initial={{ opacity: 1 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -87,13 +92,12 @@ export default function IntroVideo({
           playsInline
           preload="metadata"
           poster={poster}
-          onLoadedMetadata={onLoadedMeta}
+          onCanPlay={handleCanPlay}
           onEnded={finishIntro}
+          onError={handleCanPlay}
         >
           <source src={introVideo} type="video/mp4" />
-          <p className="text-white">
-            Your browser does not support embedded videos.
-          </p>
+          <p className="text-white">Your browser does not support embedded videos.</p>
         </video>
 
         {controlsVisible && (
@@ -101,21 +105,20 @@ export default function IntroVideo({
             className="absolute bottom-6 right-6 flex space-x-3"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 300 }}
           >
             <button
               onClick={handleSkip}
-              className="bg-teal-500/60 hover:bg-teal-500/80 text-white py-2 px-4 rounded-lg"
+              className="bg-teal-500/60 hover:bg-teal-500/80 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg"
             >
               {skipLabel}
             </button>
             <button
               onClick={toggleMute}
-              className="bg-white/20 hover:bg-white/40 text-white py-2 px-4 rounded-lg flex items-center space-x-1"
+              className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg flex items-center space-x-1"
             >
-              {videoRef.current?.muted
-                ? <Volume2 size={16} />
-                : <VolumeX size={16} />}
-              <span>{videoRef.current?.muted ? 'Unmute' : 'Mute'}</span>
+              {userMuted ? <Volume2 size={16} /> : <VolumeX size={16} />}
+              <span>{userMuted ? 'Unmute' : 'Mute'}</span>
             </button>
           </motion.div>
         )}
@@ -125,9 +128,9 @@ export default function IntroVideo({
 }
 
 IntroVideo.propTypes = {
-  poster:    PropTypes.string,
+  poster: PropTypes.string,
   skipAfter: PropTypes.number,
   skipLabel: PropTypes.string,
-  onFinish:  PropTypes.func,
+  onFinish: PropTypes.func,
 };
 
