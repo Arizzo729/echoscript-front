@@ -1,4 +1,3 @@
-```jsx
 // File: src/components/IntroVideo.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -30,52 +29,59 @@ export default function IntroVideo({
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
 
-  // Sort sources by resolution
+  // Sort sources by resolution (highest first)
   const sorted = [...sources].sort((a, b) => b.resolution - a.resolution);
 
-  // Attempt autoplay muted on mount
+  // Attempt autoplay muted on mount and schedule controls
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
+
     vid.muted = true;
     vid.playsInline = true;
-    // Set primary src
+    // set the highest-res source
     vid.src = sorted[0].src;
     vid.load();
+
     const playPromise = vid.play();
     if (playPromise?.catch) playPromise.catch(() => {});
 
-    // Show controls after delay
     const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
     return () => clearTimeout(timer);
   }, [skipAfter, sorted]);
 
-  // Hide spinner when video can play
+  // hide loading spinner once the video can play
   const handleCanPlay = () => setLoading(false);
 
-  // Fade out overlay and then call onFinish
+  // fade out the overlay and then call onFinish
   const finishIntro = () => {
     const overlay = overlayRef.current;
     if (overlay) {
       overlay.classList.add('opacity-0');
-      overlay.addEventListener('transitionend', () => onFinish?.(), { once: true });
+      overlay.addEventListener(
+        'transitionend',
+        () => onFinish?.(),
+        { once: true }
+      );
     } else {
       onFinish?.();
     }
   };
 
-  // Skip handler
+  // skip button handler
   const handleSkip = () => {
     const vid = videoRef.current;
     vid.pause();
     finishIntro();
   };
 
-  // Unmute handler
+  // unmute button handler
   const handleUnmute = () => {
     const vid = videoRef.current;
-    vid.muted = false;
-    vid.volume = 1;
+    if (vid) {
+      vid.muted = false;
+      vid.volume = 1;
+    }
   };
 
   return (
@@ -109,6 +115,9 @@ export default function IntroVideo({
           {sorted.map((s, idx) => (
             <source key={idx} src={s.src} type={s.type} />
           ))}
+          <p className="text-white">
+            Your browser does not support embedded videos.
+          </p>
         </video>
 
         {controlsVisible && (
@@ -132,4 +141,3 @@ export default function IntroVideo({
     </AnimatePresence>
   );
 }
-```
