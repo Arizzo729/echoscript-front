@@ -4,21 +4,14 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Volume2 } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-import intro1440 from '../src/assets/videos/intro.mp4';
+// Single 1080p source
+import intro1080 from '../assets/videos/intro.mp4';
 
-const defaultSources = [
-  { src: intro1440, type: 'video/mp4', resolution: 1440 },,
-];
-
-export default function IntroVideo({ sources = defaultSources, poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish }) {
+export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish }) {
   const videoRef = useRef(null);
   const overlayRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [srcIndex, setSrcIndex] = useState(0);
-
-  // Sort once on mount
-  const sorted = React.useMemo(() => [...sources].sort((a, b) => b.resolution - a.resolution), [sources]);
 
   // Attempt play & schedule controls visibility
   useEffect(() => {
@@ -26,34 +19,16 @@ export default function IntroVideo({ sources = defaultSources, poster, skipAfter
     if (!vid) return;
     vid.muted = true;
     vid.playsInline = true;
-    vid.src = sorted[srcIndex].src;
+    vid.src = intro1080;
     vid.load();
 
-    vid
-      .play()
-      .catch(() => {
-        // on autoplay failure, keep loading spinner
-      });
-
+    vid.play().catch(() => {});
     const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
     return () => clearTimeout(timer);
-  }, [sorted, srcIndex, skipAfter]);
+  }, [skipAfter]);
 
-  // Hide spinner when ready
   const handleCanPlay = () => setLoading(false);
 
-  // On error, fallback to next source
-  const handleError = () => {
-    if (srcIndex + 1 < sorted.length) {
-      setSrcIndex((i) => i + 1);
-      setLoading(true);
-    } else {
-      // no more sources, finish
-      finishIntro();
-    }
-  };
-
-  // Fade out & finish
   const finishIntro = () => {
     const overlay = overlayRef.current;
     if (overlay) {
@@ -69,7 +44,6 @@ export default function IntroVideo({ sources = defaultSources, poster, skipAfter
     finishIntro();
   };
 
-  // Unmute with fade-in
   const handleUnmute = () => {
     const vid = videoRef.current;
     if (vid) {
@@ -92,16 +66,13 @@ export default function IntroVideo({ sources = defaultSources, poster, skipAfter
         ref={overlayRef}
         key="intro-overlay"
         className="fixed inset-0 z-[9999] bg-black flex items-center justify-center transition-opacity duration-700"
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        initial={{ opacity: 1 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       >
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
           </div>
         )}
-
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
@@ -111,14 +82,11 @@ export default function IntroVideo({ sources = defaultSources, poster, skipAfter
           poster={poster}
           onCanPlay={handleCanPlay}
           onEnded={finishIntro}
-          onError={handleError}
+          onError={finishIntro}
         >
-          {sorted.map((s, i) => (
-            <source key={i} src={s.src} type={s.type} />
-          ))}
+          <source src={intro1080} type="video/mp4" />
           <p className="text-white">Your browser does not support embedded videos.</p>
         </video>
-
         {controlsVisible && (
           <motion.div
             className="absolute bottom-6 right-6 flex space-x-3"
@@ -147,7 +115,6 @@ export default function IntroVideo({ sources = defaultSources, poster, skipAfter
 }
 
 IntroVideo.propTypes = {
-  sources: PropTypes.array,
   poster: PropTypes.string,
   skipAfter: PropTypes.number,
   skipLabel: PropTypes.string,
