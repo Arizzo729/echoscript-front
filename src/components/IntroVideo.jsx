@@ -1,10 +1,10 @@
 // src/components/IntroVideo.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Volume2 } from 'lucide-react';
+import { Volume2, VolumeX } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-// Single 1080p source
+// Single intro video
 import intro1080 from '../assets/videos/intro.mp4';
 
 export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish }) {
@@ -12,12 +12,15 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
   const overlayRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const defaultVolume = 0.3;
 
-  // Attempt play & schedule controls visibility
+  // Initialize playback, set default volume
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
-    vid.muted = true;
+    vid.muted = isMuted;
+    vid.volume = isMuted ? 0 : defaultVolume;
     vid.playsInline = true;
     vid.src = intro1080;
     vid.load();
@@ -25,7 +28,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     vid.play().catch(() => {});
     const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
     return () => clearTimeout(timer);
-  }, [skipAfter]);
+  }, [skipAfter, isMuted]);
 
   const handleCanPlay = () => setLoading(false);
 
@@ -44,20 +47,14 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     finishIntro();
   };
 
-  const handleUnmute = () => {
+  // Toggle mute state
+  const toggleMute = () => {
     const vid = videoRef.current;
-    if (vid) {
-      vid.muted = false;
-      let vol = 0;
-      vid.volume = 0;
-      const fade = setInterval(() => {
-        vol += 0.05;
-        if (vol >= 1) {
-          vid.volume = 1;
-          clearInterval(fade);
-        } else vid.volume = vol;
-      }, 100);
-    }
+    if (!vid) return;
+    const newMuted = !isMuted;
+    vid.muted = newMuted;
+    vid.volume = newMuted ? 0 : defaultVolume;
+    setIsMuted(newMuted);
   };
 
   return (
@@ -76,7 +73,6 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
-          muted
           playsInline
           preload="metadata"
           poster={poster}
@@ -87,6 +83,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
           <source src={intro1080} type="video/mp4" />
           <p className="text-white">Your browser does not support embedded videos.</p>
         </video>
+
         {controlsVisible && (
           <motion.div
             className="absolute bottom-6 right-6 flex space-x-3"
@@ -101,11 +98,11 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
               {skipLabel}
             </button>
             <button
-              onClick={handleUnmute}
+              onClick={toggleMute}
               className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg transition flex items-center space-x-1"
             >
-              <Volume2 size={16} />
-              <span>Unmute</span>
+              {isMuted ? <Volume2 size={16} /> : <VolumeX size={16} />}
+              <span>{isMuted ? 'Unmute' : 'Mute'}</span>
             </button>
           </motion.div>
         )}
@@ -120,3 +117,4 @@ IntroVideo.propTypes = {
   skipLabel: PropTypes.string,
   onFinish: PropTypes.func,
 };
+
