@@ -12,24 +12,16 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
   const overlayRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
-  const defaultVolume = 0.3; poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish }) {
-  const videoRef = useRef(null);
-  const overlayRef = useRef(null);
-  const [loading, setLoading] = useState(true);
-  const [controlsVisible, setControlsVisible] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const defaultVolume = 0.3;
 
-  // Attempt play & schedule controls visibility
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
     vid.playsInline = true;
     vid.src = intro1080;
     vid.load();
-    // start muted to allow autoplay
-    vid.muted = true;
+    vid.muted = true; // allow autoplay
     vid.play().catch(() => {});
 
     const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
@@ -40,7 +32,6 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     setLoading(false);
     const vid = videoRef.current;
     if (vid) {
-      // after autoplay, enable audio per default state
       vid.muted = isMuted;
       vid.volume = defaultVolume;
     }
@@ -58,7 +49,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
 
   const handleSkip = () => {
     const vid = videoRef.current;
-    vid.pause();
+    if (vid) vid.pause();
     finishIntro();
   };
 
@@ -78,7 +69,9 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
         ref={overlayRef}
         key="intro-overlay"
         className="fixed inset-0 z-[9999] bg-black flex items-center justify-center transition-opacity duration-700"
-        initial={{ opacity: 1 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
       >
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -88,7 +81,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
-          muted
+          muted={isMuted}
           playsInline
           preload="metadata"
           poster={poster}
@@ -102,7 +95,9 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
         {controlsVisible && (
           <motion.div
             className="absolute bottom-6 right-6 flex space-x-3"
-            initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 300 }}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 300 }}
           >
             <button
               onClick={handleSkip}
