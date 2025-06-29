@@ -1,0 +1,52 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_FLAGS = "--legacy-peer-deps"
+
+# --- HTTPS & Domain Enforcement ---
+[[redirects]]
+  from = "http://echoscript.ai/*"
+  to   = "https://www.echoscript.ai/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.echoscript.ai/*"
+  to   = "https://www.echoscript.ai/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://echoscriptai.com/*"
+  to   = "https://www.echoscriptai.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.echoscriptai.com/*"
+  to   = "https://www.echoscriptai.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://echoscript.ai/*"
+  to   = "https://www.echoscript.ai/:splat"
+  status = 301
+  force = true
+
+# --- SPA fallback (must go last) ---
+[[redirects]]
+  from = "/*"
+  to   = "/index.html"
+  status = 200
+
+# --- SSL Headers (HSTS to force HTTPS long-term) ---
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    Cache-Control = "no-store"
+

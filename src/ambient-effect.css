@@ -1,0 +1,58 @@
+/* --------------------------------------------- */
+/* ✨ Ambient Background + Shimmer Effect */
+/* --------------------------------------------- */
+
+/* Soft teal-to-cyan gradient background */
+.bg-ambient {
+  background: linear-gradient(
+    135deg,
+    hsla(180, 66%, 60%, 0.2),
+    hsla(200, 100%, 70%, 0.25),
+    hsla(160, 80%, 70%, 0.15)
+  );
+  background-size: 400% 400%;
+  animation: ambientPulse 30s ease infinite;
+  position: relative;
+  z-index: 0;
+}
+
+/* Subtle shimmer overlay */
+.shimmer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+  animation: shimmerMove 12s linear infinite;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  mask-image: radial-gradient(circle, rgba(255,255,255,0.2) 20%, transparent 80%);
+}
+
+/* Pulse animation */
+@keyframes ambientPulse {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Shimmer movement */
+@keyframes shimmerMove {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(50%);
+  }
+}
