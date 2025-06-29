@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, SpeakerHigh } from 'lucide-react';
+import { X, Volume2 } from 'lucide-react';
 
 /**
  * IntroVideo — High-resolution, fullscreen intro with optional audio.
@@ -98,7 +98,7 @@ export default function IntroVideo({
           <div className="absolute bottom-6 right-6 flex space-x-3">
             <button
               onClick={handleFinish}
-              className="bg-teal-500/60 hover:bg-teal-500/80 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg transition "
+              className="bg-teal-500/60 hover:bg-teal-500/80 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg transition"
             >
               {skipLabel}
             </button>
@@ -106,7 +106,7 @@ export default function IntroVideo({
               onClick={handleUnmute}
               className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg transition flex items-center space-x-1"
             >
-              <SpeakerHigh size={16} />
+              <Volume2 size={16} />
               <span>Unmute</span>
             </button>
           </div>
@@ -115,6 +115,5 @@ export default function IntroVideo({
     </AnimatePresence>
   );
 }
-
 
 
