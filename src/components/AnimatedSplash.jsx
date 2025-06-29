@@ -1,3 +1,26 @@
+// src/components/AnimatedSplash.jsx
+/**
+ * AnimatedSplash (Disabled)
+ *
+ * Original animated splash has been deprecated.
+ * This component now immediately invokes onComplete and renders nothing.
+ * Remove any references to this file after updating.
+ */
+import { useEffect } from 'react';
+
+export default function AnimatedSplash({ onComplete }) {
+  useEffect(() => {
+    onComplete?.();
+  }, [onComplete]);
+
+  return null;
+}
+
+
+
+
+
+/*
 import React, {
   useState,
   useEffect,
@@ -130,4 +153,4 @@ export default function AnimatedSplash({
     </AnimatePresence>
   );
 }
-
+*/
