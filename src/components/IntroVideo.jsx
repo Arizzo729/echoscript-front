@@ -8,10 +8,14 @@ import { Volume2 } from 'lucide-react';
  * IntroVideo — Fullscreen intro with reliable playback, loading indicator,
  * skip & unmute controls, and fade transition.
  */
+import intro1440 from '../assets/videos/intro-1440p.mp4';
+import intro720 from '../assets/videos/intro-720p.mp4';
+import intro480 from '../assets/videos/intro-480p.mp4';
+
 const defaultSources = [
-  { src: '/videos/intro-1440p.mp4', type: 'video/mp4', resolution: 1440 },
-  { src: '/videos/intro-720p.mp4',  type: 'video/mp4', resolution:  720 },
-  { src: '/videos/intro-480p.mp4',  type: 'video/mp4', resolution:  480 }
+  { src: intro1440, type: 'video/mp4', resolution: 1440 },
+  { src: intro720,  type: 'video/mp4', resolution:  720 },
+  { src: intro480,  type: 'video/mp4', resolution:  480 }
 ];
 
 export default function IntroVideo({
