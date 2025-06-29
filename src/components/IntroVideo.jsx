@@ -5,42 +5,39 @@ import { Volume2, VolumeX } from 'lucide-react';
 import PropTypes from 'prop-types';
 import introVideo from '../assets/videos/intro.mp4';
 
-export default function IntroVideo({
-  poster,
-  skipAfter = 3,
-  skipLabel = 'Skip Intro',
-  onFinish
-}) {
+export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish }) {
   const videoRef = useRef(null);
   const overlayRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
-  // track "user wants it muted?" solely for the button icon/text
   const [userMuted, setUserMuted] = useState(false);
   const defaultVolume = 0.3;
 
-  // schedule controls
   useEffect(() => {
-    const t = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
+    return () => clearTimeout(timer);
   }, [skipAfter]);
 
-  // mount: set up video and autoplay (muted attr satisfies policy)
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     v.src = introVideo;
     v.playsInline = true;
-    v.muted = true;     // static, ensures autoplay
+    v.muted = true;
     v.volume = defaultVolume;
     v.load();
     v.play().catch(() => {});
   }, []);
 
-  // once enough data is buffered, remove spinner
   const handleCanPlay = () => {
     setLoading(false);
+    const v = videoRef.current;
+    if (v) {
+      // apply mute state and volume without re-playing
+      v.muted = userMuted;
+      if (!userMuted) v.volume = defaultVolume;
+    }
   };
 
   const finishIntro = () => {
@@ -59,18 +56,16 @@ export default function IntroVideo({
     finishIntro();
   };
 
-  // ** never touch the <video muted> attribute in JSX **
-  // only toggle the actual DOM property
   const toggleMute = () => {
     const v = videoRef.current;
     if (!v) return;
-    const nowMuted = !v.muted;
-    v.muted = nowMuted;
-    if (!nowMuted) {
-      v.volume = defaultVolume;        // restore volume
-      v.play().catch(() => {});       // safety in case it paused
+    const next = !v.muted;
+    v.muted = next;
+    if (!next) {
+      v.volume = defaultVolume;
+      v.play().catch(() => {});
     }
-    setUserMuted(nowMuted);
+    setUserMuted(next);
   };
 
   return (
@@ -93,7 +88,7 @@ export default function IntroVideo({
           ref={videoRef}
           className="w-full h-full object-cover"
           autoPlay
-          muted       {/* keep this static */}
+          muted
           playsInline
           preload="metadata"
           poster={poster}
@@ -102,9 +97,7 @@ export default function IntroVideo({
           onError={handleCanPlay}
         >
           <source src={introVideo} type="video/mp4" />
-          <p className="text-white">
-            Your browser does not support embedded videos.
-          </p>
+          <p className="text-white">Your browser does not support embedded videos.</p>
         </video>
 
         {controlsVisible && (
@@ -125,7 +118,7 @@ export default function IntroVideo({
               className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg flex items-center space-x-1"
             >
               {userMuted ? <Volume2 size={16} /> : <VolumeX size={16} />}
-              <span>{userMuted ? 'Unmuted' : 'Muted'}</span>
+              <span>{userMuted ? 'Unmute' : 'Mute'}</span>
             </button>
           </motion.div>
         )}
@@ -135,8 +128,8 @@ export default function IntroVideo({
 }
 
 IntroVideo.propTypes = {
-  poster:    PropTypes.string,
+  poster: PropTypes.string,
   skipAfter: PropTypes.number,
   skipLabel: PropTypes.string,
-  onFinish:  PropTypes.func,
+  onFinish: PropTypes.func,
 };
