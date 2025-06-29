@@ -24,8 +24,8 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     if (!v) return;
     v.src = introVideo;
     v.playsInline = true;
-    v.muted = true;
     v.volume = defaultVolume;
+    v.muted = false;
     v.load();
     v.play().catch(() => {});
   }, []);
@@ -33,11 +33,10 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
   const handleCanPlay = () => {
     setLoading(false);
     const v = videoRef.current;
-    if (!v) return;
-    // Unmute and set to default volume when ready
-    v.muted = userMuted;
-    v.volume = defaultVolume;
-    if (!userMuted && v.paused) v.play().catch(() => {});
+    if (v) {
+      v.muted = userMuted;
+      v.volume = userMuted ? 0 : defaultVolume;
+    }
   };
 
   const finishIntro = () => {
@@ -59,13 +58,11 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
   const toggleMute = () => {
     const v = videoRef.current;
     if (!v) return;
-    const next = !v.muted;
-    v.muted = next;
-    if (!next) {
-      v.volume = defaultVolume;
-      v.play().catch(() => {});
-    }
-    setUserMuted(next);
+    const nextMuted = !userMuted;
+    v.muted = nextMuted;
+    v.volume = nextMuted ? 0 : defaultVolume;
+    if (!nextMuted) v.play().catch(() => {});
+    setUserMuted(nextMuted);
   };
 
   return (
@@ -88,7 +85,6 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
           ref={videoRef}
           className="w-full h-full object-cover"
           autoPlay
-          muted
           playsInline
           preload="metadata"
           poster={poster}
@@ -117,7 +113,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
               onClick={toggleMute}
               className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg flex items-center space-x-1"
             >
-              {userMuted ? <Volume2 size={16} /> : <VolumeX size={16} />}
+              {userMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
               <span>{userMuted ? 'Unmute' : 'Mute'}</span>
             </button>
           </motion.div>
