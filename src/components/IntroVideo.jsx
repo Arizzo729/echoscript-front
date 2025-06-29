@@ -21,7 +21,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     vid.playsInline = true;
     vid.src = intro1080;
     vid.load();
-    vid.muted = true; // allow autoplay
+    vid.muted = true; // mute initially to allow autoplay
     vid.play().catch(() => {});
 
     const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
@@ -32,7 +32,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     setLoading(false);
     const vid = videoRef.current;
     if (vid) {
-      vid.muted = isMuted;
+      vid.muted = isMuted;     // apply desired mute state
       vid.volume = defaultVolume;
     }
   };
@@ -81,7 +81,6 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
-          muted={isMuted}
           playsInline
           preload="metadata"
           poster={poster}
@@ -125,4 +124,3 @@ IntroVideo.propTypes = {
   skipLabel: PropTypes.string,
   onFinish: PropTypes.func,
 };
-
