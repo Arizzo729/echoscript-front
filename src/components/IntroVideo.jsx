@@ -5,44 +5,46 @@ import { Volume2, VolumeX } from 'lucide-react';
 import PropTypes from 'prop-types';
 import introVideo from '../assets/videos/intro.mp4';
 
-export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish }) {
+export default function IntroVideo({
+  poster,
+  skipAfter = 3,
+  skipLabel = 'Skip Intro',
+  onFinish
+}) {
   const videoRef = useRef(null);
   const overlayRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
   const [userMuted, setUserMuted] = useState(false);
-  const DEFAULT_VOLUME = 0.3;
+  const defaultVolume = 0.3;
 
-  // Show controls after a delay
+  // Show controls after delay
   useEffect(() => {
     const t = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
     return () => clearTimeout(t);
   }, [skipAfter]);
 
-  // Initial mount: set up video and start autoplay (muted)
+  // Initial mount: autoplay muted
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     v.src = introVideo;
     v.playsInline = true;
-    v.muted = true;         // must start muted
-    v.volume = DEFAULT_VOLUME;
+    v.muted = true;
+    v.volume = defaultVolume;
     v.load();
     v.play().catch(() => {});
   }, []);
 
-  // Once the browser signals it's ready to play:
+  // As soon as enough is buffered, unmute at low volume
   const handleCanPlay = () => {
     setLoading(false);
     const v = videoRef.current;
     if (!v) return;
-    // If the user hasn't manually muted, unmute now
-    if (!userMuted) {
-      v.muted = false;
-      v.volume = DEFAULT_VOLUME;
-    }
-    // Retry play in case it was paused
+    // Unmute once ready
+    v.muted = false;
+    v.volume = defaultVolume;
     if (v.paused) v.play().catch(() => {});
   };
 
@@ -62,17 +64,17 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     finishIntro();
   };
 
-  // Let the user mute/unmute at will
+  // User toggle
   const toggleMute = () => {
     const v = videoRef.current;
     if (!v) return;
-    const nextMuted = !v.muted;
-    v.muted = nextMuted;
-    if (!nextMuted) {
-      v.volume = DEFAULT_VOLUME;
+    const next = !v.muted;
+    v.muted = next;
+    if (!next) {
+      v.volume = defaultVolume;
       v.play().catch(() => {});
     }
-    setUserMuted(nextMuted);
+    setUserMuted(next);
   };
 
   return (
@@ -90,11 +92,12 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
             <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
           </div>
         )}
+
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
           autoPlay
-          muted         // static to permit autoplay
+          muted
           playsInline
           preload="metadata"
           poster={poster}
@@ -105,6 +108,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
           <source src={introVideo} type="video/mp4" />
           <p className="text-white">Your browser does not support embedded videos.</p>
         </video>
+
         {controlsVisible && (
           <motion.div
             className="absolute bottom-6 right-6 flex space-x-3"
@@ -133,9 +137,9 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
 }
 
 IntroVideo.propTypes = {
-  poster: PropTypes.string,
+  poster:    PropTypes.string,
   skipAfter: PropTypes.number,
   skipLabel: PropTypes.string,
-  onFinish: PropTypes.func,
+  onFinish:  PropTypes.func,
 };
 
