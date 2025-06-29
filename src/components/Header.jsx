@@ -1,4 +1,4 @@
-// src/components/Header.jsx
+/// src/components/Header.jsx
 import React, { useState, useEffect, useRef } from "react";
 import {
   BellIcon,
@@ -85,16 +85,22 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
         .then((res) => res.json())
         .then((data) => {
           if (active && Array.isArray(data.results)) {
-            setSuggestions(data.results.length ? data.results : LOCAL_SEARCH_INDEX.filter((item) =>
-              item.name.toLowerCase().includes(searchQuery.toLowerCase())
-            ));
+            setSuggestions(
+              data.results.length
+                ? data.results
+                : LOCAL_SEARCH_INDEX.filter((item) =>
+                    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+            );
           }
         })
         .catch(() => {
           if (active) {
-            setSuggestions(LOCAL_SEARCH_INDEX.filter((item) =>
-              item.name.toLowerCase().includes(searchQuery.toLowerCase())
-            ));
+            setSuggestions(
+              LOCAL_SEARCH_INDEX.filter((item) =>
+                item.name.toLowerCase().includes(searchQuery.toLowerCase())
+              )
+            );
           }
         })
         .finally(() => active && setIsLoading(false));
@@ -129,17 +135,17 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t("Search tools, pages, actions...")}
-              className="w-full py-2 pl-10 pr-10 text-sm rounded bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              className="appearance-none w-full py-2 pl-10 pr-10 text-sm rounded bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
             />
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
             {searchQuery && (
-             <button
-  onClick={() => setSearchQuery("")}
-  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-transparent hover:text-red-500 transition"
-  aria-label={t("Clear search")}
->
-  <X className="w-4 h-4 text-zinc-400" />
-</button>
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-transparent hover:text-red-500 transition"
+                aria-label={t("Clear search")}
+              >
+                <X className="w-4 h-4 text-zinc-400" />
+              </button>
             )}
             <AnimatePresence>
               {(suggestions.length > 0 || isLoading) && (
@@ -177,14 +183,22 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
             size="sm"
             onClick={onToggleTheme}
             aria-label={t("Toggle theme")}
-            icon={isDarkMode ? <SunIcon className="w-5 h-5 text-yellow-300" /> : <MoonIcon className="w-5 h-5 text-blue-300" />}
+            icon={isDarkMode ? (
+              <SunIcon className="w-5 h-5 text-yellow-300" />
+            ) : (
+              <MoonIcon className="w-5 h-5 text-blue-300" />
+            )}
           />
           <Button
             variant="ghost"
             size="sm"
             onClick={toggleMute}
             aria-label={t("Toggle sound")}
-            icon={isMuted ? <VolumeX className="w-5 h-5 text-red-500" /> : <Volume2 className="w-5 h-5 text-teal-400" />}
+            icon={isMuted ? (
+              <VolumeX className="w-5 h-5 text-red-500" />
+            ) : (
+              <Volume2 className="w-5 h-5 text-teal-400" />
+            )}
           />
           <div className="relative">
             <Button
@@ -204,8 +218,12 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
                   exit={{ opacity: 0, y: -10 }}
                   className="absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-700 rounded shadow z-50"
                 >
-                  <div className="px-4 py-2 text-sm font-semibold border-b border-zinc-700">{t("Updates")}</div>
-                  <div className="p-4 text-sm text-zinc-400">🚧 {t("In development — check back soon!")}</div>
+                  <div className="px-4 py-2 text-sm font-semibold border-b border-zinc-700">
+                    {t("Updates")}
+                  </div>
+                  <div className="p-4 text-sm text-zinc-400">
+                    🚧 {t("In development — check back soon!")}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -228,7 +246,9 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
               <span className="text-sm text-white">
                 {isGuest ? t("Welcome, Guest") : user.email}
               </span>
-              <ChevronDownIcon className={`w-4 h-4 transition-transform ${showUserDropdown ? "rotate-180" : ""}`} />
+              <ChevronDownIcon
+                className={`w-4 h-4 transition-transform ${showUserDropdown ? "rotate-180" : ""}`}
+              />
             </Button>
             <AnimatePresence>
               {showUserDropdown && (
@@ -247,16 +267,25 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
                         {t("Privacy Settings")}
                       </Link>
                       <hr className="border-zinc-700" />
-                      <button onClick={onLogout} className="w-full text-left px-4 py-2 text-red-500 hover:bg-zinc-800">
+                      <button
+                        onClick={onLogout}
+                        className="w-full text-left px-4 py-2 text-red-500 hover:bg-zinc-800"
+                      >
                         {t("Log Out")}
                       </button>
                     </>
                   ) : (
                     <div className="p-3 space-y-2">
-                      <Link to="/signin" className="block w-full text-center px-4 py-2 text-sm font-medium bg-teal-600 hover:bg-teal-700 text-white rounded">
+                      <Link
+                        to="/signin"
+                        className="block w-full text-center px-4 py-2 text-sm font-medium bg-teal-600 hover:bg-teal-700 text-white rounded"
+                      >
                         {t("Sign In")}
                       </Link>
-                      <Link to="/signup" className="block w-full text-center px-4 py-2 text-sm font-medium bg-zinc-700 hover:bg-zinc-600 text-white rounded">
+                      <Link
+                        to="/signup"
+                        className="block w-full text-center px-4 py-2 text-sm font-medium bg-zinc-700 hover:bg-zinc-600 text-white rounded"
+                      >
                         {t("Sign Up")}
                       </Link>
                     </div>
