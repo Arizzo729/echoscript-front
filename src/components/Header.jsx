@@ -1,4 +1,4 @@
-/// src/components/Header.jsx
+// src/components/Header.jsx
 import React, { useState, useEffect, useRef } from "react";
 import {
   BellIcon,
@@ -7,7 +7,7 @@ import {
   SunIcon,
   MoonIcon,
 } from "@heroicons/react/24/outline";
-import { Volume2, VolumeX, X } from "lucide-react";
+import { Volume2, VolumeX, X } from "lucide-react"; // we can keep X import in case it’s used elsewhere
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "./ui/Button";
@@ -30,7 +30,11 @@ const LOCAL_SEARCH_INDEX = [
   { type: "Page", name: "Contact Us", path: "/contact" },
 ];
 
-export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, isDarkMode = false }) {
+export default function Header({
+  onLogout = () => {},
+  onToggleTheme = () => {},
+  isDarkMode = false,
+}) {
   const { user } = useAuth();
   const { t } = useTranslation();
   const { isMuted, toggleMute } = useSound();
@@ -135,18 +139,10 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t("Search tools, pages, actions...")}
-              className="appearance-none w-full py-2 pl-10 pr-10 text-sm rounded bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              className="w-full py-2 pl-10 pr-4 text-sm rounded bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
             />
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-transparent hover:text-red-500 transition"
-                aria-label={t("Clear search")}
-              >
-                <X className="w-4 h-4 text-zinc-400" />
-              </button>
-            )}
+
             <AnimatePresence>
               {(suggestions.length > 0 || isLoading) && (
                 <motion.ul
@@ -183,23 +179,28 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
             size="sm"
             onClick={onToggleTheme}
             aria-label={t("Toggle theme")}
-            icon={isDarkMode ? (
-              <SunIcon className="w-5 h-5 text-yellow-300" />
-            ) : (
-              <MoonIcon className="w-5 h-5 text-blue-300" />
-            )}
+            icon={
+              isDarkMode ? (
+                <SunIcon className="w-5 h-5 text-yellow-300" />
+              ) : (
+                <MoonIcon className="w-5 h-5 text-blue-300" />
+              )
+            }
           />
           <Button
             variant="ghost"
             size="sm"
             onClick={toggleMute}
             aria-label={t("Toggle sound")}
-            icon={isMuted ? (
-              <VolumeX className="w-5 h-5 text-red-500" />
-            ) : (
-              <Volume2 className="w-5 h-5 text-teal-400" />
-            )}
+            icon={
+              isMuted ? (
+                <VolumeX className="w-5 h-5 text-red-500" />
+              ) : (
+                <Volume2 className="w-5 h-5 text-teal-400" />
+              )
+            }
           />
+
           <div className="relative">
             <Button
               variant="ghost"
@@ -228,6 +229,7 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
               )}
             </AnimatePresence>
           </div>
+
           <div className="relative">
             <Button
               variant="ghost"
@@ -247,7 +249,9 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
                 {isGuest ? t("Welcome, Guest") : user.email}
               </span>
               <ChevronDownIcon
-                className={`w-4 h-4 transition-transform ${showUserDropdown ? "rotate-180" : ""}`}
+                className={`w-4 h-4 transition-transform ${
+                  showUserDropdown ? "rotate-180" : ""
+                }`}
               />
             </Button>
             <AnimatePresence>
