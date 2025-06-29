@@ -4,14 +4,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Volume2 } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-import intro1440 from '../assets/videos/intro-1440p.mp4';
-import intro720 from '../assets/videos/intro-720p.mp4';
-import intro480 from '../assets/videos/intro-480p.mp4';
+import intro1440 from '../assets/videos/intro.mp4';
 
 const defaultSources = [
-  { src: intro1440, type: 'video/mp4', resolution: 1440 },
-  { src: intro720,  type: 'video/mp4', resolution:  720 },
-  { src: intro480,  type: 'video/mp4', resolution:  480 }
+  { src: intro1440, type: 'video/mp4', resolution: 1440 },,
 ];
 
 export default function IntroVideo({ sources = defaultSources, poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish }) {
