@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * IntroVideo component — plays a fullscreen intro clip on login with audio fade-in
+ * IntroVideo component — plays a fullscreen intro clip on login with guaranteed playback
+ * and smooth audio fade-in. Autoplay policy compliance via muted start.
  *
  * Props:
  * - sources?: Array<{ src: string, type: string }> — list of video sources for resolution fallback
@@ -18,40 +19,42 @@ export default function IntroVideo({ sources, src, type = 'video/mp4', onFinish,
   const [canSkip, setCanSkip] = useState(skipAfter === 0);
   const videoRef = useRef(null);
 
-  // Determine sources array
-  const videoSources = Array.isArray(sources)
-    ? sources
-    : src
-    ? [{ src, type }]
-    : [];
+  // Build sources array
+  const videoSources = Array.isArray(sources) ? sources : src ? [{ src, type }] : [];
 
+  // Autoplay on loaded data and fade-in audio
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid || videoSources.length === 0) return;
-
+    vid.preload = 'auto';
+    vid.playsInline = true;
     vid.muted = true;
     vid.volume = 0;
-    vid.preload = 'auto';
 
-    const handleCanPlay = () => {
-      vid.play().catch(err => console.warn('IntroVideo play failed:', err));
+    const handleLoadedData = async () => {
+      try {
+        await vid.play();
+      } catch (err) {
+        console.warn('IntroVideo play failed:', err);
+      }
+      // fade volume to 40%
       const targetVol = 0.4;
       const duration = 1000;
-      const interval = 50;
-      const step = targetVol / (duration / interval);
+      const steps = duration / 50;
+      const stepVol = targetVol / steps;
       let vol = 0;
       const ramp = setInterval(() => {
-        vol = Math.min(vol + step, targetVol);
+        vol = Math.min(vol + stepVol, targetVol);
         vid.volume = vol;
         if (vol >= targetVol) {
           vid.muted = false;
           clearInterval(ramp);
         }
-      }, interval);
+      }, 50);
     };
 
-    vid.addEventListener('canplaythrough', handleCanPlay);
-    return () => vid.removeEventListener('canplaythrough', handleCanPlay);
+    vid.addEventListener('loadeddata', handleLoadedData);
+    return () => vid.removeEventListener('loadeddata', handleLoadedData);
   }, [videoSources]);
 
   // Reveal skip button after delay
@@ -62,12 +65,13 @@ export default function IntroVideo({ sources, src, type = 'video/mp4', onFinish,
     }
   }, [skipAfter]);
 
+  // Finish handler
   const finish = () => {
     setVisible(false);
-    onFinish?.();
+    onFinish && onFinish();
   };
 
-  // Prevent background scroll while visible
+  // Prevent background scroll
   useEffect(() => {
     document.body.style.overflow = visible ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -86,13 +90,15 @@ export default function IntroVideo({ sources, src, type = 'video/mp4', onFinish,
           <div className="absolute inset-0 overflow-hidden">
             <video
               ref={videoRef}
+              autoPlay
+              muted
               playsInline
               controls={false}
               onEnded={finish}
-              className="absolute top-0 left-0 w-full h-full object-cover object-top"
+              className="absolute inset-0 w-full h-full object-cover object-top"
             >
-              {videoSources.map(({ src, type }) => (
-                <source key={src} src={src} type={type} />
+              {videoSources.map(({ src: s, type: t }) => (
+                <source key={s} src={s} type={t} />
               ))}
               Your browser does not support the video tag.
             </video>
@@ -114,4 +120,5 @@ export default function IntroVideo({ sources, src, type = 'video/mp4', onFinish,
     </AnimatePresence>
   );
 }
+
 
