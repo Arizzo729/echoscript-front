@@ -82,17 +82,13 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
             <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
           </div>
         )}
-        <video
-          ref={videoRef}
-          className="w-full h-full object-cover"
-          muted
-          playsInline
-          preload="metadata"
-          poster={poster}
-          onCanPlay={handleCanPlay}
-          onEnded={finishIntro}
-          onError={finishIntro}
-        >
+        <video$1 autoPlay muted playsInline onCanPlay={() => {
+            const vid = videoRef.current;
+            if (vid && vid.paused) vid.play().catch(() => {});
+          }} onError={() => {
+            const vid = videoRef.current;
+            if (vid && vid.paused) vid.play().catch(() => {});
+          }}>
           <source src={intro1080} type="video/mp4" />
           <p className="text-white">Your browser does not support embedded videos.</p>
         </video>
