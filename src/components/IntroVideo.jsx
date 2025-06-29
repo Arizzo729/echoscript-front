@@ -13,7 +13,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
-  const defaultVolume = 0.3; poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish }) {
+  const defaultVolume = 0.3; poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish } {
   const videoRef = useRef(null);
   const overlayRef = useRef(null);
   const [loading, setLoading] = useState(true);
