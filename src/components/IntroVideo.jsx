@@ -1,4 +1,3 @@
-// src/components/IntroVideo.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
@@ -11,46 +10,70 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
 
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [userMuted, setUserMuted] = useState(false);
+  const [userMuted, setUserMuted] = useState(true); // start muted to pass autoplay
+  const [interacted, setInteracted] = useState(false);
   const defaultVolume = 0.3;
-
-  useEffect(() => {
-    const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
-    return () => clearTimeout(timer);
-  }, [skipAfter]);
 
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
+
     v.src = introVideo;
     v.playsInline = true;
-    v.muted = false; // Start with audio ON
+    v.muted = true;
     v.volume = defaultVolume;
     v.load();
-    v.play().catch(() => {});
+    attemptPlay(v);
+
+    const retryOnTabFocus = () => {
+      if (document.visibilityState === 'visible') {
+        attemptPlay(v);
+      }
+    };
+    document.addEventListener('visibilitychange', retryOnTabFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', retryOnTabFocus);
+    };
   }, []);
+
+  const attemptPlay = (v, retries = 3) => {
+    if (!v || retries <= 0) return;
+    v.play().catch(() => {
+      setTimeout(() => attemptPlay(v, retries - 1), 500);
+    });
+  };
 
   const handleCanPlay = () => {
     setLoading(false);
     const v = videoRef.current;
-    if (v) {
+    if (v && interacted) {
       v.muted = userMuted;
       v.volume = userMuted ? 0 : defaultVolume;
+      attemptPlay(v);
     }
   };
 
   const toggleMute = () => {
     const v = videoRef.current;
     if (!v) return;
-    const muted = !userMuted;
-    v.muted = muted;
-    v.volume = muted ? 0 : defaultVolume;
-    setUserMuted(muted);
+    if (!interacted) setInteracted(true);
+    const next = !userMuted;
+    v.muted = next;
+    v.volume = next ? 0 : defaultVolume;
+    attemptPlay(v);
+    setUserMuted(next);
   };
 
   const handleSkip = () => {
     const v = videoRef.current;
-    if (v) v.pause();
+    if (!v) return;
+    setInteracted(true);
+    v.pause();
+    finishIntro();
+  };
+
+  const finishIntro = () => {
     const ov = overlayRef.current;
     if (ov) {
       ov.classList.add('opacity-0');
@@ -59,6 +82,11 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
       onFinish?.();
     }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
+    return () => clearTimeout(timer);
+  }, [skipAfter]);
 
   return (
     <AnimatePresence>
@@ -84,7 +112,7 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
           preload="auto"
           poster={poster}
           onCanPlay={handleCanPlay}
-          onEnded={handleSkip}
+          onEnded={finishIntro}
           onError={handleCanPlay}
         >
           <source src={introVideo} type="video/mp4" />
@@ -124,3 +152,4 @@ IntroVideo.propTypes = {
   skipLabel: PropTypes.string,
   onFinish: PropTypes.func,
 };
+
