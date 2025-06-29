@@ -133,13 +133,13 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
             />
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
             {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full hover:text-red-500 transition"
-                aria-label={t("Clear search")}
-              >
-                <X className="w-4 h-4 text-zinc-400" />
-              </button>
+             <button
+  onClick={() => setSearchQuery("")}
+  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-transparent hover:text-red-500 transition"
+  aria-label={t("Clear search")}
+>
+  <X className="w-4 h-4 text-zinc-400" />
+</button>
             )}
             <AnimatePresence>
               {(suggestions.length > 0 || isLoading) && (
