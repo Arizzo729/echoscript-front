@@ -3,9 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
 import PropTypes from 'prop-types';
-
-// Single 1080p source
-import intro1080 from '../assets/videos/intro.mp4';
+import introVideo from '../assets/videos/intro.mp4';
 
 export default function IntroVideo({
   poster,
@@ -18,30 +16,33 @@ export default function IntroVideo({
 
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  // track "user wants it muted?" solely for the button icon/text
+  const [userMuted, setUserMuted] = useState(false);
+  const defaultVolume = 0.3;
 
-  // Play muted on mount exactly as your original snippet did
+  // schedule controls
   useEffect(() => {
-    const vid = videoRef.current;
-    if (!vid) return;
-
-    vid.playsInline = true;
-    vid.src = intro1080;
-    vid.load();
-
-    vid.muted = true;           // start muted for autoplay
-    vid.play().catch(() => {}); // original autoplay call
-
-    const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
+    return () => clearTimeout(t);
   }, [skipAfter]);
 
-  // Fired when the video can actually play through
+  // mount: set up video and autoplay (muted attr satisfies policy)
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.src = introVideo;
+    v.playsInline = true;
+    v.muted = true;     // static, ensures autoplay
+    v.volume = defaultVolume;
+    v.load();
+    v.play().catch(() => {});
+  }, []);
+
+  // once enough data is buffered, remove spinner
   const handleCanPlay = () => {
     setLoading(false);
   };
 
-  // Fade-out overlay then signal done
   const finishIntro = () => {
     const ov = overlayRef.current;
     if (ov) {
@@ -52,22 +53,24 @@ export default function IntroVideo({
     }
   };
 
-  // Skip button pauses & finishes
   const handleSkip = () => {
-    const vid = videoRef.current;
-    if (vid) vid.pause();
+    const v = videoRef.current;
+    if (v) v.pause();
     finishIntro();
   };
 
-  // ** New toggleMute replacing handleUnmute **
+  // ** never touch the <video muted> attribute in JSX **
+  // only toggle the actual DOM property
   const toggleMute = () => {
-    const vid = videoRef.current;
-    const next = !isMuted;
-    setIsMuted(next);
-    if (vid) {
-      vid.muted = next;
-      if (!next) vid.volume = 1; // on unmute, restore full volume
+    const v = videoRef.current;
+    if (!v) return;
+    const nowMuted = !v.muted;
+    v.muted = nowMuted;
+    if (!nowMuted) {
+      v.volume = defaultVolume;        // restore volume
+      v.play().catch(() => {});       // safety in case it paused
     }
+    setUserMuted(nowMuted);
   };
 
   return (
@@ -82,23 +85,26 @@ export default function IntroVideo({
       >
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12"/>
+            <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
           </div>
         )}
 
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
-          muted      /* keep this static so autoplay always works */
+          autoPlay
+          muted       {/* keep this static */}
           playsInline
           preload="metadata"
           poster={poster}
           onCanPlay={handleCanPlay}
           onEnded={finishIntro}
-          onError={finishIntro}
+          onError={handleCanPlay}
         >
-          <source src={intro1080} type="video/mp4" />
-          <p className="text-white">Your browser does not support embedded videos.</p>
+          <source src={introVideo} type="video/mp4" />
+          <p className="text-white">
+            Your browser does not support embedded videos.
+          </p>
         </video>
 
         {controlsVisible && (
@@ -110,16 +116,16 @@ export default function IntroVideo({
           >
             <button
               onClick={handleSkip}
-              className="bg-teal-500/60 hover:bg-teal-500/80 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg transition"
+              className="bg-teal-500/60 hover:bg-teal-500/80 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg"
             >
               {skipLabel}
             </button>
             <button
               onClick={toggleMute}
-              className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg transition flex items-center space-x-1"
+              className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg flex items-center space-x-1"
             >
-              {isMuted ? <Volume2 size={16}/> : <VolumeX size={16}/>}
-              <span>{isMuted ? 'Unmute' : 'Mute'}</span>
+              {userMuted ? <Volume2 size={16} /> : <VolumeX size={16} />}
+              <span>{userMuted ? 'Unmuted' : 'Muted'}</span>
             </button>
           </motion.div>
         )}
@@ -134,7 +140,3 @@ IntroVideo.propTypes = {
   skipLabel: PropTypes.string,
   onFinish:  PropTypes.func,
 };
-
-
-
-
