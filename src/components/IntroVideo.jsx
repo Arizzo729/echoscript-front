@@ -12,26 +12,38 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
   const [userMuted, setUserMuted] = useState(false);
-  const defaultVolume = 0.3;
+  const DEFAULT_VOLUME = 0.3;
 
+  // Show controls after a delay
   useEffect(() => {
-    const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
+    return () => clearTimeout(t);
   }, [skipAfter]);
 
+  // Initial mount: set up video and start autoplay (muted)
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     v.src = introVideo;
     v.playsInline = true;
-    v.muted = true;
-    v.volume = defaultVolume;
+    v.muted = true;         // must start muted
+    v.volume = DEFAULT_VOLUME;
     v.load();
     v.play().catch(() => {});
   }, []);
 
+  // Once the browser signals it's ready to play:
   const handleCanPlay = () => {
     setLoading(false);
+    const v = videoRef.current;
+    if (!v) return;
+    // If the user hasn't manually muted, unmute now
+    if (!userMuted) {
+      v.muted = false;
+      v.volume = DEFAULT_VOLUME;
+    }
+    // Retry play in case it was paused
+    if (v.paused) v.play().catch(() => {});
   };
 
   const finishIntro = () => {
@@ -50,16 +62,17 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     finishIntro();
   };
 
+  // Let the user mute/unmute at will
   const toggleMute = () => {
     const v = videoRef.current;
     if (!v) return;
-    const next = !v.muted;
-    v.muted = next;
-    if (!next) {
-      v.volume = defaultVolume;
+    const nextMuted = !v.muted;
+    v.muted = nextMuted;
+    if (!nextMuted) {
+      v.volume = DEFAULT_VOLUME;
       v.play().catch(() => {});
     }
-    setUserMuted(next);
+    setUserMuted(nextMuted);
   };
 
   return (
@@ -77,12 +90,11 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
             <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
           </div>
         )}
-
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
           autoPlay
-          muted
+          muted         // static to permit autoplay
           playsInline
           preload="metadata"
           poster={poster}
@@ -93,7 +105,6 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
           <source src={introVideo} type="video/mp4" />
           <p className="text-white">Your browser does not support embedded videos.</p>
         </video>
-
         {controlsVisible && (
           <motion.div
             className="absolute bottom-6 right-6 flex space-x-3"
