@@ -7,7 +7,7 @@ import React, {
   useRef,
   useCallback,
   useMemo,
-} from "react";
+} from 'react';
 
 const SoundContext = createContext();
 
@@ -17,7 +17,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
   const [trackIndex, setTrackIndex] = useState(0);
   const [volume, setVolume] = useState(initialVolume);
   const [isUnlocked, setIsUnlocked] = useState(false);
-  const [nowPlaying, setNowPlaying] = useState("Off");
+  const [nowPlaying, setNowPlaying] = useState('Off');
 
   const mainAudioRef = useRef(null);
   const fadeRef = useRef(null);
@@ -26,15 +26,15 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
   const ambientTracks = useMemo(
     () => [
       null,
-      new URL("../assets/sounds/ambient-loop-1.mp3", import.meta.url).href,
-      new URL("../assets/sounds/ambient-loop-2.mp3", import.meta.url).href,
-      new URL("../assets/sounds/ambient-loop-3.mp3", import.meta.url).href,
+      new URL('../assets/sounds/ambient-loop-1.mp3', import.meta.url).href,
+      new URL('../assets/sounds/ambient-loop-2.mp3', import.meta.url).href,
+      new URL('../assets/sounds/ambient-loop-3.mp3', import.meta.url).href,
     ],
     []
   );
 
   const clickSoundUrl = useMemo(
-    () => new URL("../assets/sounds/playPop.mp3", import.meta.url).href,
+    () => new URL('../assets/sounds/playPop.mp3', import.meta.url).href,
     []
   );
 
@@ -45,7 +45,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     mainAudioRef.current = mainAudio;
 
     const clickAudio = new Audio(clickSoundUrl);
-    clickAudio.preload = "auto";
+    clickAudio.preload = 'auto';
     clickRef.current = clickAudio;
 
     return () => {
@@ -56,15 +56,17 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
 
   const fadeTo = useCallback((audio, targetVol, duration = 800) => {
     cancelAnimationFrame(fadeRef.current);
-    const start = audio.volume;
-    const delta = targetVol - start;
+    const startVol = audio.volume;
+    const diff = targetVol - startVol;
     const startTime = performance.now();
 
-    const step = (now) => {
-      const t = Math.min((now - startTime) / duration, 1);
-      audio.volume = start + delta * t;
+    const step = (time) => {
+      const elapsed = time - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      audio.volume = startVol + diff * t;
       if (t < 1) fadeRef.current = requestAnimationFrame(step);
     };
+
     fadeRef.current = requestAnimationFrame(step);
   }, []);
 
@@ -73,7 +75,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     const src = ambientTracks[trackIndex];
 
     if (!src || isMuted || !isUnlocked) {
-      setNowPlaying("Off");
+      setNowPlaying('Off');
       fadeTo(audio, 0);
       setTimeout(() => audio.pause(), 600);
       return;
@@ -90,7 +92,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
         fadeTo(audio, volume * 0.2);
         setNowPlaying(`Music ${trackIndex}`);
       })
-      .catch((err) => console.warn("Autoplay blocked", err));
+      .catch((err) => console.warn('Autoplay blocked', err));
   }, [ambientTracks, trackIndex, isMuted, isUnlocked, volume, fadeTo]);
 
   const toggleAmbient = () => {
@@ -112,7 +114,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
   };
 
   const toggleMute = () => {
-    isMuted ? enableSound() : disableSound();
+    if (isMuted) enableSound(); else disableSound();
   };
 
   const playClick = () => {
@@ -120,11 +122,11 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     if (!click || sfxMuted || !isUnlocked) return;
     click.currentTime = 0;
     click.volume = volume;
-    click.play().catch((err) => console.warn("Click sound error", err));
+    click.play().catch((err) => console.warn('Click sound error', err));
   };
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("sound-settings") || "{}");
+    const saved = JSON.parse(localStorage.getItem('sound-settings') || '{}');
     setIsMuted(saved.isMuted ?? true);
     setSfxMuted(saved.sfxMuted ?? false);
     setVolume(saved.volume ?? initialVolume);
@@ -133,15 +135,15 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
 
   useEffect(() => {
     localStorage.setItem(
-      "sound-settings",
+      'sound-settings',
       JSON.stringify({ isMuted, sfxMuted, volume, trackIndex })
     );
   }, [isMuted, sfxMuted, volume, trackIndex]);
 
   useEffect(() => {
     const unlock = () => setIsUnlocked(true);
-    window.addEventListener("click", unlock, { once: true });
-    return () => window.removeEventListener("click", unlock);
+    window.addEventListener('click', unlock, { once: true });
+    return () => window.removeEventListener('click', unlock);
   }, []);
 
   useEffect(() => {
@@ -174,10 +176,10 @@ export const useSound = () => useContext(SoundContext);
 
 
 // src/components/AudioOverlay.jsx
-import React from "react";
-import Draggable from "react-draggable";
-import { motion } from "framer-motion";
-import { useSound } from "../context/SoundContext";
+import React from 'react';
+import Draggable from 'react-draggable';
+import { motion } from 'framer-motion';
+import { useSound } from '../context/SoundContext';
 
 export default function AudioOverlay() {
   const { toggleAmbient, nowPlaying, trackIndex, isMuted } = useSound();
@@ -185,17 +187,17 @@ export default function AudioOverlay() {
 
   return (
     <Draggable bounds="parent" cancel=".no-drag">
-      <div className="absolute top-6 right-6 z-20 cursor-grab touch-none" style={{ touchAction: "none" }}>
+      <div className="absolute top-6 right-6 z-20 cursor-grab touch-none" style={{ touchAction: 'none' }}>
         <motion.button
           onClick={(e) => { e.stopPropagation(); toggleAmbient(); }}
           whileTap={{ scale: 0.9 }}
           className={`no-drag flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold shadow-lg transition ${
             ambientOn
-              ? "bg-gradient-to-r from-teal-500 to-blue-500 text-white"
-              : "bg-zinc-800/50 text-zinc-300 border border-zinc-600"
+              ? 'bg-gradient-to-r from-teal-500 to-blue-500 text-white'
+              : 'bg-zinc-800/50 text-zinc-300 border border-zinc-600'
           }`}
         >
-          🎵 {ambientOn ? nowPlaying : "Music Off"}
+          🎵 {ambientOn ? nowPlaying : 'Music Off'}
         </motion.button>
       </div>
     </Draggable>
