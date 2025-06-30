@@ -18,10 +18,10 @@ export default function IntroVideo({
 
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(true); // Start muted for autoplay policy
   const defaultVolume = 1;
 
-  // Skip if already played this session
+  // Skip if already played
   useEffect(() => {
     if (window.__introPlayed) {
       navigate('/', { replace: true });
@@ -30,24 +30,30 @@ export default function IntroVideo({
     }
   }, [navigate]);
 
-  // Load, unmute, and play
+  // Load sources and attempt autoplay
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
+
     v.playsInline = true;
     v.preload = 'auto';
     v.defaultPlaybackRate = 1;
     v.muted = muted;
     v.volume = defaultVolume;
+    
+    // Clear existing sources
+    while (v.firstChild) v.removeChild(v.firstChild);
+    
     sources.forEach(({ src, type }) => {
       const source = document.createElement('source');
       source.src = src;
       source.type = type;
       v.appendChild(source);
     });
+
     v.load();
     v.play().catch(() => {
-      // user interaction may be needed
+      // Autoplay might fail silence; will retry on canplay
     });
   }, [muted, sources]);
 
@@ -57,7 +63,15 @@ export default function IntroVideo({
     return () => clearTimeout(timer);
   }, [skipAfter]);
 
-  const handleCanPlay = () => setLoading(false);
+  const handleCanPlay = () => {
+    const v = videoRef.current;
+    setLoading(false);
+    if (muted && v) {
+      // Now unmute after initial playback
+      v.muted = false;
+      setMuted(false);
+    }
+  };
 
   const toggleMute = () => {
     const v = videoRef.current;
