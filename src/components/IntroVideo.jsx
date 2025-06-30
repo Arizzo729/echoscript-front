@@ -25,8 +25,8 @@ export default function IntroVideo({
     }
   }, [navigate]);
 
-  const [loading, setLoading] = useState(true);
-  const [controlsVisible, setControlsVisible] = useState(false);
+    const [loading, setLoading] = useState(true);␊
+  const [controlsVisible, setControlsVisible] = useState(false);␊
   const [userMuted, setUserMuted] = useState(true); // start muted for autoplay
   const defaultVolume = 0.1;
 
