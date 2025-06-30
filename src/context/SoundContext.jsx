@@ -28,7 +28,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
       null,
       new URL("../assets/sounds/ambient-loop-1.mp3", import.meta.url).href,
       new URL("../assets/sounds/ambient-loop-2.mp3", import.meta.url).href,
-t      new URL("../assets/sounds/ambient-loop-3.mp3", import.meta.url).href,
+      new URL("../assets/sounds/ambient-loop-3.mp3", import.meta.url).href,
     ],
     []
   );
@@ -201,6 +201,7 @@ export default function AudioOverlay() {
     </Draggable>
   );
 }
+
 
 
 
