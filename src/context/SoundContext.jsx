@@ -44,8 +44,9 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     mainAudio.volume = 0;
     mainAudioRef.current = mainAudio;
 
-    clickRef.current = new Audio(clickSoundUrl);
-    clickRef.current.preload = "auto";
+    const clickAudio = new Audio(clickSoundUrl);
+    clickAudio.preload = "auto";
+    clickRef.current = clickAudio;
 
     return () => {
       mainAudio.pause();
@@ -84,8 +85,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
       audio.currentTime = 0;
     }
 
-    audio
-      .play()
+    audio.play()
       .then(() => {
         fadeTo(audio, volume * 0.2);
         setNowPlaying(`Music ${trackIndex}`);
@@ -201,6 +201,7 @@ export default function AudioOverlay() {
     </Draggable>
   );
 }
+
 
 
 
