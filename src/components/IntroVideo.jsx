@@ -18,10 +18,10 @@ export default function IntroVideo({
 
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [muted, setMuted] = useState(true); // Start muted for autoplay policy
-  const defaultVolume = 1;
+  const [muted, setMuted] = useState(true); // Always start muted
+  const defaultVolume = 0.3; // Lower volume level when unmuted
 
-  // Skip if already played
+  // Skip if already played this session
   useEffect(() => {
     if (window.__introPlayed) {
       navigate('/', { replace: true });
@@ -30,7 +30,7 @@ export default function IntroVideo({
     }
   }, [navigate]);
 
-  // Load sources and attempt autoplay
+  // Load sources and attempt autoplay muted
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -40,37 +40,31 @@ export default function IntroVideo({
     v.defaultPlaybackRate = 1;
     v.muted = muted;
     v.volume = defaultVolume;
-    
-    // Clear existing sources
-    while (v.firstChild) v.removeChild(v.firstChild);
-    
-    sources.forEach(({ src, type }) => {
-      const source = document.createElement('source');
-      source.src = src;
-      source.type = type;
-      v.appendChild(source);
-    });
+
+    // Append sources if not already present
+    if (v.childElementCount === 0) {
+      sources.forEach(({ src, type }) => {
+        const source = document.createElement('source');
+        source.src = src;
+        source.type = type;
+        v.appendChild(source);
+      });
+    }
 
     v.load();
     v.play().catch(() => {
-      // Autoplay might fail silence; will retry on canplay
+      // Autoplay blocked until user interaction, but stays muted
     });
   }, [muted, sources]);
 
-  // Show controls after delay
+  // Reveal controls after a delay
   useEffect(() => {
     const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
     return () => clearTimeout(timer);
   }, [skipAfter]);
 
   const handleCanPlay = () => {
-    const v = videoRef.current;
     setLoading(false);
-    if (muted && v) {
-      // Now unmute after initial playback
-      v.muted = false;
-      setMuted(false);
-    }
   };
 
   const toggleMute = () => {
@@ -78,12 +72,14 @@ export default function IntroVideo({
     if (!v) return;
     v.muted = !v.muted;
     setMuted(v.muted);
+    if (!v.muted) v.volume = defaultVolume;
   };
 
   const finishIntro = () => {
     navigate('/', { replace: true });
     const ov = overlayRef.current;
     const done = () => onFinish?.();
+
     if (ov) {
       ov.classList.add('opacity-0');
       ov.addEventListener('transitionend', done, { once: true });
@@ -93,8 +89,7 @@ export default function IntroVideo({
   };
 
   const handleSkip = () => {
-    const v = videoRef.current;
-    v?.pause();
+    videoRef.current?.pause();
     finishIntro();
   };
 
@@ -161,4 +156,5 @@ IntroVideo.propTypes = {
   ),
   onFinish: PropTypes.func,
 };
+
 
