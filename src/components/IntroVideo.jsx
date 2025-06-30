@@ -1,49 +1,60 @@
+// src/components/IntroVideo.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import introVideo from '../assets/videos/intro.mp4';
 
-export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip Intro', onFinish }) {
+export default function IntroVideo({
+  poster,
+  skipAfter = 3,
+  skipLabel = 'Skip Intro',
+  onFinish,
+}) {
+  const navigate = useNavigate();
   const videoRef = useRef(null);
   const overlayRef = useRef(null);
 
+  // If we've already played this session, skip straight to home
+  useEffect(() => {
+    if (window.__introPlayed) {
+      navigate('/', { replace: true });
+    } else {
+      window.__introPlayed = true;
+    }
+  }, [navigate]);
+
   const [loading, setLoading] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(false);
-  const [userMuted, setUserMuted] = useState(true);
-  const [interacted, setInteracted] = useState(false);
-  const defaultVolume = 0.1; // 🔉 quieter
+  const [userMuted, setUserMuted] = useState(false); // unmuted by default
+  const defaultVolume = 0.1;
 
+  // Load & autoplay (muted/unmuted) on mount
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     v.src = introVideo;
     v.playsInline = true;
-    v.muted = true;
+    v.muted = userMuted;
     v.volume = defaultVolume;
     v.load();
-    v.play().catch(() => {});
+    v.play().catch(() => {
+      // may be blocked until user gesture
+    });
   }, []);
 
+  // Show Skip + Mute controls after a delay
   useEffect(() => {
-    const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
+    return () => clearTimeout(t);
   }, [skipAfter]);
 
-  const handleCanPlay = () => {
-    setLoading(false);
-    const v = videoRef.current;
-    if (v && interacted) {
-      v.muted = userMuted;
-      v.volume = userMuted ? 0 : defaultVolume;
-      v.play().catch(() => {});
-    }
-  };
+  const handleCanPlay = () => setLoading(false);
 
   const toggleMute = () => {
     const v = videoRef.current;
     if (!v) return;
-    if (!interacted) setInteracted(true);
     const next = !userMuted;
     v.muted = next;
     v.volume = next ? 0 : defaultVolume;
@@ -51,31 +62,31 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     setUserMuted(next);
   };
 
-  const handleSkip = () => {
-    const v = videoRef.current;
-    if (v) {
-      setInteracted(true);
-      v.pause();
-    }
-    finishIntro();
-  };
-
   const finishIntro = () => {
+    // 1) navigate immediately so homepage sits underneath the overlay
+    navigate('/', { replace: true });
+
+    // 2) then fade out our black overlay smoothly
     const ov = overlayRef.current;
+    const done = () => onFinish?.();
     if (ov) {
       ov.classList.add('opacity-0');
-      ov.addEventListener('transitionend', () => onFinish?.(), { once: true });
+      ov.addEventListener('transitionend', done, { once: true });
     } else {
-      onFinish?.();
+      done();
     }
+  };
+
+  const handleSkip = () => {
+    videoRef.current?.pause();
+    finishIntro();
   };
 
   return (
     <AnimatePresence>
       <motion.div
         ref={overlayRef}
-        key="intro-overlay"
-        className="fixed inset-0 z-[9999] bg-black flex items-center justify-center transition-opacity duration-700"
+        className="fixed inset-0 z-[9999] bg-black flex items-center justify-center transition-opacity duration-1000 ease-in-out"
         initial={{ opacity: 1 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
