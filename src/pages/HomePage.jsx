@@ -1,220 +1,158 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
-import Particles from "react-tsparticles";
-import { loadSlim } from "tsparticles-slim";
-import { TypeAnimation } from "react-type-animation";
-import { FaDiscord, FaInstagram, FaLinkedin, FaTiktok } from "react-icons/fa";
-import { Sparkles } from "lucide-react";
+import React, { useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Volume2, VolumeX } from 'lucide-react';
+import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
+import introVideo from '../assets/videos/intro.mp4';
 
-import AudioWaveform from "../components/AudioWaveform";
-import HintCarousel from "../components/HintCarousel";
-import LanguageToggle from "../components/LanguageToggle";
-import LiveGPTBubble from "../components/LiveGPTBubble";
-import NewsletterSignup from "../components/NewsletterSignup";
+export default function IntroVideo({
+  poster,
+  skipAfter = 3,
+  skipLabel = 'Skip Intro',
+  sources = [{ src: introVideo, type: 'video/mp4' }],
+  onFinish,
+}) {
+  const navigate = useNavigate();
+  const videoRef = useRef(null);
+  const overlayRef = useRef(null);
 
-import detectTone from "../utils/EmotionToneDetector";
-import useVoiceInput from "../hooks/useVoiceInput";
-import { GPTContext } from "../context/GPTContext";
-import { useSound } from "../context/SoundContext";
-import { useTranslation } from "react-i18next";
+  const [loading, setLoading] = useState(true);
+  const [controlsVisible, setControlsVisible] = useState(false);
+  const [muted, setMuted] = useState(true); // Always start muted
+  const defaultVolume = 0.3; // Lower volume level when unmuted
 
-import "../styles/GlareTitle.css";
-
-export default function HomePage() {
-  const [time, setTime] = useState(new Date());
-  const [gptResponse, setGptResponse] = useState("");
-  const [showBubble, setShowBubble] = useState(false);
-
-  const { t } = useTranslation();
-  const { voiceLevel, micStatus, shortTranscript } = useVoiceInput();
-  const { setContextMessage } = useContext(GPTContext);
-  const { ambientEnabled, toggleAmbient, nowPlaying } = useSound();
-
-  // Clock update
+  // Skip if already played this session
   useEffect(() => {
-    const interval = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Transcription reaction
-  useEffect(() => {
-    if (shortTranscript?.length > 0) {
-      const tone = detectTone(shortTranscript);
-      const key = tone === "positive" ? "gpt.positive" : tone === "neutral" ? "gpt.neutral" : "gpt.negative";
-      const gptMsg = t(key, { transcript: shortTranscript });
-
-      setGptResponse(gptMsg);
-      setShowBubble(true);
-      setContextMessage(shortTranscript);
+    if (window.__introPlayed) {
+      navigate('/', { replace: true });
+    } else {
+      window.__introPlayed = true;
     }
-  }, [shortTranscript, setContextMessage, t]);
+  }, [navigate]);
 
-  const formattedTime = time.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  // Load sources and attempt autoplay muted
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
 
-  const communityLinks = useMemo(
-    () => [
-      { name: "Discord", href: "https://discord.com/invite/echoscriptai", icon: FaDiscord, color: "bg-indigo-600" },
-      { name: "Instagram", href: "https://instagram.com/echoscriptai", icon: FaInstagram, color: "bg-pink-500" },
-      { name: "LinkedIn", href: "https://linkedin.com/company/echoscriptai", icon: FaLinkedin, color: "bg-blue-700" },
-      { name: "TikTok", href: "https://tiktok.com/@echoscriptai", icon: FaTiktok, color: "bg-black" },
-    ],
-    []
-  );
+    v.playsInline = true;
+    v.preload = 'auto';
+    v.defaultPlaybackRate = 1;
+    v.muted = muted;
+    v.volume = defaultVolume;
+
+    // Append sources if not already present
+    if (v.childElementCount === 0) {
+      sources.forEach(({ src, type }) => {
+        const source = document.createElement('source');
+        source.src = src;
+        source.type = type;
+        v.appendChild(source);
+      });
+    }
+
+    v.load();
+    v.play().catch(() => {
+      // Autoplay blocked until user interaction, but stays muted
+    });
+  }, [muted, sources]);
+
+  // Reveal controls after a delay
+  useEffect(() => {
+    const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
+    return () => clearTimeout(timer);
+  }, [skipAfter]);
+
+  const handleCanPlay = () => {
+    setLoading(false);
+  };
+
+  const toggleMute = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setMuted(v.muted);
+    if (!v.muted) v.volume = defaultVolume;
+  };
+
+  const finishIntro = () => {
+    navigate('/', { replace: true });
+    const ov = overlayRef.current;
+    const done = () => onFinish?.();
+
+    if (ov) {
+      ov.classList.add('opacity-0');
+      ov.addEventListener('transitionend', done, { once: true });
+    } else {
+      done();
+    }
+  };
+
+  const handleSkip = () => {
+    videoRef.current?.pause();
+    finishIntro();
+  };
 
   return (
-    <div className="relative min-h-screen text-white overflow-x-hidden">
-      {/* Background Particles */}
-      <Particles
-        id="tsparticles"
-        init={loadSlim}
-        options={{
-          background: { color: { value: "transparent" } },
-          fullScreen: { enable: false },
-          fpsLimit: 120,
-          detectRetina: true,
-          particles: {
-            number: { value: 70, density: { enable: true, area: 1000 } },
-            color: { value: "#00f5d4" },
-            shape: { type: "circle" },
-            opacity: { value: 0.2 },
-            size: { value: { min: 1, max: 2 } },
-            move: { enable: true, speed: 0.15, direction: "none", outModes: { default: "out" } },
-            links: { enable: true, distance: 120, color: "#00f5d4", opacity: 0.1, width: 1 },
-          },
-        }}
-        className="absolute inset-0 z-0"
-      />
-
-      {/* Hero Section */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-6 pt-24">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2 }}
-        >
-          <div className="w-24 sm:w-28 mx-auto mb-6 relative">
-            <motion.div
-              className="absolute inset-0 rounded-full bg-teal-400 blur-2xl opacity-30"
-              animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.4, 0.2] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-            <img src="/Icon.png" alt="EchoScript.AI Logo" className="relative w-full drop-shadow-xl" />
+    <AnimatePresence>
+      <motion.div
+        ref={overlayRef}
+        className="fixed inset-0 z-[9999] bg-black flex items-center justify-center transition-opacity duration-1000 ease-in-out"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
           </div>
+        )}
 
-          <h1 className="glare-title text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent mb-2">
-            EchoScript.AI
-          </h1>
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover"
+          autoPlay
+          playsInline
+          poster={poster}
+          muted={muted}
+          onCanPlay={handleCanPlay}
+          onEnded={finishIntro}
+          onError={handleCanPlay}
+        />
 
-          <TypeAnimation
-            sequence={[
-              "Crystal clear transcriptions.",
-              2000,
-              "From voice to insight in seconds.",
-              2000,
-              "Edit, summarize, translate — effortlessly.",
-              2000,
-            ]}
-            wrapper="span"
-            speed={50}
-            repeat={Infinity}
-            className="block text-lg text-teal-400 font-medium"
-          />
-
-          <p className="text-sm mt-1 text-zinc-400 font-mono">{formattedTime}</p>
-        </motion.div>
-
-        {/* Audio Waveform & GPT Bubble */}
-        <div className="mt-6 mb-4">
-          <AudioWaveform voiceLevel={voiceLevel} />
-          <p className="text-xs text-zinc-500 mt-2 font-medium">{t(micStatus)}</p>
-        </div>
-
-        {gptResponse && showBubble && <LiveGPTBubble message={gptResponse} onClose={() => setShowBubble(false)} />}
-
-        {/* Feature Highlight */}
-        <motion.div
-          className="relative max-w-3xl mx-auto px-8 py-6 mt-12 rounded-2xl backdrop-blur-xl border border-teal-600/50 shadow-2xl"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5 }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 via-transparent to-blue-500/10 pointer-events-none animate-pulse-slow" />
-          <div className="absolute -inset-1 rounded-[2rem] border border-teal-500/30 blur-[3px] z-0" />
-          <p className="relative z-10 text-lg sm:text-xl font-medium text-white leading-relaxed text-center tracking-wide">
-            <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }} className="bg-gradient-to-r from-teal-400 to-blue-400 bg-clip-text text-transparent">
-              Built for creators, thinkers, and storytellers —
-            </motion.span>{" "}
-            EchoScript.AI turns your voice into beautifully clear, accurate, and editable text in seconds.
-          </p>
-        </motion.div>
-
-        <HintCarousel />
-      </div>
-
-      {/* About Section */}
-      <section className="relative z-10 py-20 px-6 text-center">
-        <h2 className="text-3xl font-bold mb-4 text-white">What is EchoScript.AI?</h2>
-        <p className="max-w-3xl mx-auto text-zinc-400 text-lg leading-relaxed">
-          EchoScript.AI is your smart transcription companion — built for creators, students, and professionals. Instantly convert voice to clear, editable text with AI-powered enhancements.
-        </p>
-      </section>
-
-      {/* Community Section */}
-      <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800">
-        <Sparkles className="w-8 h-8 text-teal-400 mb-2 mx-auto animate-pulse" />
-        <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">Join Our Creative Community</h2>
-        <p className="text-zinc-400 mb-8 max-w-2xl mx-auto leading-relaxed">
-          Follow us on social media for AI tips, feature updates, and creative inspiration. Share your voice and shape the future of EchoScript together.
-        </p>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-xl mx-auto">
-          {communityLinks.map(({ name, href, icon: Icon, color }) => (
-            <motion.a
-              key={name}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`flex flex-col items-center justify-center py-4 rounded-xl text-white shadow-lg transition-all ${color}`}
-              whileHover={{ scale: 1.05, boxShadow: "0 8px 20px rgba(0,0,0,0.2)" }}
-              transition={{ type: "spring", stiffness: 300 }}
+        {controlsVisible && (
+          <motion.div
+            className="absolute bottom-6 right-6 flex space-x-3"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+          >
+            <button
+              onClick={handleSkip}
+              className="bg-teal-500/60 hover:bg-teal-500/80 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg transition"
             >
-              <Icon className="w-6 h-6 mb-2" />
-              <span className="text-sm font-semibold">{name}</span>
-            </motion.a>
-          ))}
-        </div>
-      </section>
-
-      {/* Newsletter Section */}
-      <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800">
-        <h2 className="text-3xl font-bold text-white mb-4">Stay in the Loop</h2>
-        <p className="text-zinc-400 mb-6 max-w-xl mx-auto leading-relaxed">
-          Sign up for occasional updates, helpful AI tips, and product improvements. No spam — just smart content delivered right to you.
-        </p>
-        <NewsletterSignup />
-      </section>
-
-      {/* Controls */}
-      <div className="absolute top-6 right-6 flex items-center gap-4 z-20">
-        <LanguageToggle />
-        <motion.button
-          onClick={toggleAmbient}
-          aria-pressed={ambientEnabled}
-          className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium border transition-all duration-300 ${
-            ambientEnabled
-              ? "bg-teal-100/30 text-teal-300 border-teal-400 hover:bg-teal-200/40"
-              : "bg-zinc-700/30 text-zinc-300 border-zinc-600 hover:bg-zinc-600/50"
-          }`}
-          whileHover={{ scale: 1.02, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}
-          transition={{ type: "spring", stiffness: 280 }}
-        >
-          {ambientEnabled ? `🎵 Now playing: ${nowPlaying}` : "🎵 Background Audio Off"}
-        </motion.button>
-      </div>
-    </div>
+              {skipLabel}
+            </button>
+            <button
+              onClick={toggleMute}
+              className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg flex items-center space-x-1 transition"
+            >
+              {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+              <span>{muted ? 'Unmute' : 'Mute'}</span>
+            </button>
+          </motion.div>
+        )}
+      </motion.div>
+    </AnimatePresence>
   );
 }
+
+IntroVideo.propTypes = {
+  poster: PropTypes.string,
+  skipAfter: PropTypes.number,
+  skipLabel: PropTypes.string,
+  sources: PropTypes.arrayOf(
+    PropTypes.shape({ src: PropTypes.string.isRequired, type: PropTypes.string.isRequired })
+  ),
+  onFinish: PropTypes.func,
+};
