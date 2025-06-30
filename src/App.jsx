@@ -1,4 +1,4 @@
-// === src/App.jsx ===
+// src/App.jsx
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 
@@ -14,6 +14,7 @@ import { SoundProvider, useSound } from "./context/SoundContext";
 import AnimatedSplash from "./components/AnimatedSplash";
 import OnboardingModal from "./components/OnboardingModal";
 import Layout from "./components/Layout";
+import AudioOverlay from "./components/AudioOverlay";
 
 // Pages
 import Home from "./pages/HomePage";
@@ -92,6 +93,9 @@ function AppInner() {
               onEnableAudio={enableSound}
             />
           )}
+
+          {/* Persistent Audio Overlay */}
+          <AudioOverlay />
         </>
       )}
     </>
@@ -116,6 +120,4 @@ export default function App() {
     </AuthProvider>
   );
 }
-
- 
  
