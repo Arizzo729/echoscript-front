@@ -17,12 +17,12 @@ function Button({
   className = "",
   ...props
 }) {
-  const { playClickSound, isMuted } = useSound();
+  const { playClick, isMuted } = useSound();
 
   const handleClick = (e) => {
-    if (!disableSound && !isMuted) {
-      playClickSound();
-    }
+    if (!disableSound && !isMuted) {␊
+      playClick();
+    }␊
     if (props.onClick) props.onClick(e);
   };
 

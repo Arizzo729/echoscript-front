@@ -25,10 +25,10 @@ export default function BuyExtraMinutes() {
   const [cart, setCart] = useState({});
   const [gifting, setGifting] = useState(false);
   const [recipient, setRecipient] = useState("");
-  const { playPop } = useSound();
+    const { playClick } = useSound();;
 
   const addToCart = (id) => {
-    playPop();
+  playClick();
     setCart((prev) => ({
       ...prev,
       [id]: (prev[id] || 0) + 1,
@@ -44,7 +44,7 @@ export default function BuyExtraMinutes() {
   };
 
   const changeQuantity = (id, delta) => {
-    playPop();
+      playClick();
     setCart((prev) => {
       const currentQty = prev[id] || 0;
       const newQty = currentQty + delta;

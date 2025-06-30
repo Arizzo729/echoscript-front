@@ -2,7 +2,7 @@ import { createContext, useState, useEffect, useMemo, useContext } from "react";
 
 export const LanguageContext = createContext();
 
-const langOptions = ["en", "es", "fr", "de"];
+const langOptions = ["en", "es", "fr", "de", "zh"];
 
 export const LanguageProvider = ({ children }) => {
   const getInitialLang = () => {

@@ -1,10 +1,10 @@
-// src/components/AnimatedSplash.jsx
 /**
- * AnimatedSplash (Disabled)
+ * AnimatedSplash (Stub)
  *
- * Original animated splash has been deprecated.
- * This component now immediately invokes onComplete and renders nothing.
- * Remove any references to this file after updating.
+ * The original animated splash screen was deprecated but references to this
+ * component remain throughout the codebase. To avoid breaking imports, this
+ * file intentionally provides a minimal stub that immediately invokes
+ * `onComplete` and renders nothing.
  */
 import { useEffect } from 'react';
 

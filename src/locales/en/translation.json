@@ -1,6 +1,4 @@
-import json
-
-translation_data = {
+{
   "about_us": "What is EchoScript.AI?",
   "about_us_paragraph": "EchoScript.AI is your smart transcription assistant — designed to help you capture, organize, and transform spoken ideas into powerful text in real time.",
   "account": "Account",
@@ -82,5 +80,3 @@ translation_data = {
   "welcome": "Welcome to EchoScript.AI"
 }
 
-json_string = json.dumps(translation_data, indent=2)
-print(json_string)

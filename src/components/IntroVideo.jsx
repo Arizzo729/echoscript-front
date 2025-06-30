@@ -25,9 +25,9 @@ export default function IntroVideo({
     }
   }, [navigate]);
 
-  const [loading, setLoading] = useState(true);
-  const [controlsVisible, setControlsVisible] = useState(false);
-  const [userMuted, setUserMuted] = useState(false); // unmuted by default
+  const [loading, setLoading] = useState(true);␊
+  const [controlsVisible, setControlsVisible] = useState(false);␊
+  const [userMuted, setUserMuted] = useState(true); // start muted for autoplay
   const defaultVolume = 0.1;
 
   // Load & autoplay (muted/unmuted) on mount
@@ -97,13 +97,14 @@ export default function IntroVideo({
           </div>
         )}
 
-        <video
+  <video
           ref={videoRef}
           className="w-full h-full object-cover"
           autoPlay
           playsInline
           preload="auto"
           poster={poster}
+          muted={userMuted}
           onCanPlay={handleCanPlay}
           onEnded={finishIntro}
           onError={handleCanPlay}
