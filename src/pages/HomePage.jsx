@@ -1,19 +1,19 @@
 import React, { useEffect, useState, useContext, useMemo, Suspense, memo } from "react";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
+import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
 import useVoiceInput from "../hooks/useVoiceInput";
-import LiveGPTBubble from "../components/LiveGPTBubble";
 import { GPTContext } from "../context/GPTContext";
 import detectTone from "../utils/EmotionToneDetector";
+import LiveGPTBubble from "../components/LiveGPTBubble";
 import { FaDiscord, FaInstagram, FaLinkedin, FaTiktok } from "react-icons/fa";
 import { Sparkles } from "lucide-react";
 import "../styles/GlareTitle.css";
 import { useTranslation } from "react-i18next";
 import LanguageToggle from "../components/LanguageToggle";
 
-// Lazy-loaded heavy components for performance
-const Particles = React.lazy(() => import("react-tsparticles"));
+// Lazy-loaded heavy components
 const AudioWaveform = React.lazy(() => import("../components/AudioWaveform"));
 const HintCarousel = React.lazy(() => import("../components/HintCarousel"));
 const NewsletterSignup = React.lazy(() => import("../components/NewsletterSignup"));
@@ -26,13 +26,11 @@ function HomePage() {
   const { setContextMessage } = useContext(GPTContext);
   const { t } = useTranslation();
 
-  // Update clock every second
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Handle GPT tone-based response
   useEffect(() => {
     if (shortTranscript?.length) {
       const tone = detectTone(shortTranscript);
@@ -70,29 +68,29 @@ function HomePage() {
 
   return (
     <div className="relative min-h-screen font-sans text-white overflow-x-hidden overflow-y-auto bg-gradient-to-b from-black via-zinc-900 to-black">
-      <Suspense fallback={null}>
-        <Particles
-          id="tsparticles"
-          init={loadSlim}
-          options={{
-            background: { color: { value: "transparent" } },
-            fullScreen: { enable: false },
-            fpsLimit: 120,
-            detectRetina: true,
-            particles: {
-              number: { value: 60, density: { enable: true, area: 1200 } },
-              color: { value: ["#00f5d4", "#10b981"] },
-              shape: { type: "circle" },
-              opacity: { value: { min: 0.1, max: 0.3 } },
-              size: { value: { min: 1, max: 3 } },
-              move: { enable: true, speed: 0.2, outModes: { default: "out" } },
-              links: { enable: true, distance: 140, color: "#00f5d4", opacity: 0.2, width: 1 },
-            },
-          }}
-          className="absolute inset-0 z-0"
-        />
-      </Suspense>
+      {/* Particle Background */}
+      <Particles
+        id="tsparticles"
+        init={loadSlim}
+        options={{
+          background: { color: { value: "transparent" } },
+          fullScreen: { enable: false },
+          fpsLimit: 120,
+          detectRetina: true,
+          particles: {
+            number: { value: 60, density: { enable: true, area: 1200 } },
+            color: { value: ["#00f5d4", "#10b981"] },
+            shape: { type: "circle" },
+            opacity: { value: { min: 0.1, max: 0.3 } },
+            size: { value: { min: 1, max: 3 } },
+            move: { enable: true, speed: 0.2, outModes: { default: "out" } },
+            links: { enable: true, distance: 140, color: "#00f5d4", opacity: 0.2, width: 1 },
+          },
+        }}
+        className="absolute inset-0 z-0"
+      />
 
+      {/* Main Content */}
       <main className="relative z-10 flex flex-col items-center justify-center text-center px-6 pt-24 pb-16 max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -119,7 +117,6 @@ function HomePage() {
                 "From voice to insight in seconds.", 2500,
                 "Edit, summarize, translate — effortlessly.", 2500,
               ]}
-              wrapper="span"
               speed={60}
               repeat={Infinity}
               className="text-xl text-teal-300 font-medium"
@@ -141,7 +138,9 @@ function HomePage() {
           <div className="text-xs text-zinc-500 mt-2 font-medium">{t(micStatus)}</div>
         </motion.div>
 
-        {gptResponse && showBubble && <LiveGPTBubble message={gptResponse} onClose={() => setShowBubble(false)} />}
+        {gptResponse && (
+          <LiveGPTBubble message={gptResponse} onClose={() => setShowBubble(false)} />
+        )}
 
         <motion.div
           className="relative w-full max-w-2xl px-10 py-8 mb-16 rounded-3xl backdrop-blur-lg border border-teal-500/40 shadow-xl"
@@ -161,6 +160,7 @@ function HomePage() {
         </Suspense>
       </main>
 
+      {/* Newsletter & Community */}
       <motion.footer
         className="relative z-10 bg-zinc-900 py-16 px-6"
         initial={{ opacity: 0, y: 20 }}
@@ -187,6 +187,7 @@ function HomePage() {
         </div>
       </motion.footer>
 
+      {/* Language toggle */}
       <div className="absolute top-6 right-6 z-20">
         <LanguageToggle />
       </div>
@@ -195,3 +196,4 @@ function HomePage() {
 }
 
 export default memo(HomePage);
+
