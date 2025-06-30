@@ -1,9 +1,7 @@
-import React, { useEffect, useState, useContext, useMemo, Suspense, memo } from "react";
+import React, { useEffect, useState, useContext, useMemo, lazy, Suspense, memo } from "react";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
-import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
-import useVoiceInput from "../hooks/useVoiceInput";
 import { GPTContext } from "../context/GPTContext";
 import detectTone from "../utils/EmotionToneDetector";
 import LiveGPTBubble from "../components/LiveGPTBubble";
@@ -13,26 +11,29 @@ import "../styles/GlareTitle.css";
 import { useTranslation } from "react-i18next";
 import LanguageToggle from "../components/LanguageToggle";
 
-// Lazy-loaded heavy components
-const AudioWaveform = React.lazy(() => import("../components/AudioWaveform"));
-const HintCarousel = React.lazy(() => import("../components/HintCarousel"));
-const NewsletterSignup = React.lazy(() => import("../components/NewsletterSignup"));
+// Lazy-load heavy components
+const Particles = lazy(() => import("react-tsparticles"));
+const AudioWaveform = lazy(() => import("../components/AudioWaveform"));
+const HintCarousel = lazy(() => import("../components/HintCarousel"));
+const NewsletterSignup = lazy(() => import("../components/NewsletterSignup"));
 
 function HomePage() {
   const [time, setTime] = useState(new Date());
   const [gptResponse, setGptResponse] = useState(null);
   const [showBubble, setShowBubble] = useState(false);
-  const { voiceLevel, micStatus, shortTranscript } = useVoiceInput();
+  const { voiceLevel, micStatus, shortTranscript } = useContext(GPTContext) || useVoiceInput();
   const { setContextMessage } = useContext(GPTContext);
   const { t } = useTranslation();
 
+  // Clock updater
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  // Tone-detection response
   useEffect(() => {
-    if (shortTranscript?.length) {
+    if (shortTranscript && shortTranscript.length) {
       const tone = detectTone(shortTranscript);
       const gptMsg =
         tone === "positive"
@@ -69,10 +70,8 @@ function HomePage() {
   return (
     <div className="relative min-h-screen font-sans text-white overflow-x-hidden overflow-y-auto bg-gradient-to-b from-black via-zinc-900 to-black">
       {/* Particle Background */}
-      <Particles
-        id="tsparticles"
-        init={loadSlim}
-        options={{
+      <Suspense fallback={null}>
+        <Particles id="tsparticles" init={loadSlim} options={{
           background: { color: { value: "transparent" } },
           fullScreen: { enable: false },
           fpsLimit: 120,
@@ -86,101 +85,63 @@ function HomePage() {
             move: { enable: true, speed: 0.2, outModes: { default: "out" } },
             links: { enable: true, distance: 140, color: "#00f5d4", opacity: 0.2, width: 1 },
           },
-        }}
-        className="absolute inset-0 z-0"
-      />
+        }} className="absolute inset-0 z-0" />
+      </Suspense>
 
       {/* Main Content */}
       <main className="relative z-10 flex flex-col items-center justify-center text-center px-6 pt-24 pb-16 max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-        >
+        {/* Hero */}
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
           <div className="w-28 mx-auto mb-6 relative">
-            <motion.div
-              className="absolute inset-0 rounded-full bg-teal-400 blur-xl opacity-20"
-              animate={{ scale: [1, 1.1, 1], opacity: [0.15, 0.35, 0.15] }}
-              transition={{ duration: 2.5, repeat: Infinity }}
-            />
+            <motion.div className="absolute inset-0 rounded-full bg-teal-400 blur-xl opacity-20" animate={{ scale: [1,1.1,1], opacity: [0.15,0.35,0.15] }} transition={{ duration: 2.5, repeat: Infinity }} />
             <img src="/Icon.png" alt="EchoScript Icon" className="relative w-full drop-shadow-2xl" />
-          </motion.div>
+          </div>
 
           <h1 className="glare-title text-5xl sm:text-6xl font-bold tracking-tight bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
             EchoScript.AI <Sparkles className="inline w-6 h-6 ml-2 animate-pulse" />
           </h1>
 
           <div className="mt-4">
-            <TypeAnimation
-              sequence={[
-                "Crystal clear transcriptions.", 2500,
-                "From voice to insight in seconds.", 2500,
-                "Edit, summarize, translate — effortlessly.", 2500,
-              ]}
-              speed={60}
-              repeat={Infinity}
-              className="text-xl text-teal-300 font-medium"
-            />
+            <TypeAnimation sequence={["Crystal clear transcriptions.",2500,"From voice to insight in seconds.",2500,"Edit, summarize, translate — effortlessly.",2500]} speed={60} repeat={Infinity} className="text-xl text-teal-300 font-medium" />
           </div>
 
           <p className="text-sm mt-2 text-zinc-400 font-mono tracking-wide">{formattedTime}</p>
         </motion.div>
 
-        <motion.div
-          className="w-full max-w-md mt-8 mb-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 1 }}
-        >
+        {/* Waveform & mic status */}
+        <motion.div className="w-full max-w-md mt-8 mb-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1, duration: 1 }}>
           <Suspense fallback={<div className="h-12" />}>
             <AudioWaveform voiceLevel={voiceLevel} />
           </Suspense>
           <div className="text-xs text-zinc-500 mt-2 font-medium">{t(micStatus)}</div>
         </motion.div>
 
-        {gptResponse && (
-          <LiveGPTBubble message={gptResponse} onClose={() => setShowBubble(false)} />
-        )}
+        {/* GPT bubble */}
+        {gptResponse && showBubble && <LiveGPTBubble message={gptResponse} onClose={() => setShowBubble(false)} />}
 
-        <motion.div
-          className="relative w-full max-w-2xl px-10 py-8 mb-16 rounded-3xl backdrop-blur-lg border border-teal-500/40 shadow-xl"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5, duration: 1 }}
-        >
+        {/* Tagline card */}
+        <motion.div className="relative w-full max-w-2xl px-10 py-8 mt-12 rounded-3xl backdrop-blur-lg border border-teal-500/40 shadow-xl" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.5, duration: 1 }}>
           <p className="text-lg sm:text-xl font-medium text-white leading-relaxed tracking-wide">
-            <span className="bg-gradient-to-r from-teal-400 to-blue-400 bg-clip-text text-transparent">
-              Built for creators, thinkers, and storytellers —
-            </span> EchoScript.AI turns your voice into beautifully clear, accurate, and editable text in seconds.
+            <span className="bg-gradient-to-r from-teal-400 to-blue-400 bg-clip-text text-transparent">Built for creators, thinkers, and storytellers —</span> EchoScript.AI turns your voice into beautifully clear, accurate, and editable text in seconds.
           </p>
         </motion.div>
 
+        {/* Hint Carousel */}
         <Suspense fallback={null}>
           <HintCarousel />
         </Suspense>
       </main>
 
       {/* Newsletter & Community */}
-      <motion.footer
-        className="relative z-10 bg-zinc-900 py-16 px-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 2, duration: 1 }}
-      >
+      <motion.footer className="relative z-10 bg-zinc-900 py-16 px-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 2, duration: 1 }}>
         <div className="max-w-3xl mx-auto text-center space-y-8">
           <Suspense fallback={null}>
             <NewsletterSignup />
           </Suspense>
           <div className="flex justify-center space-x-8">
-            {communityLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`${link.color} p-4 rounded-full shadow-lg transform transition-transform duration-200 ease-out hover:scale-110`}
-              >
-                <link.icon className="w-7 h-7 text-white" />
+            {communityLinks.map(({ name, href, icon: Icon, color }) => (
+              <a key={name} href={href} target="_blank" rel="noopener noreferrer" className={`${color} p-4 rounded-full shadow-lg transform transition-transform duration-200 ease-out hover:scale-110`}>
+                <Icon className="w-7 h-7 text-white" />
               </a>
             ))}
           </div>
