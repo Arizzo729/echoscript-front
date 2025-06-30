@@ -38,6 +38,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     []
   );
 
+  // Initialize audio elements
   useEffect(() => {
     const mainAudio = new Audio();
     mainAudio.loop = true;
@@ -54,6 +55,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     };
   }, [clickSoundUrl]);
 
+  // Fade helper
   const fadeTo = useCallback((audio, targetVol, duration = 800) => {
     cancelAnimationFrame(fadeRef.current);
     const startVol = audio.volume;
@@ -61,15 +63,14 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     const startTime = performance.now();
 
     const step = (time) => {
-      const elapsed = time - startTime;
-      const t = Math.min(elapsed / duration, 1);
+      const t = Math.min((time - startTime) / duration, 1);
       audio.volume = startVol + diff * t;
       if (t < 1) fadeRef.current = requestAnimationFrame(step);
     };
-
     fadeRef.current = requestAnimationFrame(step);
   }, []);
 
+  // Play or pause ambient based on state
   const playAmbient = useCallback(() => {
     const audio = mainAudioRef.current;
     const src = ambientTracks[trackIndex];
@@ -87,7 +88,8 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
       audio.currentTime = 0;
     }
 
-    audio.play()
+    audio
+      .play()
       .then(() => {
         fadeTo(audio, volume * 0.2);
         setNowPlaying(`Music ${trackIndex}`);
@@ -95,6 +97,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
       .catch((err) => console.warn('Autoplay blocked', err));
   }, [ambientTracks, trackIndex, isMuted, isUnlocked, volume, fadeTo]);
 
+  // Cycle through tracks on each click
   const toggleAmbient = () => {
     setTrackIndex((prev) => {
       const next = (prev + 1) % ambientTracks.length;
@@ -107,16 +110,15 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     setIsMuted(false);
     setIsUnlocked(true);
   };
-
   const disableSound = () => {
     setIsMuted(true);
     setTrackIndex(0);
   };
-
   const toggleMute = () => {
-    if (isMuted) enableSound(); else disableSound();
+    isMuted ? enableSound() : disableSound();
   };
 
+  // UI click effect
   const playClick = () => {
     const click = clickRef.current;
     if (!click || sfxMuted || !isUnlocked) return;
@@ -125,6 +127,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     click.play().catch((err) => console.warn('Click sound error', err));
   };
 
+  // Load saved prefs
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('sound-settings') || '{}');
     setIsMuted(saved.isMuted ?? true);
@@ -133,6 +136,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     setTrackIndex(saved.trackIndex ?? 0);
   }, [initialVolume]);
 
+  // Persist prefs
   useEffect(() => {
     localStorage.setItem(
       'sound-settings',
@@ -140,12 +144,14 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     );
   }, [isMuted, sfxMuted, volume, trackIndex]);
 
+  // Unlock on first click
   useEffect(() => {
     const unlock = () => setIsUnlocked(true);
     window.addEventListener('click', unlock, { once: true });
     return () => window.removeEventListener('click', unlock);
   }, []);
 
+  // React to changes
   useEffect(() => {
     if (isUnlocked) playAmbient();
   }, [trackIndex, isMuted, volume, isUnlocked, playAmbient]);
@@ -173,38 +179,5 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
 }
 
 export const useSound = () => useContext(SoundContext);
-
-
-// src/components/AudioOverlay.jsx
-import React from 'react';
-import Draggable from 'react-draggable';
-import { motion } from 'framer-motion';
-import { useSound } from '../context/SoundContext';
-
-export default function AudioOverlay() {
-  const { toggleAmbient, nowPlaying, trackIndex, isMuted } = useSound();
-  const ambientOn = !isMuted && trackIndex > 0;
-
-  return (
-    <Draggable bounds="parent" cancel=".no-drag">
-      <div className="absolute top-6 right-6 z-20 cursor-grab touch-none" style={{ touchAction: 'none' }}>
-        <motion.button
-          onClick={(e) => { e.stopPropagation(); toggleAmbient(); }}
-          whileTap={{ scale: 0.9 }}
-          className={`no-drag flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold shadow-lg transition ${
-            ambientOn
-              ? 'bg-gradient-to-r from-teal-500 to-blue-500 text-white'
-              : 'bg-zinc-800/50 text-zinc-300 border border-zinc-600'
-          }`}
-        >
-          🎵 {ambientOn ? nowPlaying : 'Music Off'}
-        </motion.button>
-      </div>
-    </Draggable>
-  );
-}
-
-
-
 
 
