@@ -12,9 +12,9 @@ import React, {
 const SoundContext = createContext();
 
 export function SoundProvider({ children, initialVolume = 0.4 }) {
-  const [isMuted, setIsMuted] = useState(true);           // Default = muted
-  const [sfxMuted, setSfxMuted] = useState(false);        // Button click SFX
-  const [trackIndex, setTrackIndex] = useState(0);        // 0 = Off
+  const [isMuted, setIsMuted] = useState(true);
+  const [sfxMuted, setSfxMuted] = useState(false);
+  const [trackIndex, setTrackIndex] = useState(0);
   const [volume, setVolume] = useState(initialVolume);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [nowPlaying, setNowPlaying] = useState("Off");
@@ -23,28 +23,29 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
   const fadeRef = useRef(null);
   const clickRef = useRef(null);
 
-  const ambientTracks = useMemo(() => [
-    null,
-    new URL("../assets/sounds/ambient-loop-1.mp3", import.meta.url).href,
-    new URL("../assets/sounds/ambient-loop-2.mp3", import.meta.url).href,
-    new URL("../assets/sounds/ambient-loop-3.mp3", import.meta.url).href,
-  ], []);
+  const ambientTracks = useMemo(
+    () => [
+      null,
+      new URL("../assets/sounds/ambient-loop-1.mp3", import.meta.url).href,
+      new URL("../assets/sounds/ambient-loop-2.mp3", import.meta.url).href,
+t      new URL("../assets/sounds/ambient-loop-3.mp3", import.meta.url).href,
+    ],
+    []
+  );
 
   const clickSoundUrl = useMemo(
     () => new URL("../assets/sounds/playPop.mp3", import.meta.url).href,
     []
   );
 
-  // Initialize audio elements
   useEffect(() => {
     const mainAudio = new Audio();
     mainAudio.loop = true;
     mainAudio.volume = 0;
     mainAudioRef.current = mainAudio;
 
-    const clickAudio = new Audio(clickSoundUrl);
-    clickAudio.preload = "auto";
-    clickRef.current = clickAudio;
+    clickRef.current = new Audio(clickSoundUrl);
+    clickRef.current.preload = "auto";
 
     return () => {
       mainAudio.pause();
@@ -52,7 +53,6 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     };
   }, [clickSoundUrl]);
 
-  // Fade utility
   const fadeTo = useCallback((audio, targetVol, duration = 800) => {
     cancelAnimationFrame(fadeRef.current);
     const start = audio.volume;
@@ -67,7 +67,6 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     fadeRef.current = requestAnimationFrame(step);
   }, []);
 
-  // Core ambient playback logic
   const playAmbient = useCallback(() => {
     const audio = mainAudioRef.current;
     const src = ambientTracks[trackIndex];
@@ -91,12 +90,9 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
         fadeTo(audio, volume * 0.2);
         setNowPlaying(`Music ${trackIndex}`);
       })
-      .catch((err) => {
-        console.warn("Autoplay blocked", err);
-      });
+      .catch((err) => console.warn("Autoplay blocked", err));
   }, [ambientTracks, trackIndex, isMuted, isUnlocked, volume, fadeTo]);
 
-  // Toggle through ambient tracks on each click
   const toggleAmbient = () => {
     setTrackIndex((prev) => {
       const next = (prev + 1) % ambientTracks.length;
@@ -105,7 +101,6 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     });
   };
 
-  // Master mute controls
   const enableSound = () => {
     setIsMuted(false);
     setIsUnlocked(true);
@@ -120,7 +115,6 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     isMuted ? enableSound() : disableSound();
   };
 
-  // UI click sound
   const playClick = () => {
     const click = clickRef.current;
     if (!click || sfxMuted || !isUnlocked) return;
@@ -129,7 +123,6 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     click.play().catch((err) => console.warn("Click sound error", err));
   };
 
-  // Load/persist user settings
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("sound-settings") || "{}");
     setIsMuted(saved.isMuted ?? true);
@@ -145,14 +138,12 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     );
   }, [isMuted, sfxMuted, volume, trackIndex]);
 
-  // Unlock and react to state changes
   useEffect(() => {
     const unlock = () => setIsUnlocked(true);
     window.addEventListener("click", unlock, { once: true });
-    return () => window.removeEventListener("click`, unlock);
+    return () => window.removeEventListener("click", unlock);
   }, []);
 
-  // Play ambient whenever dependencies change
   useEffect(() => {
     if (isUnlocked) playAmbient();
   }, [trackIndex, isMuted, volume, isUnlocked, playAmbient]);
@@ -194,10 +185,7 @@ export default function AudioOverlay() {
 
   return (
     <Draggable bounds="parent" cancel=".no-drag">
-      <div
-        className="absolute top-6 right-6 z-20 cursor-grab touch-none"
-        style={{ touchAction: "none" }}
-      >
+      <div className="absolute top-6 right-6 z-20 cursor-grab touch-none" style={{ touchAction: "none" }}>
         <motion.button
           onClick={(e) => { e.stopPropagation(); toggleAmbient(); }}
           whileTap={{ scale: 0.9 }}
@@ -213,5 +201,6 @@ export default function AudioOverlay() {
     </Draggable>
   );
 }
+
 
 
