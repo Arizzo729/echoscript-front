@@ -38,7 +38,6 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     []
   );
 
-  // Initialize audio elements
   useEffect(() => {
     const mainAudio = new Audio();
     mainAudio.loop = true;
@@ -55,7 +54,6 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     };
   }, [clickSoundUrl]);
 
-  // Fade helper
   const fadeTo = useCallback((audio, targetVol, duration = 800) => {
     cancelAnimationFrame(fadeRef.current);
     const startVol = audio.volume;
@@ -67,10 +65,10 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
       audio.volume = startVol + diff * t;
       if (t < 1) fadeRef.current = requestAnimationFrame(step);
     };
+
     fadeRef.current = requestAnimationFrame(step);
   }, []);
 
-  // Play or pause ambient based on state
   const playAmbient = useCallback(() => {
     const audio = mainAudioRef.current;
     const src = ambientTracks[trackIndex];
@@ -88,18 +86,16 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
       audio.currentTime = 0;
     }
 
-    audio
-      .play()
+    audio.play()
       .then(() => {
         fadeTo(audio, volume * 0.2);
         setNowPlaying(`Music ${trackIndex}`);
       })
-      .catch((err) => console.warn('Autoplay blocked', err));
+      .catch(err => console.warn('Autoplay blocked', err));
   }, [ambientTracks, trackIndex, isMuted, isUnlocked, volume, fadeTo]);
 
-  // Cycle through tracks on each click
   const toggleAmbient = () => {
-    setTrackIndex((prev) => {
+    setTrackIndex(prev => {
       const next = (prev + 1) % ambientTracks.length;
       setIsMuted(next === 0);
       return next;
@@ -110,24 +106,24 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     setIsMuted(false);
     setIsUnlocked(true);
   };
+
   const disableSound = () => {
     setIsMuted(true);
     setTrackIndex(0);
   };
+
   const toggleMute = () => {
     isMuted ? enableSound() : disableSound();
   };
 
-  // UI click effect
   const playClick = () => {
     const click = clickRef.current;
     if (!click || sfxMuted || !isUnlocked) return;
     click.currentTime = 0;
     click.volume = volume;
-    click.play().catch((err) => console.warn('Click sound error', err));
+    click.play().catch(err => console.warn('Click sound error', err));
   };
 
-  // Load saved prefs
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('sound-settings') || '{}');
     setIsMuted(saved.isMuted ?? true);
@@ -136,7 +132,6 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     setTrackIndex(saved.trackIndex ?? 0);
   }, [initialVolume]);
 
-  // Persist prefs
   useEffect(() => {
     localStorage.setItem(
       'sound-settings',
@@ -144,40 +139,35 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     );
   }, [isMuted, sfxMuted, volume, trackIndex]);
 
-  // Unlock on first click
   useEffect(() => {
     const unlock = () => setIsUnlocked(true);
     window.addEventListener('click', unlock, { once: true });
     return () => window.removeEventListener('click', unlock);
   }, []);
 
-  // React to changes
   useEffect(() => {
     if (isUnlocked) playAmbient();
   }, [trackIndex, isMuted, volume, isUnlocked, playAmbient]);
 
   return (
-    <SoundContext.Provider
-      value={{
-        isMuted,
-        sfxMuted,
-        volume,
-        setVolume,
-        playClick,
-        toggleAmbient,
-        enableSound,
-        disableSound,
-        toggleMute,
-        nowPlaying,
-        trackIndex,
-        setSfxMuted,
-      }}
-    >
+    <SoundContext.Provider value={{
+      isMuted,
+      sfxMuted,
+      volume,
+      setVolume,
+      playClick,
+      toggleAmbient,
+      enableSound,
+      disableSound,
+      toggleMute,
+      nowPlaying,
+      trackIndex,
+      setSfxMuted,
+    }}>
       {children}
     </SoundContext.Provider>
   );
 }
 
 export const useSound = () => useContext(SoundContext);
-
 
