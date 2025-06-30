@@ -20,9 +20,9 @@ function Button({
   const { playClick, isMuted } = useSound();
 
   const handleClick = (e) => {
-    if (!disableSound && !isMuted) {␊
+    if (!disableSound && !isMuted) {
       playClick();
-    }␊
+    }
     if (props.onClick) props.onClick(e);
   };
 
