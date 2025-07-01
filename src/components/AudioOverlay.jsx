@@ -5,80 +5,80 @@ import { twMerge } from 'tailwind-merge';
 import { useSound } from '../context/SoundContext';
 
 export default function AudioOverlay() {
-  const { toggleAmbient, trackIndex, isMuted } = useSound();
+  const { toggleAmbient, trackIndex, isMuted, prevTrack, nextTrack } = useSound();
   const [minimized, setMinimized] = useState(false);
-  const [size, setSize] = useState({ width: 220, height: 44 });
-  const x = useMotionValue(20);
-  const y = useMotionValue(window.innerHeight - 100);
+  const [size, setSize] = useState({ width: 260, height: 48 });
+  const x = useMotionValue(12);
+  const y = useMotionValue(window.innerHeight - 80);
   const ref = useRef(null);
-  const resizeRef = useRef(null);
 
-  // Restore previous position and size
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('audio-overlay-state') || '{}');
+    const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
     if (saved.x != null && saved.y != null) {
       x.set(saved.x);
       y.set(saved.y);
     }
-    if (saved.width && saved.height) {
-      setSize({ width: saved.width, height: saved.height });
-    }
   }, [x, y]);
 
-  // Save position on drag end
   const handleDragEnd = (_, info) => {
-    const snapX = Math.max(0, Math.min(window.innerWidth - size.width, info.point.x));
-    const snapY = Math.max(0, Math.min(window.innerHeight - size.height, info.point.y));
+    const m = 12;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const el = ref.current;
+    const snapX = Math.min(Math.max(m, info.point.x), w - el.offsetWidth - m);
+    const snapY = Math.min(Math.max(m, info.point.y), h - el.offsetHeight - m);
     x.set(snapX);
     y.set(snapY);
-    localStorage.setItem('audio-overlay-state', JSON.stringify({ x: snapX, y: snapY, ...size }));
+    localStorage.setItem('audio-overlay-pos', JSON.stringify({ x: snapX, y: snapY }));
   };
 
-  // Resize logic
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setSize(prev => {
-        const newWidth = Math.min(Math.max(180, e.clientX - ref.current.offsetLeft), 400);
-        const newHeight = Math.min(Math.max(36, e.clientY - ref.current.offsetTop), 100);
-        return { width: newWidth, height: newHeight };
-      });
+  const startResize = (e) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startWidth = size.width;
+    const startHeight = size.height;
+
+    const onMove = (e) => {
+      const newWidth = Math.min(Math.max(200, startWidth + e.clientX - startX), 500);
+      const newHeight = Math.min(Math.max(40, startHeight + e.clientY - startY), 100);
+      setSize({ width: newWidth, height: newHeight });
     };
 
-    const handleMouseUp = () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
     };
 
-    const startResizing = () => {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-    };
-
-    const node = resizeRef.current;
-    if (node) node.addEventListener('mousedown', startResizing);
-    return () => node?.removeEventListener('mousedown', startResizing);
-  }, []);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
 
   const isActive = !isMuted && trackIndex > 0;
+
+  const containerClasses = twMerge(
+    'fixed z-[9999] rounded-lg transition-all duration-300 border border-zinc-700 backdrop-blur-xl',
+    minimized ? 'w-8 h-8' : 'flex items-center px-4 py-2 gap-2 bg-zinc-900/70'
+  );
+
+  const iconBtn = 'text-zinc-300 hover:text-teal-400 transition p-1';
 
   return (
     <motion.div
       ref={ref}
-      drag
-      dragMomentum={false}
-      dragElastic={0.15}
-      onDragEnd={handleDragEnd}
       style={{ x, y, width: size.width, height: size.height }}
-      className={twMerge(
-        'fixed z-[9999] border border-zinc-700 bg-zinc-900/80 text-white rounded-xl backdrop-blur flex items-center justify-between px-3 py-1 shadow-xl transition-all',
-        minimized && 'w-10 h-10 justify-center px-0 py-0'
-      )}
+      drag dragMomentum={false} dragElastic={0.2}
+      onDragEnd={handleDragEnd}
+      className={containerClasses}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
     >
       {minimized ? (
         <button
           onClick={() => setMinimized(false)}
-          className="text-white hover:text-teal-400 text-lg"
-          aria-label="Restore"
+          className="w-full h-full flex items-center justify-center text-zinc-300 hover:text-white"
+          aria-label="Restore Audio Overlay"
         >
           🎵
         </button>
@@ -86,42 +86,38 @@ export default function AudioOverlay() {
         <>
           <button
             onClick={() => setMinimized(true)}
-            className="absolute top-1 right-2 text-zinc-400 hover:text-white"
+            className="absolute -top-1.5 -right-2 text-zinc-400 hover:text-white"
             aria-label="Minimize"
           >
             <Minus className="w-4 h-4" />
           </button>
 
-          <div className="flex items-center gap-2 ml-2">
-            <button className="text-zinc-300 hover:text-teal-400">
+          <div className="flex items-center gap-3">
+            <button onClick={prevTrack} aria-label="Previous Track" className={iconBtn}>
               <SkipBack className="w-5 h-5" />
             </button>
 
             <button
-              onClick={() => toggleAmbient()}
-              className={twMerge(
-                'transition-colors',
-                isActive ? 'text-teal-400 hover:text-teal-300' : 'text-zinc-400 hover:text-white'
-              )}
-              aria-label="Cycle"
+              onClick={toggleAmbient}
+              aria-label="Cycle Track"
+              className={iconBtn}
             >
               <Repeat className="w-5 h-5" />
             </button>
 
-            <button className="text-zinc-300 hover:text-teal-400">
+            <button onClick={nextTrack} aria-label="Next Track" className={iconBtn}>
               <SkipForward className="w-5 h-5" />
             </button>
           </div>
-
-          <span className="ml-4 text-sm text-zinc-300">
-            {isMuted ? 'Muted' : `Track ${trackIndex || 'Off'}`}
-          </span>
-
-          <div
-            ref={resizeRef}
-            className="absolute bottom-1 right-1 w-3 h-3 cursor-nwse-resize bg-transparent"
-          />
         </>
+      )}
+
+      {/* Resize corner */}
+      {!minimized && (
+        <div
+          onMouseDown={startResize}
+          className="absolute bottom-1 right-1 w-3 h-3 cursor-nwse-resize z-50"
+        />
       )}
     </motion.div>
   );
