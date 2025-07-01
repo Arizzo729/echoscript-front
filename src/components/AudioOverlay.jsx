@@ -1,4 +1,4 @@
-// Enhanced and polished AudioOverlay.jsx
+// Final professional AudioOverlay.jsx (clean, polished)
 import React, { useState, useRef, useEffect } from 'react';
 import {
   ChevronLeft,
@@ -24,7 +24,7 @@ export default function AudioOverlay() {
     setMuted,
   } = useSound();
 
-  const trackLabels = ['BG 1 - Dreamscape Horizon', 'BG 2 - Midnight Flow', 'BG 3 - Echo Drift', 'OFF'];
+  const trackLabels = ['BG 1 — Dreamscape Horizon', 'BG 2 — Midnight Flow', 'BG 3 — Echo Drift', 'OFF'];
   const isOff = trackIndex >= trackLabels.length - 1;
 
   const [minimized, setMinimized] = useState(false);
@@ -63,7 +63,6 @@ export default function AudioOverlay() {
       window.removeEventListener('mouseup', handleMouseUp);
       localStorage.setItem('audio-overlay-pos', JSON.stringify(position));
     };
-
     const node = overlayRef.current;
     const handleMouseDown = (e) => {
       if (e.button !== 0 || e.target.closest('button, input')) return;
@@ -74,7 +73,6 @@ export default function AudioOverlay() {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
     };
-
     if (node && !minimized) node.addEventListener('mousedown', handleMouseDown);
     return () => node?.removeEventListener('mousedown', handleMouseDown);
   }, [position, minimized]);
@@ -101,18 +99,20 @@ export default function AudioOverlay() {
           animate={{ opacity: 1, scale: 1, x: position.x, y: position.y }}
           exit={{ opacity: 0, scale: 0.8 }}
           transition={{ type: 'spring', stiffness: 240, damping: 24 }}
-          className="fixed z-[9999] flex flex-col justify-center items-center gap-2 px-5 py-4 w-72 rounded-xl border border-zinc-700 bg-zinc-900/90 backdrop-blur-md"
+          className="fixed z-[9999] flex flex-col items-center px-4 py-3 w-72 rounded-2xl border border-zinc-700 bg-zinc-900/90 backdrop-blur-md shadow-none"
         >
+          {/* Minimize Button */}
           <button
             id="minimize-btn"
             onClick={handleMinimize}
-            className="absolute top-1 right-1 text-zinc-400 hover:text-white"
+            className="absolute top-1 right-1 text-zinc-400 hover:text-white p-0"
             aria-label="Minimize"
           >
             <Minus className="w-4 h-4" />
           </button>
 
-          <div className="flex items-center justify-between w-full">
+          {/* Controls */}
+          <div className="flex justify-between items-center w-full px-3 mb-2 gap-4">
             <button onClick={prevTrack} className="text-zinc-400 hover:text-white">
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -126,13 +126,15 @@ export default function AudioOverlay() {
             </button>
           </div>
 
-          <div className="relative w-full overflow-hidden h-5">
-            <div className="animate-marquee whitespace-nowrap text-center text-xs text-teal-400 font-mono">
+          {/* Track title with scroll */}
+          <div className="overflow-hidden w-full h-5 relative mb-2">
+            <div className="whitespace-nowrap animate-scroll text-center text-sm text-teal-400 font-mono px-2">
               {currentTrack}
             </div>
           </div>
 
-          <div className="relative w-full flex items-center justify-center">
+          {/* Volume control */}
+          <div className="relative flex items-center justify-center w-full">
             <button
               onClick={() => setVolumeVisible(!volumeVisible)}
               className="text-zinc-400 hover:text-white"
@@ -153,7 +155,7 @@ export default function AudioOverlay() {
                   setVolume(val);
                   setMuted(val === 0);
                 }}
-                className="absolute -top-8 w-24 h-1 bg-teal-500 rounded-full cursor-pointer"
+                className="absolute -top-9 w-24 h-1 bg-teal-500 rounded-full cursor-pointer"
               />
             )}
           </div>
@@ -162,6 +164,18 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
+// Tailwind animation (add in global.css or tailwind config if needed):
+// @keyframes scroll {
+//   0% { transform: translateX(100%); }
+//   10% { transform: translateX(0); }
+//   90% { transform: translateX(0); }
+//   100% { transform: translateX(-100%); }
+// }
+// .animate-scroll {
+//   animation: scroll 10s linear infinite;
+// }
+
 
 
 
