@@ -206,6 +206,17 @@ export default function Header({
             }
           />
 
+          {/* Music Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              const restore = document.querySelector('[aria-label="Restore Audio Overlay"]');
+              if (restore) restore.click();
+            }}
+            icon={<span className="text-lg text-teal-400">🎵</span>}
+          />
+
           <div ref={notifRef} className="relative">
             <Button
               variant="ghost"
@@ -322,5 +333,3 @@ export default function Header({
     </motion.header>
   );
 }
-
-
