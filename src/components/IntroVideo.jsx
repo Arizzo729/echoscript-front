@@ -27,13 +27,14 @@ export default function IntroVideo({
 }) {
   const videoRef = useRef(null);
   const controlsAnim = useAnimation();
+  const hasLoaded = useRef(false);
 
   const [loading, setLoading] = useState(true);
   const [muted, setMuted] = useState(true);
   const [visible, setVisible] = useState(true);
   const defaultVolume = 0.3;
 
-  // Play only once per load; resets on refresh
+  // Run intro once per page load
   useEffect(() => {
     if (window.__introPlayed) {
       setVisible(false);
@@ -42,34 +43,37 @@ export default function IntroVideo({
     }
   }, []);
 
-  // Load and autoplay muted
+  // Load video sources and play only once when visible
   useEffect(() => {
-    if (!visible) return;
+    if (!visible || hasLoaded.current) return;
     const v = videoRef.current;
     if (!v) return;
+    hasLoaded.current = true;
 
     v.playsInline = true;
     v.preload = 'auto';
     v.defaultPlaybackRate = 1;
-    if (v.childElementCount === 0) {
-      sources.forEach(({ src, type }) => {
-        const source = document.createElement('source'); source.src = src; source.type = type;
-        v.appendChild(source);
-      });
-    }
+    sources.forEach(({ src, type }) => {
+      const source = document.createElement('source');
+      source.src = src;
+      source.type = type;
+      v.appendChild(source);
+    });
     v.muted = true;
     v.volume = defaultVolume;
-    v.load();
     v.play().catch(() => {});
-  }, [sources, visible]);
+  }, [visible, sources]);
 
-  // Apply mute/unmute
+  // Toggle mute without reloading
   useEffect(() => {
     const v = videoRef.current;
-    if (v) { v.muted = muted; if (!muted) v.volume = defaultVolume; }
+    if (v) {
+      v.muted = muted;
+      if (!muted) v.volume = defaultVolume;
+    }
   }, [muted]);
 
-  // Reveal controls after delay
+  // Reveal controls
   useEffect(() => {
     if (!visible) return;
     const show = async () => {
@@ -90,7 +94,8 @@ export default function IntroVideo({
   };
 
   const handleSkip = () => {
-    videoRef.current?.pause();
+    const v = videoRef.current;
+    if (v) v.pause();
     exitSequence();
   };
 
@@ -119,17 +124,9 @@ export default function IntroVideo({
             muted={muted}
             onCanPlay={handleCanPlay}
             onEnded={exitSequence}
-            onError={handleCanPlay}
             width="1920"
             height="1080"
-          />
-
-          {/* Cover bottom-left blur with gradient overlay */}
-          <div
-            className="absolute bottom-0 left-0 w-1/3 h-1/3 pointer-events-none"
-            style={{
-              background: 'linear-gradient(to top right, rgba(0,0,0,0.8), transparent)',
-            }}
+            style={{ filter: 'brightness(1.05) contrast(1.1)' }}
           />
 
           <motion.div
@@ -175,5 +172,6 @@ IntroVideo.propTypes = {
   ),
   onFinish: PropTypes.func,
 };
+
 
 
