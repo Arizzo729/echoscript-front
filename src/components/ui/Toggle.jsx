@@ -1,67 +1,118 @@
-// ✅ EchoScript.AI — Polished Enhanced Toggle with Audio
-import React from "react";
-import { Switch } from "@headlessui/react";
-import { twMerge } from "tailwind-merge";
-import { useSound } from "../../context/SoundContext";
+import React, { useState, useRef, useEffect, useContext } from 'react';
+import { motion, useMotionValue } from 'framer-motion';
+import { Repeat } from 'lucide-react';
+import { useSound } from '../context/SoundContext';
 
 /**
- * Toggle switch with icon, label, and description
- * Variants: "primary", "danger", "success"
+ * AudioOverlay — streamlined draggable ambient control.
  */
-export default function Toggle({
-  enabled,
-  onChange,
-  label,
-  description,
-  Icon,
-  variant = "primary",
-  className = "",
-  disableSound = false,
-}) {
-  const { playClick, isMuted } = useSound(); // ✅ Correct sound function
+export default function AudioOverlay() {
+  const {
+    toggleAmbient,
+    nowPlaying,
+    trackIndex,
+    isMuted,
+    volume,
+    setVolume,
+    sfxMuted,
+    setSfxMuted
+  } = useSound();
+  const [minimized, setMinimized] = useState(false);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const wrapperRef = useRef(null);
 
-  const handleToggle = (val) => {
-    if (!disableSound && !isMuted) playClick(); // ✅ Proper audio
-    onChange(val);
+  // Load saved position
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
+    if (saved.x != null && saved.y != null) {
+      x.set(saved.x);
+      y.set(saved.y);
+    }
+  }, [x, y]);
+
+  // Snap to nearest corner and persist
+  const handleDragEnd = (_, info) => {
+    const margin = 12;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const posX = info.point.x;
+    const posY = info.point.y;
+    const snapX = posX > w / 2 ? w - margin - wrapperRef.current.clientWidth : margin;
+    const snapY = posY > h / 2 ? h - margin - wrapperRef.current.clientHeight : margin;
+    x.set(snapX);
+    y.set(snapY);
+    localStorage.setItem('audio-overlay-pos', JSON.stringify({ x: snapX, y: snapY }));
   };
 
-  const colors = {
-    primary: "bg-teal-600 dark:bg-teal-500",
-    danger: "bg-red-600 dark:bg-red-500",
-    success: "bg-green-600 dark:bg-green-500",
-  };
+  // Panel styling
+  const basePanel = 'bg-zinc-900/50 backdrop-blur-md rounded-full shadow-lg flex items-center space-x-2 pointer-events-auto';
 
   return (
-    <div className="flex items-center justify-between rounded-xl px-4 py-3 bg-zinc-50 dark:bg-zinc-800 shadow-sm transition-colors">
-      <div className="flex flex-col">
-        <div className="flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-white">
-          {Icon && <Icon className="w-4 h-4 text-teal-500 shrink-0" />}
-          {label}
+    <motion.div
+      ref={wrapperRef}
+      className="fixed z-50"
+      style={{ x, y }}
+      drag
+      dragMomentum={false}
+      dragElastic={0.2}
+      onDragEnd={handleDragEnd}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      {minimized ? (
+        <div
+          className="w-10 h-10 bg-zinc-800/60 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg cursor-move text-lg text-white"
+          onClick={() => setMinimized(false)}
+          aria-label="Restore Audio Controls"
+        >
+          🎵
         </div>
-        {description && (
-          <span className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 leading-snug">
-            {description}
-          </span>
-        )}
-      </div>
+      ) : (
+        <div className={`${basePanel} px-3 py-2`}>          
+          {/* Minimize button */}
+          <button
+            onClick={() => setMinimized(true)}
+            className="absolute -top-1 -right-1 text-xs text-gray-400 hover:text-white focus:outline-none"
+            aria-label="Minimize"
+          >
+            ✕
+          </button>
 
-      <Switch
-        checked={enabled}
-        onChange={handleToggle}
-        className={twMerge(
-          "relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-1 dark:focus:ring-offset-zinc-900",
-          enabled ? colors[variant] : "bg-zinc-300 dark:bg-zinc-600",
-          className
-        )}
-      >
-        <span
-          className={twMerge(
-            "inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-300 ease-out",
-            enabled ? "translate-x-6" : "translate-x-1"
-          )}
-        />
-      </Switch>
-    </div>
+          {/* Cycle music button */}
+          <button
+            onClick={e => { e.stopPropagation(); toggleAmbient(); }}
+            className="p-2 bg-zinc-800/60 backdrop-blur-md rounded-full hover:bg-zinc-800 active:scale-95 transition"
+            aria-label="Cycle Background Music"
+          >
+            <Repeat className="w-5 h-5 text-teal-400" />
+          </button>
+
+          {/* Now playing label */}
+          <span className="text-xs text-teal-300 whitespace-nowrap">{nowPlaying}</span>
+
+          {/* Volume slider */}
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={e => setVolume(parseFloat(e.target.value))}
+            className="w-20 h-1 bg-white rounded-lg appearance-none cursor-pointer"
+            aria-label="Volume"
+          />
+
+          {/* SFX toggle */}
+          <button
+            onClick={() => setSfxMuted(!sfxMuted)}
+            className="text-gray-300 hover:text-white focus:outline-none"
+            aria-label="Toggle Click SFX"
+          >
+            {sfxMuted ? '🔇' : '🔊'}
+          </button>
+        </div>
+      )}
+    </motion.div>
   );
 }
-
