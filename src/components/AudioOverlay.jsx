@@ -100,13 +100,13 @@ export default function AudioOverlay() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1, x: position.x, y: position.y }}
           exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ type: 'spring', stiffness: 210, damping: 22 }}
-          className="fixed z-[9999] w-72 rounded-2xl shadow-xl border border-zinc-700 bg-zinc-900/85 backdrop-blur-md px-4 py-3 flex flex-col items-center space-y-3"
+          transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+          className="fixed z-[9999] w-72 rounded-xl shadow-lg border border-zinc-700 bg-zinc-900/90 backdrop-blur-md px-4 py-3 flex flex-col items-center space-y-3"
         >
-          {/* Minimize */}
+          {/* Minimize Button */}
           <button
             onClick={handleMinimize}
-            className="absolute top-2 right-2 text-zinc-500 hover:text-white p-1"
+            className="absolute top-2 right-2 text-zinc-500 hover:text-white"
             aria-label="Minimize"
           >
             <Minus className="w-4 h-4" />
@@ -114,18 +114,18 @@ export default function AudioOverlay() {
 
           {/* Controls */}
           <div className="flex items-center justify-center space-x-5">
-            <button onClick={prevTrack} className="text-teal-400 hover:text-white p-1">
-              <ChevronLeft className="w-4 h-4" />
+            <button onClick={prevTrack} className="text-teal-400 hover:text-white">
+              <ChevronLeft className="w-5 h-5" />
             </button>
-            <button onClick={handlePlayToggle} className="text-teal-400 hover:text-white p-1">
+            <button onClick={handlePlayToggle} className="text-teal-400 hover:text-white">
               {isPlaying && !isOff ? (
-                <Pause className="w-4 h-4" />
+                <Pause className="w-5 h-5" />
               ) : (
-                <Play className="w-4 h-4" />
+                <Play className="w-5 h-5" />
               )}
             </button>
-            <button onClick={nextTrack} className="text-teal-400 hover:text-white p-1">
-              <ChevronRight className="w-4 h-4" />
+            <button onClick={nextTrack} className="text-teal-400 hover:text-white">
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
 
@@ -140,10 +140,10 @@ export default function AudioOverlay() {
           <div className="relative flex items-center justify-center w-full">
             <button
               onClick={() => setVolumeVisible(!volumeVisible)}
-              className="text-teal-400 hover:text-white p-1"
+              className="text-teal-400 hover:text-white"
               aria-label="Volume"
             >
-              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
             {volumeVisible && (
               <input
