@@ -1,4 +1,3 @@
-// src/context/SoundContext.jsx
 import React, {
   createContext,
   useContext,
@@ -18,6 +17,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
   const [volume, setVolume] = useState(initialVolume);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [nowPlaying, setNowPlaying] = useState('Off');
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const mainAudioRef = useRef(null);
   const fadeRef = useRef(null);
@@ -69,14 +69,16 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     fadeRef.current = requestAnimationFrame(step);
   }, []);
 
-  const playAmbient = useCallback(() => {
+  const playAmbientTrack = useCallback((index) => {
     const audio = mainAudioRef.current;
-    const src = ambientTracks[trackIndex];
+    const src = ambientTracks[index];
 
     if (!src || isMuted || !isUnlocked) {
       setNowPlaying('Off');
       fadeTo(audio, 0);
       setTimeout(() => audio.pause(), 600);
+      setTrackIndex(0);
+      setIsPlaying(false);
       return;
     }
 
@@ -89,27 +91,64 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     audio.play()
       .then(() => {
         fadeTo(audio, volume * 0.2);
-        setNowPlaying(`Music ${trackIndex}`);
+        setNowPlaying(`Music ${index}`);
+        setTrackIndex(index);
+        setIsPlaying(true);
       })
-      .catch(err => console.warn('Autoplay blocked', err));
-  }, [ambientTracks, trackIndex, isMuted, isUnlocked, volume, fadeTo]);
+      .catch((err) => {
+        console.warn('Autoplay blocked', err);
+        setIsPlaying(false);
+      });
+  }, [ambientTracks, isMuted, isUnlocked, volume, fadeTo]);
+
+  const togglePlay = useCallback(() => {
+    const audio = mainAudioRef.current;
+    if (!audio || !audio.src) return;
+
+    if (audio.paused) {
+      audio.play()
+        .then(() => {
+          fadeTo(audio, volume * 0.2);
+          setIsPlaying(true);
+        })
+        .catch((err) => console.warn('Play failed', err));
+    } else {
+      audio.pause();
+      setIsPlaying(false);
+    }
+  }, [volume, fadeTo]);
+
+  const nextTrack = () => {
+    const next = (trackIndex + 1) % ambientTracks.length;
+    playAmbientTrack(next);
+  };
+
+  const prevTrack = () => {
+    const prev = (trackIndex - 1 + ambientTracks.length) % ambientTracks.length;
+    playAmbientTrack(prev);
+  };
 
   const toggleAmbient = () => {
-    setTrackIndex(prev => {
-      const next = (prev + 1) % ambientTracks.length;
-      setIsMuted(next === 0);
-      return next;
-    });
+    const next = (trackIndex + 1) % ambientTracks.length;
+    playAmbientTrack(next);
+    setIsMuted(next === 0);
   };
 
   const enableSound = () => {
     setIsMuted(false);
     setIsUnlocked(true);
+    if (trackIndex > 0) playAmbientTrack(trackIndex);
   };
 
   const disableSound = () => {
     setIsMuted(true);
     setTrackIndex(0);
+    const audio = mainAudioRef.current;
+    if (audio) {
+      fadeTo(audio, 0);
+      audio.pause();
+    }
+    setIsPlaying(false);
   };
 
   const toggleMute = () => {
@@ -119,9 +158,10 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
   const playClick = () => {
     const click = clickRef.current;
     if (!click || sfxMuted || !isUnlocked) return;
+    click.pause();
     click.currentTime = 0;
     click.volume = volume;
-    click.play().catch(err => console.warn('Click sound error', err));
+    click.play().catch((err) => console.warn('Click sound error', err));
   };
 
   useEffect(() => {
@@ -146,8 +186,8 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
   }, []);
 
   useEffect(() => {
-    if (isUnlocked) playAmbient();
-  }, [trackIndex, isMuted, volume, isUnlocked, playAmbient]);
+    if (isUnlocked) playAmbientTrack(trackIndex);
+  }, [trackIndex, isMuted, volume, isUnlocked, playAmbientTrack]);
 
   return (
     <SoundContext.Provider value={{
@@ -162,7 +202,14 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
       toggleMute,
       nowPlaying,
       trackIndex,
+      setTrackIndex,
+      isPlaying,
+      playAmbientTrack,
+      togglePlay,
+      nextTrack,
+      prevTrack,
       setSfxMuted,
+      setIsMuted,
     }}>
       {children}
     </SoundContext.Provider>
@@ -170,4 +217,5 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
 }
 
 export const useSound = () => useContext(SoundContext);
+
 

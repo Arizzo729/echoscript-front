@@ -123,13 +123,9 @@ export default function Header({
   }, [searchQuery]);
 
   const restoreOverlay = () => {
-    const restoreBtn = document.querySelector('[aria-label="Restore Audio Overlay"]');
-    const minimizeBtn = document.querySelector('[aria-label="Minimize Audio Overlay"]');
-
+    const minimizeBtn = document.querySelector('[aria-label="Minimize"]');
     if (minimizeBtn && minimizeBtn.offsetParent !== null) {
       minimizeBtn.click();
-    } else if (restoreBtn) {
-      restoreBtn.click();
     }
   };
 
@@ -222,6 +218,77 @@ export default function Header({
             aria-label="Restore Audio Overlay"
             icon={<span id="header-music-icon" className="text-lg text-teal-400">🎵</span>}
           />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/settings")}
+            aria-label={t("Go to Settings")}
+            icon={<Cog className="w-5 h-5 text-white" />}
+          />
+
+          {/* 🔔 Notifications */}
+          <div className="relative" ref={notifRef}>
+            <button
+              onClick={() => setShowNotifDropdown((prev) => !prev)}
+              className="text-white hover:text-teal-300 focus:outline-none p-1"
+              aria-label="Notifications"
+            >
+              <BellIcon className="w-5 h-5" />
+            </button>
+            <AnimatePresence>
+              {showNotifDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  className="absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-700 rounded shadow z-50 p-3 text-sm text-white"
+                >
+                  <p className="text-zinc-400">No new notifications</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* 👤 Account Dropdown */}
+          <div className="relative" ref={userRef}>
+            <button
+              onClick={() => setShowUserDropdown((prev) => !prev)}
+              className="text-white hover:text-teal-300 focus:outline-none p-1"
+              aria-label="User menu"
+            >
+              <ChevronDownIcon className="w-5 h-5" />
+            </button>
+            <AnimatePresence>
+              {showUserDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  className="absolute right-0 mt-2 w-48 bg-zinc-900 border border-zinc-700 rounded shadow-md z-50"
+                >
+                  {isGuest ? (
+                    <>
+                      <Link to="/signin" onClick={() => setShowUserDropdown(false)} className="block px-4 py-2 hover:bg-zinc-800 text-white text-sm">
+                        {t("Sign In")}
+                      </Link>
+                      <Link to="/signup" onClick={() => setShowUserDropdown(false)} className="block px-4 py-2 hover:bg-zinc-800 text-white text-sm">
+                        {t("Sign Up")}
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/account" onClick={() => setShowUserDropdown(false)} className="block px-4 py-2 hover:bg-zinc-800 text-white text-sm">
+                        {t("Account Settings")}
+                      </Link>
+                      <button onClick={() => { setShowUserDropdown(false); onLogout(); }} className="block w-full text-left px-4 py-2 text-sm hover:bg-zinc-800 text-red-400">
+                        {t("Sign Out")}
+                      </button>
+                    </>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </motion.header>
