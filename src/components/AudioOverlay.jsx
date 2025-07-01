@@ -29,12 +29,18 @@ export default function AudioOverlay() {
   const [volumeVisible, setVolumeVisible] = useState(false);
   const [volume, setVolume] = useState(1);
   const [position, setPosition] = useState({ x: 20, y: window.innerHeight - 90 });
+  const [hidden, setHidden] = useState(false); // handle intro check cleanly
 
   const overlayRef = useRef(null);
   const isDragging = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
 
-  if (typeof window !== 'undefined' && !window.__introPlayed) return null;
+  // ✅ Fix hook violation by delaying intro check
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.__introPlayed) {
+      setHidden(true);
+    }
+  }, []);
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
@@ -97,7 +103,7 @@ export default function AudioOverlay() {
 
   return (
     <AnimatePresence>
-      {!minimized && (
+      {!minimized && !hidden && (
         <motion.div
           ref={overlayRef}
           initial={{ opacity: 0, scale: 0.95 }}
