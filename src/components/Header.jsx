@@ -5,8 +5,9 @@ import {
   ChevronDownIcon,
   SunIcon,
   MoonIcon,
+  UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Volume2, VolumeX, Cog, UserCircle } from "lucide-react";
+import { Volume2, VolumeX, Cog } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "./ui/Button";
@@ -29,7 +30,11 @@ const LOCAL_SEARCH_INDEX = [
   { type: "Page", name: "Contact Us", path: "/contact" },
 ];
 
-export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, isDarkMode = false }) {
+export default function Header({
+  onLogout = () => {},
+  onToggleTheme = () => {},
+  isDarkMode = false,
+}) {
   const { user } = useAuth();
   const { t } = useTranslation();
   const { isMuted, toggleMute } = useSound();
@@ -41,13 +46,25 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
   const [isLoading, setIsLoading] = useState(false);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [overlayVisible, setOverlayVisible] = useState(false);
+
   const searchRef = useRef(null);
   const notifRef = useRef(null);
   const userRef = useRef(null);
 
   useEffect(() => {
+    const stored = localStorage.getItem("echo-muted");
+    if (stored === "true" && !isMuted) toggleMute();
+    if (stored !== "true" && isMuted) toggleMute();
+  }, []);
+
+  useEffect(() => {
     const closeAll = (e) => {
-      if (!searchRef.current?.contains(e.target) && !notifRef.current?.contains(e.target) && !userRef.current?.contains(e.target)) {
+      if (
+        !searchRef.current?.contains(e.target) &&
+        !notifRef.current?.contains(e.target) &&
+        !userRef.current?.contains(e.target)
+      ) {
         setShowNotifDropdown(false);
         setShowUserDropdown(false);
       }
@@ -86,7 +103,9 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
             item.name.toLowerCase().includes(searchQuery.toLowerCase())
           );
           if (active) {
-            const deduped = [...new Map([...aiResults, ...fallbackResults].map(item => [item.path, item])).values()];
+            const deduped = [
+              ...new Map([...aiResults, ...fallbackResults].map((item) => [item.path, item])).values(),
+            ];
             setSuggestions(deduped);
           }
         })
@@ -108,15 +127,23 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
     };
   }, [searchQuery]);
 
-  const restoreOverlay = () => {
+  const toggleOverlay = () => {
     const minimizeBtn = document.querySelector('[aria-label="Minimize"]');
     if (minimizeBtn && minimizeBtn.offsetParent !== null) {
       minimizeBtn.click();
+      setOverlayVisible(false);
+    } else {
+      setOverlayVisible(true);
     }
   };
 
   return (
-    <motion.header className="sticky top-0 z-50 bg-zinc-900/80 backdrop-blur border-b border-zinc-800 shadow">
+    <motion.header
+      className="sticky top-0 z-50 bg-zinc-900/80 backdrop-blur border-b border-zinc-800 shadow"
+      initial={{ opacity: 0, y: -15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="flex items-center justify-between gap-4 px-4 sm:px-6 py-3 flex-wrap">
         <Link to="/" className="flex items-center gap-2 min-w-[150px]">
           <img src={Logo} alt="EchoScript.AI" className="h-8 sm:h-10" />
@@ -165,24 +192,52 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mt-2 sm:mt-0">
-          <Button variant="ghost" size="sm" onClick={onToggleTheme} aria-label={t("Toggle theme")}
-            icon={isDarkMode ? <SunIcon className="w-5 h-5 text-yellow-300" /> : <MoonIcon className="w-5 h-5 text-blue-300" />} />
+        <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleTheme}
+            aria-label={t("Toggle theme")}
+            icon={
+              isDarkMode ? (
+                <SunIcon className="w-5 h-5 text-yellow-300" />
+              ) : (
+                <MoonIcon className="w-5 h-5 text-blue-300" />
+              )
+            }
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleMute}
+            aria-label={t("Toggle sound")}
+            icon={
+              isMuted ? (
+                <VolumeX className="w-5 h-5 text-red-500" />
+              ) : (
+                <Volume2 className="w-5 h-5 text-teal-400" />
+              )
+            }
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleOverlay}
+            aria-label="Toggle Audio Overlay"
+            icon={<span id="header-music-icon" className="text-lg text-teal-400">🎵</span>}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/settings")}
+            aria-label={t("Go to Settings")}
+            icon={<Cog className="w-5 h-5 text-white" />}
+          />
 
-          <Button variant="ghost" size="sm" onClick={toggleMute} aria-label={t("Toggle sound")}
-            icon={isMuted ? <VolumeX className="w-5 h-5 text-red-500" /> : <Volume2 className="w-5 h-5 text-teal-400" />} />
-
-          <Button variant="ghost" size="sm" onClick={restoreOverlay} aria-label="Restore Audio Overlay"
-            icon={<span id="header-music-icon" className="text-lg text-teal-400">🎵</span>} />
-
-          <Button variant="ghost" size="sm" onClick={() => navigate("/settings")} aria-label={t("Go to Settings")}
-            icon={<Cog className="w-5 h-5 text-white" />} />
-
-          {/* Notifications */}
           <div className="relative" ref={notifRef}>
             <button
               onClick={() => setShowNotifDropdown((prev) => !prev)}
-              className="text-white hover:text-teal-300 focus:outline-none"
+              className="text-white hover:text-teal-300 focus:outline-none bg-transparent active:bg-transparent"
               aria-label="Notifications"
             >
               <BellIcon className="w-5 h-5" />
@@ -201,15 +256,14 @@ export default function Header({ onLogout = () => {}, onToggleTheme = () => {}, 
             </AnimatePresence>
           </div>
 
-          {/* Account Dropdown */}
           <div className="relative" ref={userRef}>
             <button
               onClick={() => setShowUserDropdown((prev) => !prev)}
-              className="flex items-center gap-1 text-white hover:text-teal-300 focus:outline-none"
+              className="flex items-center gap-1 text-white hover:text-teal-300 focus:outline-none bg-transparent active:bg-transparent"
               aria-label="User menu"
             >
-              <UserCircle className="w-5 h-5" />
-              <ChevronDownIcon className="w-4 h-4 text-zinc-400" />
+              <UserCircleIcon className="w-5 h-5" />
+              <ChevronDownIcon className="w-4 h-4" />
             </button>
             <AnimatePresence>
               {showUserDropdown && (

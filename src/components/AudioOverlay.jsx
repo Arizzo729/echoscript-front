@@ -28,14 +28,13 @@ export default function AudioOverlay() {
   const [minimized, setMinimized] = useState(false);
   const [volumeVisible, setVolumeVisible] = useState(false);
   const [volume, setVolume] = useState(1);
-  const [position, setPosition] = useState({ x: 20, y: window.innerHeight - 90 });
+  const [position, setPosition] = useState({ x: 20, y: window.innerHeight - 100 });
   const [hidden, setHidden] = useState(false);
 
   const overlayRef = useRef(null);
   const isDragging = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
 
-  // Prevent showing during intro
   useEffect(() => {
     if (typeof window !== 'undefined' && !window.__introPlayed) {
       setHidden(true);
@@ -54,9 +53,12 @@ export default function AudioOverlay() {
       const newY = e.clientY - dragOffset.current.y;
       const maxX = window.innerWidth - overlayRef.current.offsetWidth;
       const maxY = window.innerHeight - overlayRef.current.offsetHeight;
-      setPosition({
-        x: Math.min(Math.max(0, newX), maxX),
-        y: Math.min(Math.max(0, newY), maxY),
+
+      requestAnimationFrame(() => {
+        setPosition({
+          x: Math.min(Math.max(0, newX), maxX),
+          y: Math.min(Math.max(0, newY), maxY),
+        });
       });
     };
 
@@ -70,7 +72,13 @@ export default function AudioOverlay() {
     const node = overlayRef.current;
     if (!minimized && node) {
       const handleMouseDown = (e) => {
-        if (e.target.closest('#minimize-btn') || e.target.closest('#volume-wrapper')) return;
+        if (
+          e.target.closest('#minimize-btn') ||
+          e.target.closest('#volume-wrapper') ||
+          e.button !== 0
+        )
+          return;
+
         const bounds = node.getBoundingClientRect();
         dragOffset.current = {
           x: e.clientX - bounds.left,
@@ -111,10 +119,10 @@ export default function AudioOverlay() {
           exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
           transition={{ type: 'spring', stiffness: 240, damping: 24 }}
           className={twMerge(
-            'fixed z-[9999] flex items-center gap-3 px-5 py-3 rounded-full shadow-xl border border-zinc-700 bg-zinc-900/80 backdrop-blur-md cursor-default select-none'
+            'fixed z-[9999] flex items-center gap-4 px-5 py-3 rounded-full shadow-xl border border-zinc-700 bg-zinc-900/90 backdrop-blur-md cursor-default select-none'
           )}
         >
-          {/* Minimize Button (top-right, floating outside bounds) */}
+          {/* Minimize Button */}
           <button
             id="minimize-btn"
             onClick={handleMinimize}
@@ -124,22 +132,39 @@ export default function AudioOverlay() {
             <Minus className="w-3.5 h-3.5" />
           </button>
 
-          {/* Controls */}
-          <button onClick={prevTrack} className="text-teal-400 hover:text-white">
-            <ChevronLeft className="w-4 h-4" />
+          {/* Previous */}
+          <button
+            onClick={prevTrack}
+            className="text-teal-400 hover:text-white focus:outline-none"
+            aria-label="Previous Track"
+          >
+            <ChevronLeft className="w-5 h-5" />
           </button>
 
-          <button onClick={handlePlayToggle} className="text-teal-400 hover:text-white">
-            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+          {/* Play/Pause */}
+          <button
+            onClick={handlePlayToggle}
+            className="text-teal-400 hover:text-white focus:outline-none"
+            aria-label="Play or Pause"
+          >
+            {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
           </button>
 
-          <button onClick={nextTrack} className="text-teal-400 hover:text-white">
-            <ChevronRight className="w-4 h-4" />
+          {/* Next */}
+          <button
+            onClick={nextTrack}
+            className="text-teal-400 hover:text-white focus:outline-none"
+            aria-label="Next Track"
+          >
+            <ChevronRight className="w-5 h-5" />
           </button>
 
-          <span className="text-xs text-zinc-300 truncate max-w-[100px]">{currentTrack}</span>
+          {/* Track Label */}
+          <span className="text-xs text-zinc-300 font-medium min-w-[50px] max-w-[80px] truncate text-center">
+            {currentTrack}
+          </span>
 
-          {/* Volume Toggle */}
+          {/* Volume */}
           <div
             id="volume-wrapper"
             className="relative"
@@ -147,10 +172,10 @@ export default function AudioOverlay() {
           >
             <button
               onClick={() => setVolumeVisible(!volumeVisible)}
-              className="text-teal-400 hover:text-white"
+              className="text-teal-400 hover:text-white focus:outline-none"
               aria-label="Volume"
             >
-              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
 
             {volumeVisible && (
@@ -165,7 +190,7 @@ export default function AudioOverlay() {
                   setVolume(val);
                   setMuted(val === 0);
                 }}
-                className="absolute -top-8 left-1/2 -translate-x-1/2 w-24 h-1 appearance-none bg-teal-500 rounded-full cursor-pointer"
+                className="absolute -top-9 left-1/2 -translate-x-1/2 w-24 h-1 bg-teal-500 rounded-full cursor-pointer"
               />
             )}
           </div>
@@ -174,4 +199,5 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
 
