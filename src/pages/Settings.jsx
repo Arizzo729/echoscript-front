@@ -19,12 +19,13 @@ import {
   Star,
   LogIn,
   ChevronRight,
+  Clock4,
 } from "lucide-react";
 import Button from "../components/ui/Button";
 import { FontSizeContext } from "../context/useFontSize";
 import { useTranslation } from "react-i18next";
 import { useSound } from "../context/SoundContext";
-import i18n from "i18next"; // ✅ Fixed: import i18n
+import i18n from "i18next";
 import { useAuth } from "../context/AuthContext";
 
 const tabs = [
@@ -105,14 +106,39 @@ export default function Settings() {
       {activeTab === "preferences" && (
         <div className="space-y-8">
           <Section title="Appearance & Comfort">
-            <ToggleRow label="Dark Mode" value={darkMode} onChange={handleDarkToggle} icon={<Moon />} />
-            <ToggleRow label="Show Helpful Hints" value={showHints} onChange={() => setShowHints(!showHints)} icon={<Eye />} />
-            <ToggleRow label="Accessible Fonts" value={accessibleFonts} onChange={() => setAccessibleFonts(!accessibleFonts)} icon={<Text />} />
+            <ToggleRow
+              label="Dark Mode"
+              value={darkMode}
+              onChange={handleDarkToggle}
+              icon={<Moon />}
+            />
+            <ToggleRow
+              label="Show Helpful Hints"
+              value={showHints}
+              onChange={() => setShowHints(!showHints)}
+              icon={<Eye />}
+            />
+            <ToggleRow
+              label="Accessible Fonts"
+              value={accessibleFonts}
+              onChange={() => setAccessibleFonts(!accessibleFonts)}
+              icon={<Text />}
+            />
           </Section>
 
           <Section title="Sound Settings" icon={<Speaker />}>
-            <ToggleRow label="Sound Effects" value={!isMuted} onChange={toggleMute} icon={<Volume2 />} />
-            <ToggleRow label="Ambient Music" value={ambientEnabled} onChange={toggleAmbient} icon={<Music2 />} />
+            <ToggleRow
+              label="Sound Effects"
+              value={!isMuted}
+              onChange={toggleMute}
+              icon={<Volume2 />}
+            />
+            <ToggleRow
+              label="Ambient Music"
+              value={ambientEnabled}
+              onChange={toggleAmbient}
+              icon={<Music2 />}
+            />
             <SliderRow
               label="Volume"
               value={volume}
@@ -137,9 +163,66 @@ export default function Settings() {
           </Section>
 
           <Section title="Extras">
-            <ToggleRow label="AI Assistant" value={aiAssistantEnabled} onChange={() => setAiAssistantEnabled(!aiAssistantEnabled)} icon={<Bot />} />
-            <ToggleRow label="Push Notifications" value={notifications} onChange={() => setNotifications(!notifications)} icon={<Bell />} />
-            <ToggleRow label="Enable Multiple Languages" value={multiLang} onChange={() => setMultiLang(!multiLang)} icon={<Languages />} />
+            {isAuthenticated ? (
+              <ToggleRow
+                label="Skip Intro Video"
+                value={localStorage.getItem("skipIntro") === "true"}
+                onChange={() => {
+                  const current = localStorage.getItem("skipIntro") === "true";
+                  localStorage.setItem("skipIntro", (!current).toString());
+                }}
+                icon={<Eye />}
+              />
+            ) : (
+              <div className="flex items-center justify-between bg-zinc-800 px-4 py-3 rounded-lg border border-zinc-700 opacity-50">
+                <div className="flex items-center gap-3 text-sm text-zinc-400">
+                  <Eye className="text-teal-400 w-4 h-4" />
+                  <span>Skip Intro Video</span>
+                </div>
+                <span className="text-xs text-zinc-500 italic pr-2">
+                  Sign in to enable
+                </span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between bg-zinc-800 px-4 py-3 rounded-lg border border-zinc-700">
+              <div className="flex items-center gap-3 text-sm text-zinc-300">
+                <Clock4 className="text-teal-400 w-4 h-4" />
+                <span>Time Zone</span>
+              </div>
+              <select
+                value={localStorage.getItem("timezone") || "UTC"}
+                onChange={(e) =>
+                  localStorage.setItem("timezone", e.target.value)
+                }
+                className="bg-zinc-700 text-white px-3 py-1 rounded-md border border-zinc-600"
+              >
+                {["UTC", "EST", "CST", "MST", "PST", "GMT", "CET"].map((tz) => (
+                  <option key={tz} value={tz}>
+                    {tz}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <ToggleRow
+              label="AI Assistant"
+              value={aiAssistantEnabled}
+              onChange={() => setAiAssistantEnabled(!aiAssistantEnabled)}
+              icon={<Bot />}
+            />
+            <ToggleRow
+              label="Push Notifications"
+              value={notifications}
+              onChange={() => setNotifications(!notifications)}
+              icon={<Bell />}
+            />
+            <ToggleRow
+              label="Enable Multiple Languages"
+              value={multiLang}
+              onChange={() => setMultiLang(!multiLang)}
+              icon={<Languages />}
+            />
             <div className="flex items-center justify-between bg-zinc-800 px-4 py-3 rounded-lg border border-zinc-700">
               <div className="flex items-center gap-3 text-sm text-zinc-300">
                 <Languages className="text-teal-400 w-4 h-4" />
@@ -158,12 +241,19 @@ export default function Settings() {
           {isAuthenticated ? (
             <div className="grid gap-4">
               <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-700">
-                <p><strong>Email:</strong> {user?.email || "your@email.com"}</p>
-                <p><strong>Plan:</strong> {localStorage.getItem("fakePlan") || user?.plan || "Pro"}</p>
+                <p>
+                  <strong>Email:</strong> {user?.email || "your@email.com"}
+                </p>
+                <p>
+                  <strong>Plan:</strong>{" "}
+                  {localStorage.getItem("fakePlan") || user?.plan || "Pro"}
+                </p>
 
                 {user?.email === "andrew@echoscript.ai" && (
                   <div className="mt-4">
-                    <label className="block text-sm text-white font-medium mb-1">👑 Owner Mode</label>
+                    <label className="block text-sm text-white font-medium mb-1">
+                      👑 Owner Mode
+                    </label>
                     <select
                       value={localStorage.getItem("fakePlan") || ""}
                       onChange={(e) => {
@@ -204,10 +294,21 @@ export default function Settings() {
 
       {activeTab === "faq" && (
         <Section title="Frequently Asked Questions" icon={<Info />}>
-          {["Why won't my file upload?","What determines the enterprise estimate?","Can I buy more minutes?","How secure is my data?","What formats are supported?"].map((q, i) => (
-            <div key={i} className="bg-zinc-900 p-4 border border-zinc-700 rounded-lg">
+          {[
+            "Why won't my file upload?",
+            "What determines the enterprise estimate?",
+            "Can I buy more minutes?",
+            "How secure is my data?",
+            "What formats are supported?",
+          ].map((q, i) => (
+            <div
+              key={i}
+              className="bg-zinc-900 p-4 border border-zinc-700 rounded-lg"
+            >
               <p className="font-medium text-white mb-1">{q}</p>
-              <Button size="xs" variant="outline">{t("More info")}</Button>
+              <Button size="xs" variant="outline">
+                {t("More info")}
+              </Button>
             </div>
           ))}
         </Section>
@@ -216,9 +317,17 @@ export default function Settings() {
       {activeTab === "contact" && (
         <Section title="Contact Us" icon={<Mail />}>
           <div className="bg-zinc-900 rounded-lg p-5 border border-zinc-700 text-sm space-y-2">
-            <p>Email: <span className="text-teal-400">support@echoscript.ai</span></p>
-            <p>Discord: <span className="text-teal-400">discord.gg/echoscript</span></p>
-            <p>Follow us on <span className="text-white">X</span>, <span className="text-white">Instagram</span>, and <span className="text-white">LinkedIn</span>.</p>
+            <p>
+              Email: <span className="text-teal-400">support@echoscript.ai</span>
+            </p>
+            <p>
+              Discord: <span className="text-teal-400">discord.gg/echoscript</span>
+            </p>
+            <p>
+              Follow us on <span className="text-white">X</span>,{" "}
+              <span className="text-white">Instagram</span>, and{" "}
+              <span className="text-white">LinkedIn</span>.
+            </p>
           </div>
         </Section>
       )}
@@ -278,4 +387,3 @@ function SliderRow({ label, value, onChange, min, max, step, display }) {
     </div>
   );
 }
-
