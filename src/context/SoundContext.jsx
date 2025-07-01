@@ -25,10 +25,10 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
 
   const ambientTracks = useMemo(
     () => [
-      null,
       new URL('../assets/sounds/ambient-loop-1.mp3', import.meta.url).href,
       new URL('../assets/sounds/ambient-loop-2.mp3', import.meta.url).href,
       new URL('../assets/sounds/ambient-loop-3.mp3', import.meta.url).href,
+      null, // OFF track
     ],
     []
   );
@@ -77,7 +77,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
       setNowPlaying('Off');
       fadeTo(audio, 0);
       setTimeout(() => audio.pause(), 600);
-      setTrackIndex(0);
+      setTrackIndex(ambientTracks.length - 1);
       setIsPlaying(false);
       return;
     }
@@ -91,7 +91,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     audio.play()
       .then(() => {
         fadeTo(audio, volume * 0.2);
-        setNowPlaying(`Music ${index}`);
+        setNowPlaying(`Music ${index + 1}`);
         setTrackIndex(index);
         setIsPlaying(true);
       })
@@ -103,7 +103,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
 
   const togglePlay = useCallback(() => {
     const audio = mainAudioRef.current;
-    if (!audio || !audio.src) return;
+    if (!audio || !audio.src || audio.src === 'null') return;
 
     if (audio.paused) {
       audio.play()
@@ -131,18 +131,18 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
   const toggleAmbient = () => {
     const next = (trackIndex + 1) % ambientTracks.length;
     playAmbientTrack(next);
-    setIsMuted(next === 0);
+    setIsMuted(next === ambientTracks.length - 1);
   };
 
   const enableSound = () => {
     setIsMuted(false);
     setIsUnlocked(true);
-    if (trackIndex > 0) playAmbientTrack(trackIndex);
+    if (trackIndex < ambientTracks.length - 1) playAmbientTrack(trackIndex);
   };
 
   const disableSound = () => {
     setIsMuted(true);
-    setTrackIndex(0);
+    setTrackIndex(ambientTracks.length - 1);
     const audio = mainAudioRef.current;
     if (audio) {
       fadeTo(audio, 0);
@@ -186,7 +186,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
   }, []);
 
   useEffect(() => {
-    if (isUnlocked) playAmbientTrack(trackIndex);
+    if (isUnlocked && trackIndex < ambientTracks.length - 1) playAmbientTrack(trackIndex);
   }, [trackIndex, isMuted, volume, isUnlocked, playAmbientTrack]);
 
   return (
@@ -217,5 +217,3 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
 }
 
 export const useSound = () => useContext(SoundContext);
-
-
