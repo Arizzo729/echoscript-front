@@ -23,8 +23,6 @@ export default function AudioOverlay() {
     prevTrack,
   } = useSound();
 
- if (typeof window !== 'undefined' && !window.__introPlayed) return null;
-
   const [minimized, setMinimized] = useState(false);
   const [width, setWidth] = useState(280);
   const [resizing, setResizing] = useState(false);
@@ -108,7 +106,7 @@ export default function AudioOverlay() {
       {minimized ? (
         <button
           onClick={() => setMinimized(false)}
-          className="text-teal-400 hover:text-white"
+          className="text-teal-400 hover:text-white bg-transparent focus:outline-none focus:ring-0"
           aria-label="Restore Audio Overlay"
         >
           🎵
@@ -117,7 +115,7 @@ export default function AudioOverlay() {
         <>
           <button
             onClick={() => setMinimized(true)}
-            className="absolute -top-2 -right-2 text-teal-400 hover:text-white"
+            className="absolute -top-2 -right-2 text-teal-400 hover:text-white bg-transparent focus:outline-none focus:ring-0"
             aria-label="Minimize"
           >
             <Minus className="w-4 h-4" />
@@ -125,7 +123,7 @@ export default function AudioOverlay() {
 
           <button
             onClick={prevTrack}
-            className="text-teal-400 hover:text-white"
+            className="text-teal-400 hover:text-white bg-transparent focus:outline-none focus:ring-0"
             aria-label="Previous Track"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -133,7 +131,7 @@ export default function AudioOverlay() {
 
           <button
             onClick={togglePlay}
-            className="text-teal-400 hover:text-white"
+            className="text-teal-400 hover:text-white bg-transparent focus:outline-none focus:ring-0"
             aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
@@ -141,7 +139,7 @@ export default function AudioOverlay() {
 
           <button
             onClick={nextTrack}
-            className="text-teal-400 hover:text-white"
+            className="text-teal-400 hover:text-white bg-transparent focus:outline-none focus:ring-0"
             aria-label="Next Track"
           >
             <ChevronRight className="w-5 h-5" />
@@ -163,7 +161,3 @@ export default function AudioOverlay() {
     </motion.div>
   );
 }
-
-
-
-
