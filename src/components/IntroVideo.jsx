@@ -61,16 +61,14 @@ export default function IntroVideo({
     });
     v.muted = true;
     v.volume = defaultVolume;
-    // Only play programmatically once
     v.play().catch(() => {});
   }, [visible, sources]);
 
-  // Toggle mute without triggering playback
+  // Toggle mute without reloading
   useEffect(() => {
     const v = videoRef.current;
     if (v) {
       v.muted = muted;
-      if (!muted) v.volume = defaultVolume;
     }
   }, [muted]);
 
@@ -101,7 +99,7 @@ export default function IntroVideo({
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={() => onFinish && onFinish()}>
       {visible && (
         <motion.div
           className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
@@ -111,8 +109,12 @@ export default function IntroVideo({
           exit="hidden"
         >
           {loading && (
-            <motion.div className="absolute inset-0 flex items-center justify-center"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
               <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
             </motion.div>
           )}
@@ -120,7 +122,8 @@ export default function IntroVideo({
           <motion.video
             ref={videoRef}
             className="w-full h-full object-cover"
-            playsInline preload="auto"
+            playsInline
+            preload="auto"
             poster={poster}
             muted={muted}
             onCanPlay={handleCanPlay}
@@ -173,3 +176,4 @@ IntroVideo.propTypes = {
   ),
   onFinish: PropTypes.func,
 };
+
