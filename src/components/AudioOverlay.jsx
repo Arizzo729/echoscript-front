@@ -29,13 +29,13 @@ export default function AudioOverlay() {
   const [volumeVisible, setVolumeVisible] = useState(false);
   const [volume, setVolume] = useState(1);
   const [position, setPosition] = useState({ x: 20, y: window.innerHeight - 90 });
-  const [hidden, setHidden] = useState(false); // handle intro check cleanly
+  const [hidden, setHidden] = useState(false);
 
   const overlayRef = useRef(null);
   const isDragging = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
 
-  // ✅ Fix hook violation by delaying intro check
+  // Prevent showing during intro
   useEffect(() => {
     if (typeof window !== 'undefined' && !window.__introPlayed) {
       setHidden(true);
@@ -114,30 +114,29 @@ export default function AudioOverlay() {
             'fixed z-[9999] flex items-center gap-3 px-5 py-3 rounded-full shadow-xl border border-zinc-700 bg-zinc-900/80 backdrop-blur-md cursor-default select-none'
           )}
         >
-          {/* Top-right minimize */}
-          <span
+          {/* Minimize Button (top-right, floating outside bounds) */}
+          <button
             id="minimize-btn"
             onClick={handleMinimize}
-            className="absolute top-1 right-2 text-zinc-400 hover:text-white cursor-pointer"
+            className="absolute -top-2 -right-2 text-zinc-400 hover:text-white rounded-full p-1 backdrop-blur-sm"
             aria-label="Minimize"
           >
-            <Minus className="w-4 h-4" />
-          </span>
+            <Minus className="w-3.5 h-3.5" />
+          </button>
 
-          {/* Track Controls */}
-          <span onClick={prevTrack} className="text-teal-400 hover:text-white cursor-pointer">
+          {/* Controls */}
+          <button onClick={prevTrack} className="text-teal-400 hover:text-white">
             <ChevronLeft className="w-4 h-4" />
-          </span>
+          </button>
 
-          <span onClick={handlePlayToggle} className="text-teal-400 hover:text-white cursor-pointer">
+          <button onClick={handlePlayToggle} className="text-teal-400 hover:text-white">
             {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-          </span>
+          </button>
 
-          <span onClick={nextTrack} className="text-teal-400 hover:text-white cursor-pointer">
+          <button onClick={nextTrack} className="text-teal-400 hover:text-white">
             <ChevronRight className="w-4 h-4" />
-          </span>
+          </button>
 
-          {/* Track Label */}
           <span className="text-xs text-zinc-300 truncate max-w-[100px]">{currentTrack}</span>
 
           {/* Volume Toggle */}
@@ -166,7 +165,7 @@ export default function AudioOverlay() {
                   setVolume(val);
                   setMuted(val === 0);
                 }}
-                className="absolute -top-8 left-1/2 -translate-x-1/2 w-24 h-1 bg-teal-500 rounded-full cursor-pointer appearance-none"
+                className="absolute -top-8 left-1/2 -translate-x-1/2 w-24 h-1 appearance-none bg-teal-500 rounded-full cursor-pointer"
               />
             )}
           </div>
@@ -175,3 +174,4 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
