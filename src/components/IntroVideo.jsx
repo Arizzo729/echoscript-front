@@ -20,13 +20,7 @@ const controlsVariants = {
   }),
 };
 
-export default function IntroVideo({
-  poster,
-  skipAfter = 3,
-  skipLabel = 'Skip Intro',
-  sources = [{ src: introVideo, type: 'video/mp4' }],
-  onFinish,
-}) {
+export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip Intro', sources = [{ src: introVideo, type: 'video/mp4' }], onFinish }) {
   const videoRef = useRef(null);
   const controlsAnim = useAnimation();
   const hasPlayed = useRef(false);
@@ -148,7 +142,8 @@ export default function IntroVideo({
               whileTap={{ scale: 0.95 }}
               className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg flex items-center space-x-1"
             >
-              {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}<span>{muted ? 'Unmute' : 'Mute'}</span>
+              {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+              <span>{muted ? 'Unmute' : 'Mute'}</span>
             </motion.button>
           </motion.div>
         </motion.div>
