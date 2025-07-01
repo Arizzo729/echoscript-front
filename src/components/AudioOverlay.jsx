@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
   ChevronRight,
   Pause,
   Play,
-  Minus
+  Minus,
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useSound } from '../context/SoundContext';
@@ -35,14 +35,11 @@ export default function AudioOverlay() {
 
   useEffect(() => {
     const handleMouseMove = (e) => {
-      setPosition(prev => {
-        const newX = e.clientX - dragStart.current.x;
-        const newY = e.clientY - dragStart.current.y;
-        return {
-          x: Math.max(0, Math.min(window.innerWidth - overlayRef.current.offsetWidth, newX)),
-          y: Math.max(0, Math.min(window.innerHeight - overlayRef.current.offsetHeight, newY))
-        };
-      });
+      const newX = e.clientX - dragStart.current.x;
+      const newY = e.clientY - dragStart.current.y;
+      const clampedX = Math.max(0, Math.min(window.innerWidth - overlayRef.current.offsetWidth, newX));
+      const clampedY = Math.max(0, Math.min(window.innerHeight - overlayRef.current.offsetHeight, newY));
+      setPosition({ x: clampedX, y: clampedY });
     };
 
     const handleMouseUp = () => {
@@ -61,9 +58,9 @@ export default function AudioOverlay() {
     };
 
     const node = overlayRef.current;
-    if (node) node.addEventListener('mousedown', onMouseDown);
+    if (node && !minimized) node.addEventListener('mousedown', onMouseDown);
     return () => node && node.removeEventListener('mousedown', onMouseDown);
-  }, [position]);
+  }, [position, minimized]);
 
   const handlePlayToggle = () => {
     if (trackIndex === 0) {
@@ -74,37 +71,30 @@ export default function AudioOverlay() {
   };
 
   const handleMinimize = () => {
-    setMinimized(true);
     const headerMusicIcon = document.getElementById('header-music-icon');
     if (headerMusicIcon) {
       const rect = headerMusicIcon.getBoundingClientRect();
       setPosition({ x: rect.left, y: rect.top });
     }
+    setMinimized(true);
   };
 
   const currentTrack = trackLabels[trackIndex] || 'BG';
   if (typeof window !== 'undefined' && window.__introPlayed === false) return null;
 
   return (
-    <motion.div
-      ref={overlayRef}
-      style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
-      className={twMerge(
-        'fixed z-[9999] px-3 py-2 shadow-lg border border-zinc-700 rounded-lg backdrop-blur-md bg-zinc-900/80 select-none flex items-center justify-between transition-colors duration-200 cursor-move',
-        minimized && 'w-8 h-8 justify-center p-0 gap-0'
-      )}
-    >
-      {minimized ? (
-        <span
-          onClick={() => setMinimized(false)}
-          id="header-music-icon"
-          className="text-teal-400 hover:text-white bg-transparent cursor-pointer"
-          aria-label="Restore Audio Overlay"
+    <AnimatePresence>
+      {!minimized && (
+        <motion.div
+          ref={overlayRef}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1, x: position.x, y: position.y }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className={twMerge(
+            'fixed z-[9999] px-3 py-2 shadow-lg border border-zinc-700 rounded-lg backdrop-blur-md bg-zinc-900/80 select-none flex items-center justify-between transition-colors duration-200'
+          )}
         >
-          🎵
-        </span>
-      ) : (
-        <>
           <span
             onClick={handleMinimize}
             className="absolute -top-2 -right-2 text-teal-400 hover:text-white cursor-pointer"
@@ -145,11 +135,12 @@ export default function AudioOverlay() {
               {currentTrack}
             </span>
           </div>
-        </>
+        </motion.div>
       )}
-    </motion.div>
+    </AnimatePresence>
   );
 }
+
 
 
 
