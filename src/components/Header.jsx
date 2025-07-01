@@ -123,8 +123,14 @@ export default function Header({
   }, [searchQuery]);
 
   const restoreOverlay = () => {
-    const restore = document.querySelector('[aria-label="Restore Audio Overlay"]');
-    if (restore) restore.click();
+    const restoreBtn = document.querySelector('[aria-label="Restore Audio Overlay"]');
+    const minimizeBtn = document.querySelector('[aria-label="Minimize Audio Overlay"]');
+
+    if (minimizeBtn && minimizeBtn.offsetParent !== null) {
+      minimizeBtn.click();
+    } else if (restoreBtn) {
+      restoreBtn.click();
+    }
   };
 
   return (

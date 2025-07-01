@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
@@ -15,6 +16,7 @@ import HintCarousel from "../components/HintCarousel";
 import "../styles/GlareTitle.css";
 import { useTranslation } from "react-i18next";
 import LanguageToggle from "../components/LanguageToggle";
+import { useSound } from "../context/SoundContext";
 
 export default function HomePage() {
   const [time, setTime] = useState(new Date());
@@ -23,6 +25,7 @@ export default function HomePage() {
   const { voiceLevel, micStatus, shortTranscript } = useVoiceInput();
   const { setContextMessage } = useContext(GPTContext);
   const { t } = useTranslation();
+  const { ambientEnabled, toggleAmbient, nowPlaying } = useSound();
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -200,9 +203,20 @@ export default function HomePage() {
         <NewsletterSignup />
       </section>
 
-      {/* Language Control */}
+      {/* 🔊 Audio & Language Controls */}
       <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
         <LanguageToggle />
+        <motion.button
+          onClick={toggleAmbient}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-300 ${
+            ambientEnabled
+              ? "bg-teal-100/30 text-teal-300 border-teal-400 hover:bg-teal-200/40"
+              : "bg-zinc-700/30 text-zinc-300 border-zinc-600 hover:bg-zinc-600/50"
+          }`}
+          whileTap={{ scale: 0.95 }}
+        >
+          🎵 {ambientEnabled ? `Now playing: ${nowPlaying}` : "Background Audio Off"}
+        </motion.button>
       </div>
     </div>
   );
