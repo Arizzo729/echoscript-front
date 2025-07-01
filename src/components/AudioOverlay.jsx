@@ -1,10 +1,12 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+// src/components/AudioOverlay.jsx
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue } from 'framer-motion';
 import { Repeat } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 import { useSound } from '../context/SoundContext';
 
 /**
- * AudioOverlay — streamlined draggable ambient control.
+ * AudioOverlay — slim draggable control panel for cycling ambient tracks
  */
 export default function AudioOverlay() {
   const {
@@ -15,11 +17,12 @@ export default function AudioOverlay() {
     volume,
     setVolume,
     sfxMuted,
-    setSfxMuted
+    setSfxMuted,
   } = useSound();
+
   const [minimized, setMinimized] = useState(false);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
+  const x = useMotionValue(12);
+  const y = useMotionValue(window.innerHeight - 64);
   const wrapperRef = useRef(null);
 
   // Load saved position
@@ -31,88 +34,119 @@ export default function AudioOverlay() {
     }
   }, [x, y]);
 
-  // Snap to nearest corner and persist
+  // Snap to nearest corner on drag end
   const handleDragEnd = (_, info) => {
     const margin = 12;
     const w = window.innerWidth;
     const h = window.innerHeight;
-    const posX = info.point.x;
-    const posY = info.point.y;
-    const snapX = posX > w / 2 ? w - margin - wrapperRef.current.clientWidth : margin;
-    const snapY = posY > h / 2 ? h - margin - wrapperRef.current.clientHeight : margin;
+    const snapX = info.point.x > w / 2
+      ? w - margin - wrapperRef.current.clientWidth
+      : margin;
+    const snapY = info.point.y > h / 2
+      ? h - margin - wrapperRef.current.clientHeight
+      : margin;
     x.set(snapX);
     y.set(snapY);
     localStorage.setItem('audio-overlay-pos', JSON.stringify({ x: snapX, y: snapY }));
   };
 
-  // Panel styling
-  const basePanel = 'bg-zinc-900/50 backdrop-blur-md rounded-full shadow-lg flex items-center space-x-2 pointer-events-auto';
+  const isActive = !isMuted && trackIndex > 0;
+
+  // Dynamic classes for panel
+  const panelClasses = twMerge(
+    'fixed z-50 pointer-events-auto bg-zinc-900/70 dark:bg-zinc-800/70 backdrop-blur-lg rounded-xl shadow-lg',
+    minimized
+      ? 'w-8 h-8 p-0'
+      : 'px-2 py-1 flex items-center space-x-2'
+  );
+
+  // Cycle button classes
+  const cycleButtonClasses = twMerge(
+    'flex items-center justify-center p-1 rounded-full transition-colors duration-200',
+    isActive
+      ? 'bg-teal-500 hover:bg-teal-600 text-white'
+      : 'bg-zinc-700 hover:bg-zinc-600 text-zinc-300'
+  );
 
   return (
     <motion.div
       ref={wrapperRef}
-      className="fixed z-50"
       style={{ x, y }}
       drag
       dragMomentum={false}
       dragElastic={0.2}
       onDragEnd={handleDragEnd}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      className={panelClasses}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
     >
       {minimized ? (
-        <div
-          className="w-10 h-10 bg-zinc-800/60 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg cursor-move text-lg text-white"
+        <button
           onClick={() => setMinimized(false)}
-          aria-label="Restore Audio Controls"
+          className="w-full h-full flex items-center justify-center text-white text-base"
+          aria-label="Restore Audio Overlay"
         >
           🎵
-        </div>
+        </button>
       ) : (
-        <div className={`${basePanel} px-3 py-2`}>          
-          {/* Minimize button */}
+        <>
+          {/* Minimize */}
           <button
             onClick={() => setMinimized(true)}
             className="absolute -top-1 -right-1 text-xs text-gray-400 hover:text-white focus:outline-none"
-            aria-label="Minimize"
+            aria-label="Minimize Overlay"
           >
             ✕
           </button>
 
-          {/* Cycle music button */}
+          {/* Cycle Music */}
           <button
             onClick={e => { e.stopPropagation(); toggleAmbient(); }}
-            className="p-2 bg-zinc-800/60 backdrop-blur-md rounded-full hover:bg-zinc-800 active:scale-95 transition"
+            className={cycleButtonClasses}
             aria-label="Cycle Background Music"
           >
-            <Repeat className="w-5 h-5 text-teal-400" />
+            <Repeat className="w-4 h-4" />
           </button>
 
-          {/* Now playing label */}
-          <span className="text-xs text-teal-300 whitespace-nowrap">{nowPlaying}</span>
+          {/* Now Playing */}
+          <span
+            className={twMerge(
+              'text-xs font-medium whitespace-nowrap',
+              isActive ? 'text-teal-300' : 'text-zinc-400'
+            )}
+          >
+            {isActive ? nowPlaying : 'Off'}
+          </span>
 
-          {/* Volume slider */}
+          {/* Volume Slider */}
           <input
             type="range"
-            min="0"
-            max="1"
-            step="0.01"
+            min={0}
+            max={1}
+            step={0.01}
             value={volume}
             onChange={e => setVolume(parseFloat(e.target.value))}
-            className="w-20 h-1 bg-white rounded-lg appearance-none cursor-pointer"
+            className="w-20 h-1 bg-white rounded cursor-pointer"
             aria-label="Volume"
           />
 
-          {/* SFX toggle */}
+          {/* SFX Toggle */}
           <button
-            onClick={() => setSfxMuted(!sfxMuted)}
-            className="text-gray-300 hover:text-white focus:outline-none"
-            aria-label="Toggle Click SFX"
+            onClick={() => setSfxMuted(prev => !prev)}
+            className={twMerge(
+              'p-1 text-sm rounded-full transition-colors',
+              sfxMuted
+                ? 'text-zinc-500 hover:text-zinc-400'
+                : 'text-teal-400 hover:text-teal-300'
+            )}
+            aria-label="Toggle SFX"
           >
             {sfxMuted ? '🔇' : '🔊'}
           </button>
-        </div>
+        </>
       )}
     </motion.div>
   );
 }
+
