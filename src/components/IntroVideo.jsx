@@ -4,13 +4,11 @@ import { Volume2, VolumeX } from 'lucide-react';
 import PropTypes from 'prop-types';
 import introVideo from '../assets/videos/intro.mp4';
 
-// Variants for overlay fade
 const overlayVariants = {
   visible: { opacity: 1, transition: { duration: 0.8 } },
   hidden: { opacity: 0, transition: { duration: 0.8 } },
 };
 
-// Variants for control buttons
 const controlsVariants = {
   hidden: { opacity: 0, y: 20, transition: { duration: 0.4 } },
   visible: i => ({
@@ -20,17 +18,22 @@ const controlsVariants = {
   }),
 };
 
-export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip Intro', sources = [{ src: introVideo, type: 'video/mp4' }], onFinish }) {
+export default function IntroVideo({
+  poster,
+  skipAfter = 3,
+  skipLabel = 'Skip Intro',
+  sources = [{ src: introVideo, type: 'video/mp4' }],
+  onFinish,
+}) {
   const videoRef = useRef(null);
   const controlsAnim = useAnimation();
   const hasPlayed = useRef(false);
 
   const [loading, setLoading] = useState(true);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(true); // Start muted for Safari
   const [showIntro, setShowIntro] = useState(false);
   const defaultVolume = 0.3;
 
-  // Only show intro once per load
   useEffect(() => {
     if (!window.__introPlayed) {
       window.__introPlayed = true;
@@ -38,7 +41,6 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
     }
   }, []);
 
-  // Play intro once
   useEffect(() => {
     if (showIntro && !hasPlayed.current) {
       const v = videoRef.current;
@@ -47,26 +49,30 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
         v.playsInline = true;
         v.preload = 'auto';
         v.defaultPlaybackRate = 1;
-        sources.forEach(({ src, type }) => {
-          const source = document.createElement('source');
-          source.src = src;
-          source.type = type;
-          v.appendChild(source);
-        });
-        v.muted = true;
         v.volume = defaultVolume;
-        v.play().catch(() => {});
+        v.muted = true; // Must be true to allow autoplay in Safari
+
+        if (v.children.length === 0) {
+          sources.forEach(({ src, type }) => {
+            const source = document.createElement('source');
+            source.src = src;
+            source.type = type;
+            v.appendChild(source);
+          });
+        }
+
+        v.play().catch(() => {
+          // Fallback if autoplay fails — some Safari versions need a user gesture
+        });
       }
     }
   }, [showIntro, sources]);
 
-  // Toggle mute without replay
   useEffect(() => {
     const v = videoRef.current;
     if (v) v.muted = muted;
   }, [muted]);
 
-  // Reveal controls after delay
   useEffect(() => {
     if (!showIntro) return;
     controlsAnim.start('hidden').then(() =>
@@ -75,9 +81,15 @@ export default function IntroVideo({ poster, skipAfter = 3, skipLabel = 'Skip In
   }, [showIntro, skipAfter, controlsAnim]);
 
   const handleCanPlay = () => setLoading(false);
-  const toggleMute = () => setMuted(prev => !prev);
+  const toggleMute = () => {
+    const v = videoRef.current;
+    setMuted(prev => {
+      const next = !prev;
+      if (v) v.muted = next;
+      return next;
+    });
+  };
 
-  // Exit sequence: buttons fade, then overlay fades into home
   const exitIntro = async () => {
     await controlsAnim.start('hidden');
     setShowIntro(false);
@@ -161,5 +173,3 @@ IntroVideo.propTypes = {
   ),
   onFinish: PropTypes.func,
 };
-
-

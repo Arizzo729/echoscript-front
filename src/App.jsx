@@ -15,6 +15,7 @@ import AnimatedSplash from "./components/AnimatedSplash";
 import OnboardingModal from "./components/OnboardingModal";
 import Layout from "./components/Layout";
 import AudioOverlay from "./components/AudioOverlay";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Pages
 import Home from "./pages/HomePage";
@@ -120,7 +121,9 @@ export default function App() {
           <GPTProvider>
             <FontSizeProvider>
               <SoundProvider>
-                <AppInner />
+                <ErrorBoundary>
+                  <AppInner />
+                </ErrorBoundary>
               </SoundProvider>
             </FontSizeProvider>
           </GPTProvider>
