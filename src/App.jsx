@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 
@@ -53,7 +54,6 @@ function AppInner() {
     }
   }, [splashDone]);
 
-  // Set intro flag once finished
   const handleIntroDone = () => {
     setShowIntro(false);
     setIntroComplete(true);
@@ -104,7 +104,7 @@ function AppInner() {
             />
           )}
 
-          {/* ✅ Final gate to show audio overlay only when intro is done */}
+          {/* ✅ Final condition — AudioOverlay rendered after intro */}
           {introComplete && <AudioOverlay />}
         </>
       )}

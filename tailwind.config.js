@@ -102,11 +102,18 @@ module.exports = {
           '50%': { strokeDashoffset: '60', transform: 'rotate(180deg)' },
           '100%': { strokeDashoffset: '220', transform: 'rotate(360deg)' },
         },
+        scroll: {
+          '0%': { transform: 'translateX(100%)' },
+          '10%': { transform: 'translateX(0)' },
+          '90%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
       },
       animation: {
         fadeIn: 'fadeIn 0.8s ease-out forwards',
         pulseGlow: 'pulseGlow 2s ease-in-out infinite',
         dashSpin: 'dashSpin 1.4s ease-in-out infinite',
+        scroll: 'scroll 10s linear infinite',
       },
     },
   },
@@ -114,7 +121,6 @@ module.exports = {
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
     require('@tailwindcss/aspect-ratio'),
-    // `line-clamp` is built-in from Tailwind v3.3 — plugin no longer needed.
   ],
   safelist: [
     'dark',
@@ -141,4 +147,3 @@ module.exports = {
     'text-green-600',
   ],
 };
-
