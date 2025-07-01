@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   BellIcon,
   MagnifyingGlassIcon,
@@ -122,6 +122,11 @@ export default function Header({
     };
   }, [searchQuery]);
 
+  const restoreOverlay = () => {
+    const restore = document.querySelector('[aria-label="Restore Audio Overlay"]');
+    if (restore) restore.click();
+  };
+
   return (
     <motion.header
       className="sticky top-0 z-50 bg-zinc-900/80 backdrop-blur border-b border-zinc-800 shadow"
@@ -147,7 +152,6 @@ export default function Header({
               className="w-full py-2 pl-10 pr-4 text-sm rounded bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
             />
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-
             <AnimatePresence>
               {(suggestions.length > 0 || isLoading) && (
                 <motion.ul
@@ -205,135 +209,15 @@ export default function Header({
               )
             }
           />
-
-          {/* Music Toggle Button */}
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              const restore = document.querySelector('[aria-label="Restore Audio Overlay"]');
-              if (restore) restore.click();
-            }}
+            onClick={restoreOverlay}
             aria-label="Restore Audio Overlay"
-            icon={<span className="text-lg text-teal-400">🎵</span>}
+            icon={<span id="header-music-icon" className="text-lg text-teal-400">🎵</span>}
           />
-
-          {/* Notifications */}
-          <div ref={notifRef} className="relative">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setShowNotifDropdown((prev) => !prev);
-                setShowUserDropdown(false);
-              }}
-              icon={<BellIcon className="w-5 h-5 text-zinc-300" />}
-            />
-            <AnimatePresence>
-              {showNotifDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute right-0 mt-2 w-64 bg-zinc-900 border border-zinc-700 rounded shadow z-50"
-                >
-                  <div className="px-4 py-2 text-sm font-semibold border-b border-zinc-700">
-                    {t("Updates")}
-                  </div>
-                  <div className="p-4 text-sm text-zinc-400">
-                    🚧 {t("In development — check back soon!")}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/settings")}
-            aria-label={t("Settings")}
-            icon={<Cog className="w-5 h-5 text-zinc-300" />}
-          />
-
-          {/* User Dropdown */}
-          <div ref={userRef} className="relative">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setShowUserDropdown((prev) => !prev);
-                setShowNotifDropdown(false);
-              }}
-              className="flex items-center gap-2"
-              icon={
-                <div className="w-8 h-8 rounded-full border border-teal-400 bg-zinc-800 flex items-center justify-center text-xs font-bold text-teal-300">
-                  {isGuest ? "GU" : "EU"}
-                </div>
-              }
-            >
-              <span className="text-sm text-white">
-                {isGuest ? t("Welcome, Guest") : user.email}
-              </span>
-              <ChevronDownIcon
-                className={`w-4 h-4 transition-transform ${
-                  showUserDropdown ? "rotate-180" : ""
-                }`}
-              />
-            </Button>
-            <AnimatePresence>
-              {showUserDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute right-0 mt-2 w-48 bg-zinc-900 border border-zinc-700 rounded shadow z-50"
-                >
-                  {!isGuest ? (
-                    <>
-                      <Link
-                        to="/profile"
-                        className="block px-4 py-2 text-white hover:bg-zinc-800"
-                      >
-                        {t("Profile")}
-                      </Link>
-                      <Link
-                        to="/privacy"
-                        className="block px-4 py-2 text-white hover:bg-zinc-800"
-                      >
-                        {t("Privacy Settings")}
-                      </Link>
-                      <hr className="border-zinc-700" />
-                      <button
-                        onClick={onLogout}
-                        className="w-full text-left px-4 py-2 text-red-500 hover:bg-zinc-800"
-                      >
-                        {t("Log Out")}
-                      </button>
-                    </>
-                  ) : (
-                    <div className="p-3 space-y-2">
-                      <Link
-                        to="/signin"
-                        className="block w-full text-center px-4 py-2 text-sm font-medium bg-teal-600 hover:bg-teal-700 text-white rounded"
-                      >
-                        {t("Sign In")}
-                      </Link>
-                      <Link
-                        to="/signup"
-                        className="block w-full text-center px-4 py-2 text-sm font-medium bg-zinc-700 hover:bg-zinc-600 text-white rounded"
-                      >
-                        {t("Sign Up")}
-                      </Link>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </div>
       </div>
     </motion.header>
   );
 }
-

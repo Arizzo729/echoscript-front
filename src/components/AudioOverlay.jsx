@@ -26,7 +26,8 @@ export default function AudioOverlay() {
   const [minimized, setMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 16, y: window.innerHeight - 80 });
   const overlayRef = useRef(null);
-  const dragStart = useRef({ x: 0, y: 0 });
+  const isDragging = useRef(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
@@ -35,31 +36,39 @@ export default function AudioOverlay() {
 
   useEffect(() => {
     const handleMouseMove = (e) => {
-      const newX = e.clientX - dragStart.current.x;
-      const newY = e.clientY - dragStart.current.y;
+      if (!isDragging.current) return;
+      const newX = e.clientX - dragOffset.current.x;
+      const newY = e.clientY - dragOffset.current.y;
       const clampedX = Math.max(0, Math.min(window.innerWidth - overlayRef.current.offsetWidth, newX));
       const clampedY = Math.max(0, Math.min(window.innerHeight - overlayRef.current.offsetHeight, newY));
       setPosition({ x: clampedX, y: clampedY });
     };
 
     const handleMouseUp = () => {
+      isDragging.current = false;
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
       localStorage.setItem('audio-overlay-pos', JSON.stringify(position));
     };
 
-    const onMouseDown = (e) => {
-      dragStart.current = {
-        x: e.clientX - position.x,
-        y: e.clientY - position.y
-      };
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-    };
-
     const node = overlayRef.current;
-    if (node && !minimized) node.addEventListener('mousedown', onMouseDown);
-    return () => node && node.removeEventListener('mousedown', onMouseDown);
+    if (!minimized && node) {
+      const handleMouseDown = (e) => {
+        // Only start drag if not clicking the minimize button
+        const isClickInsideMinimize = e.target.closest('#minimize-btn');
+        if (isClickInsideMinimize) return;
+
+        isDragging.current = true;
+        dragOffset.current = {
+          x: e.clientX - position.x,
+          y: e.clientY - position.y
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+      };
+      node.addEventListener('mousedown', handleMouseDown);
+      return () => node.removeEventListener('mousedown', handleMouseDown);
+    }
   }, [position, minimized]);
 
   const handlePlayToggle = () => {
@@ -90,14 +99,15 @@ export default function AudioOverlay() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1, x: position.x, y: position.y }}
           exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          transition={{ type: 'tween', ease: 'linear', duration: 0.1 }}
           className={twMerge(
-            'fixed z-[9999] px-3 py-2 shadow-lg border border-zinc-700 rounded-lg backdrop-blur-md bg-zinc-900/80 select-none flex items-center justify-between transition-colors duration-200'
+            'fixed z-[9999] px-4 py-3 shadow-lg border border-zinc-700 rounded-lg backdrop-blur-md bg-zinc-900/80 select-none flex items-center justify-between transition-colors duration-200 cursor-default'
           )}
         >
           <span
+            id="minimize-btn"
             onClick={handleMinimize}
-            className="absolute -top-2 -right-2 text-teal-400 hover:text-white cursor-pointer"
+            className="absolute top-1 right-1 text-teal-400 hover:text-white cursor-pointer"
             aria-label="Minimize"
           >
             <Minus className="w-4 h-4" />
