@@ -1,4 +1,4 @@
-// Final professional AudioOverlay.jsx (clean, polished)
+// Finalized, clean, polished, and fully working AudioOverlay.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import {
   ChevronLeft,
@@ -24,7 +24,12 @@ export default function AudioOverlay() {
     setMuted,
   } = useSound();
 
-  const trackLabels = ['BG 1 — Dreamscape Horizon', 'BG 2 — Midnight Flow', 'BG 3 — Echo Drift', 'OFF'];
+  const trackLabels = [
+    'BG 1 — Dreamscape Horizon',
+    'BG 2 — Midnight Flow',
+    'BG 3 — Echo Drift',
+    'OFF',
+  ];
   const isOff = trackIndex >= trackLabels.length - 1;
 
   const [minimized, setMinimized] = useState(false);
@@ -99,7 +104,7 @@ export default function AudioOverlay() {
           animate={{ opacity: 1, scale: 1, x: position.x, y: position.y }}
           exit={{ opacity: 0, scale: 0.8 }}
           transition={{ type: 'spring', stiffness: 240, damping: 24 }}
-          className="fixed z-[9999] flex flex-col items-center px-4 py-3 w-72 rounded-2xl border border-zinc-700 bg-zinc-900/90 backdrop-blur-md shadow-none"
+          className="fixed z-[9999] flex flex-col items-center px-4 py-3 w-72 rounded-2xl border border-zinc-700 bg-zinc-900/90 backdrop-blur-md"
         >
           {/* Minimize Button */}
           <button
@@ -126,14 +131,14 @@ export default function AudioOverlay() {
             </button>
           </div>
 
-          {/* Track title with scroll */}
+          {/* Track title */}
           <div className="overflow-hidden w-full h-5 relative mb-2">
             <div className="whitespace-nowrap animate-scroll text-center text-sm text-teal-400 font-mono px-2">
               {currentTrack}
             </div>
           </div>
 
-          {/* Volume control */}
+          {/* Volume */}
           <div className="relative flex items-center justify-center w-full">
             <button
               onClick={() => setVolumeVisible(!volumeVisible)}
@@ -164,19 +169,6 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
-
-// Tailwind animation (add in global.css or tailwind config if needed):
-// @keyframes scroll {
-//   0% { transform: translateX(100%); }
-//   10% { transform: translateX(0); }
-//   90% { transform: translateX(0); }
-//   100% { transform: translateX(-100%); }
-// }
-// .animate-scroll {
-//   animation: scroll 10s linear infinite;
-// }
-
-
 
 
 
