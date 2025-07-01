@@ -6,7 +6,7 @@ import {
   SunIcon,
   MoonIcon,
 } from "@heroicons/react/24/outline";
-import { Volume2, VolumeX, X, Cog } from "lucide-react"; // Added Cog icon
+import { Volume2, VolumeX, Cog } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "./ui/Button";
@@ -81,9 +81,11 @@ export default function Header({
       setIsLoading(false);
       return;
     }
+
     let active = true;
     const controller = new AbortController();
     setIsLoading(true);
+
     const timeout = setTimeout(() => {
       fetch("/api/search", {
         method: "POST",
@@ -93,27 +95,25 @@ export default function Header({
       })
         .then((res) => res.json())
         .then((data) => {
-          if (active && Array.isArray(data.results)) {
-            setSuggestions(
-              data.results.length
-                ? data.results
-                : LOCAL_SEARCH_INDEX.filter((item) =>
-                    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-                  )
-            );
+          const aiResults = Array.isArray(data.results) ? data.results : [];
+          const fallbackResults = LOCAL_SEARCH_INDEX.filter((item) =>
+            item.name.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+          if (active) {
+            const deduped = [...new Map([...aiResults, ...fallbackResults].map(item => [item.path, item])).values()];
+            setSuggestions(deduped);
           }
         })
         .catch(() => {
           if (active) {
-            setSuggestions(
-              LOCAL_SEARCH_INDEX.filter((item) =>
-                item.name.toLowerCase().includes(searchQuery.toLowerCase())
-              )
+            const fallback = LOCAL_SEARCH_INDEX.filter((item) =>
+              item.name.toLowerCase().includes(searchQuery.toLowerCase())
             );
+            setSuggestions(fallback);
           }
         })
         .finally(() => active && setIsLoading(false));
-    }, 200);
+    }, 250);
 
     return () => {
       active = false;
@@ -235,13 +235,12 @@ export default function Header({
             </AnimatePresence>
           </div>
 
-          {/* Settings cog button */}
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/settings')}
+            onClick={() => navigate("/settings")}
             aria-label={t("Settings")}
-            icon={<Cog className="w-5 h-5 text-zinc-300" />} 
+            icon={<Cog className="w-5 h-5 text-zinc-300" />}
           />
 
           <div ref={userRef} className="relative">
@@ -253,13 +252,19 @@ export default function Header({
                 setShowNotifDropdown(false);
               }}
               className="flex items-center gap-2"
-              icon={<div className="w-8 h-8 rounded-full border border-teal-400 bg-zinc-800 flex items-center justify-center text-xs font-bold text-teal-300">{isGuest ? "GU" : "EU"}</div>}
+              icon={
+                <div className="w-8 h-8 rounded-full border border-teal-400 bg-zinc-800 flex items-center justify-center text-xs font-bold text-teal-300">
+                  {isGuest ? "GU" : "EU"}
+                </div>
+              }
             >
               <span className="text-sm text-white">
                 {isGuest ? t("Welcome, Guest") : user.email}
               </span>
               <ChevronDownIcon
-                className={`w-4 h-4 transition-transform ${showUserDropdown ? "rotate-180" : ""}`}
+                className={`w-4 h-4 transition-transform ${
+                  showUserDropdown ? "rotate-180" : ""
+                }`}
               />
             </Button>
             <AnimatePresence>
@@ -272,10 +277,16 @@ export default function Header({
                 >
                   {!isGuest ? (
                     <>
-                      <Link to="/profile" className="block px-4 py-2 text-white hover:bg-zinc-800">
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 text-white hover:bg-zinc-800"
+                      >
                         {t("Profile")}
                       </Link>
-                      <Link to="/privacy" className="block px-4 py-2 text-white hover:bg-zinc-800">
+                      <Link
+                        to="/privacy"
+                        className="block px-4 py-2 text-white hover:bg-zinc-800"
+                      >
                         {t("Privacy Settings")}
                       </Link>
                       <hr className="border-zinc-700" />

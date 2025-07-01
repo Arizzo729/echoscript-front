@@ -21,9 +21,6 @@ import MobileBottomNav from "./MobileBottomNav";
 // Lazy-loaded components
 const Header = lazy(() => import("./Header"));
 const Sidebar = lazy(() => import("./Sidebar"));
-const GlobalSearch = lazy(() => import("./GlobalSearch"));
-const NotificationBell = lazy(() => import("./NotificationBell"));
-const ProfileMenu = lazy(() => import("./ProfileMenu"));
 
 export const ThemeContext = createContext({ theme: "light", toggleTheme: () => {} });
 
@@ -82,16 +79,7 @@ export default function Layout() {
               collapseSidebar={collapseSidebar}
               sidebarCollapsed={sidebarCollapsed}
             >
-              <Suspense fallback={<div className="w-64 h-8 bg-zinc-800 rounded" />}>
-                <GlobalSearch />
-              </Suspense>
               <div className="flex items-center space-x-4">
-                <Suspense fallback={<div className="w-8 h-8 bg-zinc-800 rounded-full" />}>
-                  <NotificationBell />
-                </Suspense>
-                <Suspense fallback={<div className="w-8 h-8 bg-zinc-800 rounded-full" />}>
-                  <ProfileMenu />
-                </Suspense>
               </div>
             </Header>
           </Suspense>
