@@ -4,13 +4,15 @@ import { Volume2, VolumeX } from 'lucide-react';
 import PropTypes from 'prop-types';
 import introVideo from '../assets/videos/intro.mp4';
 
+// Variants for overlay fade
 const overlayVariants = {
-  visible: { opacity: 1 },
+  visible: { opacity: 1, transition: { duration: 0.8 } },
   hidden: { opacity: 0, transition: { duration: 0.8 } },
 };
 
+// Variants for control buttons
 const controlsVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 20, transition: { duration: 0.4 } },
   visible: i => ({
     opacity: 1,
     y: 0,
@@ -27,80 +29,76 @@ export default function IntroVideo({
 }) {
   const videoRef = useRef(null);
   const controlsAnim = useAnimation();
-  const hasLoaded = useRef(false);
+  const hasPlayed = useRef(false);
 
   const [loading, setLoading] = useState(true);
   const [muted, setMuted] = useState(true);
-  const [visible, setVisible] = useState(true);
+  const [showIntro, setShowIntro] = useState(false);
   const defaultVolume = 0.3;
 
-  // Run intro only once per page load
+  // Only show intro once per load
   useEffect(() => {
-    if (window.__introPlayed) {
-      setVisible(false);
-    } else {
+    if (!window.__introPlayed) {
       window.__introPlayed = true;
+      setShowIntro(true);
     }
   }, []);
 
-  // Load video sources and play only once when visible
+  // Play intro once
   useEffect(() => {
-    if (!visible || hasLoaded.current) return;
-    const v = videoRef.current;
-    if (!v) return;
-    hasLoaded.current = true;
-
-    v.playsInline = true;
-    v.preload = 'auto';
-    v.defaultPlaybackRate = 1;
-    sources.forEach(({ src, type }) => {
-      const source = document.createElement('source');
-      source.src = src;
-      source.type = type;
-      v.appendChild(source);
-    });
-    v.muted = true;
-    v.volume = defaultVolume;
-    v.play().catch(() => {});
-  }, [visible, sources]);
-
-  // Toggle mute without reloading
-  useEffect(() => {
-    const v = videoRef.current;
-    if (v) {
-      v.muted = muted;
+    if (showIntro && !hasPlayed.current) {
+      const v = videoRef.current;
+      hasPlayed.current = true;
+      if (v) {
+        v.playsInline = true;
+        v.preload = 'auto';
+        v.defaultPlaybackRate = 1;
+        sources.forEach(({ src, type }) => {
+          const source = document.createElement('source');
+          source.src = src;
+          source.type = type;
+          v.appendChild(source);
+        });
+        v.muted = true;
+        v.volume = defaultVolume;
+        v.play().catch(() => {});
+      }
     }
+  }, [showIntro, sources]);
+
+  // Toggle mute without replay
+  useEffect(() => {
+    const v = videoRef.current;
+    if (v) v.muted = muted;
   }, [muted]);
 
-  // Reveal controls
+  // Reveal controls after delay
   useEffect(() => {
-    if (!visible) return;
-    const show = async () => {
-      await controlsAnim.start({ opacity: 0 });
-      await new Promise(r => setTimeout(r, skipAfter * 1000));
-      await controlsAnim.start('visible');
-    };
-    show();
-  }, [skipAfter, visible, controlsAnim]);
+    if (!showIntro) return;
+    controlsAnim.start('hidden').then(() =>
+      setTimeout(() => controlsAnim.start('visible'), skipAfter * 1000)
+    );
+  }, [showIntro, skipAfter, controlsAnim]);
 
   const handleCanPlay = () => setLoading(false);
   const toggleMute = () => setMuted(prev => !prev);
 
-  const exitSequence = async () => {
+  // Exit sequence: buttons fade, then overlay fades into home
+  const exitIntro = async () => {
     await controlsAnim.start('hidden');
-    setVisible(false);
+    setShowIntro(false);
     onFinish?.();
   };
 
   const handleSkip = () => {
     const v = videoRef.current;
     if (v) v.pause();
-    exitSequence();
+    exitIntro();
   };
 
   return (
-    <AnimatePresence onExitComplete={() => onFinish && onFinish()}>
-      {visible && (
+    <AnimatePresence onExitComplete={onFinish}>
+      {showIntro && (
         <motion.div
           className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
           variants={overlayVariants}
@@ -119,7 +117,7 @@ export default function IntroVideo({
             </motion.div>
           )}
 
-          <motion.video
+          <video
             ref={videoRef}
             className="w-full h-full object-cover"
             playsInline
@@ -127,15 +125,11 @@ export default function IntroVideo({
             poster={poster}
             muted={muted}
             onCanPlay={handleCanPlay}
-            onEnded={exitSequence}
-            width="1920"
-            height="1080"
-            style={{ filter: 'brightness(1.05) contrast(1.1)' }}
+            onEnded={exitIntro}
           />
 
           <motion.div
             className="absolute bottom-6 right-6 flex space-x-3"
-            custom={0}
             variants={controlsVariants}
             initial="hidden"
             animate={controlsAnim}
@@ -148,17 +142,13 @@ export default function IntroVideo({
             >
               {skipLabel}
             </motion.button>
-
             <motion.button
               onClick={toggleMute}
-              custom={1}
-              variants={controlsVariants}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg flex items-center space-x-1"
             >
-              {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-              <span>{muted ? 'Unmute' : 'Mute'}</span>
+              {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}<span>{muted ? 'Unmute' : 'Mute'}</span>
             </motion.button>
           </motion.div>
         </motion.div>
@@ -176,4 +166,5 @@ IntroVideo.propTypes = {
   ),
   onFinish: PropTypes.func,
 };
+
 
