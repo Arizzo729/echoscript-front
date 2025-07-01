@@ -5,8 +5,7 @@ import {
   ChevronRight,
   Pause,
   Play,
-  Minus,
-  GripHorizontal
+  Minus
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useSound } from '../context/SoundContext';
@@ -24,41 +23,45 @@ export default function AudioOverlay() {
   } = useSound();
 
   const [minimized, setMinimized] = useState(false);
-  const [width, setWidth] = useState(280);
-  const [height, setHeight] = useState(60);
-  const [resizing, setResizing] = useState(false);
+  const [size, setSize] = useState({ width: 280, height: 60 });
   const [position, setPosition] = useState({ x: 16, y: window.innerHeight - 80 });
   const overlayRef = useRef(null);
-  const minWidth = 240;
+  const isResizing = useRef(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
+  const resizeOrigin = useRef({ width: 0, height: 0, x: 0, y: 0 });
+
+  const minWidth = 200;
   const maxWidth = 520;
   const minHeight = 40;
   const maxHeight = 120;
-  const dragOffset = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
     if (saved.x != null && saved.y != null) setPosition({ x: saved.x, y: saved.y });
     const savedWidth = localStorage.getItem('audio-overlay-width');
     const savedHeight = localStorage.getItem('audio-overlay-height');
-    if (savedWidth) setWidth(parseInt(savedWidth));
-    if (savedHeight) setHeight(parseInt(savedHeight));
+    if (savedWidth) setSize((s) => ({ ...s, width: parseInt(savedWidth) }));
+    if (savedHeight) setSize((s) => ({ ...s, height: parseInt(savedHeight) }));
   }, []);
 
-  const handleDragStart = (e) => {
-    dragOffset.current = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    };
-    window.addEventListener('pointermove', handleDragging);
-    window.addEventListener('pointerup', stopDragging);
+  const handlePointerDown = (e) => {
+    if (!e.target.closest('[data-resize-handle]')) {
+      dragOffset.current = {
+        x: e.clientX - position.x,
+        y: e.clientY - position.y,
+      };
+      window.addEventListener('pointermove', handleDragging);
+      window.addEventListener('pointerup', stopDragging);
+    }
   };
 
   const handleDragging = (e) => {
     const newX = e.clientX - dragOffset.current.x;
     const newY = e.clientY - dragOffset.current.y;
-    const clampedX = Math.max(0, Math.min(window.innerWidth - width, newX));
-    const clampedY = Math.max(0, Math.min(window.innerHeight - height, newY));
-    setPosition({ x: clampedX, y: clampedY });
+    setPosition({
+      x: Math.max(0, Math.min(window.innerWidth - size.width, newX)),
+      y: Math.max(0, Math.min(window.innerHeight - size.height, newY)),
+    });
   };
 
   const stopDragging = () => {
@@ -68,31 +71,33 @@ export default function AudioOverlay() {
   };
 
   const handleResizeStart = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setResizing(true);
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startWidth = width;
-    const startHeight = height;
-
-    const onMove = (ev) => {
-      const newWidth = Math.min(Math.max(startWidth + ev.clientX - startX, minWidth), maxWidth);
-      const newHeight = Math.min(Math.max(startHeight + ev.clientY - startY, minHeight), maxHeight);
-      setWidth(newWidth);
-      setHeight(newHeight);
+    isResizing.current = true;
+    resizeOrigin.current = {
+      width: size.width,
+      height: size.height,
+      x: e.clientX,
+      y: e.clientY,
     };
+    window.addEventListener('pointermove', handleResize);
+    window.addEventListener('pointerup', stopResize);
+  };
 
-    const onUp = () => {
-      setResizing(false);
-      localStorage.setItem('audio-overlay-width', width);
-      localStorage.setItem('audio-overlay-height', height);
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-    };
+  const handleResize = (e) => {
+    if (!isResizing.current) return;
+    const deltaX = e.clientX - resizeOrigin.current.x;
+    const deltaY = e.clientY - resizeOrigin.current.y;
+    setSize({
+      width: Math.max(minWidth, Math.min(maxWidth, resizeOrigin.current.width + deltaX)),
+      height: Math.max(minHeight, Math.min(maxHeight, resizeOrigin.current.height + deltaY)),
+    });
+  };
 
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+  const stopResize = () => {
+    isResizing.current = false;
+    window.removeEventListener('pointermove', handleResize);
+    window.removeEventListener('pointerup', stopResize);
+    localStorage.setItem('audio-overlay-width', size.width);
+    localStorage.setItem('audio-overlay-height', size.height);
   };
 
   const currentTrack = trackNames?.[trackIndex] || 'Ambient Track';
@@ -100,7 +105,7 @@ export default function AudioOverlay() {
   return (
     <motion.div
       ref={overlayRef}
-      style={{ transform: `translate(${position.x}px, ${position.y}px)`, width, height }}
+      style={{ transform: `translate(${position.x}px, ${position.y}px)`, ...size }}
       className={twMerge(
         'fixed z-[9999] px-3 py-2 shadow-lg border border-zinc-700 rounded-lg backdrop-blur-md bg-zinc-900/80 cursor-default select-none transition-all flex items-center justify-between',
         minimized && 'w-8 h-8 justify-center p-0 gap-0'
@@ -108,11 +113,7 @@ export default function AudioOverlay() {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      onPointerDown={(e) => {
-        if (!resizing && !e.target.closest('button') && !e.target.closest('[title="Resize"]')) {
-          handleDragStart(e);
-        }
-      }}
+      onPointerDown={handlePointerDown}
     >
       {minimized ? (
         <span
@@ -132,9 +133,10 @@ export default function AudioOverlay() {
             <Minus className="w-4 h-4" />
           </span>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 w-full">
             <span
               onClick={prevTrack}
+              role="button"
               className="text-teal-400 hover:text-white cursor-pointer"
               aria-label="Previous Track"
             >
@@ -143,6 +145,7 @@ export default function AudioOverlay() {
 
             <span
               onClick={togglePlay}
+              role="button"
               className="text-teal-400 hover:text-white cursor-pointer"
               aria-label={isPlaying ? 'Pause' : 'Play'}
             >
@@ -151,22 +154,36 @@ export default function AudioOverlay() {
 
             <span
               onClick={nextTrack}
+              role="button"
               className="text-teal-400 hover:text-white cursor-pointer"
               aria-label="Next Track"
             >
               <ChevronRight className="w-5 h-5" />
             </span>
 
-            <span className="text-sm text-zinc-300 truncate max-w-[160px]">
+            <span className="text-sm text-zinc-300 truncate max-w-[180px]">
               {currentTrack}
             </span>
 
             <div
-              onMouseDown={handleResizeStart}
-              className="cursor-se-resize w-4 h-6 ml-1 text-zinc-500 hover:text-zinc-300"
+              onPointerDown={handleResizeStart}
+              data-resize-handle
+              className="cursor-se-resize w-4 h-6 ml-auto text-zinc-500 hover:text-zinc-300"
               title="Resize"
             >
-              <GripHorizontal className="w-4 h-4 mx-auto" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4 mx-auto"
+              >
+                <path d="M15 3h6v6" />
+                <path d="M21 3L14 10" />
+              </svg>
             </div>
           </div>
         </>
