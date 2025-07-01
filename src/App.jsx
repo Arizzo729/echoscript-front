@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 
@@ -39,10 +38,12 @@ import Unsubscribe from "./pages/Unsubscribe";
 import Unsubscribed from "./pages/Unsubscribed";
 import NotFound from "./pages/NotFound";
 
-// ✅ AppInner handles splash, onboarding, and routes
 function AppInner() {
   const [splashDone, setSplashDone] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
+  const [introComplete, setIntroComplete] = useState(() =>
+    typeof window !== "undefined" ? !!window.__introPlayed : false
+  );
   const { enableSound } = useSound();
 
   useEffect(() => {
@@ -51,6 +52,15 @@ function AppInner() {
       return () => clearTimeout(timer);
     }
   }, [splashDone]);
+
+  // Set intro flag once finished
+  const handleIntroDone = () => {
+    setShowIntro(false);
+    setIntroComplete(true);
+    if (typeof window !== "undefined") {
+      window.__introPlayed = true;
+    }
+  };
 
   return (
     <>
@@ -89,20 +99,19 @@ function AppInner() {
 
           {showIntro && (
             <OnboardingModal
-              onClose={() => setShowIntro(false)}
+              onClose={handleIntroDone}
               onEnableAudio={enableSound}
             />
           )}
 
-          {/* Persistent Audio Overlay */}
-          <AudioOverlay />
+          {/* ✅ Final gate to show audio overlay only when intro is done */}
+          {introComplete && <AudioOverlay />}
         </>
       )}
     </>
   );
 }
 
-// ✅ App Root with full context providers
 export default function App() {
   return (
     <AuthProvider>
@@ -120,4 +129,6 @@ export default function App() {
     </AuthProvider>
   );
 }
+
+
  

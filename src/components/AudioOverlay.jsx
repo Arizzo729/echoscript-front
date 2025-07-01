@@ -24,7 +24,9 @@ export default function AudioOverlay() {
     setMuted,
   } = useSound();
 
-  const trackLabels = ['OFF', 'BG 1', 'BG 2', 'BG 3'];
+  const trackLabels = ['BG 1', 'BG 2', 'BG 3', 'OFF'];
+  const isOff = trackIndex >= trackLabels.length - 1;
+
   const [minimized, setMinimized] = useState(false);
   const [volumeVisible, setVolumeVisible] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -35,17 +37,20 @@ export default function AudioOverlay() {
   const isDragging = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
 
+  // ✅ Hide during intro
   useEffect(() => {
     if (typeof window !== 'undefined' && !window.__introPlayed) {
       setHidden(true);
     }
   }, []);
 
+  // Load saved position
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
     if (saved.x != null && saved.y != null) setPosition(saved);
   }, []);
 
+  // Drag logic
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (!isDragging.current) return;
@@ -93,11 +98,16 @@ export default function AudioOverlay() {
     }
   }, [position, minimized]);
 
+  // ✅ Play or start BG 1 if OFF
   const handlePlayToggle = () => {
-    if (trackIndex === 0) playAmbientTrack(1);
-    else togglePlay();
+    if (isOff) {
+      playAmbientTrack(0); // Start BG 1
+    } else {
+      togglePlay();
+    }
   };
 
+  // ✅ Minimize logic
   const handleMinimize = () => {
     const icon = document.getElementById('header-music-icon');
     if (icon) {
@@ -107,13 +117,15 @@ export default function AudioOverlay() {
     setMinimized(true);
   };
 
-  const currentTrack = trackLabels[trackIndex] || 'BG';
+  const currentTrack = isOff ? 'OFF' : trackLabels[trackIndex];
 
   return (
     <AnimatePresence>
       {!minimized && !hidden && (
         <motion.div
           ref={overlayRef}
+          id="audio-overlay"
+          data-minimized="false"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1, x: position.x, y: position.y }}
           exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
@@ -126,7 +138,7 @@ export default function AudioOverlay() {
           <button
             id="minimize-btn"
             onClick={handleMinimize}
-            className="absolute -top-2 -right-2 text-zinc-400 hover:text-white rounded-full p-1 backdrop-blur-sm"
+            className="absolute -top-2 -right-2 text-zinc-400 hover:text-white p-1"
             aria-label="Minimize"
           >
             <Minus className="w-3.5 h-3.5" />
@@ -135,7 +147,7 @@ export default function AudioOverlay() {
           {/* Previous */}
           <button
             onClick={prevTrack}
-            className="text-teal-400 hover:text-white focus:outline-none"
+            className="text-teal-400 hover:text-white focus:outline-none bg-transparent"
             aria-label="Previous Track"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -144,16 +156,20 @@ export default function AudioOverlay() {
           {/* Play/Pause */}
           <button
             onClick={handlePlayToggle}
-            className="text-teal-400 hover:text-white focus:outline-none"
+            className="text-teal-400 hover:text-white focus:outline-none bg-transparent"
             aria-label="Play or Pause"
           >
-            {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+            {isPlaying && !isOff ? (
+              <Pause className="w-5 h-5" />
+            ) : (
+              <Play className="w-5 h-5" />
+            )}
           </button>
 
           {/* Next */}
           <button
             onClick={nextTrack}
-            className="text-teal-400 hover:text-white focus:outline-none"
+            className="text-teal-400 hover:text-white focus:outline-none bg-transparent"
             aria-label="Next Track"
           >
             <ChevronRight className="w-5 h-5" />
@@ -172,7 +188,7 @@ export default function AudioOverlay() {
           >
             <button
               onClick={() => setVolumeVisible(!volumeVisible)}
-              className="text-teal-400 hover:text-white focus:outline-none"
+              className="text-teal-400 hover:text-white focus:outline-none bg-transparent"
               aria-label="Volume"
             >
               {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -199,5 +215,7 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
+
 
 

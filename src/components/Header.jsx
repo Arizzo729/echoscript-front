@@ -128,12 +128,19 @@ export default function Header({
   }, [searchQuery]);
 
   const toggleOverlay = () => {
-    const minimizeBtn = document.querySelector('[aria-label="Minimize"]');
-    if (minimizeBtn && minimizeBtn.offsetParent !== null) {
-      minimizeBtn.click();
-      setOverlayVisible(false);
-    } else {
+    const overlay = document.getElementById("audio-overlay");
+    if (!overlay) return;
+
+    const minimized = overlay.dataset.minimized === "true";
+
+    if (minimized) {
+      overlay.style.display = "block";
+      overlay.dataset.minimized = "false";
       setOverlayVisible(true);
+    } else {
+      overlay.style.display = "none";
+      overlay.dataset.minimized = "true";
+      setOverlayVisible(false);
     }
   };
 
@@ -233,15 +240,14 @@ export default function Header({
             aria-label={t("Go to Settings")}
             icon={<Cog className="w-5 h-5 text-white" />}
           />
-
           <div className="relative" ref={notifRef}>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setShowNotifDropdown((prev) => !prev)}
-              className="text-white hover:text-teal-300 focus:outline-none bg-transparent active:bg-transparent"
               aria-label="Notifications"
-            >
-              <BellIcon className="w-5 h-5" />
-            </button>
+              icon={<BellIcon className="w-5 h-5 text-white" />}
+            />
             <AnimatePresence>
               {showNotifDropdown && (
                 <motion.div
@@ -301,3 +307,4 @@ export default function Header({
     </motion.header>
   );
 }
+
