@@ -1,4 +1,3 @@
-// Finalized, clean, polished, and fully working AudioOverlay.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import {
   ChevronLeft,
@@ -24,14 +23,8 @@ export default function AudioOverlay() {
     setMuted,
   } = useSound();
 
-  const trackLabels = [
-    'BG 1 — Dreamscape Horizon',
-    'BG 2 — Midnight Flow',
-    'BG 3 — Echo Drift',
-    'OFF',
-  ];
+  const trackLabels = ['BG 1 — Dreamscape Horizon', 'BG 2 — Midnight Flow', 'BG 3 — Echo Drift', 'OFF'];
   const isOff = trackIndex >= trackLabels.length - 1;
-
   const [minimized, setMinimized] = useState(false);
   const [volumeVisible, setVolumeVisible] = useState(false);
   const [volume, setVolume] = useState(1);
@@ -83,7 +76,6 @@ export default function AudioOverlay() {
   }, [position, minimized]);
 
   const handlePlayToggle = () => (isOff ? playAmbientTrack(0) : togglePlay());
-
   const handleMinimize = () => {
     const icon = document.getElementById('header-music-icon');
     if (icon) {
@@ -104,45 +96,41 @@ export default function AudioOverlay() {
           animate={{ opacity: 1, scale: 1, x: position.x, y: position.y }}
           exit={{ opacity: 0, scale: 0.8 }}
           transition={{ type: 'spring', stiffness: 240, damping: 24 }}
-          className="fixed z-[9999] flex flex-col items-center px-4 py-3 w-72 rounded-2xl border border-zinc-700 bg-zinc-900/90 backdrop-blur-md"
+          className="fixed z-[9999] flex flex-col items-center gap-3 px-5 py-4 w-80 rounded-xl border border-zinc-700 bg-zinc-900/80 backdrop-blur-md shadow-xl"
         >
-          {/* Minimize Button */}
           <button
             id="minimize-btn"
             onClick={handleMinimize}
-            className="absolute top-1 right-1 text-zinc-400 hover:text-white p-0"
+            className="absolute top-1.5 right-2 text-zinc-400 hover:text-white"
             aria-label="Minimize"
           >
             <Minus className="w-4 h-4" />
           </button>
 
-          {/* Controls */}
-          <div className="flex justify-between items-center w-full px-3 mb-2 gap-4">
-            <button onClick={prevTrack} className="text-zinc-400 hover:text-white">
+          <div className="flex justify-center items-center w-full gap-6">
+            <button onClick={prevTrack} className="text-teal-400 hover:text-white">
               <ChevronLeft className="w-5 h-5" />
             </button>
 
-            <button onClick={handlePlayToggle} className="text-zinc-400 hover:text-white">
+            <button onClick={handlePlayToggle} className="text-teal-400 hover:text-white">
               {isPlaying && !isOff ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
             </button>
 
-            <button onClick={nextTrack} className="text-zinc-400 hover:text-white">
+            <button onClick={nextTrack} className="text-teal-400 hover:text-white">
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Track title */}
-          <div className="overflow-hidden w-full h-5 relative mb-2">
-            <div className="whitespace-nowrap animate-scroll text-center text-sm text-teal-400 font-mono px-2">
+          <div className="overflow-hidden w-full h-6 text-center">
+            <div className="whitespace-nowrap animate-scroll text-sm text-teal-400 font-mono">
               {currentTrack}
             </div>
           </div>
 
-          {/* Volume */}
-          <div className="relative flex items-center justify-center w-full">
+          <div className="relative flex items-center justify-center w-full mt-2">
             <button
               onClick={() => setVolumeVisible(!volumeVisible)}
-              className="text-zinc-400 hover:text-white"
+              className="text-teal-400 hover:text-white"
               aria-label="Volume"
             >
               {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -160,7 +148,7 @@ export default function AudioOverlay() {
                   setVolume(val);
                   setMuted(val === 0);
                 }}
-                className="absolute -top-9 w-24 h-1 bg-teal-500 rounded-full cursor-pointer"
+                className="absolute -top-9 w-32 h-1 bg-teal-500 rounded-full cursor-pointer"
               />
             )}
           </div>
@@ -169,6 +157,7 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
 
 
 
