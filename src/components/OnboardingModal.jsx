@@ -28,6 +28,7 @@ export default function OnboardingModal({ onClose }) {
   }, [onClose]);
 
   useEffect(() => modalRef.current?.focus(), []);
+
   useEffect(() => {
     const handler = (e) => {
       if (e.key === 'ArrowRight') next();
@@ -44,6 +45,7 @@ export default function OnboardingModal({ onClose }) {
       playClick();
     }
   };
+
   const prev = () => {
     if (step > 0) {
       setStep((s) => s - 1);
@@ -51,26 +53,29 @@ export default function OnboardingModal({ onClose }) {
     }
   };
 
-useEffect(() => {
-  let cancel = false;
-  setAnimData(null);
+  useEffect(() => {
+    let cancel = false;
+    setAnimData(null);
 
-  const currentStep = STEPS?.[step];
-  if (!currentStep || !currentStep.filename) return;
+    const currentStep = STEPS?.[step];
+    if (!currentStep || !currentStep.filename) return;
 
-  const controller = new AbortController();
+    const controller = new AbortController();
 
-  fetch(`/assets/onboarding/${currentStep.filename}`, { signal: controller.signal })
-    .then((r) => r.json())
-    .then((data) => !cancel && setAnimData(data))
-    .catch(() => {});
+    fetch(`/assets/onboarding/${currentStep.filename}`, { signal: controller.signal })
+      .then((r) => r.json())
+      .then((data) => !cancel && setAnimData(data))
+      .catch(() => {});
 
-  return () => { cancel = true; controller.abort(); };
-}, [step]);
-
+    return () => {
+      cancel = true;
+      controller.abort();
+    };
+  }, [step]);
 
   useEffect(() => {
-    const full = STEPS[step].description;
+    const current = STEPS?.[step];
+    const full = current?.description || '';
     let idx = 0;
     setTypedDesc('');
     const speed = 30;
@@ -84,12 +89,10 @@ useEffect(() => {
 
   const swipe = useSwipeable({ onSwipedLeft: next, onSwipedRight: prev, trackMouse: true });
   const progress = ((step + 1) / STEPS.length) * 100;
-  const current = STEPS[step];
+  const current = STEPS?.[step] || {};
 
   if (showVideo) {
-    return (
-      <IntroVideo onFinish={handleVideoFinish} skipAfter={3} skipLabel="Skip Intro" />
-    );
+    return <IntroVideo onFinish={handleVideoFinish} skipAfter={3} skipLabel="Skip Intro" />;
   }
 
   return ReactDOM.createPortal(
@@ -135,30 +138,31 @@ useEffect(() => {
             transition={{ duration: 0.35 }}
           >
             <div className="w-full h-60 bg-zinc-800 rounded-xl mb-5 flex items-center justify-center">
-              {animData ? <Lottie animationData={animData} loop autoplay style={{ width: '100%', height: '100%' }} />
-                       : <div className="animate-pulse h-10 w-10 bg-zinc-700 rounded-full" />}
+              {animData ? (
+                <Lottie animationData={animData} loop autoplay style={{ width: '100%', height: '100%' }} />
+              ) : (
+                <div className="animate-pulse h-10 w-10 bg-zinc-700 rounded-full" />
+              )}
             </div>
-            <h2 id="onboarding-title" className="text-2xl font-bold mb-2">{current.title}</h2>
+            <h2 id="onboarding-title" className="text-2xl font-bold mb-2">{current.title || ''}</h2>
             <p id="onboarding-desc" className="text-sm text-zinc-300 min-h-[3.5rem] leading-relaxed">{typedDesc}</p>
           </motion.div>
 
           <div className="flex items-center justify-between px-6 pb-5">
-            <button onClick={prev} disabled={step===0} className="text-sm text-zinc-400 hover:text-zinc-200 disabled:opacity-40">← Back</button>
+            <button onClick={prev} disabled={step === 0} className="text-sm text-zinc-400 hover:text-zinc-200 disabled:opacity-40">← Back</button>
             <div className="flex space-x-2">
               {STEPS.map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-2 w-2 rounded-full ${i===step?'bg-teal-400':'bg-zinc-700'}`}
-                />
+                <div key={i} className={`h-2 w-2 rounded-full ${i === step ? 'bg-teal-400' : 'bg-zinc-700'}`} />
               ))}
             </div>
-            {step < STEPS.length-1
-              ? <button onClick={next} className="text-sm text-teal-300 hover:text-teal-100">Next →</button>
-              : <button onClick={finishOnboarding} className="text-sm text-teal-300 hover:text-teal-100">Finish</button>
-            }
+            {step < STEPS.length - 1 ? (
+              <button onClick={next} className="text-sm text-teal-300 hover:text-teal-100">Next →</button>
+            ) : (
+              <button onClick={finishOnboarding} className="text-sm text-teal-300 hover:text-teal-100">Finish</button>
+            )}
           </div>
 
-          {current.id==='audio' && (
+          {current.id === 'audio' && (
             <div className="px-6 pb-6">
               <button onClick={() => { enableSound(); next(); }} className="w-full py-2 font-semibold rounded-full bg-teal-500 hover:bg-teal-400">Enable Audio</button>
             </div>
