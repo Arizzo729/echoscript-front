@@ -21,7 +21,6 @@ import MobileBottomNav from "./MobileBottomNav";
 // Lazy-loaded components
 const Header = lazy(() => import("./Header"));
 const Sidebar = lazy(() => import("./Sidebar"));
-const Breadcrumbs = lazy(() => import("./Breadcrumbs"));
 const GlobalSearch = lazy(() => import("./GlobalSearch"));
 const NotificationBell = lazy(() => import("./NotificationBell"));
 const ProfileMenu = lazy(() => import("./ProfileMenu"));
@@ -106,9 +105,6 @@ export default function Layout() {
               id="main-content"
               className={`flex-1 overflow-y-auto relative px-6 py-4 transition-all duration-300 ${sidebarCollapsed ? 'pl-20' : 'pl-56'}`}
             >
-              <Suspense fallback={<div className="h-6 w-full bg-zinc-800 rounded mb-4" />}>
-                <Breadcrumbs location={location} />
-              </Suspense>
 
               {isPending && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
