@@ -1,9 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
 import PropTypes from 'prop-types';
-import { useNavigate } from 'react-router-dom';
 import introVideo from '../assets/videos/intro.mp4';
+
+const overlayVariants = {
+  visible: { opacity: 1 },
+  hidden: { opacity: 0, transition: { duration: 0.8 } },
+};
+
+const controlsVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: i => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: 0.2 + i * 0.1, duration: 0.5, ease: 'easeOut' },
+  }),
+};
 
 export default function IntroVideo({
   poster,
@@ -12,137 +25,143 @@ export default function IntroVideo({
   sources = [{ src: introVideo, type: 'video/mp4' }],
   onFinish,
 }) {
-  const navigate = useNavigate();
   const videoRef = useRef(null);
-  const overlayRef = useRef(null);
+  const controlsAnim = useAnimation();
 
   const [loading, setLoading] = useState(true);
-  const [controlsVisible, setControlsVisible] = useState(false);
-  const [muted, setMuted] = useState(true); // Always start muted
-  const defaultVolume = 0.3; // Lower volume level when unmuted
+  const [muted, setMuted] = useState(true);
+  const [visible, setVisible] = useState(true);
+  const defaultVolume = 0.3;
 
-  // Skip if already played this session
+  // Play only once per load; resets on refresh
   useEffect(() => {
     if (window.__introPlayed) {
-      navigate('/', { replace: true });
+      setVisible(false);
     } else {
       window.__introPlayed = true;
     }
-  }, [navigate]);
+  }, []);
 
-  // Load sources and attempt autoplay muted
+  // Load and autoplay muted
   useEffect(() => {
+    if (!visible) return;
     const v = videoRef.current;
     if (!v) return;
 
     v.playsInline = true;
     v.preload = 'auto';
     v.defaultPlaybackRate = 1;
-    v.muted = muted;
-    v.volume = defaultVolume;
-
-    // Append sources if not already present
     if (v.childElementCount === 0) {
       sources.forEach(({ src, type }) => {
-        const source = document.createElement('source');
-        source.src = src;
-        source.type = type;
+        const source = document.createElement('source'); source.src = src; source.type = type;
         v.appendChild(source);
       });
     }
-
+    v.muted = true;
+    v.volume = defaultVolume;
     v.load();
-    v.play().catch(() => {
-      // Autoplay blocked until user interaction, but stays muted
-    });
-  }, [muted, sources]);
+    v.play().catch(() => {});
+  }, [sources, visible]);
 
-  // Reveal controls after a delay
+  // Apply mute/unmute
   useEffect(() => {
-    const timer = setTimeout(() => setControlsVisible(true), skipAfter * 1000);
-    return () => clearTimeout(timer);
-  }, [skipAfter]);
-
-  const handleCanPlay = () => {
-    setLoading(false);
-  };
-
-  const toggleMute = () => {
     const v = videoRef.current;
-    if (!v) return;
-    v.muted = !v.muted;
-    setMuted(v.muted);
-    if (!v.muted) v.volume = defaultVolume;
-  };
+    if (v) { v.muted = muted; if (!muted) v.volume = defaultVolume; }
+  }, [muted]);
 
-  const finishIntro = () => {
-    navigate('/', { replace: true });
-    const ov = overlayRef.current;
-    const done = () => onFinish?.();
+  // Reveal controls after delay
+  useEffect(() => {
+    if (!visible) return;
+    const show = async () => {
+      await controlsAnim.start({ opacity: 0 });
+      await new Promise(r => setTimeout(r, skipAfter * 1000));
+      await controlsAnim.start('visible');
+    };
+    show();
+  }, [skipAfter, visible, controlsAnim]);
 
-    if (ov) {
-      ov.classList.add('opacity-0');
-      ov.addEventListener('transitionend', done, { once: true });
-    } else {
-      done();
-    }
+  const handleCanPlay = () => setLoading(false);
+  const toggleMute = () => setMuted(prev => !prev);
+
+  const exitSequence = async () => {
+    await controlsAnim.start('hidden');
+    setVisible(false);
+    onFinish?.();
   };
 
   const handleSkip = () => {
     videoRef.current?.pause();
-    finishIntro();
+    exitSequence();
   };
 
   return (
     <AnimatePresence>
-      <motion.div
-        ref={overlayRef}
-        className="fixed inset-0 z-[9999] bg-black flex items-center justify-center transition-opacity duration-1000 ease-in-out"
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
-          </div>
-        )}
+      {visible && (
+        <motion.div
+          className="fixed inset-0 z-[9999] bg-black flex items-center justify-center"
+          variants={overlayVariants}
+          initial="visible"
+          animate="visible"
+          exit="hidden"
+        >
+          {loading && (
+            <motion.div className="absolute inset-0 flex items-center justify-center"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+              <div className="animate-spin border-4 border-teal-500 border-t-transparent rounded-full h-12 w-12" />
+            </motion.div>
+          )}
 
-        <video
-          ref={videoRef}
-          className="w-full h-full object-cover"
-          autoPlay
-          playsInline
-          poster={poster}
-          muted={muted}
-          onCanPlay={handleCanPlay}
-          onEnded={finishIntro}
-          onError={handleCanPlay}
-        />
+          <motion.video
+            ref={videoRef}
+            className="w-full h-full object-cover"
+            autoPlay playsInline preload="auto"
+            poster={poster}
+            muted={muted}
+            onCanPlay={handleCanPlay}
+            onEnded={exitSequence}
+            onError={handleCanPlay}
+            width="1920"
+            height="1080"
+          />
 
-        {controlsVisible && (
+          {/* Cover bottom-left blur with gradient overlay */}
+          <div
+            className="absolute bottom-0 left-0 w-1/3 h-1/3 pointer-events-none"
+            style={{
+              background: 'linear-gradient(to top right, rgba(0,0,0,0.8), transparent)',
+            }}
+          />
+
           <motion.div
             className="absolute bottom-6 right-6 flex space-x-3"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 300 }}
+            custom={0}
+            variants={controlsVariants}
+            initial="hidden"
+            animate={controlsAnim}
           >
-            <button
+            <motion.button
               onClick={handleSkip}
-              className="bg-teal-500/60 hover:bg-teal-500/80 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg transition"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-teal-500/60 hover:bg-teal-500/80 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg"
             >
               {skipLabel}
-            </button>
-            <button
+            </motion.button>
+
+            <motion.button
               onClick={toggleMute}
-              className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg flex items-center space-x-1 transition"
+              custom={1}
+              variants={controlsVariants}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="bg-white/20 hover:bg-white/40 text-white text-sm font-medium py-2 px-4 rounded-lg shadow-lg flex items-center space-x-1"
             >
               {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
               <span>{muted ? 'Unmute' : 'Mute'}</span>
-            </button>
+            </motion.button>
           </motion.div>
-        )}
-      </motion.div>
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 }
