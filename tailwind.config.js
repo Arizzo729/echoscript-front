@@ -147,3 +147,4 @@ module.exports = {
     'text-green-600',
   ],
 };
+
