@@ -51,15 +51,23 @@ export default function OnboardingModal({ onClose }) {
     }
   };
 
-  useEffect(() => {
-    let cancel = false;
-    setAnimData(null);
-    fetch(`/assets/onboarding/${STEPS[step].filename}`, { signal: (new AbortController()).signal })
-      .then((r) => r.json())
-      .then((data) => !cancel && setAnimData(data))
-      .catch(() => {});
-    return () => { cancel = true; };
-  }, [step]);
+useEffect(() => {
+  let cancel = false;
+  setAnimData(null);
+
+  const currentStep = STEPS?.[step];
+  if (!currentStep || !currentStep.filename) return;
+
+  const controller = new AbortController();
+
+  fetch(`/assets/onboarding/${currentStep.filename}`, { signal: controller.signal })
+    .then((r) => r.json())
+    .then((data) => !cancel && setAnimData(data))
+    .catch(() => {});
+
+  return () => { cancel = true; controller.abort(); };
+}, [step]);
+
 
   useEffect(() => {
     const full = STEPS[step].description;
