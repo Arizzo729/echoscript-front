@@ -34,7 +34,7 @@ export default function IntroVideo({
   const [visible, setVisible] = useState(true);
   const defaultVolume = 0.3;
 
-  // Run intro once per page load
+  // Run intro only once per page load
   useEffect(() => {
     if (window.__introPlayed) {
       setVisible(false);
@@ -61,10 +61,11 @@ export default function IntroVideo({
     });
     v.muted = true;
     v.volume = defaultVolume;
+    // Only play programmatically once
     v.play().catch(() => {});
   }, [visible, sources]);
 
-  // Toggle mute without reloading
+  // Toggle mute without triggering playback
   useEffect(() => {
     const v = videoRef.current;
     if (v) {
@@ -119,7 +120,7 @@ export default function IntroVideo({
           <motion.video
             ref={videoRef}
             className="w-full h-full object-cover"
-            autoPlay playsInline preload="auto"
+            playsInline preload="auto"
             poster={poster}
             muted={muted}
             onCanPlay={handleCanPlay}
@@ -172,6 +173,3 @@ IntroVideo.propTypes = {
   ),
   onFinish: PropTypes.func,
 };
-
-
-
