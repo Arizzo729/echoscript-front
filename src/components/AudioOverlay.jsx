@@ -21,14 +21,14 @@ export default function AudioOverlay() {
   const controls = useDragControls();
   const wrapperRef = useRef(null);
 
-  // Restore saved position
+  // Load saved position
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
     if (saved.x != null) x.set(saved.x);
     if (saved.y != null) y.set(saved.y);
   }, [x, y]);
 
-  // Persist position on drag end
+  // Save position on drag end
   const handleDragEnd = (_, info) => {
     const node = wrapperRef.current;
     if (!node) return;
@@ -54,13 +54,13 @@ export default function AudioOverlay() {
     return () => window.removeEventListener('keydown', onKey);
   }, [trackIndex, isPlaying]);
 
-  // Play/pause toggle without blocking rapid clicks
+  // Play/pause toggle
   const handlePlayClick = () => {
     if (trackIndex === 0) playAmbientTrack(1);
     else togglePlay();
   };
 
-  // Next track and auto-play (throttled)
+  // Next track
   const handleNext = () => {
     if (busy) return;
     setBusy(true);
@@ -69,7 +69,7 @@ export default function AudioOverlay() {
     setTimeout(() => setBusy(false), 300);
   };
 
-  // Previous track and auto-play (throttled)
+  // Previous track
   const handlePrev = () => {
     if (busy) return;
     setBusy(true);
@@ -87,7 +87,13 @@ export default function AudioOverlay() {
         drag="xy"
         dragControls={controls}
         dragListener={false}
+        dragMomentum={false}
+        dragElastic={0}
         onDragEnd={handleDragEnd}
+        onPointerDownCapture={(e) => {
+          const tag = e.target.tagName.toLowerCase();
+          if (!['button', 'input', 'svg', 'path'].includes(tag)) controls.start(e);
+        }}
         style={{ x, y }}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -101,7 +107,6 @@ export default function AudioOverlay() {
             <span className="text-[0.65rem] leading-tight">Tip: Use ← → to switch, Space to play/pause.</span>
             <button
               onClick={() => setShowTip(false)}
-              onPointerDown={(e) => e.stopPropagation()}
               className="ml-auto p-0 bg-transparent text-white hover:opacity-75 focus:outline-none"
             >
               <X className="w-3.5 h-3.5" />
@@ -109,17 +114,7 @@ export default function AudioOverlay() {
           </div>
         )}
 
-        <div
-          className="rounded-2xl backdrop-blur-xl border border-teal-500/40 bg-zinc-900/80 shadow-md"
-          onPointerDown={(e) => {
-            const tag = e.target.tagName.toLowerCase();
-            if (['button', 'input', 'svg', 'path'].includes(tag)) {
-              e.stopPropagation();
-            } else {
-              controls.start(e);
-            }
-          }}
-        >
+        <div className="rounded-2xl backdrop-blur-xl border border-teal-500/40 bg-zinc-900/80 shadow-md">
           <div className="flex items-center gap-3 px-4 py-2">
             <Button
               variant="ghost"
@@ -149,10 +144,7 @@ export default function AudioOverlay() {
             </span>
           </div>
 
-          <div
-            className="w-full flex justify-center pb-2 px-4"
-            onPointerDown={(e) => e.stopPropagation()}
-          >
+          <div className="w-full flex justify-center pb-2 px-4">
             <input
               type="range"
               min={0}
@@ -169,5 +161,4 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
-
 
