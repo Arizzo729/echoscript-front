@@ -1,4 +1,3 @@
-// src/components/AudioOverlay.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -59,10 +58,13 @@ export default function AudioOverlay() {
 
     const onPointerMove = (e) => {
       if (!dragging.current) return;
+
       const newX = e.clientX - offset.current.x;
       const newY = e.clientY - offset.current.y;
+
       const maxX = window.innerWidth - node.offsetWidth;
       const maxY = window.innerHeight - node.offsetHeight;
+
       setPosition({
         x: Math.min(Math.max(0, newX), maxX),
         y: Math.min(Math.max(0, newY), maxY),
@@ -90,7 +92,11 @@ export default function AudioOverlay() {
 
   const handlePlayToggle = () => {
     if (!isUnlocked) enableSound();
-    isOff ? playAmbientTrack(0) : togglePlay();
+    if (isOff) {
+      playAmbientTrack(0);
+    } else {
+      togglePlay();
+    }
   };
 
   const handleNext = () => {
@@ -162,9 +168,6 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
-
-
-
 
 
 
