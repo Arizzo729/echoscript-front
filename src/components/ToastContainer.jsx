@@ -1,4 +1,4 @@
-// src/components/toast/ToastProvider.jsx — Advanced Toast Notification System
+// src/components/toast/ToastProvider.jsx — Advanced ; Notification System
 
 import React, { createContext, useContext, useReducer, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
