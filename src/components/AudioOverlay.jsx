@@ -1,17 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  ChevronLeft, ChevronRight, Pause, Play,
-} from 'lucide-react';
+// src/components/AudioOverlay.jsx
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSound } from '../context/SoundContext';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Pause,
+  Play,
+} from 'lucide-react';
 import Button from './ui/Button';
+import { useSound } from '../context/SoundContext';
 
 export default function AudioOverlay() {
   const {
     trackIndex,
     isPlaying,
-    isMuted,
-    isUnlocked,
     volume,
     setVolume,
     togglePlay,
@@ -19,58 +21,71 @@ export default function AudioOverlay() {
     prevTrack,
     playAmbientTrack,
     enableSound,
+    isUnlocked,
   } = useSound();
 
-  const trackLabels = [
-    'BG 1 — Dreamscape Horizon',
-    'BG 2 — Midnight Flow',
-    'BG 3 — Echo Drift',
-    'OFF',
-  ];
-  const isOff = trackIndex >= trackLabels.length - 1;
+  const isOff = trackIndex === 3; // 'OFF' is last index
+  const currentTrack =
+    trackIndex === 0
+      ? 'BG 1 — Dreamscape Horizon'
+      : trackIndex === 1
+      ? 'BG 2 — Midnight Flow'
+      : trackIndex === 2
+      ? 'BG 3 — Echo Drift'
+      : 'OFF';
 
   const [position, setPosition] = useState({ x: 40, y: 80 });
   const [hidden, setHidden] = useState(false);
   const overlayRef = useRef(null);
-  const dragOffset = useRef({ x: 0, y: 0 });
+  const dragging = useRef(false);
+  const offset = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     if (!window.__introPlayed) setHidden(true);
-  }, []);
-
-  useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
     if (saved.x != null && saved.y != null) setPosition(saved);
   }, []);
 
   useEffect(() => {
     const node = overlayRef.current;
-    const onMouseMove = (e) => {
+
+    const onPointerDown = (e) => {
+      if (e.button !== 0 || e.target.closest('button, input')) return;
+      dragging.current = true;
+      offset.current.x = e.clientX - node.getBoundingClientRect().left;
+      offset.current.y = e.clientY - node.getBoundingClientRect().top;
+      document.body.style.userSelect = 'none';
+    };
+
+    const onPointerMove = (e) => {
+      if (!dragging.current) return;
+      const newX = e.clientX - offset.current.x;
+      const newY = e.clientY - offset.current.y;
       const maxX = window.innerWidth - node.offsetWidth;
       const maxY = window.innerHeight - node.offsetHeight;
       setPosition({
-        x: Math.min(Math.max(0, e.clientX - dragOffset.current.x), maxX),
-        y: Math.min(Math.max(0, e.clientY - dragOffset.current.y), maxY),
+        x: Math.min(Math.max(0, newX), maxX),
+        y: Math.min(Math.max(0, newY), maxY),
       });
     };
-    const onMouseUp = () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      document.body.style.userSelect = '';
-      localStorage.setItem('audio-overlay-pos', JSON.stringify(position));
-    };
-    const onMouseDown = (e) => {
-      if (e.button !== 0 || e.target.closest('button, input')) return;
-      const bounds = node.getBoundingClientRect();
-      dragOffset.current.x = e.clientX - bounds.left;
-      dragOffset.current.y = e.clientY - bounds.top;
-      document.body.style.userSelect = 'none';
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
+
+    const onPointerUp = () => {
+      if (dragging.current) {
+        dragging.current = false;
+        document.body.style.userSelect = '';
+        localStorage.setItem('audio-overlay-pos', JSON.stringify(position));
+      }
     };
 
-    if (node) node.addEventListener('mousedown', onMouseDown);
-    return () => node?.removeEventListener('mousedown', onMouseDown);
+    node.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+
+    return () => {
+      node.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+    };
   }, [position]);
 
   const handlePlayToggle = () => {
@@ -78,17 +93,15 @@ export default function AudioOverlay() {
     isOff ? playAmbientTrack(0) : togglePlay();
   };
 
-  const handlePrev = () => {
-    if (!isUnlocked) enableSound();
-    prevTrack();
-  };
-
   const handleNext = () => {
     if (!isUnlocked) enableSound();
     nextTrack();
   };
 
-  const currentTrack = isOff ? 'OFF' : trackLabels[trackIndex];
+  const handlePrev = () => {
+    if (!isUnlocked) enableSound();
+    prevTrack();
+  };
 
   return (
     <AnimatePresence>
@@ -98,10 +111,9 @@ export default function AudioOverlay() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1, x: position.x, y: position.y }}
           exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-          className="fixed z-[9999] flex flex-col items-center gap-1 select-none cursor-move"
+          transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+          className="fixed z-[9999] flex flex-col items-center gap-1 select-none cursor-grab"
         >
-          {/* Pill bar */}
           <div className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl">
             <Button
               variant="ghost"
@@ -116,9 +128,11 @@ export default function AudioOverlay() {
               onClick={handlePlayToggle}
               aria-label="Play"
               icon={
-                isPlaying && !isOff
-                  ? <Pause className="w-4 h-4 text-teal-400" />
-                  : <Play className="w-4 h-4 text-teal-400" />
+                isPlaying && !isOff ? (
+                  <Pause className="w-4 h-4 text-teal-400" />
+                ) : (
+                  <Play className="w-4 h-4 text-teal-400" />
+                )
               }
             />
             <Button
@@ -133,7 +147,6 @@ export default function AudioOverlay() {
             </span>
           </div>
 
-          {/* Volume bar */}
           <div className="w-full flex justify-center mt-0.5">
             <input
               type="range"
@@ -150,6 +163,7 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
 
 
 
