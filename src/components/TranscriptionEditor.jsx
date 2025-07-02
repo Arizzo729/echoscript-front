@@ -1,19 +1,28 @@
 // src/components/TranscriptEditor.jsx
-import React, { useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import PropTypes from 'prop-types';
 
+/**
+ * Editable transcript component using a contentEditable div.
+ *
+ * @param {Object} props
+ * @param {string} props.value        – The transcript text to display and edit.
+ * @param {(newText: string) => void} props.onChange – Callback invoked when text changes.
+ */
 export default function TranscriptEditor({ value, onChange }) {
   const editorRef = useRef(null);
 
-  // Keep the contentEditable div in sync with `value`
+  // Sync the editable div whenever `value` prop changes
   useEffect(() => {
-    if (editorRef.current && value !== editorRef.current.innerText) {
-      editorRef.current.innerText = value;
+    const editor = editorRef.current;
+    if (editor && value !== editor.innerText) {
+      editor.innerText = value;
     }
   }, [value]);
 
   const handleInput = () => {
-    onChange?.(editorRef.current.innerText);
+    onChange(editorRef.current.innerText);
   };
 
   return (
@@ -34,9 +43,13 @@ export default function TranscriptEditor({ value, onChange }) {
         spellCheck
       />
       <p className="text-sm text-zinc-400 mt-2">
-        Tip: Use <strong>Ctrl+Z</strong> to undo, <strong>Ctrl+Y</strong> to redo,
-        and copy/paste freely.
+        Tip: Use <strong>Ctrl+Z</strong> to undo, <strong>Ctrl+Y</strong> to redo, and copy/paste freely.
       </p>
     </motion.div>
   );
 }
+
+TranscriptEditor.propTypes = {
+  value:    PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+};
