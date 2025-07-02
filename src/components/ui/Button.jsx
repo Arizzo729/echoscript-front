@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — Final Enhanced Button with Sound + Glow Integration + Drag Fix
+// ✅ EchoScript.AI — Enhanced Button (No Prop Interference, Clean Drag, Glow, Sound)
 import React from "react";
 import { twMerge } from "tailwind-merge";
 import { motion } from "framer-motion";
@@ -20,11 +20,12 @@ function Button({
   const { playClick, isMuted } = useSound();
 
   const handleClick = (e) => {
-    e.stopPropagation(); // Prevents drag interference
     if (!disableSound && !isMuted) {
       playClick();
     }
-    props?.onClick?.(e);
+    if (typeof props.onClick === "function") {
+      props.onClick(e);
+    }
   };
 
   const base =
@@ -98,4 +99,5 @@ function Button({
 
 export { Button };
 export default Button;
+
 

@@ -1,7 +1,7 @@
 // ✅ EchoScript.AI — AudioOverlay FINAL: Stable, Synced, Styled
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pause, Play, Lightbulb, X } from 'lucide-react';
 import Button from './ui/Button';
 import { useSound } from '../context/SoundContext';
 
@@ -15,6 +15,7 @@ const TRACKS = [
 export default function AudioOverlay() {
   const context = useSound();
   const audioRefFallback = useRef(null);
+  const isTransitioningRef = useRef(false);
   const {
     trackIndex = 0,
     setTrackIndex = () => {},
@@ -28,6 +29,7 @@ export default function AudioOverlay() {
   } = context || {};
 
   const [hidden, setHidden] = useState(false);
+  const [showTip, setShowTip] = useState(true);
   const x = useMotionValue(40);
   const y = useMotionValue(80);
   const wrapperRef = useRef(null);
@@ -41,7 +43,6 @@ export default function AudioOverlay() {
       setVolume(0.5);
       localStorage.setItem("audio-default-volume", "0.5");
     }
-    // Always start on OFF
     setTrackIndex(0);
     setIsPlaying(false);
   }, [audioRef]);
@@ -53,22 +54,32 @@ export default function AudioOverlay() {
     if (saved.y != null) y.set(saved.y);
   }, [x, y]);
 
-  const playTrack = async (index) => {
+  const stopTrack = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+      audioRef.current.load();
+    }
+  };
+
+  const playTrack = useCallback(async (index) => {
+    if (isTransitioningRef.current) return;
     const track = TRACKS[index];
     if (!track || !track.src || !audioRef.current || !isUnlocked) return;
     try {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+      isTransitioningRef.current = true;
+      stopTrack();
       audioRef.current.src = track.src;
       audioRef.current.volume = volume * (track.gain || 0.4);
-      audioRef.current.load();
       await audioRef.current.play();
       setTrackIndex(index);
       setIsPlaying(true);
     } catch (err) {
       console.warn(`Failed to play ${track.label}:`, err.message);
+    } finally {
+      isTransitioningRef.current = false;
     }
-  };
+  }, [volume, audioRef, isUnlocked, setTrackIndex, setIsPlaying]);
 
   const pauseTrack = () => {
     if (audioRef.current && !audioRef.current.paused) {
@@ -78,6 +89,7 @@ export default function AudioOverlay() {
   };
 
   const togglePlay = async () => {
+    if (isTransitioningRef.current) return;
     if (!isUnlocked) {
       enableSound();
       return;
@@ -91,11 +103,13 @@ export default function AudioOverlay() {
   };
 
   const handleNext = async () => {
+    if (isTransitioningRef.current) return;
     const next = (trackIndex + 1) % TRACKS.length;
     await playTrack(next);
   };
 
   const handlePrev = async () => {
+    if (isTransitioningRef.current) return;
     const prev = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
     await playTrack(prev);
   };
@@ -114,6 +128,21 @@ export default function AudioOverlay() {
 
   const currentLabel = TRACKS[trackIndex]?.label || 'OFF';
 
+  useEffect(() => {
+    const handleKey = async (e) => {
+      if (e.key === ' ') {
+        e.preventDefault();
+        await togglePlay();
+      } else if (e.key === 'ArrowRight') {
+        await handleNext();
+      } else if (e.key === 'ArrowLeft') {
+        await handlePrev();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [togglePlay, handleNext, handlePrev]);
+
   return (
     <AnimatePresence>
       {!hidden && (
@@ -129,16 +158,25 @@ export default function AudioOverlay() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-          className="fixed z-[9999] flex flex-col items-center gap-1 select-none drop-shadow-xl"
+          className="fixed z-[9999] flex flex-col items-center gap-1 select-none drop-shadow-xl pointer-events-auto"
           onPointerDown={(e) => {
             const tag = e.target.tagName.toLowerCase();
             const blockDrag = ["button", "input", "svg", "path"];
-            if (blockDrag.includes(tag)) {
-              e.stopPropagation();
-            }
+            if (blockDrag.includes(tag)) e.stopPropagation();
           }}
         >
-          <div className="rounded-2xl backdrop-blur-xl border border-teal-500/40 bg-zinc-900/80 shadow-md shadow-teal-600/10">
+          {showTip && (
+            <div className="flex items-start gap-2 px-3 py-2 mb-1 bg-zinc-800/90 border border-teal-500/30 text-white text-xs rounded-md shadow shadow-teal-500/10">
+              <Lightbulb className="w-3.5 h-3.5 text-teal-300 mt-0.5" />
+              <span className="text-[0.65rem] leading-tight">
+                Tip: Use ← → arrows to switch tracks, Space to play/pause.
+              </span>
+              <button onClick={() => setShowTip(false)} className="ml-auto text-teal-300 hover:text-white">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+          <div className="rounded-2xl backdrop-blur-xl border border-teal-500/40 bg-zinc-900/80 shadow-md shadow-teal-600/20">
             <div className="flex items-center gap-3 px-4 py-2">
               <Button variant="ghost" size="sm" onClick={handlePrev} icon={<ChevronLeft className="w-4 h-4 text-teal-400" />} />
               <Button
