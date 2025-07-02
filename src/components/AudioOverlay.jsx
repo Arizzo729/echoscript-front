@@ -8,8 +8,17 @@ import Button from './ui/Button';
 
 export default function AudioOverlay() {
   const {
-    trackIndex, isPlaying, volume, setVolume,
-    togglePlay, nextTrack, prevTrack, playAmbientTrack,
+    trackIndex,
+    isPlaying,
+    isMuted,
+    isUnlocked,
+    volume,
+    setVolume,
+    togglePlay,
+    nextTrack,
+    prevTrack,
+    playAmbientTrack,
+    enableSound,
   } = useSound();
 
   const trackLabels = [
@@ -18,11 +27,12 @@ export default function AudioOverlay() {
     'BG 3 — Echo Drift',
     'OFF',
   ];
-
   const isOff = trackIndex >= trackLabels.length - 1;
+
   const [position, setPosition] = useState({ x: 40, y: 80 });
   const [hidden, setHidden] = useState(false);
   const overlayRef = useRef(null);
+  const dragOffset = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     if (!window.__introPlayed) setHidden(true);
@@ -35,25 +45,25 @@ export default function AudioOverlay() {
 
   useEffect(() => {
     const node = overlayRef.current;
-
     const onMouseMove = (e) => {
       const maxX = window.innerWidth - node.offsetWidth;
       const maxY = window.innerHeight - node.offsetHeight;
-      const x = Math.min(Math.max(0, e.clientX - node.offsetWidth / 2), maxX);
-      const y = Math.min(Math.max(0, e.clientY - node.offsetHeight / 2), maxY);
-      setPosition({ x, y });
+      setPosition({
+        x: Math.min(Math.max(0, e.clientX - dragOffset.current.x), maxX),
+        y: Math.min(Math.max(0, e.clientY - dragOffset.current.y), maxY),
+      });
     };
-
     const onMouseUp = () => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
       document.body.style.userSelect = '';
       localStorage.setItem('audio-overlay-pos', JSON.stringify(position));
     };
-
     const onMouseDown = (e) => {
       if (e.button !== 0 || e.target.closest('button, input')) return;
-      e.preventDefault();
+      const bounds = node.getBoundingClientRect();
+      dragOffset.current.x = e.clientX - bounds.left;
+      dragOffset.current.y = e.clientY - bounds.top;
       document.body.style.userSelect = 'none';
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
@@ -63,7 +73,21 @@ export default function AudioOverlay() {
     return () => node?.removeEventListener('mousedown', onMouseDown);
   }, [position]);
 
-  const handlePlayToggle = () => (isOff ? playAmbientTrack(0) : togglePlay());
+  const handlePlayToggle = () => {
+    if (!isUnlocked) enableSound();
+    isOff ? playAmbientTrack(0) : togglePlay();
+  };
+
+  const handlePrev = () => {
+    if (!isUnlocked) enableSound();
+    prevTrack();
+  };
+
+  const handleNext = () => {
+    if (!isUnlocked) enableSound();
+    nextTrack();
+  };
+
   const currentTrack = isOff ? 'OFF' : trackLabels[trackIndex];
 
   return (
@@ -77,12 +101,12 @@ export default function AudioOverlay() {
           transition={{ type: 'spring', stiffness: 300, damping: 22 }}
           className="fixed z-[9999] flex flex-col items-center gap-1 select-none cursor-move"
         >
-          {/* Pill Bar */}
+          {/* Pill bar */}
           <div className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl">
             <Button
               variant="ghost"
               size="sm"
-              onClick={prevTrack}
+              onClick={handlePrev}
               aria-label="Previous"
               icon={<ChevronLeft className="w-4 h-4 text-teal-400" />}
             />
@@ -100,7 +124,7 @@ export default function AudioOverlay() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={nextTrack}
+              onClick={handleNext}
               aria-label="Next"
               icon={<ChevronRight className="w-4 h-4 text-teal-400" />}
             />
@@ -109,7 +133,7 @@ export default function AudioOverlay() {
             </span>
           </div>
 
-          {/* Volume Slider */}
+          {/* Volume bar */}
           <div className="w-full flex justify-center mt-0.5">
             <input
               type="range"
@@ -126,9 +150,6 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
-
-
-
 
 
 
