@@ -7,7 +7,6 @@ import React, {
   Suspense,
   lazy,
   useTransition
-  default
 } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
