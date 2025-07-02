@@ -62,7 +62,8 @@ const VARIANTS: Record<ToastType, { icon: ReactNode; border: string }> = {
 };
 
 // Reducer
-function toastReducer(state: Toast[], action: { type: string; payload?: any }) {
+type ReducerAction = { type: "ADD" | "REMOVE"; payload: any };
+function toastReducer(state: Toast[], action: ReducerAction) {
   switch (action.type) {
     case "ADD":
       return [...state, action.payload];
@@ -85,9 +86,17 @@ export const ToastProvider = ({
   const [toasts, dispatch] = useReducer(toastReducer, [] as Toast[]);
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
+  const removeToast = useCallback((id: string) => {
+    dispatch({ type: "REMOVE", payload: id });
+    if (timers.current[id]) {
+      clearTimeout(timers.current[id]);
+      delete timers.current[id];
+    }
+  }, []);
+
   const addToast = useCallback(
     (opts: Omit<Toast, "id">) => {
-      const id = `;{Date.now()}-;{Math.random()}`;
+      const id = `${Date.now()}-${Math.random()}`;
       const toast: Toast = { id, ...opts };
       dispatch({ type: "ADD", payload: toast });
       if (timers.current[id]) clearTimeout(timers.current[id]);
@@ -99,21 +108,13 @@ export const ToastProvider = ({
         removeToast(oldest.id);
       }
     },
-    [limit, toasts]
+    [limit, toasts, removeToast]
   );
-
-  const removeToast = useCallback((id: string) => {
-    dispatch({ type: "REMOVE", payload: id });
-    if (timers.current[id]) {
-      clearTimeout(timers.current[id]);
-      delete timers.current[id];
-    }
-  }, []);
 
   return (
     <ToastContext.Provider value={{ addToast, removeToast }}>
       {children}
-      <div className={`;{POSITIONS[position]} z-50 space-y-3 p-2 max-w-sm`}>        
+      <div className={`${POSITIONS[position]} z-50 space-y-3 p-2 max-w-sm`}>
         <AnimatePresence>
           {toasts.map((t) => {
             const variant = VARIANTS[t.type];
@@ -140,7 +141,10 @@ export const ToastProvider = ({
                 </div>
                 {t.action && (
                   <button
-                    onClick={() => { t.action.callback(t.action.meta); removeToast(t.id); }}
+                    onClick={() => {
+                      t.action.callback(t.action.meta);
+                      removeToast(t.id);
+                    }}
                     className="ml-2 px-3 py-1 text-xs font-semibold rounded hover:bg-gray-800 transition"
                   >
                     {t.action.label}
