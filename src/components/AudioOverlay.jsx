@@ -1,26 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  ChevronLeft,
-  ChevronRight,
-  Pause,
-  Play,
-  Minus,
-  Volume2,
-  VolumeX,
+  ChevronLeft, ChevronRight, Pause, Play, Minus, Volume2, VolumeX,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSound } from '../context/SoundContext';
 
 export default function AudioOverlay() {
   const {
-    trackIndex,
-    isMuted,
-    isPlaying,
-    togglePlay,
-    nextTrack,
-    prevTrack,
-    playAmbientTrack,
-    setMuted,
+    trackIndex, isMuted, isPlaying,
+    togglePlay, nextTrack, prevTrack,
+    playAmbientTrack, setMuted,
   } = useSound();
 
   const trackLabels = [
@@ -29,7 +18,6 @@ export default function AudioOverlay() {
     'BG 3 — Echo Drift',
     'OFF',
   ];
-
   const isOff = trackIndex >= trackLabels.length - 1;
   const [minimized, setMinimized] = useState(false);
   const [volumeVisible, setVolumeVisible] = useState(false);
@@ -77,8 +65,12 @@ export default function AudioOverlay() {
       window.addEventListener('mouseup', onMouseUp);
     };
 
-    if (node && !minimized) node.addEventListener('mousedown', onMouseDown);
-    return () => node?.removeEventListener('mousedown', onMouseDown);
+    if (node && !minimized) {
+      node.addEventListener('mousedown', onMouseDown);
+    }
+    return () => {
+      node?.removeEventListener('mousedown', onMouseDown);
+    };
   }, [position, minimized]);
 
   const handlePlayToggle = () => (isOff ? playAmbientTrack(0) : togglePlay());
@@ -101,43 +93,49 @@ export default function AudioOverlay() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1, x: position.x, y: position.y }}
           exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ type: 'spring', stiffness: 280, damping: 24 }}
-          className="fixed z-[9999] w-60 max-w-sm rounded-2xl shadow-2xl border border-teal-700 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl px-4 py-3 flex flex-col items-center gap-3 select-none cursor-move"
+          transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+          className="fixed z-[9999] w-[230px] rounded-xl shadow-lg border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl px-4 py-3 flex flex-col items-center gap-3 select-none cursor-move"
         >
           <button
             onClick={handleMinimize}
-            className="absolute top-2 right-2 text-zinc-400 hover:text-white"
+            className="absolute top-2 right-2 text-teal-400 hover:text-white transition"
             aria-label="Minimize"
           >
             <Minus className="w-4 h-4" />
           </button>
 
-          <div className="flex items-center justify-center gap-5">
-            <button onClick={prevTrack} className="p-1 rounded-full hover:ring ring-teal-400/40 text-teal-300 hover:text-white">
+          <div className="flex items-center justify-center gap-3 mt-1">
+            <button
+              onClick={prevTrack}
+              className="p-1.5 rounded-full text-teal-400 hover:text-white transition focus:outline-none"
+              aria-label="Previous"
+            >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <button onClick={handlePlayToggle} className="p-1 rounded-full hover:ring ring-teal-400/40 text-teal-300 hover:text-white">
-              {isPlaying && !isOff ? (
-                <Pause className="w-5 h-5" />
-              ) : (
-                <Play className="w-5 h-5" />
-              )}
+            <button
+              onClick={handlePlayToggle}
+              className="p-1.5 rounded-full text-teal-400 hover:text-white transition focus:outline-none"
+              aria-label="Play"
+            >
+              {isPlaying && !isOff ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
             </button>
-            <button onClick={nextTrack} className="p-1 rounded-full hover:ring ring-teal-400/40 text-teal-300 hover:text-white">
+            <button
+              onClick={nextTrack}
+              className="p-1.5 rounded-full text-teal-400 hover:text-white transition focus:outline-none"
+              aria-label="Next"
+            >
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="w-full text-center">
-            <span className="text-[0.65rem] text-teal-200 bg-zinc-800/60 px-3 py-1 rounded-full font-mono">
-              {currentTrack}
-            </span>
-          </div>
+          <span className="text-[0.65rem] text-teal-200 bg-zinc-800/60 px-3 py-1 rounded-full font-mono text-center">
+            {currentTrack}
+          </span>
 
           <div className="relative w-full flex justify-center items-center">
             <button
               onClick={() => setVolumeVisible(!volumeVisible)}
-              className="p-1 rounded-full hover:ring ring-teal-400/40 text-teal-300 hover:text-white"
+              className="p-1.5 rounded-full text-teal-400 hover:text-white transition focus:outline-none"
               aria-label="Volume"
             >
               {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -165,6 +163,7 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
 
 
 
