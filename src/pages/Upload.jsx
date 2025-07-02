@@ -7,7 +7,7 @@ import PaywallModal from "../components/PaywallModal";
 import CountdownSelector from "../components/CountdownSelector";
 import CountdownTimer from "../components/CountdownTimer";
 import LiveWaveform from "../components/LiveWaveform";
-import TranscriptEditor from "../components/TranscriptEditor";
+import TranscriptEditor from "../components/TranscriptEditor.jsx";
 import TranscriptExportPanel from "../components/TranscriptExportPanel";
 import {
   Mic,
