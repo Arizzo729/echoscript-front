@@ -1,121 +1,106 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, useMotionValue } from 'framer-motion';
-import { Repeat } from 'lucide-react';
-import { useSound } from '../context/SoundContext';
+// ✅ EchoScript.AI — Final Enhanced Universal Toggle.jsx
+import React, { useState, useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
+import { motion, AnimatePresence } from 'framer-motion';
+import { twMerge } from 'tailwind-merge';
 
-export default function AudioOverlay() {
-  const {
-    trackIndex,
-    nowPlaying,
-    isMuted,
-    volume,
-    setVolume,
-    sfxMuted,
-    setSfxMuted,
-    isUnlocked,
-    enableSound,
-    toggleAmbient,
-  } = useSound();
+/**
+ * A reliable, accessible, animated toggle switch
+ * - Works across all pages and contexts
+ * - Syncs with external state if needed
+ * - Can trigger custom callbacks
+ * - Includes fallbacks and safe error handling
+ */
+export default function Toggle({
+  checked = false,
+  onChange = () => {},
+  label = '',
+  disabled = false,
+  size = 'md',
+  className = '',
+  controlled = false,
+  syncExternal = null,
+}) {
+  const [isOn, setIsOn] = useState(!!checked);
+  const prevExternal = useRef(checked);
 
-  const [minimized, setMinimized] = useState(false);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const wrapperRef = useRef(null);
-
-  // Load saved position
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
-    if (saved.x != null) x.set(saved.x);
-    if (saved.y != null) y.set(saved.y);
-  }, [x, y]);
+    if (controlled && syncExternal !== null && syncExternal !== prevExternal.current) {
+      setIsOn(!!syncExternal);
+      prevExternal.current = syncExternal;
+    }
+  }, [controlled, syncExternal]);
 
-  const handleDragEnd = (_, info) => {
-    const margin = 12;
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const posX = info.point.x;
-    const posY = info.point.y;
-    const snapX = posX > w / 2 ? w - margin - wrapperRef.current.clientWidth : margin;
-    const snapY = posY > h / 2 ? h - margin - wrapperRef.current.clientHeight : margin;
-    x.set(snapX);
-    y.set(snapY);
-    localStorage.setItem('audio-overlay-pos', JSON.stringify({ x: snapX, y: snapY }));
+  const handleToggle = () => {
+    if (disabled) return;
+    const newState = !isOn;
+    setIsOn(newState);
+    onChange(newState);
   };
 
-  const handleCycleMusic = () => {
-    if (!isUnlocked) enableSound();
-    toggleAmbient();
+  const sizes = {
+    sm: {
+      width: 'w-9',
+      height: 'h-5',
+      circle: 'w-4 h-4',
+    },
+    md: {
+      width: 'w-11',
+      height: 'h-6',
+      circle: 'w-5 h-5',
+    },
+    lg: {
+      width: 'w-14',
+      height: 'h-7',
+      circle: 'w-6 h-6',
+    },
   };
 
-  const basePanel = 'bg-zinc-900/60 backdrop-blur-md rounded-full shadow-lg flex items-center space-x-2 pointer-events-auto';
+  const { width, height, circle } = sizes[size] || sizes.md;
 
   return (
-    <motion.div
-      ref={wrapperRef}
-      className="fixed z-[9999]"
-      style={{ x, y }}
-      drag
-      dragMomentum={false}
-      dragElastic={0.2}
-      onDragEnd={handleDragEnd}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-    >
-      {minimized ? (
-        <div
-          className="w-10 h-10 bg-zinc-800/70 rounded-full backdrop-blur-md flex items-center justify-center shadow-lg cursor-move text-lg text-white"
-          onClick={() => setMinimized(false)}
-          aria-label="Restore Audio Controls"
-        >
-          🎵
-        </div>
-      ) : (
-        <div className={`${basePanel} px-3 py-2 relative`}>
-          {/* Minimize */}
-          <button
-            onClick={() => setMinimized(true)}
-            className="absolute -top-1 -right-1 text-xs text-gray-400 hover:text-white"
-            aria-label="Minimize"
-          >
-            ✕
-          </button>
-
-          {/* Toggle ambient */}
-          <button
-            onClick={(e) => { e.stopPropagation(); handleCycleMusic(); }}
-            className="p-2 bg-zinc-800/60 rounded-full hover:bg-zinc-800 active:scale-95 transition"
-            aria-label="Cycle Background Music"
-          >
-            <Repeat className="w-5 h-5 text-teal-400" />
-          </button>
-
-          {/* Track name */}
-          <span className="text-xs text-teal-300 font-mono whitespace-nowrap">
-            {nowPlaying}
-          </span>
-
-          {/* Volume */}
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={volume}
-            onChange={e => setVolume(parseFloat(e.target.value))}
-            className="w-20 h-1 accent-teal-400 cursor-pointer"
-            aria-label="Volume"
-          />
-
-          {/* SFX toggle */}
-          <button
-            onClick={() => setSfxMuted(!sfxMuted)}
-            className="text-gray-300 hover:text-white"
-            aria-label="Toggle Click Sounds"
-          >
-            {sfxMuted ? '🔇' : '🔊'}
-          </button>
-        </div>
+    <div
+      className={twMerge(
+        'inline-flex items-center space-x-2 select-none',
+        disabled && 'opacity-50 cursor-not-allowed',
+        className
       )}
-    </motion.div>
+    >
+      {label && <span className="text-sm text-white whitespace-nowrap">{label}</span>}
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isOn}
+        aria-label={label || 'Toggle'}
+        disabled={disabled}
+        onClick={handleToggle}
+        className={twMerge(
+          'relative inline-flex items-center rounded-full transition-colors duration-300 ease-in-out focus:outline-none',
+          width,
+          height,
+          isOn ? 'bg-teal-500' : 'bg-zinc-600'
+        )}
+      >
+        <motion.span
+          className={twMerge(
+            'inline-block transform rounded-full bg-white shadow-md',
+            circle
+          )}
+          layout
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        />
+      </button>
+    </div>
   );
 }
+
+Toggle.propTypes = {
+  checked: PropTypes.bool,
+  onChange: PropTypes.func,
+  label: PropTypes.string,
+  disabled: PropTypes.bool,
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
+  className: PropTypes.string,
+  controlled: PropTypes.bool,
+  syncExternal: PropTypes.bool,
+};
