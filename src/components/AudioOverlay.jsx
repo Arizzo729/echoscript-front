@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — AudioOverlay FINAL PATCHED
+// ✅ EchoScript.AI — AudioOverlay DIAGNOSE BG1 ISSUE
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
@@ -30,6 +30,7 @@ export default function AudioOverlay() {
 
   const [hidden, setHidden] = useState(false);
   const [refError, setRefError] = useState(false);
+  const [debugInfo, setDebugInfo] = useState(null);
   const x = useMotionValue(40);
   const y = useMotionValue(80);
   const wrapperRef = useRef(null);
@@ -51,18 +52,27 @@ export default function AudioOverlay() {
   const playTrack = async (index) => {
     const track = TRACKS[index];
     if (!track || !track.src || !audioRef.current || !isUnlocked) return;
+
     try {
-      if (!audioRef.current.paused && trackIndex === index) return;
       audioRef.current.pause();
       audioRef.current.src = track.src;
       audioRef.current.load();
+
       await audioRef.current.play();
       setTrackIndex(index);
       setIsPlaying(true);
       setRefError(false);
+      setDebugInfo(null);
     } catch (err) {
       console.error('Audio play failed:', err);
       setRefError(true);
+      setDebugInfo({
+        error: err.message,
+        track: track.label,
+        src: track.src,
+        index,
+        audioReady: audioRef.current.readyState,
+      });
     }
   };
 
@@ -146,7 +156,10 @@ export default function AudioOverlay() {
         >
           {refError && (
             <div className="text-xs text-red-500 bg-red-900/40 px-3 py-1 rounded mb-1 shadow">
-              Audio failed to play — check if BG1 file exists and isn't blocked.
+              Failed to play {debugInfo?.track || 'unknown'}
+              <pre className="text-[0.6rem] mt-1 whitespace-pre-wrap break-all text-orange-400">
+{JSON.stringify(debugInfo, null, 2)}
+              </pre>
             </div>
           )}
           <div className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl">
@@ -192,4 +205,5 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
 
