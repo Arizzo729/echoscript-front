@@ -16,8 +16,6 @@ export default function AudioOverlay() {
     volume,
     setVolume,
     togglePlay,
-    nextTrack,
-    prevTrack,
     playAmbientTrack,
     enableSound,
     isUnlocked,
@@ -31,7 +29,6 @@ export default function AudioOverlay() {
   const isOff = trackIndex === 3;
   const currentTrack = isOff ? 'OFF' : `BG ${trackIndex + 1}`;
 
-  // Load saved position
   useEffect(() => {
     if (!window.__introPlayed) setHidden(true);
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
@@ -53,20 +50,25 @@ export default function AudioOverlay() {
   const handlePlayToggle = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    if (isOff) playAmbientTrack(0);
-    else togglePlay();
+    if (isOff) {
+      playAmbientTrack(0); // OFF → BG1
+    } else {
+      togglePlay();
+    }
   };
 
   const handleNext = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    nextTrack();
+    const nextIndex = (trackIndex + 1) % 4;
+    playAmbientTrack(nextIndex);
   };
 
   const handlePrev = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    prevTrack();
+    const prevIndex = (trackIndex - 1 + 4) % 4;
+    playAmbientTrack(prevIndex);
   };
 
   return (
@@ -85,11 +87,14 @@ export default function AudioOverlay() {
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 300, damping: 24 }}
           className="fixed z-[9999] flex flex-col items-center gap-1 select-none"
+          onPointerDown={(e) => {
+            const tag = e.target.tagName.toLowerCase();
+            if (['button', 'input', 'svg', 'path'].includes(tag)) {
+              e.stopPropagation();
+            }
+          }}
         >
-          <div
-            className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl"
-            onPointerDown={(e) => e.stopPropagation()}
-          >
+          <div className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl">
             <Button
               variant="ghost"
               size="sm"
@@ -117,7 +122,7 @@ export default function AudioOverlay() {
               aria-label="Next"
               icon={<ChevronRight className="w-4 h-4 text-teal-400" />}
             />
-            <span className="text-[0.6rem] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono tracking-wide min-w-[40px] text-center">
+            <span className="text-[0.6rem] min-w-[32px] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono text-center">
               {currentTrack}
             </span>
           </div>
@@ -130,6 +135,7 @@ export default function AudioOverlay() {
               value={volume}
               onChange={(e) => setVolume(parseFloat(e.target.value))}
               className="w-40 h-1 accent-teal-400 cursor-pointer"
+              onPointerDown={(e) => e.stopPropagation()}
             />
           </div>
         </motion.div>
