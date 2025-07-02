@@ -30,7 +30,6 @@ export default function UploadPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
   const [countdown, setCountdown] = useState(3);
-
   const [transcript, setTranscript] = useState("");
   const [translated, setTranslated] = useState("");
   const [enableTranslation, setEnableTranslation] = useState(false);
@@ -38,7 +37,7 @@ export default function UploadPage() {
   const [paywallInfo, setPaywallInfo] = useState(null);
   const [notification, setNotification] = useState(null);
 
-  // Load draft if present
+  // Load draft
   useEffect(() => {
     if (file) {
       const key = `draft_${file.name}`;
@@ -52,7 +51,7 @@ export default function UploadPage() {
     }
   }, [file, t]);
 
-  // Clear notification after delay
+  // Clear notifications
   useEffect(() => {
     if (notification) {
       const timer = setTimeout(() => setNotification(null), 3000);
@@ -100,16 +99,16 @@ export default function UploadPage() {
 
   const handleSubmit = () => {
     if (!file) return;
-    fetch('/api/submitTranscript', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    fetch("/api/submitTranscript", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         fileName: file.name,
         transcript,
         translated: enableTranslation ? translated : null,
       }),
     })
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error();
         return res.json();
       })
@@ -158,22 +157,25 @@ export default function UploadPage() {
         className="min-h-screen px-4 py-10 md:px-10 md:py-16 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white"
       >
         <div className="max-w-5xl mx-auto space-y-10">
+          {/* Header */}
           <div className="text-center space-y-2">
             <h1 className="text-4xl font-extrabold tracking-tight">
               {t("Upload or Record Audio/Video")}
             </h1>
             <p className="text-zinc-400 text-sm md:text-base">
-              {t("Supports")} MP3, WAV, MP4, MKV, MOV, FLAC —{' '}
+              {t("Supports")} MP3, WAV, MP4, MKV, MOV, FLAC —{" "}
               {t("click or drag to upload, or record live.")}
             </p>
           </div>
 
+          {/* Notification */}
           {notification && (
             <div className="text-center text-sm text-teal-300">
               {notification}
             </div>
           )}
 
+          {/* Controls */}
           <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-4">
             <div className="flex items-center gap-3">
               <Timer className="w-5 h-5 text-teal-400" />
@@ -202,6 +204,7 @@ export default function UploadPage() {
             )}
           </div>
 
+          {/* File upload / recording */}
           <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl space-y-6">
             <div
               onDrop={handleDrop}
@@ -241,13 +244,11 @@ export default function UploadPage() {
               <div className="flex flex-col items-center gap-4">
                 <button
                   onClick={() => {
-                    if (isRecording) {
-                      setIsRecording(false);
-                    } else {
-                      countdown > 0
-                        ? setShowCountdown(true)
-                        : setIsRecording(true);
-                    }
+                    isRecording
+                      ? setIsRecording(false)
+                      : countdown > 0
+                      ? setShowCountdown(true)
+                      : setIsRecording(true);
                   }}
                   className="flex items-center gap-2 px-5 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700 transition"
                 >
@@ -282,6 +283,7 @@ export default function UploadPage() {
             )}
           </div>
 
+          {/* Transcript & Translation */}
           {!paywallInfo && transcript && (
             <>
               <div className="grid md:grid-cols-2 gap-6">
@@ -290,7 +292,10 @@ export default function UploadPage() {
                     <FileText className="w-5 h-5 text-teal-400" />
                     {t("Transcript")}
                   </h3>
-                  <TranscriptEditor value={transcript} onChange={setTranscript} />
+                  <TranscriptEditor
+                    value={transcript}
+                    onChange={setTranscript}
+                  />
                 </div>
 
                 {enableTranslation && translated && (
@@ -335,6 +340,7 @@ export default function UploadPage() {
             </>
           )}
 
+          {/* Info box */}
           <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-5 text-sm text-zinc-400 space-y-3 mt-8">
             <p className="flex items-center gap-2">
               <Mic className="w-4 h-4 text-teal-400" />
