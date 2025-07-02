@@ -16,6 +16,7 @@ import OnboardingModal from "./components/OnboardingModal";
 import Layout from "./components/Layout";
 import AudioOverlay from "./components/AudioOverlay";
 import ErrorBoundary from "./components/ErrorBoundary";
+import TranscriptAudioPlayer from "./components/TranscriptAudioPlayer"; // ✅ New import
 
 // Pages
 import Home from "./pages/HomePage";
@@ -106,7 +107,14 @@ function AppInner() {
           )}
 
           {/* ✅ Final condition — AudioOverlay rendered after intro */}
-          {introComplete && <AudioOverlay />}
+          {introComplete && (
+            <>
+              <AudioOverlay />
+              <div className="fixed bottom-24 left-4 right-4 z-50 max-w-3xl mx-auto">
+                <TranscriptAudioPlayer audioUrl="/audio/sample-audio.mp3" />
+              </div>
+            </>
+          )}
         </>
       )}
     </>

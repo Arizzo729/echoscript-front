@@ -1,4 +1,4 @@
-// UploadPage.jsx — Final polished version
+// src/pages/Upload.jsx
 import React, { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -7,6 +7,8 @@ import PaywallModal from "../components/PaywallModal";
 import CountdownSelector from "../components/CountdownSelector";
 import CountdownTimer from "../components/CountdownTimer";
 import LiveWaveform from "../components/LiveWaveform";
+import TranscriptEditor from "../components/TranscriptEditor";
+import TranscriptExportPanel from "../components/TranscriptExportPanel";
 import {
   Mic,
   MicOff,
@@ -34,6 +36,29 @@ export default function UploadPage() {
   const [enableTranslation, setEnableTranslation] = useState(false);
   const [file, setFile] = useState(null);
   const [paywallInfo, setPaywallInfo] = useState(null);
+  const [notification, setNotification] = useState(null);
+
+  // Load draft if present
+  useEffect(() => {
+    if (file) {
+      const key = `draft_${file.name}`;
+      const draft = localStorage.getItem(key);
+      if (draft) {
+        const data = JSON.parse(draft);
+        setTranscript(data.transcript || "");
+        setTranslated(data.translated || "");
+        setNotification(t("Loaded previous draft."));
+      }
+    }
+  }, [file, t]);
+
+  // Clear notification after delay
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   const handleTranscript = useCallback(
     (response) => {
@@ -64,6 +89,33 @@ export default function UploadPage() {
     link.download = filename;
     link.click();
   }, []);
+
+  const handleSave = () => {
+    if (!file) return;
+    const key = `draft_${file.name}`;
+    const data = { transcript, translated, time: Date.now() };
+    localStorage.setItem(key, JSON.stringify(data));
+    setNotification(t("Draft saved."));
+  };
+
+  const handleSubmit = () => {
+    if (!file) return;
+    fetch('/api/submitTranscript', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: file.name,
+        transcript,
+        translated: enableTranslation ? translated : null,
+      }),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then(() => setNotification(t("Submitted successfully!")))
+      .catch(() => setNotification(t("Submission failed. Try again.")));
+  };
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -111,11 +163,16 @@ export default function UploadPage() {
               {t("Upload or Record Audio/Video")}
             </h1>
             <p className="text-zinc-400 text-sm md:text-base">
-              {t("Supports")} MP3, WAV, MP4, MKV, MOV, FLAC — {t(
-                "click or drag to upload, or record live."
-              )}
+              {t("Supports")} MP3, WAV, MP4, MKV, MOV, FLAC —{' '}
+              {t("click or drag to upload, or record live.")}
             </p>
           </div>
+
+          {notification && (
+            <div className="text-center text-sm text-teal-300">
+              {notification}
+            </div>
+          )}
 
           <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-4">
             <div className="flex items-center gap-3">
@@ -154,15 +211,17 @@ export default function UploadPage() {
               }
               className="p-6 border-2 border-dashed border-teal-600 bg-zinc-800 rounded-lg text-sm text-zinc-300 text-center cursor-pointer hover:bg-zinc-700 transition"
             >
-              {file ? file.name : t("Click or drag your audio/video file here")}
+              {file
+                ? file.name
+                : t("Click or drag your audio/video file here")}
               <input
                 id="hiddenFileInput"
                 type="file"
-                accept={
-                  ACCEPTED_AUDIO_FORMATS.concat(ACCEPTED_VIDEO_FORMATS)
-                    .map((f) => `.${f}`)
-                    .join(",")
-                }
+                accept={ACCEPTED_AUDIO_FORMATS.concat(
+                  ACCEPTED_VIDEO_FORMATS
+                )
+                  .map((f) => `.${f}`)
+                  .join(",")}
                 className="hidden"
                 onChange={(e) =>
                   e.target.files?.[0] && handleFileUpload(e.target.files[0])
@@ -192,7 +251,11 @@ export default function UploadPage() {
                   }}
                   className="flex items-center gap-2 px-5 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700 transition"
                 >
-                  {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                  {isRecording ? (
+                    <MicOff className="w-5 h-5" />
+                  ) : (
+                    <Mic className="w-5 h-5" />
+                  )}
                   {isRecording ? t("Stop") : t("Record")}
                 </button>
                 <span className="text-sm text-zinc-400">
@@ -220,42 +283,56 @@ export default function UploadPage() {
           </div>
 
           {!paywallInfo && transcript && (
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="p-4 bg-zinc-800 rounded-lg border border-zinc-700 space-y-3">
-                <h3 className="font-semibold text-lg text-white flex gap-2 items-center">
-                  <FileText className="w-5 h-5 text-teal-400" />
-                  {t("Transcript")}
-                </h3>
-                <pre className="text-zinc-300 text-sm whitespace-pre-wrap max-h-64 overflow-auto">
-                  {transcript}
-                </pre>
-                <button
-                  onClick={() => handleDownload(transcript, "transcript.txt")}
-                  className="text-sm text-teal-400 flex items-center gap-2 hover:underline"
-                >
-                  <Download className="w-4 h-4" />
-                  {t("Download Transcript")}
-                </button>
-              </div>
-              {enableTranslation && translated && (
+            <>
+              <div className="grid md:grid-cols-2 gap-6">
                 <div className="p-4 bg-zinc-800 rounded-lg border border-zinc-700 space-y-3">
                   <h3 className="font-semibold text-lg text-white flex gap-2 items-center">
-                    <Subtitles className="w-5 h-5 text-yellow-400" />
-                    {t("Translated Output")}
+                    <FileText className="w-5 h-5 text-teal-400" />
+                    {t("Transcript")}
                   </h3>
-                  <pre className="text-zinc-300 text-sm whitespace-pre-wrap max-h-64 overflow-auto">
-                    {translated}
-                  </pre>
-                  <button
-                    onClick={() => handleDownload(translated, "translated.txt")}
-                    className="text-sm text-yellow-300 flex items-center gap-2 hover:underline"
-                  >
-                    <Download className="w-4 h-4" />
-                    {t("Download Translation")}
-                  </button>
+                  <TranscriptEditor value={transcript} onChange={setTranscript} />
                 </div>
-              )}
-            </div>
+
+                {enableTranslation && translated && (
+                  <div className="p-4 bg-zinc-800 rounded-lg border border-zinc-700 space-y-3">
+                    <h3 className="font-semibold text-lg text-white flex gap-2 items-center">
+                      <Subtitles className="w-5 h-5 text-yellow-400" />
+                      {t("Translated Output")}
+                    </h3>
+                    <pre className="text-zinc-300 text-sm whitespace-pre-wrap max-h-64 overflow-auto">
+                      {translated}
+                    </pre>
+                    <button
+                      onClick={() =>
+                        handleDownload(translated, "translated.txt")
+                      }
+                      className="text-sm text-yellow-300 flex items-center gap-2 hover:underline"
+                    >
+                      <Download className="w-4 h-4" />
+                      {t("Download Translation")}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 flex justify-center space-x-4">
+                <TranscriptExportPanel transcriptText={transcript} />
+                <button
+                  onClick={handleSave}
+                  disabled={!transcript}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 disabled:opacity-50 transition"
+                >
+                  {t("Save Draft")}
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={!transcript}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 disabled:opacity-50 transition"
+                >
+                  {t("Submit for Review")}
+                </button>
+              </div>
+            </>
           )}
 
           <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-5 text-sm text-zinc-400 space-y-3 mt-8">
@@ -273,7 +350,9 @@ export default function UploadPage() {
         </div>
       </motion.div>
 
-      {paywallInfo && <PaywallModal info={paywallInfo} onClose={closePaywallModal} />}
+      {paywallInfo && (
+        <PaywallModal info={paywallInfo} onClose={closePaywallModal} />
+      )}
     </>
   );
 }
