@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — AudioOverlay FIXED
+// ✅ EchoScript.AI — AudioOverlay FINAL FIXED
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
@@ -13,25 +13,30 @@ const TRACKS = [
 ];
 
 export default function AudioOverlay() {
+  const context = useSound();
+
+  // Fallback if useSound() returns undefined or incomplete context
+  const audioRefFallback = useRef(null);
   const {
-    trackIndex,
-    setTrackIndex,
-    isPlaying,
-    setIsPlaying,
-    volume,
-    setVolume,
-    audioRef,
-    enableSound,
-    isUnlocked
-  } = useSound();
+    trackIndex = 0,
+    setTrackIndex = () => {},
+    isPlaying = false,
+    setIsPlaying = () => {},
+    volume = 0.5,
+    setVolume = () => {},
+    audioRef = audioRefFallback,
+    enableSound = () => {},
+    isUnlocked = false
+  } = context || {};
 
   const [hidden, setHidden] = useState(false);
+  const [refError, setRefError] = useState(false);
   const x = useMotionValue(40);
   const y = useMotionValue(80);
   const wrapperRef = useRef(null);
 
   useEffect(() => {
-    if (!audioRef.current) {
+    if (!audioRef?.current) {
       audioRef.current = new Audio();
       audioRef.current.loop = true;
     }
@@ -46,7 +51,7 @@ export default function AudioOverlay() {
 
   const playTrack = async (index) => {
     const track = TRACKS[index];
-    if (!track || !track.src || !audioRef.current || !isUnlocked) return;
+    if (!track || !track.src || !audioRef?.current || !isUnlocked) return;
     try {
       audioRef.current.src = track.src;
       audioRef.current.volume = volume;
@@ -56,11 +61,12 @@ export default function AudioOverlay() {
       setIsPlaying(true);
     } catch (err) {
       console.error('Audio play failed:', err);
+      setRefError(true);
     }
   };
 
   const pauseTrack = () => {
-    if (audioRef.current) audioRef.current.pause();
+    audioRef?.current?.pause();
     setIsPlaying(false);
   };
 
@@ -133,6 +139,11 @@ export default function AudioOverlay() {
             }
           }}
         >
+          {refError && (
+            <div className="text-xs text-red-500 bg-red-900/40 px-3 py-1 rounded mb-1 shadow">
+              Audio failed to play or ref is broken.
+            </div>
+          )}
           <div className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl">
             <Button variant="ghost" size="sm" onClick={handlePrev} icon={<ChevronLeft className="w-4 h-4 text-teal-400" />} />
             <Button
@@ -162,7 +173,7 @@ export default function AudioOverlay() {
               onChange={(e) => {
                 const v = parseFloat(e.target.value);
                 setVolume(v);
-                if (audioRef.current) audioRef.current.volume = v;
+                if (audioRef?.current) audioRef.current.volume = v;
               }}
               className="w-40 h-1 accent-teal-400 cursor-pointer z-50"
               onPointerDown={(e) => e.stopPropagation()}
