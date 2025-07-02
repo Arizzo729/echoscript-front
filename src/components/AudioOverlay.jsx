@@ -1,7 +1,12 @@
-// ✅ EchoScript.AI — AudioOverlay: Core Fixed Version (No OFF, Clean Theme)
+// ✅ EchoScript.AI — Final Fixed AudioOverlay (BG1–BG3 Only, No BG4/Off)
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Pause,
+  Play,
+} from 'lucide-react';
 import Button from './ui/Button';
 import { useSound } from '../context/SoundContext';
 
@@ -22,6 +27,7 @@ export default function AudioOverlay() {
   const y = useMotionValue(80);
   const wrapperRef = useRef(null);
 
+  const totalTracks = 3;
   const currentTrack = `BG ${trackIndex + 1}`;
 
   useEffect(() => {
@@ -43,24 +49,33 @@ export default function AudioOverlay() {
     localStorage.setItem('audio-overlay-pos', JSON.stringify({ x: clampedX, y: clampedY }));
   };
 
+  const cycleTrack = (direction) => {
+    let next = trackIndex;
+    if (direction === 'next') {
+      next = (trackIndex + 1) % totalTracks;
+    } else {
+      next = (trackIndex - 1 + totalTracks) % totalTracks;
+    }
+    playAmbientTrack(next);
+  };
+
   const handlePlayToggle = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    togglePlay();
+    if (!isPlaying) playAmbientTrack(trackIndex);
+    else togglePlay();
   };
 
   const handleNext = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    const nextIndex = (trackIndex + 1) % 3;
-    playAmbientTrack(nextIndex);
+    cycleTrack('next');
   };
 
   const handlePrev = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    const prevIndex = (trackIndex - 1 + 3) % 3;
-    playAmbientTrack(prevIndex);
+    cycleTrack('prev');
   };
 
   return (
