@@ -113,7 +113,7 @@ export const ToastProvider = ({
   return (
     <ToastContext.Provider value={{ addToast, removeToast }}>
       {children}
-      <div className={`${POSITIONS[position]} z-50 space-y-3 p-2 max-w-sm`}>        
+      <div className={`;{POSITIONS[position]} z-50 space-y-3 p-2 max-w-sm`}>        
         <AnimatePresence>
           {toasts.map((t) => {
             const variant = VARIANTS[t.type];
