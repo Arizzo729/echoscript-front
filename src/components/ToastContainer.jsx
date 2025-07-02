@@ -17,7 +17,7 @@ const ToastContext = createContext();
 // Hook to use toast
 export const useToast = () => {
   const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error("useToast must be used within ToastProvider");
+  if (!ctx) throw new Error("useToast must be used within ToastContainer");
   return ctx.addToast;
 };
 
@@ -49,7 +49,7 @@ function toastReducer(state, action) {
 }
 
 // Provider component
-function ToastProvider({ children, limit = 5, position = "top-right" }) {
+function ToastContainer({ children, limit = 5, position = "top-right" }) {
   const [toasts, dispatch] = useReducer(toastReducer, []);
   const timers = useRef({});
 
@@ -81,7 +81,7 @@ function ToastProvider({ children, limit = 5, position = "top-right" }) {
   useEffect(() => () => Object.values(timers.current).forEach(clearTimeout), []);
 
   return (
-    <ToastContext.Provider value={{ addToast, removeToast }}>
+    <ToastContext.Container value={{ addToast, removeToast }}>
       {children}
       <div className={POSITIONS[position] + " z-50 space-y-3 p-2 max-w-sm"}>
         <AnimatePresence>
@@ -124,11 +124,11 @@ function ToastProvider({ children, limit = 5, position = "top-right" }) {
           })}
         </AnimatePresence>
       </div>
-    </ToastContext.Provider>
+    </ToastContext.Container>
   );
 }
 
 // Default export for Layout import
-export default ToastProvider;
+export default ToastContainer;
 ```
 
