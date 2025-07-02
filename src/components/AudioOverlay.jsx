@@ -1,12 +1,7 @@
-// ✅ EchoScript.AI — Final Stable AudioOverlay with Track Cycling and Proper Interactions
+// ✅ EchoScript.AI — Final MASTER AudioOverlay with Enhanced Cycling, Speed, and Polished Interactions
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Pause,
-  Play,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import Button from './ui/Button';
 import { useSound } from '../context/SoundContext';
 
@@ -24,6 +19,7 @@ export default function AudioOverlay() {
   } = useSound();
 
   const [hidden, setHidden] = useState(false);
+  const [label, setLabel] = useState('');
   const x = useMotionValue(40);
   const y = useMotionValue(80);
   const wrapperRef = useRef(null);
@@ -37,6 +33,10 @@ export default function AudioOverlay() {
     if (saved.x != null) x.set(saved.x);
     if (saved.y != null) y.set(saved.y);
   }, [x, y]);
+
+  useEffect(() => {
+    setLabel(currentTrack);
+  }, [currentTrack]);
 
   const handleDragEnd = (_, info) => {
     const node = wrapperRef.current;
@@ -52,14 +52,12 @@ export default function AudioOverlay() {
 
   const cycleTrack = (direction) => {
     const total = 4;
-    let next = trackIndex;
-    if (direction === 'next') {
-      next = (trackIndex + 1) % total;
-    } else {
-      next = (trackIndex - 1 + total) % total;
-    }
+    let next = direction === 'next'
+      ? (trackIndex + 1) % total
+      : (trackIndex - 1 + total) % total;
+
     if (next === 3) {
-      pauseAmbientTrack(); // OFF
+      pauseAmbientTrack();
     } else {
       playAmbientTrack(next);
     }
@@ -69,7 +67,7 @@ export default function AudioOverlay() {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
     if (isOff) {
-      playAmbientTrack(0); // OFF → BG1
+      playAmbientTrack(0);
     } else {
       togglePlay();
     }
@@ -106,7 +104,7 @@ export default function AudioOverlay() {
           onPointerDown={(e) => {
             const tag = e.target.tagName.toLowerCase();
             if (['button', 'input', 'svg', 'path'].includes(tag)) {
-              e.stopPropagation(); // Prevent accidental dragging
+              e.stopPropagation();
             }
           }}
         >
@@ -139,7 +137,7 @@ export default function AudioOverlay() {
               icon={<ChevronRight className="w-4 h-4 text-teal-400" />}
             />
             <span className="text-[0.6rem] min-w-[32px] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono text-center">
-              {currentTrack}
+              {label}
             </span>
           </div>
           <div className="w-full flex justify-center mt-0.5">
