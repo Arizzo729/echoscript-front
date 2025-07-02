@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — AudioOverlay DIAGNOSE BG1 ISSUE
+// ✅ EchoScript.AI — AudioOverlay SYNCED + ENHANCED
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
@@ -6,10 +6,10 @@ import Button from './ui/Button';
 import { useSound } from '../context/SoundContext';
 
 const TRACKS = [
-  { label: 'OFF', src: null },
-  { label: 'BG 1', src: new URL('../assets/sounds/ambient-loop-1.mp3', import.meta.url).href },
-  { label: 'BG 2', src: new URL('../assets/sounds/ambient-loop-2.mp3', import.meta.url).href },
-  { label: 'BG 3', src: new URL('../assets/sounds/ambient-loop-3.mp3', import.meta.url).href },
+  { label: 'OFF', src: null, gain: 0 },
+  { label: 'BG 1', src: new URL('../assets/sounds/ambient-loop-1.mp3', import.meta.url).href, gain: 0.2 },
+  { label: 'BG 2', src: new URL('../assets/sounds/ambient-loop-2.mp3', import.meta.url).href, gain: 0.4 },
+  { label: 'BG 3', src: new URL('../assets/sounds/ambient-loop-3.mp3', import.meta.url).href, gain: 0.4 },
 ];
 
 export default function AudioOverlay() {
@@ -29,8 +29,6 @@ export default function AudioOverlay() {
   } = context || {};
 
   const [hidden, setHidden] = useState(false);
-  const [refError, setRefError] = useState(false);
-  const [debugInfo, setDebugInfo] = useState(null);
   const x = useMotionValue(40);
   const y = useMotionValue(80);
   const wrapperRef = useRef(null);
@@ -52,27 +50,17 @@ export default function AudioOverlay() {
   const playTrack = async (index) => {
     const track = TRACKS[index];
     if (!track || !track.src || !audioRef.current || !isUnlocked) return;
-
     try {
+      const adjustedVolume = Math.min(volume, 1.0) * (track.gain || 0.4);
       audioRef.current.pause();
       audioRef.current.src = track.src;
+      audioRef.current.volume = adjustedVolume;
       audioRef.current.load();
-
       await audioRef.current.play();
       setTrackIndex(index);
       setIsPlaying(true);
-      setRefError(false);
-      setDebugInfo(null);
     } catch (err) {
-      console.error('Audio play failed:', err);
-      setRefError(true);
-      setDebugInfo({
-        error: err.message,
-        track: track.label,
-        src: track.src,
-        index,
-        audioReady: audioRef.current.readyState,
-      });
+      console.warn(`Failed to play ${track.label}:`, err.message);
     }
   };
 
@@ -98,20 +86,20 @@ export default function AudioOverlay() {
   };
 
   const handleNext = async () => {
-    const next = (trackIndex + 1) % TRACKS.length;
+    let next = (trackIndex + 1) % TRACKS.length;
+    setTrackIndex(next);
     if (next === 0) {
       pauseTrack();
-      setTrackIndex(0);
     } else {
       await playTrack(next);
     }
   };
 
   const handlePrev = async () => {
-    const prev = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
+    let prev = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
+    setTrackIndex(prev);
     if (prev === 0) {
       pauseTrack();
-      setTrackIndex(0);
     } else {
       await playTrack(prev);
     }
@@ -154,14 +142,6 @@ export default function AudioOverlay() {
             }
           }}
         >
-          {refError && (
-            <div className="text-xs text-red-500 bg-red-900/40 px-3 py-1 rounded mb-1 shadow">
-              Failed to play {debugInfo?.track || 'unknown'}
-              <pre className="text-[0.6rem] mt-1 whitespace-pre-wrap break-all text-orange-400">
-{JSON.stringify(debugInfo, null, 2)}
-              </pre>
-            </div>
-          )}
           <div className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl">
             <Button variant="ghost" size="sm" onClick={handlePrev} icon={<ChevronLeft className="w-4 h-4 text-teal-400" />} />
             <Button
@@ -190,12 +170,15 @@ export default function AudioOverlay() {
               type="range"
               min={0}
               max={1}
-              step={0.01}
+              step={0.001}
               value={volume}
               onChange={(e) => {
                 const v = parseFloat(e.target.value);
                 setVolume(v);
-                if (audioRef.current) audioRef.current.volume = v;
+                if (audioRef.current) {
+                  const gain = TRACKS[trackIndex]?.gain || 0.4;
+                  audioRef.current.volume = v * gain;
+                }
               }}
               className="w-40 h-1 accent-teal-400 cursor-pointer z-50 touch-none"
             />
@@ -205,5 +188,4 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
-
 
