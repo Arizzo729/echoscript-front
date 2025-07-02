@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — AudioOverlay SYNC+FIX+POLISH
+// ✅ EchoScript.AI — AudioOverlay FINAL: Stable, Synced, Styled
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
@@ -14,7 +14,6 @@ const TRACKS = [
 
 export default function AudioOverlay() {
   const context = useSound();
-
   const audioRefFallback = useRef(null);
   const {
     trackIndex = 0,
@@ -42,6 +41,9 @@ export default function AudioOverlay() {
       setVolume(0.5);
       localStorage.setItem("audio-default-volume", "0.5");
     }
+    // Always start on OFF
+    setTrackIndex(0);
+    setIsPlaying(false);
   }, [audioRef]);
 
   useEffect(() => {
@@ -54,19 +56,13 @@ export default function AudioOverlay() {
   const playTrack = async (index) => {
     const track = TRACKS[index];
     if (!track || !track.src || !audioRef.current || !isUnlocked) return;
-
     try {
-      const adjustedVolume = Math.min(volume, 1.0) * (track.gain || 0.4);
-
-      // Always pause before changing
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
-
       audioRef.current.src = track.src;
-      audioRef.current.volume = adjustedVolume;
+      audioRef.current.volume = volume * (track.gain || 0.4);
       audioRef.current.load();
       await audioRef.current.play();
-
       setTrackIndex(index);
       setIsPlaying(true);
     } catch (err) {
@@ -75,7 +71,7 @@ export default function AudioOverlay() {
   };
 
   const pauseTrack = () => {
-    if (audioRef.current) {
+    if (audioRef.current && !audioRef.current.paused) {
       audioRef.current.pause();
       setIsPlaying(false);
     }
@@ -86,41 +82,22 @@ export default function AudioOverlay() {
       enableSound();
       return;
     }
-    const current = TRACKS[trackIndex];
-
     if (trackIndex === 0) {
       await playTrack(1);
-    } else if (!isPlaying) {
-      if (current?.src) {
-        audioRef.current.volume = volume * (current.gain || 0.4);
-        await audioRef.current.play();
-        setIsPlaying(true);
-      } else {
-        await playTrack(trackIndex);
-      }
     } else {
-      pauseTrack();
+      if (isPlaying) pauseTrack();
+      else await playTrack(trackIndex);
     }
   };
 
   const handleNext = async () => {
     const next = (trackIndex + 1) % TRACKS.length;
-    setTrackIndex(next);
-    if (next === 0) {
-      pauseTrack();
-    } else {
-      await playTrack(next);
-    }
+    await playTrack(next);
   };
 
   const handlePrev = async () => {
     const prev = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
-    setTrackIndex(prev);
-    if (prev === 0) {
-      pauseTrack();
-    } else {
-      await playTrack(prev);
-    }
+    await playTrack(prev);
   };
 
   const handleDragEnd = (_, info) => {
@@ -152,58 +129,55 @@ export default function AudioOverlay() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-          className="fixed z-[9999] flex flex-col items-center gap-1 select-none"
+          className="fixed z-[9999] flex flex-col items-center gap-1 select-none drop-shadow-xl"
           onPointerDown={(e) => {
             const tag = e.target.tagName.toLowerCase();
-            if (["button", "input", "svg", "path"].includes(tag)) {
+            const blockDrag = ["button", "input", "svg", "path"];
+            if (blockDrag.includes(tag)) {
               e.stopPropagation();
             }
           }}
         >
-          <motion.div
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.15 }}
-            className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl"
-          >
-            <Button variant="ghost" size="sm" onClick={handlePrev} icon={<ChevronLeft className="w-4 h-4 text-teal-400" />} />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={togglePlay}
-              icon={
-                isPlaying && trackIndex !== 0 ? (
-                  <Pause className="w-4 h-4 text-teal-400 transition-transform duration-200" />
-                ) : (
-                  <Play className="w-4 h-4 text-teal-400 transition-transform duration-200" />
-                )
-              }
-            />
-            <Button variant="ghost" size="sm" onClick={handleNext} icon={<ChevronRight className="w-4 h-4 text-teal-400" />} />
-            <span className="text-[0.6rem] min-w-[32px] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono text-center">
-              {currentLabel}
-            </span>
-          </motion.div>
-
-          <div
-            className="w-full flex justify-center mt-0.5"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.001}
-              value={volume}
-              onChange={(e) => {
-                const v = parseFloat(e.target.value);
-                setVolume(v);
-                const gain = TRACKS[trackIndex]?.gain || 0.4;
-                if (audioRef.current) audioRef.current.volume = v * gain;
-              }}
-              className="w-40 h-1 accent-teal-400 cursor-pointer z-50 touch-none"
-            />
+          <div className="rounded-2xl backdrop-blur-xl border border-teal-500/40 bg-zinc-900/80 shadow-md shadow-teal-600/10">
+            <div className="flex items-center gap-3 px-4 py-2">
+              <Button variant="ghost" size="sm" onClick={handlePrev} icon={<ChevronLeft className="w-4 h-4 text-teal-400" />} />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={togglePlay}
+                icon={
+                  isPlaying && trackIndex !== 0 ? (
+                    <Pause className="w-4 h-4 text-teal-400 transition duration-150" />
+                  ) : (
+                    <Play className="w-4 h-4 text-teal-400 transition duration-150" />
+                  )
+                }
+              />
+              <Button variant="ghost" size="sm" onClick={handleNext} icon={<ChevronRight className="w-4 h-4 text-teal-400" />} />
+              <span className="text-[0.6rem] min-w-[32px] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono text-center">
+                {currentLabel}
+              </span>
+            </div>
+            <div
+              className="w-full flex justify-center pb-2 px-4"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={volume}
+                onChange={(e) => {
+                  const v = parseFloat(e.target.value);
+                  setVolume(v);
+                  const gain = TRACKS[trackIndex]?.gain || 0.4;
+                  if (audioRef.current) audioRef.current.volume = v * gain;
+                }}
+                className="w-40 h-1 accent-teal-400 cursor-pointer touch-none"
+              />
+            </div>
           </div>
         </motion.div>
       )}
