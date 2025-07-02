@@ -28,17 +28,10 @@ export default function AudioOverlay() {
   const y = useMotionValue(80);
   const wrapperRef = useRef(null);
 
-  const tracks = [
-    'BG 1 — Dreamscape Horizon',
-    'BG 2 — Midnight Flow',
-    'BG 3 — Echo Drift',
-    'OFF',
-  ];
+  const isOff = trackIndex === 3;
+  const currentTrack = isOff ? 'OFF' : `BG ${trackIndex + 1}`;
 
-  const isOff = trackIndex >= tracks.length - 1;
-  const currentTrack = tracks[trackIndex] || 'OFF';
-
-  // Load saved position on mount
+  // Load saved position
   useEffect(() => {
     if (!window.__introPlayed) setHidden(true);
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
@@ -46,7 +39,6 @@ export default function AudioOverlay() {
     if (saved.y != null) y.set(saved.y);
   }, [x, y]);
 
-  // Save position on drag end
   const handleDragEnd = (_, info) => {
     const node = wrapperRef.current;
     const maxX = window.innerWidth - node.offsetWidth;
@@ -58,18 +50,21 @@ export default function AudioOverlay() {
     localStorage.setItem('audio-overlay-pos', JSON.stringify({ x: clampedX, y: clampedY }));
   };
 
-  const handlePlayToggle = () => {
+  const handlePlayToggle = (e) => {
+    e.stopPropagation();
     if (!isUnlocked) enableSound();
     if (isOff) playAmbientTrack(0);
     else togglePlay();
   };
 
-  const handleNext = () => {
+  const handleNext = (e) => {
+    e.stopPropagation();
     if (!isUnlocked) enableSound();
     nextTrack();
   };
 
-  const handlePrev = () => {
+  const handlePrev = (e) => {
+    e.stopPropagation();
     if (!isUnlocked) enableSound();
     prevTrack();
   };
@@ -91,7 +86,10 @@ export default function AudioOverlay() {
           transition={{ type: 'spring', stiffness: 300, damping: 24 }}
           className="fixed z-[9999] flex flex-col items-center gap-1 select-none"
         >
-          <div className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl cursor-move">
+          <div
+            className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl"
+            onPointerDown={(e) => e.stopPropagation()}
+          >
             <Button
               variant="ghost"
               size="sm"
@@ -119,7 +117,7 @@ export default function AudioOverlay() {
               aria-label="Next"
               icon={<ChevronRight className="w-4 h-4 text-teal-400" />}
             />
-            <span className="text-[0.6rem] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono tracking-wide">
+            <span className="text-[0.6rem] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono tracking-wide min-w-[40px] text-center">
               {currentTrack}
             </span>
           </div>
