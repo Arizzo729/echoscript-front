@@ -120,7 +120,7 @@ export default function HistoryPage() {
                   </div>
                   <p
                     className={`text-sm text-zinc-300 whitespace-pre-wrap transition-max-h overflow-hidden ${
-n                      expandedId === h.id ? "max-h-screen" : "max-h-20"
+                      expandedId === h.id ? "max-h-screen" : "max-h-20"
                     }`}
                   >
                     {h.preview}
@@ -181,3 +181,4 @@ n                      expandedId === h.id ? "max-h-screen" : "max-h-20"
     </motion.div>
   );
 }
+
