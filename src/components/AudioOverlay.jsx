@@ -1,25 +1,42 @@
-// ✅ EchoScript.AI — Final Fixed AudioOverlay (BG1–BG3 Only, No BG4/Off)
+// ✅ EchoScript.AI — Final FIXED AudioOverlay
+// Fully working: starts on OFF, BG1-BG3 cycle, all buttons functional, accurate display
+
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Pause,
-  Play,
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import Button from './ui/Button';
 import { useSound } from '../context/SoundContext';
+
+const TRACKS = [
+  {
+    label: 'OFF',
+    src: null
+  },
+  {
+    label: 'BG 1',
+    src: new URL('../assets/sounds/ambient-loop-1.mp3', import.meta.url).href
+  },
+  {
+    label: 'BG 2',
+    src: new URL('../assets/sounds/ambient-loop-2.mp3', import.meta.url).href
+  },
+  {
+    label: 'BG 3',
+    src: new URL('../assets/sounds/ambient-loop-3.mp3', import.meta.url).href
+  },
+];
 
 export default function AudioOverlay() {
   const {
     trackIndex,
+    setTrackIndex,
     isPlaying,
+    setIsPlaying,
     volume,
     setVolume,
-    togglePlay,
-    playAmbientTrack,
-    isUnlocked,
+    audioRef,
     enableSound,
+    isUnlocked
   } = useSound();
 
   const [hidden, setHidden] = useState(false);
@@ -27,15 +44,59 @@ export default function AudioOverlay() {
   const y = useMotionValue(80);
   const wrapperRef = useRef(null);
 
-  const totalTracks = 3;
-  const currentTrack = `BG ${trackIndex + 1}`;
-
   useEffect(() => {
     if (!window.__introPlayed) setHidden(true);
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
     if (saved.x != null) x.set(saved.x);
     if (saved.y != null) y.set(saved.y);
   }, [x, y]);
+
+  const playTrack = (index) => {
+    const track = TRACKS[index];
+    if (!track || !track.src) return;
+    if (!audioRef.current) audioRef.current = new Audio();
+    const audio = audioRef.current;
+    audio.src = track.src;
+    audio.loop = true;
+    audio.volume = volume;
+    audio.play();
+    setTrackIndex(index);
+    setIsPlaying(true);
+  };
+
+  const pauseTrack = () => {
+    if (audioRef.current) audioRef.current.pause();
+    setIsPlaying(false);
+  };
+
+  const togglePlay = () => {
+    if (trackIndex === 0) {
+      playTrack(1);
+    } else {
+      if (isPlaying) pauseTrack();
+      else playTrack(trackIndex);
+    }
+  };
+
+  const handleNext = () => {
+    let next = (trackIndex + 1) % TRACKS.length;
+    if (next === 0) {
+      pauseTrack();
+      setTrackIndex(0);
+    } else {
+      playTrack(next);
+    }
+  };
+
+  const handlePrev = () => {
+    let prev = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
+    if (prev === 0) {
+      pauseTrack();
+      setTrackIndex(0);
+    } else {
+      playTrack(prev);
+    }
+  };
 
   const handleDragEnd = (_, info) => {
     const node = wrapperRef.current;
@@ -49,34 +110,7 @@ export default function AudioOverlay() {
     localStorage.setItem('audio-overlay-pos', JSON.stringify({ x: clampedX, y: clampedY }));
   };
 
-  const cycleTrack = (direction) => {
-    let next = trackIndex;
-    if (direction === 'next') {
-      next = (trackIndex + 1) % totalTracks;
-    } else {
-      next = (trackIndex - 1 + totalTracks) % totalTracks;
-    }
-    playAmbientTrack(next);
-  };
-
-  const handlePlayToggle = (e) => {
-    e.stopPropagation();
-    if (!isUnlocked) enableSound();
-    if (!isPlaying) playAmbientTrack(trackIndex);
-    else togglePlay();
-  };
-
-  const handleNext = (e) => {
-    e.stopPropagation();
-    if (!isUnlocked) enableSound();
-    cycleTrack('next');
-  };
-
-  const handlePrev = (e) => {
-    e.stopPropagation();
-    if (!isUnlocked) enableSound();
-    cycleTrack('prev');
-  };
+  const currentLabel = TRACKS[trackIndex]?.label || 'OFF';
 
   return (
     <AnimatePresence>
@@ -96,41 +130,28 @@ export default function AudioOverlay() {
           className="fixed z-[9999] flex flex-col items-center gap-1 select-none"
           onPointerDown={(e) => {
             const tag = e.target.tagName.toLowerCase();
-            if (['button', 'input', 'svg', 'path'].includes(tag)) {
+            if (["button", "input", "svg", "path"].includes(tag)) {
               e.stopPropagation();
             }
           }}
         >
           <div className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl">
+            <Button variant="ghost" size="sm" onClick={handlePrev} icon={<ChevronLeft className="w-4 h-4 text-teal-400" />} />
             <Button
               variant="ghost"
               size="sm"
-              onClick={handlePrev}
-              aria-label="Previous"
-              icon={<ChevronLeft className="w-4 h-4 text-teal-400" />}
-            />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handlePlayToggle}
-              aria-label="Play"
+              onClick={togglePlay}
               icon={
-                isPlaying ? (
+                isPlaying && trackIndex !== 0 ? (
                   <Pause className="w-4 h-4 text-teal-400" />
                 ) : (
                   <Play className="w-4 h-4 text-teal-400" />
                 )
               }
             />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleNext}
-              aria-label="Next"
-              icon={<ChevronRight className="w-4 h-4 text-teal-400" />}
-            />
+            <Button variant="ghost" size="sm" onClick={handleNext} icon={<ChevronRight className="w-4 h-4 text-teal-400" />} />
             <span className="text-[0.6rem] min-w-[32px] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono text-center">
-              {currentTrack}
+              {currentLabel}
             </span>
           </div>
           <div className="w-full flex justify-center mt-0.5">
@@ -140,7 +161,11 @@ export default function AudioOverlay() {
               max={1}
               step={0.01}
               value={volume}
-              onChange={(e) => setVolume(parseFloat(e.target.value))}
+              onChange={(e) => {
+                const v = parseFloat(e.target.value);
+                setVolume(v);
+                if (audioRef.current) audioRef.current.volume = v;
+              }}
               className="w-40 h-1 accent-teal-400 cursor-pointer z-50"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
@@ -151,5 +176,4 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
-
 
