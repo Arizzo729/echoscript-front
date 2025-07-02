@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — Final AudioOverlay with No Autoplay, Clean Cycle, and Proper Play Behavior
+// ✅ EchoScript.AI — Final Stable AudioOverlay with Track Cycling and Proper Interactions
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import {
@@ -18,10 +18,9 @@ export default function AudioOverlay() {
     setVolume,
     togglePlay,
     playAmbientTrack,
+    pauseAmbientTrack,
     enableSound,
     isUnlocked,
-    nextTrack,
-    prevTrack,
   } = useSound();
 
   const [hidden, setHidden] = useState(false);
@@ -41,6 +40,7 @@ export default function AudioOverlay() {
 
   const handleDragEnd = (_, info) => {
     const node = wrapperRef.current;
+    if (!node) return;
     const maxX = window.innerWidth - node.offsetWidth;
     const maxY = window.innerHeight - node.offsetHeight;
     const clampedX = Math.min(Math.max(0, info.point.x), maxX);
@@ -48,6 +48,21 @@ export default function AudioOverlay() {
     x.set(clampedX);
     y.set(clampedY);
     localStorage.setItem('audio-overlay-pos', JSON.stringify({ x: clampedX, y: clampedY }));
+  };
+
+  const cycleTrack = (direction) => {
+    const total = 4;
+    let next = trackIndex;
+    if (direction === 'next') {
+      next = (trackIndex + 1) % total;
+    } else {
+      next = (trackIndex - 1 + total) % total;
+    }
+    if (next === 3) {
+      pauseAmbientTrack(); // OFF
+    } else {
+      playAmbientTrack(next);
+    }
   };
 
   const handlePlayToggle = (e) => {
@@ -63,13 +78,13 @@ export default function AudioOverlay() {
   const handleNext = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    nextTrack();
+    cycleTrack('next');
   };
 
   const handlePrev = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    prevTrack();
+    cycleTrack('prev');
   };
 
   return (
@@ -91,7 +106,7 @@ export default function AudioOverlay() {
           onPointerDown={(e) => {
             const tag = e.target.tagName.toLowerCase();
             if (['button', 'input', 'svg', 'path'].includes(tag)) {
-              e.stopPropagation(); // Block drag if interacting
+              e.stopPropagation(); // Prevent accidental dragging
             }
           }}
         >
@@ -135,8 +150,9 @@ export default function AudioOverlay() {
               step={0.01}
               value={volume}
               onChange={(e) => setVolume(parseFloat(e.target.value))}
-              className="w-40 h-1 accent-teal-400 cursor-pointer"
+              className="w-40 h-1 accent-teal-400 cursor-pointer z-50"
               onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
             />
           </div>
         </motion.div>
@@ -144,5 +160,6 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
 
 
