@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — Final MASTER AudioOverlay with Enhanced Cycling, Speed, and Polished Interactions
+// ✅ EchoScript.AI — AudioOverlay: Core Fixed Version (No OFF, Clean Theme)
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
@@ -13,19 +13,16 @@ export default function AudioOverlay() {
     setVolume,
     togglePlay,
     playAmbientTrack,
-    pauseAmbientTrack,
-    enableSound,
     isUnlocked,
+    enableSound,
   } = useSound();
 
   const [hidden, setHidden] = useState(false);
-  const [label, setLabel] = useState('');
   const x = useMotionValue(40);
   const y = useMotionValue(80);
   const wrapperRef = useRef(null);
 
-  const isOff = trackIndex === 3;
-  const currentTrack = isOff ? 'OFF' : `BG ${trackIndex + 1}`;
+  const currentTrack = `BG ${trackIndex + 1}`;
 
   useEffect(() => {
     if (!window.__introPlayed) setHidden(true);
@@ -33,10 +30,6 @@ export default function AudioOverlay() {
     if (saved.x != null) x.set(saved.x);
     if (saved.y != null) y.set(saved.y);
   }, [x, y]);
-
-  useEffect(() => {
-    setLabel(currentTrack);
-  }, [currentTrack]);
 
   const handleDragEnd = (_, info) => {
     const node = wrapperRef.current;
@@ -50,39 +43,24 @@ export default function AudioOverlay() {
     localStorage.setItem('audio-overlay-pos', JSON.stringify({ x: clampedX, y: clampedY }));
   };
 
-  const cycleTrack = (direction) => {
-    const total = 4;
-    let next = direction === 'next'
-      ? (trackIndex + 1) % total
-      : (trackIndex - 1 + total) % total;
-
-    if (next === 3) {
-      pauseAmbientTrack();
-    } else {
-      playAmbientTrack(next);
-    }
-  };
-
   const handlePlayToggle = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    if (isOff) {
-      playAmbientTrack(0);
-    } else {
-      togglePlay();
-    }
+    togglePlay();
   };
 
   const handleNext = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    cycleTrack('next');
+    const nextIndex = (trackIndex + 1) % 3;
+    playAmbientTrack(nextIndex);
   };
 
   const handlePrev = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    cycleTrack('prev');
+    const prevIndex = (trackIndex - 1 + 3) % 3;
+    playAmbientTrack(prevIndex);
   };
 
   return (
@@ -122,7 +100,7 @@ export default function AudioOverlay() {
               onClick={handlePlayToggle}
               aria-label="Play"
               icon={
-                isPlaying && !isOff ? (
+                isPlaying ? (
                   <Pause className="w-4 h-4 text-teal-400" />
                 ) : (
                   <Play className="w-4 h-4 text-teal-400" />
@@ -137,7 +115,7 @@ export default function AudioOverlay() {
               icon={<ChevronRight className="w-4 h-4 text-teal-400" />}
             />
             <span className="text-[0.6rem] min-w-[32px] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono text-center">
-              {label}
+              {currentTrack}
             </span>
           </div>
           <div className="w-full flex justify-center mt-0.5">
@@ -158,6 +136,5 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
-
 
 
