@@ -60,7 +60,7 @@ export default function AudioOverlay() {
     else togglePlay();
   };
 
-  // Next track
+  // Next track (throttled)
   const handleNext = () => {
     if (busy) return;
     setBusy(true);
@@ -69,7 +69,7 @@ export default function AudioOverlay() {
     setTimeout(() => setBusy(false), 300);
   };
 
-  // Previous track
+  // Previous track (throttled)
   const handlePrev = () => {
     if (busy) return;
     setBusy(true);
@@ -92,7 +92,9 @@ export default function AudioOverlay() {
         onDragEnd={handleDragEnd}
         onPointerDownCapture={(e) => {
           const tag = e.target.tagName.toLowerCase();
-          if (!['button', 'input', 'svg', 'path'].includes(tag)) controls.start(e);
+          if (!['button', 'input', 'svg', 'path'].includes(tag)) {
+            controls.start(e, { snapToCursor: false });
+          }
         }}
         style={{ x, y }}
         initial={{ opacity: 0, scale: 0.95 }}
@@ -107,6 +109,7 @@ export default function AudioOverlay() {
             <span className="text-[0.65rem] leading-tight">Tip: Use ← → to switch, Space to play/pause.</span>
             <button
               onClick={() => setShowTip(false)}
+              onPointerDown={(e) => e.stopPropagation()}
               className="ml-auto p-0 bg-transparent text-white hover:opacity-75 focus:outline-none"
             >
               <X className="w-3.5 h-3.5" />
@@ -161,4 +164,5 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
 
