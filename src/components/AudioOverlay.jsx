@@ -54,16 +54,13 @@ export default function AudioOverlay() {
     return () => window.removeEventListener('keydown', onKey);
   }, [trackIndex, isPlaying]);
 
-  // Play/pause toggle
+  // Play/pause toggle without blocking rapid clicks
   const handlePlayClick = () => {
-    if (busy) return;
-    setBusy(true);
     if (trackIndex === 0) playAmbientTrack(1);
     else togglePlay();
-    setTimeout(() => setBusy(false), 200);
   };
 
-  // Next track and auto-play
+  // Next track and auto-play (throttled)
   const handleNext = () => {
     if (busy) return;
     setBusy(true);
@@ -72,7 +69,7 @@ export default function AudioOverlay() {
     setTimeout(() => setBusy(false), 300);
   };
 
-  // Previous track and auto-play
+  // Previous track and auto-play (throttled)
   const handlePrev = () => {
     if (busy) return;
     setBusy(true);
@@ -136,7 +133,6 @@ export default function AudioOverlay() {
               variant="ghost"
               size="sm"
               onClick={handlePlayClick}
-              disabled={busy}
               onPointerDown={(e) => e.stopPropagation()}
               icon={isPlaying ? <Pause className="w-4 h-4 text-teal-400" /> : <Play className="w-4 h-4 text-teal-400" />}
             />
