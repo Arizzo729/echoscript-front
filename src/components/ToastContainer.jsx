@@ -1,5 +1,5 @@
 ```jsx
-// src/components/toast/ToastContainer.jsx
+// src/components/ToastContainer.jsx
 import React, {
   createContext,
   useContext,
@@ -128,8 +128,7 @@ function ToastProvider({ children, limit = 5, position = "top-right" }) {
   );
 }
 
-// default export for Layout import
+// Default export for Layout import
 export default ToastProvider;
 ```
-
 
