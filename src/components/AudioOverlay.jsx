@@ -1,6 +1,4 @@
-// ✅ EchoScript.AI — Final FIXED AudioOverlay
-// Fully working: starts on OFF, BG1-BG3 cycle, all buttons functional, accurate display
-
+// ✅ EchoScript.AI — AudioOverlay FIXED
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
@@ -8,22 +6,10 @@ import Button from './ui/Button';
 import { useSound } from '../context/SoundContext';
 
 const TRACKS = [
-  {
-    label: 'OFF',
-    src: null
-  },
-  {
-    label: 'BG 1',
-    src: new URL('../assets/sounds/ambient-loop-1.mp3', import.meta.url).href
-  },
-  {
-    label: 'BG 2',
-    src: new URL('../assets/sounds/ambient-loop-2.mp3', import.meta.url).href
-  },
-  {
-    label: 'BG 3',
-    src: new URL('../assets/sounds/ambient-loop-3.mp3', import.meta.url).href
-  },
+  { label: 'OFF', src: null },
+  { label: 'BG 1', src: new URL('../assets/sounds/ambient-loop-1.mp3', import.meta.url).href },
+  { label: 'BG 2', src: new URL('../assets/sounds/ambient-loop-2.mp3', import.meta.url).href },
+  { label: 'BG 3', src: new URL('../assets/sounds/ambient-loop-3.mp3', import.meta.url).href },
 ];
 
 export default function AudioOverlay() {
@@ -45,23 +31,32 @@ export default function AudioOverlay() {
   const wrapperRef = useRef(null);
 
   useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      audioRef.current.loop = true;
+    }
+  }, [audioRef]);
+
+  useEffect(() => {
     if (!window.__introPlayed) setHidden(true);
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
     if (saved.x != null) x.set(saved.x);
     if (saved.y != null) y.set(saved.y);
   }, [x, y]);
 
-  const playTrack = (index) => {
+  const playTrack = async (index) => {
     const track = TRACKS[index];
-    if (!track || !track.src) return;
-    if (!audioRef.current) audioRef.current = new Audio();
-    const audio = audioRef.current;
-    audio.src = track.src;
-    audio.loop = true;
-    audio.volume = volume;
-    audio.play();
-    setTrackIndex(index);
-    setIsPlaying(true);
+    if (!track || !track.src || !audioRef.current || !isUnlocked) return;
+    try {
+      audioRef.current.src = track.src;
+      audioRef.current.volume = volume;
+      await audioRef.current.load();
+      await audioRef.current.play();
+      setTrackIndex(index);
+      setIsPlaying(true);
+    } catch (err) {
+      console.error('Audio play failed:', err);
+    }
   };
 
   const pauseTrack = () => {
@@ -69,32 +64,35 @@ export default function AudioOverlay() {
     setIsPlaying(false);
   };
 
-  const togglePlay = () => {
+  const togglePlay = async () => {
+    if (!isUnlocked) {
+      enableSound();
+      return;
+    }
     if (trackIndex === 0) {
-      playTrack(1);
+      await playTrack(1);
     } else {
-      if (isPlaying) pauseTrack();
-      else playTrack(trackIndex);
+      isPlaying ? pauseTrack() : await playTrack(trackIndex);
     }
   };
 
-  const handleNext = () => {
-    let next = (trackIndex + 1) % TRACKS.length;
+  const handleNext = async () => {
+    const next = (trackIndex + 1) % TRACKS.length;
     if (next === 0) {
       pauseTrack();
       setTrackIndex(0);
     } else {
-      playTrack(next);
+      await playTrack(next);
     }
   };
 
-  const handlePrev = () => {
-    let prev = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
+  const handlePrev = async () => {
+    const prev = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
     if (prev === 0) {
       pauseTrack();
       setTrackIndex(0);
     } else {
-      playTrack(prev);
+      await playTrack(prev);
     }
   };
 
