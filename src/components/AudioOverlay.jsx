@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — AudioOverlay SYNCED + ENHANCED
+// ✅ EchoScript.AI — AudioOverlay SYNC+FIX+POLISH
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
@@ -38,6 +38,10 @@ export default function AudioOverlay() {
       audioRef.current = new Audio();
       audioRef.current.loop = true;
     }
+    if (!localStorage.getItem("audio-default-volume")) {
+      setVolume(0.5);
+      localStorage.setItem("audio-default-volume", "0.5");
+    }
   }, [audioRef]);
 
   useEffect(() => {
@@ -50,13 +54,19 @@ export default function AudioOverlay() {
   const playTrack = async (index) => {
     const track = TRACKS[index];
     if (!track || !track.src || !audioRef.current || !isUnlocked) return;
+
     try {
       const adjustedVolume = Math.min(volume, 1.0) * (track.gain || 0.4);
+
+      // Always pause before changing
       audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+
       audioRef.current.src = track.src;
       audioRef.current.volume = adjustedVolume;
       audioRef.current.load();
       await audioRef.current.play();
+
       setTrackIndex(index);
       setIsPlaying(true);
     } catch (err) {
@@ -65,7 +75,7 @@ export default function AudioOverlay() {
   };
 
   const pauseTrack = () => {
-    if (audioRef.current && !audioRef.current.paused) {
+    if (audioRef.current) {
       audioRef.current.pause();
       setIsPlaying(false);
     }
@@ -76,17 +86,25 @@ export default function AudioOverlay() {
       enableSound();
       return;
     }
+    const current = TRACKS[trackIndex];
+
     if (trackIndex === 0) {
       await playTrack(1);
-    } else if (isPlaying) {
-      pauseTrack();
+    } else if (!isPlaying) {
+      if (current?.src) {
+        audioRef.current.volume = volume * (current.gain || 0.4);
+        await audioRef.current.play();
+        setIsPlaying(true);
+      } else {
+        await playTrack(trackIndex);
+      }
     } else {
-      await playTrack(trackIndex);
+      pauseTrack();
     }
   };
 
   const handleNext = async () => {
-    let next = (trackIndex + 1) % TRACKS.length;
+    const next = (trackIndex + 1) % TRACKS.length;
     setTrackIndex(next);
     if (next === 0) {
       pauseTrack();
@@ -96,7 +114,7 @@ export default function AudioOverlay() {
   };
 
   const handlePrev = async () => {
-    let prev = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
+    const prev = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
     setTrackIndex(prev);
     if (prev === 0) {
       pauseTrack();
@@ -142,7 +160,12 @@ export default function AudioOverlay() {
             }
           }}
         >
-          <div className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl">
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.15 }}
+            className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl"
+          >
             <Button variant="ghost" size="sm" onClick={handlePrev} icon={<ChevronLeft className="w-4 h-4 text-teal-400" />} />
             <Button
               variant="ghost"
@@ -150,9 +173,9 @@ export default function AudioOverlay() {
               onClick={togglePlay}
               icon={
                 isPlaying && trackIndex !== 0 ? (
-                  <Pause className="w-4 h-4 text-teal-400" />
+                  <Pause className="w-4 h-4 text-teal-400 transition-transform duration-200" />
                 ) : (
-                  <Play className="w-4 h-4 text-teal-400" />
+                  <Play className="w-4 h-4 text-teal-400 transition-transform duration-200" />
                 )
               }
             />
@@ -160,7 +183,8 @@ export default function AudioOverlay() {
             <span className="text-[0.6rem] min-w-[32px] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono text-center">
               {currentLabel}
             </span>
-          </div>
+          </motion.div>
+
           <div
             className="w-full flex justify-center mt-0.5"
             onPointerDown={(e) => e.stopPropagation()}
@@ -175,10 +199,8 @@ export default function AudioOverlay() {
               onChange={(e) => {
                 const v = parseFloat(e.target.value);
                 setVolume(v);
-                if (audioRef.current) {
-                  const gain = TRACKS[trackIndex]?.gain || 0.4;
-                  audioRef.current.volume = v * gain;
-                }
+                const gain = TRACKS[trackIndex]?.gain || 0.4;
+                if (audioRef.current) audioRef.current.volume = v * gain;
               }}
               className="w-40 h-1 accent-teal-400 cursor-pointer z-50 touch-none"
             />
@@ -188,4 +210,5 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
 
