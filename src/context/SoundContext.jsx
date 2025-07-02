@@ -93,7 +93,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
       return;
     }
 
-    if (audio.src !== src) {
+    if (!audio.src || !audio.src.endsWith(src)) {
       audio.pause();
       audio.src = src;
       audio.currentTime = 0;
@@ -226,4 +226,3 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
 }
 
 export const useSound = () => useContext(SoundContext);
-

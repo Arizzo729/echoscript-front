@@ -1,3 +1,4 @@
+// ✅ EchoScript.AI — Final AudioOverlay with No Autoplay, Clean Cycle, and Proper Play Behavior
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import {

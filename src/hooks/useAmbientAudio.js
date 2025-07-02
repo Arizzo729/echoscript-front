@@ -1,13 +1,12 @@
-// ✅ EchoScript.AI — Optimized Ambient Audio Hook with Fade, Unlock, and Cycling
+// ✅ EchoScript.AI — Unified Ambient Audio Hook (Fully Synced with SoundContext)
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 const trackLabels = ["Music 1", "Music 2", "Music 3", "Off"];
 
 export default function useAmbientAudio(defaultVolume = 0.4) {
-  const [trackIndex, setTrackIndex] = useState(3); // 'Off'
+  const [trackIndex, setTrackIndex] = useState(3); // Start at 'Off'
   const audioRef = useRef(null);
   const fadeRef = useRef(null);
-  const unlockAttempted = useRef(false);
 
   const ambientUrls = useMemo(() => [
     new URL("../assets/sounds/ambient-loop-1.mp3", import.meta.url).href,
@@ -20,7 +19,6 @@ export default function useAmbientAudio(defaultVolume = 0.4) {
   const fadeTo = useCallback((targetVol, duration = 600) => {
     const audio = audioRef.current;
     if (!audio) return;
-
     const steps = 20;
     const interval = duration / steps;
     const step = (targetVol - audio.volume) / steps;
@@ -36,31 +34,20 @@ export default function useAmbientAudio(defaultVolume = 0.4) {
     }, interval);
   }, []);
 
-  const setupAudio = useCallback(() => {
-    if (isOff || !ambientUrls[trackIndex]) return;
+  const setupAudio = useCallback((index) => {
+    if (index === 3) return;
+    const src = ambientUrls[index];
+    if (!src) return;
 
-    const audio = new Audio(ambientUrls[trackIndex]);
+    const audio = new Audio(src);
     audio.loop = true;
     audio.volume = 0;
     audioRef.current = audio;
 
-    const tryPlay = () => {
-      if (unlockAttempted.current) return;
-      unlockAttempted.current = true;
-
-      audio.play()
-        .then(() => fadeTo(defaultVolume))
-        .catch(err => console.warn("Ambient audio blocked by browser:", err));
-    };
-
-    document.body.addEventListener("click", tryPlay, { once: true });
-    document.body.addEventListener("touchstart", tryPlay, { once: true });
-
-    return () => {
-      document.body.removeEventListener("click", tryPlay);
-      document.body.removeEventListener("touchstart", tryPlay);
-    };
-  }, [ambientUrls, trackIndex, defaultVolume, fadeTo, isOff]);
+    audio.play()
+      .then(() => fadeTo(defaultVolume))
+      .catch(err => console.warn("Audio autoplay failed:", err));
+  }, [ambientUrls, defaultVolume, fadeTo]);
 
   useEffect(() => {
     clearInterval(fadeRef.current);
@@ -68,21 +55,24 @@ export default function useAmbientAudio(defaultVolume = 0.4) {
       audioRef.current.pause();
       audioRef.current = null;
     }
+    setupAudio(trackIndex);
 
-    const cleanup = setupAudio();
     return () => {
       clearInterval(fadeRef.current);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
-      cleanup?.();
     };
   }, [trackIndex, setupAudio]);
 
   const nextTrack = useCallback(() => {
-    setTrackIndex(prev => (prev + 1) % (ambientUrls.length + 1));
-  }, [ambientUrls.length]);
+    setTrackIndex(prev => (prev + 1) % 4);
+  }, []);
+
+  const prevTrack = useCallback(() => {
+    setTrackIndex(prev => (prev - 1 + 4) % 4);
+  }, []);
 
   const play = useCallback(() => {
     if (!audioRef.current) return;
@@ -101,6 +91,7 @@ export default function useAmbientAudio(defaultVolume = 0.4) {
     isPlaying: !isOff,
     currentTrack: trackLabels[trackIndex],
     nextTrack,
+    prevTrack,
     play,
     pause,
     setVolume,
