@@ -15,7 +15,7 @@ import 'nprogress/nprogress.css';
 import ErrorBoundary from './ErrorBoundary';
 import IntroVideo from './IntroVideo';
 import AudioOverlay from './AudioOverlay';
-import ToastContainer from './ToastContainer';
+import ToastContainer from './ToastContainer';       // <-- this import now matches
 import MobileBottomNav from './MobileBottomNav';
 
 const Header = lazy(() => import('./Header'));
@@ -62,7 +62,10 @@ export default function Layout() {
 
   return (
     <ThemeContext.Provider value={themeValue}>
-      <a href="#main-content" className="sr-only focus:not-sr-only fixed top-2 left-2 p-2 bg-teal-500 text-white rounded">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only fixed top-2 left-2 p-2 bg-teal-500 text-white rounded"
+      >
         Skip to content
       </a>
 

@@ -14,20 +14,20 @@ const POSITIONS = {
 
 const VARIANTS = {
   success: { icon: <CheckCircle className="text-green-400" />, border: 'border-green-500' },
-  error:   { icon: <AlertCircle className="text-red-400" />, border: 'border-red-500' },
-  info:    { icon: <Info className="text-blue-400" />, border: 'border-blue-500' },
+  error:   { icon: <AlertCircle className="text-red-400" />,   border: 'border-red-500' },
+  info:    { icon: <Info className="text-blue-400" />,        border: 'border-blue-500' },
 };
 
-function ToastContainer({ position = 'top-right' }) {
+export default function ToastContainer({ position = 'top-right' }) {
   const ctx = useContext(ToastContext);
   if (!ctx) return null;
-  const { toasts = [], removeToast } = ctx;
-  if (toasts.length === 0) return null;
+  const { toasts, removeToast } = ctx;
+  if (!toasts || toasts.length === 0) return null;
 
   return createPortal(
     <div className={POSITIONS[position] + ' z-50 space-y-3 p-2 max-w-sm pointer-events-none'}>
       <AnimatePresence>
-        {toasts.map(({ id, type, message }) => {
+        {toasts.map(({ id, type, message, action }) => {
           const v = VARIANTS[type] || VARIANTS.info;
           return (
             <motion.div
@@ -38,12 +38,30 @@ function ToastContainer({ position = 'top-right' }) {
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               onClick={() => removeToast(id)}
               role="status"
-              className={'pointer-events-auto flex items-start gap-3 p-4 bg-gray-900 border-l-4 shadow-md backdrop-blur-sm rounded-lg ' + v.border}
+              className={
+                'pointer-events-auto flex items-start gap-3 p-4 bg-gray-900 border-l-4 shadow-md backdrop-blur-sm rounded-lg ' +
+                v.border
+              }
             >
               {v.icon}
               <div className="flex-1 text-sm text-white font-medium">{message}</div>
+              {action && (
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    action.callback(action.meta);
+                    removeToast(id);
+                  }}
+                  className="ml-2 px-3 py-1 text-xs font-semibold rounded hover:bg-gray-800 transition"
+                >
+                  {action.label}
+                </button>
+              )}
               <button
-                onClick={e => { e.stopPropagation(); removeToast(id); }}
+                onClick={e => {
+                  e.stopPropagation();
+                  removeToast(id);
+                }}
                 aria-label="Dismiss notification"
                 className="text-gray-400 hover:text-white transition"
               >
@@ -58,6 +76,5 @@ function ToastContainer({ position = 'top-right' }) {
   );
 }
 
-export default ToastContainer;
 
 
