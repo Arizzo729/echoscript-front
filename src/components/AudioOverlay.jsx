@@ -24,21 +24,21 @@ export default function AudioOverlay() {
     isUnlocked,
   } = useSound();
 
-  const isOff = trackIndex === 3; // 'OFF' is last index
-  const currentTrack =
-    trackIndex === 0
-      ? 'BG 1 — Dreamscape Horizon'
-      : trackIndex === 1
-      ? 'BG 2 — Midnight Flow'
-      : trackIndex === 2
-      ? 'BG 3 — Echo Drift'
-      : 'OFF';
-
   const [position, setPosition] = useState({ x: 40, y: 80 });
   const [hidden, setHidden] = useState(false);
   const overlayRef = useRef(null);
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
+
+  const tracks = [
+    'BG 1 — Dreamscape Horizon',
+    'BG 2 — Midnight Flow',
+    'BG 3 — Echo Drift',
+    'OFF',
+  ];
+
+  const isOff = trackIndex >= tracks.length - 1;
+  const currentTrack = tracks[trackIndex] || 'OFF';
 
   useEffect(() => {
     if (!window.__introPlayed) setHidden(true);
@@ -111,7 +111,7 @@ export default function AudioOverlay() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1, x: position.x, y: position.y }}
           exit={{ opacity: 0, scale: 0.9 }}
-          transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 24 }}
           className="fixed z-[9999] flex flex-col items-center gap-1 select-none cursor-grab"
         >
           <div className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl">
@@ -146,7 +146,6 @@ export default function AudioOverlay() {
               {currentTrack}
             </span>
           </div>
-
           <div className="w-full flex justify-center mt-0.5">
             <input
               type="range"
