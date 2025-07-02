@@ -51,8 +51,10 @@ export default function AudioOverlay() {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
     if (isOff) {
-      playAmbientTrack(0); // OFF → BG1
+      console.log('Playing from OFF → BG1');
+      playAmbientTrack(0);
     } else {
+      console.log('Toggling play');
       togglePlay();
     }
   };
@@ -60,15 +62,17 @@ export default function AudioOverlay() {
   const handleNext = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    const nextIndex = (trackIndex + 1) % 4;
-    playAmbientTrack(nextIndex);
+    const next = (trackIndex + 1) % 4;
+    console.log('Next →', next);
+    playAmbientTrack(next);
   };
 
   const handlePrev = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    const prevIndex = (trackIndex - 1 + 4) % 4;
-    playAmbientTrack(prevIndex);
+    const prev = (trackIndex - 1 + 4) % 4;
+    console.log('Prev →', prev);
+    playAmbientTrack(prev);
   };
 
   return (
@@ -90,7 +94,7 @@ export default function AudioOverlay() {
           onPointerDown={(e) => {
             const tag = e.target.tagName.toLowerCase();
             if (['button', 'input', 'svg', 'path'].includes(tag)) {
-              e.stopPropagation();
+              e.stopPropagation(); // Block drag if interacting
             }
           }}
         >
