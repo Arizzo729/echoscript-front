@@ -1,4 +1,18 @@
-// ✅ EchoScript.AI — AudioOverlay FINAL: Stable, Synced, Styled
+// ✅ EchoScript.AI — AudioOverlay FINAL: Stable, Synced, Styled, Functional
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Pause, Play, Lightbulb, X } from 'lucide-react';
+import Button from './ui/Button';
+import { useSound } from '../context/SoundContext';
+
+const TRACKS = [
+  { label: 'OFF', src: null, gain: 0 },
+  { label: 'BG 1', src: new URL('../assets/sounds/ambient-loop-1.mp3', import.meta.url).href, gain: 0.2 },
+  { label: 'BG 2', src: new URL('../assets/sounds/ambient-loop-2.mp3', import.meta.url).href, gain: 0.4 },
+  { label: 'BG 3', src: new URL('../assets/sounds/ambient-loop-3.mp3', import.meta.url).href, gain: 0.4 },
+];
+
+// ✅ EchoScript.AI — AudioOverlay FINAL: Synced, Reliable, Unified
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play, Lightbulb, X } from 'lucide-react';
@@ -13,20 +27,20 @@ const TRACKS = [
 ];
 
 export default function AudioOverlay() {
-  const context = useSound();
-  const audioRefFallback = useRef(null);
-  const isTransitioningRef = useRef(false);
   const {
-    trackIndex = 0,
-    setTrackIndex = () => {},
-    isPlaying = false,
-    setIsPlaying = () => {},
-    volume = 0.5,
-    setVolume = () => {},
-    audioRef = audioRefFallback,
-    enableSound = () => {},
-    isUnlocked = false
-  } = context || {};
+    trackIndex,
+    setTrackIndex,
+    isPlaying,
+    setIsPlaying,
+    volume,
+    setVolume,
+    enableSound,
+    isUnlocked,
+    playAmbientTrack,
+    togglePlay,
+    nextTrack,
+    prevTrack
+  } = useSound();
 
   const [hidden, setHidden] = useState(false);
   const [showTip, setShowTip] = useState(true);
@@ -35,84 +49,11 @@ export default function AudioOverlay() {
   const wrapperRef = useRef(null);
 
   useEffect(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-      audioRef.current.loop = true;
-    }
-    if (!localStorage.getItem("audio-default-volume")) {
-      setVolume(0.5);
-      localStorage.setItem("audio-default-volume", "0.5");
-    }
-    setTrackIndex(0);
-    setIsPlaying(false);
-  }, [audioRef]);
-
-  useEffect(() => {
     if (!window.__introPlayed) setHidden(true);
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
     if (saved.x != null) x.set(saved.x);
     if (saved.y != null) y.set(saved.y);
   }, [x, y]);
-
-  const stopTrack = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = '';
-      audioRef.current.load();
-    }
-  };
-
-  const playTrack = useCallback(async (index) => {
-    if (isTransitioningRef.current) return;
-    const track = TRACKS[index];
-    if (!track || !track.src || !audioRef.current || !isUnlocked) return;
-    try {
-      isTransitioningRef.current = true;
-      stopTrack();
-      audioRef.current.src = track.src;
-      audioRef.current.volume = volume * (track.gain || 0.4);
-      await audioRef.current.play();
-      setTrackIndex(index);
-      setIsPlaying(true);
-    } catch (err) {
-      console.warn(`Failed to play ${track.label}:`, err.message);
-    } finally {
-      isTransitioningRef.current = false;
-    }
-  }, [volume, audioRef, isUnlocked, setTrackIndex, setIsPlaying]);
-
-  const pauseTrack = () => {
-    if (audioRef.current && !audioRef.current.paused) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
-  };
-
-  const togglePlay = async () => {
-    if (isTransitioningRef.current) return;
-    if (!isUnlocked) {
-      enableSound();
-      return;
-    }
-    if (trackIndex === 0) {
-      await playTrack(1);
-    } else {
-      if (isPlaying) pauseTrack();
-      else await playTrack(trackIndex);
-    }
-  };
-
-  const handleNext = async () => {
-    if (isTransitioningRef.current) return;
-    const next = (trackIndex + 1) % TRACKS.length;
-    await playTrack(next);
-  };
-
-  const handlePrev = async () => {
-    if (isTransitioningRef.current) return;
-    const prev = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
-    await playTrack(prev);
-  };
 
   const handleDragEnd = (_, info) => {
     const node = wrapperRef.current;
@@ -126,22 +67,22 @@ export default function AudioOverlay() {
     localStorage.setItem('audio-overlay-pos', JSON.stringify({ x: clampedX, y: clampedY }));
   };
 
-  const currentLabel = TRACKS[trackIndex]?.label || 'OFF';
-
   useEffect(() => {
     const handleKey = async (e) => {
       if (e.key === ' ') {
         e.preventDefault();
         await togglePlay();
       } else if (e.key === 'ArrowRight') {
-        await handleNext();
+        await nextTrack();
       } else if (e.key === 'ArrowLeft') {
-        await handlePrev();
+        await prevTrack();
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [togglePlay, handleNext, handlePrev]);
+  }, [togglePlay, nextTrack, prevTrack]);
+
+  const currentLabel = TRACKS[trackIndex]?.label || 'OFF';
 
   return (
     <AnimatePresence>
@@ -178,7 +119,7 @@ export default function AudioOverlay() {
           )}
           <div className="rounded-2xl backdrop-blur-xl border border-teal-500/40 bg-zinc-900/80 shadow-md shadow-teal-600/20">
             <div className="flex items-center gap-3 px-4 py-2">
-              <Button variant="ghost" size="sm" onClick={handlePrev} icon={<ChevronLeft className="w-4 h-4 text-teal-400" />} />
+              <Button variant="ghost" size="sm" onClick={prevTrack} icon={<ChevronLeft className="w-4 h-4 text-teal-400" />} />
               <Button
                 variant="ghost"
                 size="sm"
@@ -191,7 +132,7 @@ export default function AudioOverlay() {
                   )
                 }
               />
-              <Button variant="ghost" size="sm" onClick={handleNext} icon={<ChevronRight className="w-4 h-4 text-teal-400" />} />
+              <Button variant="ghost" size="sm" onClick={nextTrack} icon={<ChevronRight className="w-4 h-4 text-teal-400" />} />
               <span className="text-[0.6rem] min-w-[32px] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono text-center">
                 {currentLabel}
               </span>
@@ -210,8 +151,6 @@ export default function AudioOverlay() {
                 onChange={(e) => {
                   const v = parseFloat(e.target.value);
                   setVolume(v);
-                  const gain = TRACKS[trackIndex]?.gain || 0.4;
-                  if (audioRef.current) audioRef.current.volume = v * gain;
                 }}
                 className="w-40 h-1 accent-teal-400 cursor-pointer touch-none"
               />
@@ -222,5 +161,3 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
-
-

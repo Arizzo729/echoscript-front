@@ -45,16 +45,22 @@ export default function SignIn() {
       transition={{ duration: 0.4 }}
     >
       <div className="w-full max-w-sm space-y-8 p-8 bg-zinc-900 border border-zinc-700 rounded-2xl shadow-xl">
-        {/* New header */}
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="text-sm text-zinc-400 hover:text-white focus:outline-none mb-2"
+        >
+          ← {t("go_back") || "Go Back"}
+        </button>
+
+        {/* Header */}
         <div className="space-y-2 text-center">
           <h1 className="text-4xl font-extrabold text-white">Welcome Back</h1>
           <p className="text-sm text-zinc-400">
-            {t("signin_subtitle")}{" "}
-            <span className="text-teal-400 font-semibold">EchoScript.AI</span>
+            {t("signin_subtitle")} <span className="text-teal-400 font-semibold">EchoScript.AI</span>
           </p>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="px-4 py-2 text-sm text-red-300 bg-red-500/10 rounded-md text-center">
             {error}
@@ -62,12 +68,8 @@ export default function SignIn() {
         )}
 
         <form onSubmit={handleSignIn} className="space-y-6">
-          {/* Email */}
           <div>
-            <label
-              htmlFor="email"
-              className="block mb-1 text-xs font-medium text-zinc-400"
-            >
+            <label htmlFor="email" className="block mb-1 text-xs font-medium text-zinc-400">
               {t("email_label")}
             </label>
             <div className="relative">
@@ -84,12 +86,8 @@ export default function SignIn() {
             </div>
           </div>
 
-          {/* Password */}
           <div>
-            <label
-              htmlFor="password"
-              className="block mb-1 text-xs font-medium text-zinc-400"
-            >
+            <label htmlFor="password" className="block mb-1 text-xs font-medium text-zinc-400">
               {t("password_label")}
             </label>
             <div className="relative">
@@ -109,16 +107,11 @@ export default function SignIn() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full focus:outline-none focus:ring-0"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5 text-zinc-400 hover:text-white" />
-                ) : (
-                  <Eye className="w-5 h-5 text-zinc-400 hover:text-white" />
-                )}
+                {showPassword ? <EyeOff className="w-5 h-5 text-zinc-400 hover:text-white" /> : <Eye className="w-5 h-5 text-zinc-400 hover:text-white" />}
               </button>
             </div>
           </div>
 
-          {/* Remember & Forgot */}
           <div className="flex items-center justify-between text-xs text-zinc-400">
             <label className="flex items-center gap-2">
               <input
@@ -129,38 +122,25 @@ export default function SignIn() {
               />
               {t("remember_me")}
             </label>
-            <Link
-              to="/reset"
-              className="text-teal-400 hover:underline focus:outline-none"
-            >
+            <Link to="/reset" className="text-teal-400 hover:underline focus:outline-none">
               {t("forgot_password")}
             </Link>
           </div>
 
-          {/* Submit */}
           <motion.button
             type="submit"
             whileTap={{ scale: 0.96 }}
             disabled={loading}
-            className={`w-full py-2 text-sm font-semibold rounded-lg shadow-sm transition ${
-              loading
-                ? "bg-teal-600 cursor-not-allowed"
-                : "bg-teal-500 hover:bg-teal-400"
-            } focus:outline-none focus:ring-2 focus:ring-teal-400`}
+            className={`w-full py-2 text-sm font-semibold rounded-lg shadow-sm transition ${loading ? "bg-teal-600 cursor-not-allowed" : "bg-teal-500 hover:bg-teal-400"} focus:outline-none focus:ring-2 focus:ring-teal-400`}
           >
             {loading ? t("signing_in") : t("sign_in_button")}
           </motion.button>
         </form>
 
-        {/* Sign Up Link */}
         <p className="text-center text-xs text-zinc-500">
-          {t("no_account")}{" "}
-          <Link to="/signup" className="text-teal-400 font-medium hover:underline">
-            {t("sign_up_link")}
-          </Link>
+          {t("no_account")} <Link to="/signup" className="text-teal-400 font-medium hover:underline">{t("sign_up_link")}</Link>
         </p>
       </div>
     </motion.div>
   );
 }
-

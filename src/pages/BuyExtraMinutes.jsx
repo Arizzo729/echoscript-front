@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gift, Trash2, Plus, Minus } from "lucide-react";
+import { Gift, Trash2, Plus, Minus, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import {
   Card,
@@ -11,7 +12,6 @@ import {
 } from "../components/ui/Card";
 import { useSound } from "../context/SoundContext";
 
-// Clean, optimized pricing with even bonus intervals and upsell-friendly logic
 const bundles = [
   { id: 1, price: 0.99, minutes: 5, bonus: 0 },
   { id: 2, price: 3.99, minutes: 25, bonus: 15 },
@@ -25,14 +25,12 @@ export default function BuyExtraMinutes() {
   const [cart, setCart] = useState({});
   const [gifting, setGifting] = useState(false);
   const [recipient, setRecipient] = useState("");
-    const { playClick } = useSound();;
+  const { playClick } = useSound();
+  const navigate = useNavigate();
 
   const addToCart = (id) => {
-  playClick();
-    setCart((prev) => ({
-      ...prev,
-      [id]: (prev[id] || 0) + 1,
-    }));
+    playClick();
+    setCart((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
   };
 
   const removeFromCart = (id) => {
@@ -44,7 +42,7 @@ export default function BuyExtraMinutes() {
   };
 
   const changeQuantity = (id, delta) => {
-      playClick();
+    playClick();
     setCart((prev) => {
       const currentQty = prev[id] || 0;
       const newQty = currentQty + delta;
@@ -76,6 +74,17 @@ export default function BuyExtraMinutes() {
 
   return (
     <div className="flex flex-col lg:flex-row max-w-7xl mx-auto px-6 py-12 gap-10">
+      {/* Return Button */}
+      <div className="mb-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-sm text-zinc-400 hover:text-white focus:outline-none"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Return to previous page
+        </button>
+      </div>
+
       {/* Bundles Grid */}
       <section className="flex-1 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {bundles.map((bundle) => (
@@ -192,7 +201,6 @@ export default function BuyExtraMinutes() {
               )}
             </AnimatePresence>
 
-            {/* Totals */}
             <div className="pt-3 border-t border-zinc-700 text-sm text-white space-y-1">
               <div className="flex justify-between">
                 <span>Total Minutes:</span>
@@ -204,14 +212,12 @@ export default function BuyExtraMinutes() {
               </div>
             </div>
 
-            {/* Suggested Upsell */}
             {suggestedId && suggestedId <= bundles.length && (
               <div className="mt-4 text-xs text-teal-300 italic">
                 Consider upgrading to a larger bundle for more value!
               </div>
             )}
 
-            {/* Gift Option */}
             <div className="flex items-center gap-2 pt-2">
               <input
                 id="gift"
@@ -244,7 +250,6 @@ export default function BuyExtraMinutes() {
               </motion.div>
             )}
 
-            {/* Checkout */}
             <Button
               size="lg"
               className="w-full bg-teal-600 hover:bg-teal-500 mt-4"
@@ -255,7 +260,6 @@ export default function BuyExtraMinutes() {
               Checkout
             </Button>
 
-            {/* Empty Cart */}
             {Object.keys(cart).length > 0 && (
               <button
                 onClick={emptyCart}

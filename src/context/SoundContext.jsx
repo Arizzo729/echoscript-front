@@ -1,3 +1,4 @@
+// ✅ EchoScript.AI — SoundContext FINAL: Synced, Reliable, Locked
 import React, {
   createContext,
   useContext,
@@ -9,6 +10,7 @@ import React, {
 } from 'react';
 
 const SoundContext = createContext();
+const transitionLock = { current: false };
 
 export function SoundProvider({ children, initialVolume = 0.4 }) {
   const [isMuted, setIsMuted] = useState(true);
@@ -27,7 +29,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     new URL('../assets/sounds/ambient-loop-1.mp3', import.meta.url).href,
     new URL('../assets/sounds/ambient-loop-2.mp3', import.meta.url).href,
     new URL('../assets/sounds/ambient-loop-3.mp3', import.meta.url).href,
-    null, // OFF
+    null,
   ], []);
 
   const clickSoundUrl = useMemo(
@@ -81,15 +83,19 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
   }, []);
 
   const playAmbientTrack = useCallback((index) => {
+    if (transitionLock.current) return;
+    transitionLock.current = true;
+
     const audio = mainAudioRef.current;
     const src = ambientTracks[index];
 
     if (!src || isMuted || !isUnlocked) {
       fadeTo(audio, 0);
       setTimeout(() => audio.pause(), 600);
-      setTrackIndex(3); // OFF
+      setTrackIndex(3);
       setNowPlaying('Off');
       setIsPlaying(false);
+      transitionLock.current = false;
       return;
     }
 
@@ -107,42 +113,47 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     }).catch((err) => {
       console.warn('Autoplay blocked:', err);
       setIsPlaying(false);
+    }).finally(() => {
+      transitionLock.current = false;
     });
   }, [ambientTracks, isMuted, isUnlocked, volume, fadeTo]);
 
   const togglePlay = useCallback(() => {
+    if (transitionLock.current) return;
+    transitionLock.current = true;
+
     const audio = mainAudioRef.current;
     const src = ambientTracks[trackIndex];
-    if (!audio || !src || isMuted || !isUnlocked) return;
+    if (!audio || !src || isMuted || !isUnlocked) {
+      transitionLock.current = false;
+      return;
+    }
 
     if (audio.paused) {
       audio.play().then(() => {
         fadeTo(audio, volume * 0.2);
         setIsPlaying(true);
-      }).catch((err) => console.warn('Play failed', err));
+      }).catch((err) => console.warn('Play failed', err)).finally(() => {
+        transitionLock.current = false;
+      });
     } else {
       fadeTo(audio, 0);
       setTimeout(() => audio.pause(), 400);
       setIsPlaying(false);
+      transitionLock.current = false;
     }
   }, [ambientTracks, trackIndex, isMuted, isUnlocked, volume, fadeTo]);
 
   const nextTrack = () => {
-    if (trackIndex === 3) {
-      playAmbientTrack(0);
-    } else {
-      const next = trackIndex === 2 ? 0 : trackIndex + 1;
-      playAmbientTrack(next);
-    }
+    if (transitionLock.current) return;
+    const next = trackIndex === 3 ? 0 : (trackIndex + 1) % 3;
+    playAmbientTrack(next);
   };
 
   const prevTrack = () => {
-    if (trackIndex === 3) {
-      playAmbientTrack(2);
-    } else {
-      const prev = trackIndex === 0 ? 2 : trackIndex - 1;
-      playAmbientTrack(prev);
-    }
+    if (transitionLock.current) return;
+    const prev = trackIndex === 3 ? 2 : (trackIndex - 1 + 3) % 3;
+    playAmbientTrack(prev);
   };
 
   const toggleAmbient = () => {
@@ -212,6 +223,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
       trackIndex,
       setTrackIndex,
       isPlaying,
+      setIsPlaying,
       playAmbientTrack,
       togglePlay,
       nextTrack,
