@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSound } from '../context/SoundContext';
+import Button from './ui/Button'; // adjust this path if your Button lives elsewhere
 
 export default function AudioOverlay() {
   const {
@@ -18,6 +19,7 @@ export default function AudioOverlay() {
     'BG 3 — Echo Drift',
     'OFF',
   ];
+
   const isOff = trackIndex >= trackLabels.length - 1;
   const [minimized, setMinimized] = useState(false);
   const [volumeVisible, setVolumeVisible] = useState(false);
@@ -65,12 +67,8 @@ export default function AudioOverlay() {
       window.addEventListener('mouseup', onMouseUp);
     };
 
-    if (node && !minimized) {
-      node.addEventListener('mousedown', onMouseDown);
-    }
-    return () => {
-      node?.removeEventListener('mousedown', onMouseDown);
-    };
+    if (node && !minimized) node.addEventListener('mousedown', onMouseDown);
+    return () => node?.removeEventListener('mousedown', onMouseDown);
   }, [position, minimized]);
 
   const handlePlayToggle = () => (isOff ? playAmbientTrack(0) : togglePlay());
@@ -96,36 +94,43 @@ export default function AudioOverlay() {
           transition={{ type: 'spring', stiffness: 300, damping: 22 }}
           className="fixed z-[9999] w-[230px] rounded-xl shadow-lg border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl px-4 py-3 flex flex-col items-center gap-3 select-none cursor-move"
         >
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleMinimize}
-            className="absolute top-2 right-2 text-teal-400 hover:text-white transition"
             aria-label="Minimize"
-          >
-            <Minus className="w-4 h-4" />
-          </button>
+            className="absolute top-2 right-2"
+            icon={<Minus className="w-4 h-4 text-teal-400" />}
+          />
 
           <div className="flex items-center justify-center gap-3 mt-1">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={prevTrack}
-              className="p-1.5 rounded-full text-teal-400 hover:text-white transition focus:outline-none"
               aria-label="Previous"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
+              icon={<ChevronLeft className="w-5 h-5 text-teal-400" />}
+            />
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handlePlayToggle}
-              className="p-1.5 rounded-full text-teal-400 hover:text-white transition focus:outline-none"
               aria-label="Play"
-            >
-              {isPlaying && !isOff ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-            </button>
-            <button
+              icon={
+                isPlaying && !isOff ? (
+                  <Pause className="w-5 h-5 text-teal-400" />
+                ) : (
+                  <Play className="w-5 h-5 text-teal-400" />
+                )
+              }
+            />
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={nextTrack}
-              className="p-1.5 rounded-full text-teal-400 hover:text-white transition focus:outline-none"
               aria-label="Next"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+              icon={<ChevronRight className="w-5 h-5 text-teal-400" />}
+            />
           </div>
 
           <span className="text-[0.65rem] text-teal-200 bg-zinc-800/60 px-3 py-1 rounded-full font-mono text-center">
@@ -133,13 +138,19 @@ export default function AudioOverlay() {
           </span>
 
           <div className="relative w-full flex justify-center items-center">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setVolumeVisible(!volumeVisible)}
-              className="p-1.5 rounded-full text-teal-400 hover:text-white transition focus:outline-none"
               aria-label="Volume"
-            >
-              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-            </button>
+              icon={
+                isMuted ? (
+                  <VolumeX className="w-5 h-5 text-teal-400" />
+                ) : (
+                  <Volume2 className="w-5 h-5 text-teal-400" />
+                )
+              }
+            />
             {volumeVisible && (
               <div className="absolute bottom-full mb-2 w-28">
                 <input
@@ -163,6 +174,7 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
 
 
 
