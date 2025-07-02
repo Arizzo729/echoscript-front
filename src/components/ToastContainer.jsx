@@ -9,60 +9,35 @@ import React, {
   useEffect,
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Info,
-} from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle, Info } from "lucide-react";
 
-// Toast types and context
-type ToastType = "success" | "error" | "info";
+// Create context
+const ToastContext = createContext();
 
-type ToastAction = {
-  label: string;
-  callback: (meta?: any) => void;
-  meta?: any;
-};
-
-type Toast = {
-  id: string;
-  message: string;
-  type: ToastType;
-  duration: number;
-  action?: ToastAction;
-};
-
-type ToastContextProps = {
-  addToast: (toast: Omit<Toast, "id">) => void;
-  removeToast: (id: string) => void;
-};
-
-const ToastContext = createContext<ToastContextProps | undefined>(undefined);
-
-export const useToast = (): ToastContextProps["addToast"] => {
+// Hook to use toast
+export const useToast = () => {
   const ctx = useContext(ToastContext);
   if (!ctx) throw new Error("useToast must be used within ToastProvider");
   return ctx.addToast;
 };
 
-// Position presets
-const POSITIONS: Record<string, string> = {
+// Preset positions
+const POSITIONS = {
   "top-right": "fixed top-4 right-4 flex-col items-end",
   "top-left": "fixed top-4 left-4 flex-col items-start",
   "bottom-right": "fixed bottom-4 right-4 flex-col items-end",
   "bottom-left": "fixed bottom-4 left-4 flex-col items-start",
 };
 
-// Variants
-const VARIANTS: Record<ToastType, { icon: React.ReactNode; border: string }> = {
+// Icon & border by type
+const VARIANTS = {
   success: { icon: <CheckCircle className="text-green-400" />, border: "border-green-500" },
-  error: { icon: <AlertCircle className="text-red-400" />, border: "border-red-500" },
-  info: { icon: <Info className="text-blue-400" />, border: "border-blue-500" },
+  error:   { icon: <AlertCircle className="text-red-400" />, border: "border-red-500" },
+  info:    { icon: <Info className="text-blue-400" />, border: "border-blue-500" },
 };
 
 // Reducer
-function toastReducer(state: Toast[], action: { type: "ADD" | "REMOVE"; payload: any }) {
+function toastReducer(state, action) {
   switch (action.type) {
     case "ADD":
       return [...state, action.payload];
@@ -73,19 +48,12 @@ function toastReducer(state: Toast[], action: { type: "ADD" | "REMOVE"; payload:
   }
 }
 
-export const ToastProvider = ({
-  children,
-  limit = 5,
-  position = "top-right",
-}: {
-  children: React.ReactNode;
-  limit?: number;
-  position?: keyof typeof POSITIONS;
-}) => {
-  const [toasts, dispatch] = useReducer(toastReducer, [] as Toast[]);
-  const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+// Provider component
+function ToastProvider({ children, limit = 5, position = "top-right" }) {
+  const [toasts, dispatch] = useReducer(toastReducer, []);
+  const timers = useRef({});
 
-  const removeToast = useCallback((id: string) => {
+  const removeToast = useCallback((id) => {
     dispatch({ type: "REMOVE", payload: id });
     if (timers.current[id]) {
       clearTimeout(timers.current[id]);
@@ -94,14 +62,13 @@ export const ToastProvider = ({
   }, []);
 
   const addToast = useCallback(
-    (opts: Omit<Toast, "id">) => {
+    ({ message, type = "info", duration = 4000, action }) => {
       const id = Date.now().toString() + "-" + Math.random().toString();
-      const toast: Toast = { id, ...opts };
-      dispatch({ type: "ADD", payload: toast });
+      dispatch({ type: "ADD", payload: { id, message, type, duration, action } });
       if (timers.current[id]) clearTimeout(timers.current[id]);
-      timers.current[id] = setTimeout(() => removeToast(id), opts.duration);
+      timers.current[id] = setTimeout(() => removeToast(id), duration);
 
-      // Enforce limit
+      // enforce limit
       if (limit && toasts.length >= limit) {
         const [oldest] = toasts;
         if (oldest) removeToast(oldest.id);
@@ -110,12 +77,8 @@ export const ToastProvider = ({
     [limit, toasts, removeToast]
   );
 
-  // Clear timers on unmount
-  useEffect(() => {
-    return () => {
-      Object.values(timers.current).forEach(clearTimeout);
-    };
-  }, []);
+  // cleanup on unmount
+  useEffect(() => () => Object.values(timers.current).forEach(clearTimeout), []);
 
   return (
     <ToastContext.Provider value={{ addToast, removeToast }}>
@@ -123,7 +86,7 @@ export const ToastProvider = ({
       <div className={POSITIONS[position] + " z-50 space-y-3 p-2 max-w-sm"}>
         <AnimatePresence>
           {toasts.map((t) => {
-            const variant = VARIANTS[t.type];
+            const v = VARIANTS[t.type];
             return (
               <motion.div
                 key={t.id}
@@ -132,23 +95,18 @@ export const ToastProvider = ({
                 exit={{ opacity: 0, x: 50 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 onMouseEnter={() => clearTimeout(timers.current[t.id])}
-                onMouseLeave={() => {
-                  timers.current[t.id] = setTimeout(() => removeToast(t.id), t.duration);
-                }}
+                onMouseLeave={() => { timers.current[t.id] = setTimeout(() => removeToast(t.id), t.duration); }}
                 role="status"
                 className={
                   "flex items-start gap-3 p-4 bg-gray-900 border-l-4 shadow-md backdrop-blur-sm rounded-lg " +
-                  variant.border
+                  v.border
                 }
               >
-                {variant.icon}
+                {v.icon}
                 <div className="flex-1 text-sm text-white font-medium">{t.message}</div>
                 {t.action && (
                   <button
-                    onClick={() => {
-                      t.action.callback(t.action.meta);
-                      removeToast(t.id);
-                    }}
+                    onClick={() => { t.action.callback(t.action.meta); removeToast(t.id); }}
                     className="ml-2 px-3 py-1 text-xs font-semibold rounded hover:bg-gray-800 transition"
                   >
                     {t.action.label}
@@ -168,7 +126,10 @@ export const ToastProvider = ({
       </div>
     </ToastContext.Provider>
   );
-};
+}
+
+// default export for Layout import
+export default ToastProvider;
 ```
 
 
