@@ -1,7 +1,7 @@
 // src/components/SignUp.jsx
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../context/AuthContext";
@@ -38,7 +38,7 @@ export default function SignUp() {
     setLoading(true);
     try {
       await signUp({ email, password });
-      navigate("/dashboard");
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message || t("signup_error_general"));
     } finally {
@@ -53,14 +53,15 @@ export default function SignUp() {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="w-full max-w-sm space-y-8 p-8 bg-zinc-900 border border-zinc-700 rounded-2xl shadow-xl">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="text-sm text-zinc-400 hover:text-white focus:outline-none mb-2"
+      <div className="w-full max-w-sm space-y-6 p-8 bg-zinc-900 border border-zinc-700 rounded-2xl shadow-xl">
+        {/* Home Link */}
+        <Link
+          to="/"
+          className="flex items-center text-sm font-medium text-teal-400 hover:underline focus:outline-none mb-4"
         >
-          ← {t("go_back") || "Go Back"}
-        </button>
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Home
+        </Link>
 
         {/* Header */}
         <div className="space-y-2 text-center">
@@ -79,6 +80,7 @@ export default function SignUp() {
         )}
 
         <form onSubmit={handleSignUp} className="space-y-6">
+          {/* Email Field */}
           <div>
             <label htmlFor="email" className="block mb-1 text-xs font-medium text-zinc-400">
               {t("email_label")}
@@ -98,6 +100,7 @@ export default function SignUp() {
             </div>
           </div>
 
+          {/* Password Field */}
           <div>
             <label htmlFor="password" className="block mb-1 text-xs font-medium text-zinc-400">
               {t("password_label")}
@@ -125,6 +128,7 @@ export default function SignUp() {
             </div>
           </div>
 
+          {/* Confirm Password Field */}
           <div>
             <label htmlFor="confirm" className="block mb-1 text-xs font-medium text-zinc-400">
               {t("confirm_password_label")}
@@ -144,6 +148,7 @@ export default function SignUp() {
             </div>
           </div>
 
+          {/* Submit */}
           <motion.button
             type="submit"
             whileTap={{ scale: 0.96 }}
@@ -154,8 +159,15 @@ export default function SignUp() {
           </motion.button>
         </form>
 
-        <p className="text-center text-xs text-zinc-500">
-          {t("already_have_account")} <Link to="/signin" className="text-teal-400 font-medium hover:underline focus:outline-none">{t("sign_in_link")}</Link>
+        {/* Footer Link */}
+        <p className="text-center text-xs text-zinc-500 mt-4">
+          Already have an account?{' '}
+          <Link
+            to="/signin"
+            className="font-medium text-teal-400 hover:underline focus:outline-none"
+          >
+            Sign in here.
+          </Link>
         </p>
       </div>
     </motion.div>

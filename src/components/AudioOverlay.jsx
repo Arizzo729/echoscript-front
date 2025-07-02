@@ -1,6 +1,6 @@
-// AudioOverlay.jsx
+// src/components/AudioOverlay.jsx
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useDragControls } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play, Lightbulb, X } from 'lucide-react';
 import Button from './ui/Button';
 import { useSound } from '../context/SoundContext';
@@ -13,29 +13,22 @@ const TRACKS = [
 ];
 
 export default function AudioOverlay() {
-  const {
-    trackIndex,
-    isPlaying,
-    volume,
-    setVolume,
-    playAmbientTrack,
-    togglePlay,
-    nextTrack,
-    prevTrack,
-  } = useSound();
+  const { trackIndex, isPlaying, volume, setVolume, playAmbientTrack, togglePlay } = useSound();
   const [showTip, setShowTip] = useState(true);
+  const [busy, setBusy] = useState(false);
   const x = useMotionValue(40);
   const y = useMotionValue(80);
+  const controls = useDragControls();
   const wrapperRef = useRef(null);
 
-  // Restore position
+  // Restore saved position
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
     if (saved.x != null) x.set(saved.x);
     if (saved.y != null) y.set(saved.y);
   }, [x, y]);
 
-  // Save after drag
+  // Persist position on drag end
   const handleDragEnd = (_, info) => {
     const node = wrapperRef.current;
     if (!node) return;
@@ -53,18 +46,39 @@ export default function AudioOverlay() {
     const onKey = (e) => {
       if (e.key === ' ') {
         e.preventDefault();
-        if (trackIndex === 0) playAmbientTrack(1);
-        else togglePlay();
-      } else if (e.key === 'ArrowRight') nextTrack();
-      else if (e.key === 'ArrowLeft') prevTrack();
+        handlePlayClick();
+      } else if (e.key === 'ArrowRight') handleNext();
+      else if (e.key === 'ArrowLeft') handlePrev();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [trackIndex, playAmbientTrack, togglePlay, nextTrack, prevTrack]);
+  }, [trackIndex, isPlaying]);
 
+  // Play/pause toggle
   const handlePlayClick = () => {
+    if (busy) return;
+    setBusy(true);
     if (trackIndex === 0) playAmbientTrack(1);
     else togglePlay();
+    setTimeout(() => setBusy(false), 200);
+  };
+
+  // Next track and auto-play
+  const handleNext = () => {
+    if (busy) return;
+    setBusy(true);
+    const nextIdx = (trackIndex + 1) % TRACKS.length;
+    playAmbientTrack(nextIdx);
+    setTimeout(() => setBusy(false), 300);
+  };
+
+  // Previous track and auto-play
+  const handlePrev = () => {
+    if (busy) return;
+    setBusy(true);
+    const prevIdx = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
+    playAmbientTrack(prevIdx);
+    setTimeout(() => setBusy(false), 300);
   };
 
   const currentLabel = TRACKS[trackIndex]?.label;
@@ -73,61 +87,84 @@ export default function AudioOverlay() {
     <AnimatePresence>
       <motion.div
         ref={wrapperRef}
-        drag
-        dragMomentum={false}
-        dragElastic={0}
-        style={{ x, y }}
+        drag="xy"
+        dragControls={controls}
+        dragListener={false}
         onDragEnd={handleDragEnd}
+        style={{ x, y }}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
         transition={{ type: 'spring', stiffness: 300, damping: 24 }}
         className="fixed z-[9999] flex flex-col items-center gap-1 select-none drop-shadow-xl"
-        onPointerDown={(e) => {
-          const tag = e.target.tagName.toLowerCase();
-          if (['button', 'input', 'svg', 'path'].includes(tag)) e.stopPropagation();
-        }}
       >
         {showTip && (
           <div className="flex items-start gap-2 px-3 py-2 mb-1 bg-zinc-800/90 border border-teal-500/30 text-white text-xs rounded-md">
             <Lightbulb className="w-3.5 h-3.5 text-teal-300 mt-0.5" />
-            <span className="text-[0.65rem] leading-tight">
-              Tip: Use ← → to switch, Space to play/pause.
-            </span>
+            <span className="text-[0.65rem] leading-tight">Tip: Use ← → to switch, Space to play/pause.</span>
             <button
               onClick={() => setShowTip(false)}
+              onPointerDown={(e) => e.stopPropagation()}
               className="ml-auto p-0 bg-transparent text-white hover:opacity-75 focus:outline-none"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
-        <div className="rounded-2xl backdrop-blur-xl border border-teal-500/40 bg-zinc-900/80 shadow-md">
+
+        <div
+          className="rounded-2xl backdrop-blur-xl border border-teal-500/40 bg-zinc-900/80 shadow-md"
+          onPointerDown={(e) => {
+            const tag = e.target.tagName.toLowerCase();
+            if (['button', 'input', 'svg', 'path'].includes(tag)) {
+              e.stopPropagation();
+            } else {
+              controls.start(e);
+            }
+          }}
+        >
           <div className="flex items-center gap-3 px-4 py-2">
-            <Button variant="ghost" size="sm" onClick={prevTrack} icon={<ChevronLeft className="w-4 h-4 text-teal-400" />} />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handlePrev}
+              disabled={busy}
+              onPointerDown={(e) => e.stopPropagation()}
+              icon={<ChevronLeft className="w-4 h-4 text-teal-400" />}
+            />
             <Button
               variant="ghost"
               size="sm"
               onClick={handlePlayClick}
-              icon={isPlaying && trackIndex !== 0 ? <Pause className="w-4 h-4 text-teal-400" /> : <Play className="w-4 h-4 text-teal-400" />}
+              disabled={busy}
+              onPointerDown={(e) => e.stopPropagation()}
+              icon={isPlaying ? <Pause className="w-4 h-4 text-teal-400" /> : <Play className="w-4 h-4 text-teal-400" />}
             />
-            <Button variant="ghost" size="sm" onClick={nextTrack} icon={<ChevronRight className="w-4 h-4 text-teal-400" />} />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleNext}
+              disabled={busy}
+              onPointerDown={(e) => e.stopPropagation()}
+              icon={<ChevronRight className="w-4 h-4 text-teal-400" />}
+            />
             <span className="text-[0.6rem] min-w-[32px] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono text-center">
               {currentLabel}
             </span>
           </div>
+
           <div
             className="w-full flex justify-center pb-2 px-4"
             onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
           >
             <input
               type="range"
               min={0}
-              max={1}
-              step={0.01}
-              value={volume}
-              onChange={(e) => setVolume(parseFloat(e.target.value))}
+              max={100}
+              step={1}
+              value={volume * 100}
+              onChange={(e) => setVolume(parseFloat(e.target.value) / 100)}
+              onPointerDown={(e) => e.stopPropagation()}
               className="w-40 h-1 accent-teal-400 cursor-pointer"
             />
           </div>
@@ -136,4 +173,5 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
 
