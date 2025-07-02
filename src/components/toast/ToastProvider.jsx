@@ -87,7 +87,7 @@ export const ToastProvider = ({
 
   const addToast = useCallback(
     (opts: Omit<Toast, "id">) => {
-      const id = `${Date.now()}-${Math.random()}`;
+      const id = `;{Date.now()}-;{Math.random()}`;
       const toast: Toast = { id, ...opts };
       dispatch({ type: "ADD", payload: toast });
       if (timers.current[id]) clearTimeout(timers.current[id]);
