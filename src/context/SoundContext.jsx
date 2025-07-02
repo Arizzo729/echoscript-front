@@ -35,7 +35,6 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     []
   );
 
-  // 🧠 Load saved preferences
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('sound-settings') || '{}');
     setIsMuted(saved.isMuted ?? true);
@@ -88,7 +87,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     if (!src || isMuted || !isUnlocked) {
       fadeTo(audio, 0);
       setTimeout(() => audio.pause(), 600);
-      setTrackIndex(3); // OFF
+      setTrackIndex(3);
       setNowPlaying('Off');
       setIsPlaying(false);
       return;
@@ -128,28 +127,19 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     }
   }, [ambientTracks, trackIndex, isMuted, isUnlocked, volume, fadeTo]);
 
-  const nextTrack = () => {
-    const next = trackIndex >= ambientTracks.length - 1 ? 0 : trackIndex + 1;
-    playAmbientTrack(next);
-  };
-
-  const prevTrack = () => {
-    const prev = trackIndex <= 0 ? ambientTracks.length - 1 : trackIndex - 1;
-    playAmbientTrack(prev);
-  };
+  const nextTrack = () => playAmbientTrack((trackIndex + 1) % ambientTracks.length);
+  const prevTrack = () => playAmbientTrack((trackIndex - 1 + ambientTracks.length) % ambientTracks.length);
 
   const toggleAmbient = () => {
     const next = (trackIndex + 1) % ambientTracks.length;
     playAmbientTrack(next);
-    setIsMuted(next === ambientTracks.length - 1); // OFF = muted
+    setIsMuted(next === ambientTracks.length - 1);
   };
 
   const enableSound = () => {
     setIsMuted(false);
     setIsUnlocked(true);
-    if (trackIndex < ambientTracks.length - 1) {
-      playAmbientTrack(trackIndex);
-    }
+    if (trackIndex < ambientTracks.length - 1) playAmbientTrack(trackIndex);
   };
 
   const disableSound = () => {
@@ -158,13 +148,11 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     fadeTo(audio, 0);
     setTimeout(() => audio.pause(), 400);
     setIsPlaying(false);
-    setTrackIndex(ambientTracks.length - 1); // OFF
+    setTrackIndex(ambientTracks.length - 1);
     setNowPlaying('Off');
   };
 
-  const toggleMute = () => {
-    isMuted ? enableSound() : disableSound();
-  };
+  const toggleMute = () => isMuted ? enableSound() : disableSound();
 
   const playClick = () => {
     const click = clickRef.current;
@@ -178,9 +166,7 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
   useEffect(() => {
     const unlock = () => {
       setIsUnlocked(true);
-      if (!isMuted && trackIndex < ambientTracks.length - 1) {
-        playAmbientTrack(trackIndex);
-      }
+      if (!isMuted && trackIndex < ambientTracks.length - 1) playAmbientTrack(trackIndex);
     };
     window.addEventListener('click', unlock, { once: true });
     window.addEventListener('keydown', unlock, { once: true });
