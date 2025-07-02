@@ -1,4 +1,3 @@
-```jsx
 // src/components/ToastContainer.jsx
 import React, { useContext } from 'react';
 import { createPortal } from 'react-dom';
@@ -6,7 +5,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react';
 import { ToastContext } from './toast/ToastProvider';
 
-// Preset positions
 const POSITIONS = {
   'top-right': 'fixed top-4 right-4 flex-col items-end',
   'top-left': 'fixed top-4 left-4 flex-col items-start',
@@ -14,39 +12,38 @@ const POSITIONS = {
   'bottom-left': 'fixed bottom-4 left-4 flex-col items-start',
 };
 
-// Variant icons and borders
 const VARIANTS = {
   success: { icon: <CheckCircle className="text-green-400" />, border: 'border-green-500' },
   error:   { icon: <AlertCircle className="text-red-400" />, border: 'border-red-500' },
   info:    { icon: <Info className="text-blue-400" />, border: 'border-blue-500' },
 };
 
-export default function ToastContainer({ position = 'top-right' }) {
+function ToastContainer({ position = 'top-right' }) {
   const ctx = useContext(ToastContext);
   if (!ctx) return null;
   const { toasts = [], removeToast } = ctx;
-  if (!toasts.length) return null;
+  if (toasts.length === 0) return null;
 
   return createPortal(
     <div className={POSITIONS[position] + ' z-50 space-y-3 p-2 max-w-sm pointer-events-none'}>
       <AnimatePresence>
-        {toasts.map((t) => {
-          const v = VARIANTS[t.type] || VARIANTS.info;
+        {toasts.map(({ id, type, message }) => {
+          const v = VARIANTS[type] || VARIANTS.info;
           return (
             <motion.div
-              key={t.id}
+              key={id}
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              onClick={() => removeToast(t.id)}
+              onClick={() => removeToast(id)}
               role="status"
               className={'pointer-events-auto flex items-start gap-3 p-4 bg-gray-900 border-l-4 shadow-md backdrop-blur-sm rounded-lg ' + v.border}
             >
               {v.icon}
-              <div className="flex-1 text-sm text-white font-medium">{t.message}</div>
+              <div className="flex-1 text-sm text-white font-medium">{message}</div>
               <button
-                onClick={() => removeToast(t.id)}
+                onClick={e => { e.stopPropagation(); removeToast(id); }}
                 aria-label="Dismiss notification"
                 className="text-gray-400 hover:text-white transition"
               >
@@ -60,5 +57,7 @@ export default function ToastContainer({ position = 'top-right' }) {
     document.body
   );
 }
-```
+
+export default ToastContainer;
+
 

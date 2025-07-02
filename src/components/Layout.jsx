@@ -1,63 +1,60 @@
 // src/components/Layout.jsx
-import React, { 
+import React, {
   useState,
   useEffect,
   createContext,
   useMemo,
   Suspense,
   lazy,
-  useTransition
-} from "react";
-import { Outlet, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import NProgress from "nprogress";
-import "nprogress/nprogress.css";
-import ErrorBoundary from "./ErrorBoundary";
-import IntroVideo from "./IntroVideo";
-import AudioOverlay from "./AudioOverlay";
-import ToastContainer from "./ToastContainer";
-import MobileBottomNav from "./MobileBottomNav";
+  useTransition,
+} from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
+import ErrorBoundary from './ErrorBoundary';
+import IntroVideo from './IntroVideo';
+import AudioOverlay from './AudioOverlay';
+import ToastContainer from './ToastContainer';
+import MobileBottomNav from './MobileBottomNav';
 
-// Lazy-loaded components
-const Header = lazy(() => import("./Header"));
-const Sidebar = lazy(() => import("./Sidebar"));
+const Header = lazy(() => import('./Header'));
+const Sidebar = lazy(() => import('./Sidebar'));
 
-// Theme context
-export const ThemeContext = createContext({ theme: "light", toggleTheme: () => {} });
+export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} });
 
 export default function Layout() {
   const location = useLocation();
   const [showIntro, setShowIntro] = useState(true);
   const [theme, setTheme] = useState(() => {
-    const stored = localStorage.getItem("theme");
+    const stored = typeof window !== 'undefined' && localStorage.getItem('theme');
     if (stored) return stored;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [isPending, startTransition] = useTransition();
 
-  // Route change progress
   useEffect(() => {
-    NProgress.configure({ showSpinner: false, easing: "ease", speed: 400 });
+    NProgress.configure({ showSpinner: false, easing: 'ease', speed: 400 });
     NProgress.start();
     startTransition(() => {});
     return () => NProgress.done();
   }, [location.pathname]);
 
-  // Theme persistence
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("theme", theme);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Lock scroll while intro plays
   useEffect(() => {
-    document.body.style.overflow = showIntro ? "hidden" : "";
+    document.body.style.overflow = showIntro ? 'hidden' : '';
   }, [showIntro]);
 
   const handleIntroFinish = () => setShowIntro(false);
-  const toggleTheme = () => setTheme(prev => (prev === "dark" ? "light" : "dark"));
+  const toggleTheme = () => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   const toggleDrawer = () => setDrawerOpen(prev => !prev);
   const collapseSidebar = () => setSidebarCollapsed(prev => !prev);
 
@@ -65,17 +62,12 @@ export default function Layout() {
 
   return (
     <ThemeContext.Provider value={themeValue}>
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only fixed top-2 left-2 p-2 bg-teal-500 text-white rounded"
-      >
+      <a href="#main-content" className="sr-only focus:not-sr-only fixed top-2 left-2 p-2 bg-teal-500 text-white rounded">
         Skip to content
       </a>
 
       <AnimatePresence>
-        {showIntro && (
-          <IntroVideo key="intro" src="/videos/intro.mp4" onFinish={handleIntroFinish} />
-        )}
+        {showIntro && <IntroVideo key="intro" src="/videos/intro.mp4" onFinish={handleIntroFinish} />}
       </AnimatePresence>
 
       {!showIntro && (
@@ -86,9 +78,7 @@ export default function Layout() {
               drawerOpen={drawerOpen}
               collapseSidebar={collapseSidebar}
               sidebarCollapsed={sidebarCollapsed}
-            >
-              {/* optional header children */}
-            </Header>
+            />
           </Suspense>
 
           <div className="flex flex-1 overflow-hidden">
@@ -119,11 +109,12 @@ export default function Layout() {
           </div>
 
           <AudioOverlay />
-          <ToastContainer />
+          <ToastContainer position="top-right" />
           <MobileBottomNav className="md:hidden" />
         </div>
       )}
     </ThemeContext.Provider>
   );
 }
+
 
