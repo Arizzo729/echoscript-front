@@ -1,17 +1,3 @@
-// ✅ EchoScript.AI — AudioOverlay FINAL: Stable, Synced, Styled, Functional
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Pause, Play, Lightbulb, X } from 'lucide-react';
-import Button from './ui/Button';
-import { useSound } from '../context/SoundContext';
-
-const TRACKS = [
-  { label: 'OFF', src: null, gain: 0 },
-  { label: 'BG 1', src: new URL('../assets/sounds/ambient-loop-1.mp3', import.meta.url).href, gain: 0.2 },
-  { label: 'BG 2', src: new URL('../assets/sounds/ambient-loop-2.mp3', import.meta.url).href, gain: 0.4 },
-  { label: 'BG 3', src: new URL('../assets/sounds/ambient-loop-3.mp3', import.meta.url).href, gain: 0.4 },
-];
-
 // ✅ EchoScript.AI — AudioOverlay FINAL: Synced, Reliable, Unified
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
