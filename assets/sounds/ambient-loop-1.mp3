@@ -1,0 +1,41 @@
+import React, { useRef, useState } from "react";
+import BacklitButton from "./BacklitButton";
+
+export default function AmbientAudioButton() {
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const toggleAmbient = () => {
+    const audio = audioRef.current;
+
+    if (!audio) return;
+
+    if (audio.paused) {
+      audio.play().then(() => {
+        setIsPlaying(true);
+      }).catch(err => {
+        console.error("Audio playback failed:", err);
+      });
+    } else {
+      audio.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  return (
+    <>
+      <BacklitButton onClick={toggleAmbient}>
+        {isPlaying ? "Pause Ambient" : "Play Ambient"}
+      </BacklitButton>
+      
+      <audio
+        ref={audioRef}
+        loop
+        preload="auto"
+      >
+        <source src="/assets/sounds/ambient.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+    </>
+  );
+}

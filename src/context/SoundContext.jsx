@@ -13,7 +13,7 @@ const SoundContext = createContext();
 export function SoundProvider({ children, initialVolume = 0.4 }) {
   const [isMuted, setIsMuted] = useState(true);
   const [sfxMuted, setSfxMuted] = useState(false);
-  const [trackIndex, setTrackIndex] = useState(0);
+  const [trackIndex, setTrackIndex] = useState(3); // start at OFF
   const [volume, setVolume] = useState(initialVolume);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [nowPlaying, setNowPlaying] = useState('Off');
@@ -35,23 +35,21 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     []
   );
 
-  // 🧠 Load saved settings on mount
+  // 🧠 Load saved preferences
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('sound-settings') || '{}');
     setIsMuted(saved.isMuted ?? true);
     setSfxMuted(saved.sfxMuted ?? false);
     setVolume(saved.volume ?? initialVolume);
-    setTrackIndex(saved.trackIndex ?? ambientTracks.length - 1); // default to OFF
-  }, [initialVolume, ambientTracks.length]);
+    setTrackIndex(saved.trackIndex ?? 3);
+  }, [initialVolume]);
 
-  // 💾 Save settings
   useEffect(() => {
     localStorage.setItem('sound-settings', JSON.stringify({
       isMuted, sfxMuted, volume, trackIndex
     }));
   }, [isMuted, sfxMuted, volume, trackIndex]);
 
-  // 🎧 Setup audio once
   useEffect(() => {
     const mainAudio = new Audio();
     mainAudio.loop = true;
@@ -68,7 +66,6 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     };
   }, [clickSoundUrl]);
 
-  // ✨ Smooth volume transition
   const fadeTo = useCallback((audio, targetVol, duration = 800) => {
     cancelAnimationFrame(fadeRef.current);
     const startVol = audio.volume;
@@ -84,16 +81,15 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     fadeRef.current = requestAnimationFrame(step);
   }, []);
 
-  // 🔊 Play ambient background track
   const playAmbientTrack = useCallback((index) => {
     const audio = mainAudioRef.current;
     const src = ambientTracks[index];
 
     if (!src || isMuted || !isUnlocked) {
-      setNowPlaying('Off');
       fadeTo(audio, 0);
       setTimeout(() => audio.pause(), 600);
-      setTrackIndex(ambientTracks.length - 1); // OFF
+      setTrackIndex(3); // OFF
+      setNowPlaying('Off');
       setIsPlaying(false);
       return;
     }
@@ -115,39 +111,37 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     });
   }, [ambientTracks, isMuted, isUnlocked, volume, fadeTo]);
 
-  // ⏯️ Toggle play/pause
   const togglePlay = useCallback(() => {
     const audio = mainAudioRef.current;
-    if (!audio || !audio.src || audio.src === 'null') return;
+    const src = ambientTracks[trackIndex];
+    if (!audio || !src || isMuted || !isUnlocked) return;
 
     if (audio.paused) {
-      audio.play()
-        .then(() => {
-          fadeTo(audio, volume * 0.2);
-          setIsPlaying(true);
-        })
-        .catch((err) => console.warn('Play failed', err));
+      audio.play().then(() => {
+        fadeTo(audio, volume * 0.2);
+        setIsPlaying(true);
+      }).catch((err) => console.warn('Play failed', err));
     } else {
-      audio.pause();
+      fadeTo(audio, 0);
+      setTimeout(() => audio.pause(), 400);
       setIsPlaying(false);
     }
-  }, [volume, fadeTo]);
+  }, [ambientTracks, trackIndex, isMuted, isUnlocked, volume, fadeTo]);
 
-  // ⏮️ ⏭️ Track controls
   const nextTrack = () => {
-    const next = (trackIndex + 1) % ambientTracks.length;
+    const next = trackIndex >= ambientTracks.length - 1 ? 0 : trackIndex + 1;
     playAmbientTrack(next);
   };
 
   const prevTrack = () => {
-    const prev = (trackIndex - 1 + ambientTracks.length) % ambientTracks.length;
+    const prev = trackIndex <= 0 ? ambientTracks.length - 1 : trackIndex - 1;
     playAmbientTrack(prev);
   };
 
   const toggleAmbient = () => {
     const next = (trackIndex + 1) % ambientTracks.length;
     playAmbientTrack(next);
-    setIsMuted(next === ambientTracks.length - 1); // OFF if at end
+    setIsMuted(next === ambientTracks.length - 1); // OFF = muted
   };
 
   const enableSound = () => {
@@ -160,13 +154,12 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
 
   const disableSound = () => {
     setIsMuted(true);
-    setTrackIndex(ambientTracks.length - 1); // OFF
     const audio = mainAudioRef.current;
-    if (audio) {
-      fadeTo(audio, 0);
-      audio.pause();
-    }
+    fadeTo(audio, 0);
+    setTimeout(() => audio.pause(), 400);
     setIsPlaying(false);
+    setTrackIndex(ambientTracks.length - 1); // OFF
+    setNowPlaying('Off');
   };
 
   const toggleMute = () => {
@@ -182,7 +175,6 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
     click.play().catch((err) => console.warn('Click sound error', err));
   };
 
-  // 🔓 Unlock audio on any interaction
   useEffect(() => {
     const unlock = () => {
       setIsUnlocked(true);
@@ -227,3 +219,4 @@ export function SoundProvider({ children, initialVolume = 0.4 }) {
 }
 
 export const useSound = () => useContext(SoundContext);
+
