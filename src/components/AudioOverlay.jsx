@@ -19,6 +19,8 @@ export default function AudioOverlay() {
     playAmbientTrack,
     enableSound,
     isUnlocked,
+    nextTrack,
+    prevTrack,
   } = useSound();
 
   const [hidden, setHidden] = useState(false);
@@ -51,10 +53,8 @@ export default function AudioOverlay() {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
     if (isOff) {
-      console.log('Playing from OFF → BG1');
-      playAmbientTrack(0);
+      playAmbientTrack(0); // OFF → BG1
     } else {
-      console.log('Toggling play');
       togglePlay();
     }
   };
@@ -62,17 +62,13 @@ export default function AudioOverlay() {
   const handleNext = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    const next = (trackIndex + 1) % 4;
-    console.log('Next →', next);
-    playAmbientTrack(next);
+    nextTrack();
   };
 
   const handlePrev = (e) => {
     e.stopPropagation();
     if (!isUnlocked) enableSound();
-    const prev = (trackIndex - 1 + 4) % 4;
-    console.log('Prev →', prev);
-    playAmbientTrack(prev);
+    prevTrack();
   };
 
   return (
@@ -147,8 +143,5 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
-
-
-
 
 
