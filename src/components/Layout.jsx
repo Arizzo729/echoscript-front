@@ -15,8 +15,8 @@ import 'nprogress/nprogress.css';
 import ErrorBoundary from './ErrorBoundary';
 import IntroVideo from './IntroVideo';
 import AudioOverlay from './AudioOverlay';
-import ToastContainer from './ToastContainer';
 import { ToastProvider } from './toast/ToastProvider';
+import ToastContainer from './ToastContainer';
 import MobileBottomNav from './MobileBottomNav';
 
 const Header = lazy(() => import('./Header'));
