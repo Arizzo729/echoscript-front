@@ -1,16 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  ChevronLeft, ChevronRight, Pause, Play, Minus, Volume2, VolumeX,
+  ChevronLeft, ChevronRight, Pause, Play, Minus,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSound } from '../context/SoundContext';
-import Button from './ui/Button'; // adjust this path if your Button lives elsewhere
+import Button from './ui/Button';
 
 export default function AudioOverlay() {
   const {
     trackIndex, isMuted, isPlaying,
     togglePlay, nextTrack, prevTrack,
-    playAmbientTrack, setMuted,
+    playAmbientTrack,
   } = useSound();
 
   const trackLabels = [
@@ -22,11 +22,8 @@ export default function AudioOverlay() {
 
   const isOff = trackIndex >= trackLabels.length - 1;
   const [minimized, setMinimized] = useState(false);
-  const [volumeVisible, setVolumeVisible] = useState(false);
-  const [volume, setVolume] = useState(1);
   const [position, setPosition] = useState({ x: 40, y: 80 });
   const [hidden, setHidden] = useState(false);
-
   const overlayRef = useRef(null);
   const dragOffset = useRef({ x: 0, y: 0 });
 
@@ -92,83 +89,48 @@ export default function AudioOverlay() {
           animate={{ opacity: 1, scale: 1, x: position.x, y: position.y }}
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-          className="fixed z-[9999] w-[230px] rounded-xl shadow-lg border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl px-4 py-3 flex flex-col items-center gap-3 select-none cursor-move"
+          className="fixed z-[9999] flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl cursor-move"
         >
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={prevTrack}
+            aria-label="Previous"
+            icon={<ChevronLeft className="w-4 h-4 text-teal-400" />}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handlePlayToggle}
+            aria-label="Play"
+            icon={
+              isPlaying && !isOff
+                ? <Pause className="w-4 h-4 text-teal-400" />
+                : <Play className="w-4 h-4 text-teal-400" />
+            }
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={nextTrack}
+            aria-label="Next"
+            icon={<ChevronRight className="w-4 h-4 text-teal-400" />}
+          />
+
+          <span className="text-[0.6rem] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono tracking-wide">
+            {currentTrack}
+          </span>
+
           <Button
             variant="ghost"
             size="sm"
             onClick={handleMinimize}
             aria-label="Minimize"
-            className="absolute top-2 right-2"
-            icon={<Minus className="w-4 h-4 text-teal-400" />}
+            icon={
+              <span className="text-teal-400 text-sm leading-none -mb-1">_</span>
+            }
+            className="ml-2"
           />
-
-          <div className="flex items-center justify-center gap-3 mt-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={prevTrack}
-              aria-label="Previous"
-              icon={<ChevronLeft className="w-5 h-5 text-teal-400" />}
-            />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handlePlayToggle}
-              aria-label="Play"
-              icon={
-                isPlaying && !isOff ? (
-                  <Pause className="w-5 h-5 text-teal-400" />
-                ) : (
-                  <Play className="w-5 h-5 text-teal-400" />
-                )
-              }
-            />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={nextTrack}
-              aria-label="Next"
-              icon={<ChevronRight className="w-5 h-5 text-teal-400" />}
-            />
-          </div>
-
-          <span className="text-[0.65rem] text-teal-200 bg-zinc-800/60 px-3 py-1 rounded-full font-mono text-center">
-            {currentTrack}
-          </span>
-
-          <div className="relative w-full flex justify-center items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setVolumeVisible(!volumeVisible)}
-              aria-label="Volume"
-              icon={
-                isMuted ? (
-                  <VolumeX className="w-5 h-5 text-teal-400" />
-                ) : (
-                  <Volume2 className="w-5 h-5 text-teal-400" />
-                )
-              }
-            />
-            {volumeVisible && (
-              <div className="absolute bottom-full mb-2 w-28">
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={volume}
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value);
-                    setVolume(val);
-                    setMuted(val === 0);
-                  }}
-                  className="w-full accent-teal-400"
-                />
-              </div>
-            )}
-          </div>
         </motion.div>
       )}
     </AnimatePresence>
