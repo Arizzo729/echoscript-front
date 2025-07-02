@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import {
   ChevronLeft,
   ChevronRight,
@@ -23,11 +23,10 @@ export default function AudioOverlay() {
     isUnlocked,
   } = useSound();
 
-  const [position, setPosition] = useState({ x: 40, y: 80 });
   const [hidden, setHidden] = useState(false);
-  const overlayRef = useRef(null);
-  const dragging = useRef(false);
-  const offset = useRef({ x: 0, y: 0 });
+  const x = useMotionValue(40);
+  const y = useMotionValue(80);
+  const wrapperRef = useRef(null);
 
   const tracks = [
     'BG 1 — Dreamscape Horizon',
@@ -39,64 +38,30 @@ export default function AudioOverlay() {
   const isOff = trackIndex >= tracks.length - 1;
   const currentTrack = tracks[trackIndex] || 'OFF';
 
+  // Load saved position on mount
   useEffect(() => {
     if (!window.__introPlayed) setHidden(true);
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
-    if (saved.x != null && saved.y != null) setPosition(saved);
-  }, []);
+    if (saved.x != null) x.set(saved.x);
+    if (saved.y != null) y.set(saved.y);
+  }, [x, y]);
 
-  useEffect(() => {
-    const node = overlayRef.current;
-
-    const onPointerDown = (e) => {
-      if (e.button !== 0 || e.target.closest('button, input')) return;
-      dragging.current = true;
-      offset.current.x = e.clientX - node.getBoundingClientRect().left;
-      offset.current.y = e.clientY - node.getBoundingClientRect().top;
-      document.body.style.userSelect = 'none';
-    };
-
-    const onPointerMove = (e) => {
-      if (!dragging.current) return;
-
-      const newX = e.clientX - offset.current.x;
-      const newY = e.clientY - offset.current.y;
-
-      const maxX = window.innerWidth - node.offsetWidth;
-      const maxY = window.innerHeight - node.offsetHeight;
-
-      setPosition({
-        x: Math.min(Math.max(0, newX), maxX),
-        y: Math.min(Math.max(0, newY), maxY),
-      });
-    };
-
-    const onPointerUp = () => {
-      if (dragging.current) {
-        dragging.current = false;
-        document.body.style.userSelect = '';
-        localStorage.setItem('audio-overlay-pos', JSON.stringify(position));
-      }
-    };
-
-    node.addEventListener('pointerdown', onPointerDown);
-    window.addEventListener('pointermove', onPointerMove);
-    window.addEventListener('pointerup', onPointerUp);
-
-    return () => {
-      node.removeEventListener('pointerdown', onPointerDown);
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-    };
-  }, [position]);
+  // Save position on drag end
+  const handleDragEnd = (_, info) => {
+    const node = wrapperRef.current;
+    const maxX = window.innerWidth - node.offsetWidth;
+    const maxY = window.innerHeight - node.offsetHeight;
+    const clampedX = Math.min(Math.max(0, info.point.x), maxX);
+    const clampedY = Math.min(Math.max(0, info.point.y), maxY);
+    x.set(clampedX);
+    y.set(clampedY);
+    localStorage.setItem('audio-overlay-pos', JSON.stringify({ x: clampedX, y: clampedY }));
+  };
 
   const handlePlayToggle = () => {
     if (!isUnlocked) enableSound();
-    if (isOff) {
-      playAmbientTrack(0);
-    } else {
-      togglePlay();
-    }
+    if (isOff) playAmbientTrack(0);
+    else togglePlay();
   };
 
   const handleNext = () => {
@@ -113,14 +78,20 @@ export default function AudioOverlay() {
     <AnimatePresence>
       {!hidden && (
         <motion.div
-          ref={overlayRef}
+          ref={wrapperRef}
+          drag
+          dragMomentum={false}
+          dragElastic={0}
+          dragPropagation={false}
+          style={{ x, y }}
+          onDragEnd={handleDragEnd}
           initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1, x: position.x, y: position.y }}
+          animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-          className="fixed z-[9999] flex flex-col items-center gap-1 select-none cursor-grab"
+          className="fixed z-[9999] flex flex-col items-center gap-1 select-none"
         >
-          <div className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl">
+          <div className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl cursor-move">
             <Button
               variant="ghost"
               size="sm"
@@ -168,6 +139,8 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
+
 
 
 
