@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — AudioOverlay FINAL FIXED
+// ✅ EchoScript.AI — AudioOverlay FINAL FINAL POLISH
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
@@ -15,7 +15,6 @@ const TRACKS = [
 export default function AudioOverlay() {
   const context = useSound();
 
-  // Fallback if useSound() returns undefined or incomplete context
   const audioRefFallback = useRef(null);
   const {
     trackIndex = 0,
@@ -53,6 +52,7 @@ export default function AudioOverlay() {
     const track = TRACKS[index];
     if (!track || !track.src || !audioRef?.current || !isUnlocked) return;
     try {
+      if (!audioRef.current.paused && trackIndex === index) return;
       audioRef.current.src = track.src;
       audioRef.current.volume = volume;
       await audioRef.current.load();
@@ -66,8 +66,10 @@ export default function AudioOverlay() {
   };
 
   const pauseTrack = () => {
-    audioRef?.current?.pause();
-    setIsPlaying(false);
+    if (audioRef?.current && !audioRef.current.paused) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
   };
 
   const togglePlay = async () => {
@@ -77,8 +79,10 @@ export default function AudioOverlay() {
     }
     if (trackIndex === 0) {
       await playTrack(1);
+    } else if (isPlaying) {
+      pauseTrack();
     } else {
-      isPlaying ? pauseTrack() : await playTrack(trackIndex);
+      await playTrack(trackIndex);
     }
   };
 
@@ -141,7 +145,7 @@ export default function AudioOverlay() {
         >
           {refError && (
             <div className="text-xs text-red-500 bg-red-900/40 px-3 py-1 rounded mb-1 shadow">
-              Audio failed to play or ref is broken.
+              Audio failed to play or BG1 might be missing.
             </div>
           )}
           <div className="flex items-center gap-3 px-4 py-2 rounded-full shadow-md border border-teal-600 bg-gradient-to-br from-zinc-950/90 to-zinc-900/80 backdrop-blur-xl">
@@ -163,7 +167,11 @@ export default function AudioOverlay() {
               {currentLabel}
             </span>
           </div>
-          <div className="w-full flex justify-center mt-0.5">
+          <div
+            className="w-full flex justify-center mt-0.5"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
             <input
               type="range"
               min={0}
@@ -176,8 +184,6 @@ export default function AudioOverlay() {
                 if (audioRef?.current) audioRef.current.volume = v;
               }}
               className="w-40 h-1 accent-teal-400 cursor-pointer z-50"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
             />
           </div>
         </motion.div>
@@ -185,4 +191,5 @@ export default function AudioOverlay() {
     </AnimatePresence>
   );
 }
+
 
