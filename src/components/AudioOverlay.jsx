@@ -1,6 +1,6 @@
 // src/components/AudioOverlay.jsx
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence, useMotionValue, useDragControls } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Pause, Play, Lightbulb, X } from 'lucide-react';
 import Button from './ui/Button';
 import { useSound } from '../context/SoundContext';
@@ -18,7 +18,6 @@ export default function AudioOverlay() {
   const [busy, setBusy] = useState(false);
   const x = useMotionValue(40);
   const y = useMotionValue(80);
-  const controls = useDragControls();
   const wrapperRef = useRef(null);
 
   // Load saved position
@@ -84,19 +83,11 @@ export default function AudioOverlay() {
     <AnimatePresence>
       <motion.div
         ref={wrapperRef}
-        drag="xy"
-        dragControls={controls}
-        dragListener={false}
+        drag
         dragMomentum={false}
         dragElastic={0}
         onDragEnd={handleDragEnd}
-        onPointerDownCapture={(e) => {
-          const tag = e.target.tagName.toLowerCase();
-          if (!['button', 'input', 'svg', 'path'].includes(tag)) {
-            controls.start(e, { snapToCursor: false });
-          }
-        }}
-        style={{ x, y }}
+        style={{ x, y, cursor: 'grab' }}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
@@ -109,7 +100,7 @@ export default function AudioOverlay() {
             <span className="text-[0.65rem] leading-tight">Tip: Use ← → to switch, Space to play/pause.</span>
             <button
               onClick={() => setShowTip(false)}
-              onPointerDown={(e) => e.stopPropagation()}
+              onPointerDownCapture={(e) => e.stopPropagation()}
               className="ml-auto p-0 bg-transparent text-white hover:opacity-75 focus:outline-none"
             >
               <X className="w-3.5 h-3.5" />
@@ -117,21 +108,27 @@ export default function AudioOverlay() {
           </div>
         )}
 
-        <div className="rounded-2xl backdrop-blur-xl border border-teal-500/40 bg-zinc-900/80 shadow-md">
+        <div
+          className="rounded-2xl backdrop-blur-xl border border-teal-500/40 bg-zinc-900/80 shadow-md"
+          onPointerDownCapture={(e) => {
+            const tag = e.target.tagName.toLowerCase();
+            if (tag !== 'div') e.stopPropagation();
+          }}
+        >
           <div className="flex items-center gap-3 px-4 py-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={handlePrev}
               disabled={busy}
-              onPointerDown={(e) => e.stopPropagation()}
+              onPointerDownCapture={(e) => e.stopPropagation()}
               icon={<ChevronLeft className="w-4 h-4 text-teal-400" />}
             />
             <Button
               variant="ghost"
               size="sm"
               onClick={handlePlayClick}
-              onPointerDown={(e) => e.stopPropagation()}
+              onPointerDownCapture={(e) => e.stopPropagation()}
               icon={isPlaying ? <Pause className="w-4 h-4 text-teal-400" /> : <Play className="w-4 h-4 text-teal-400" />}
             />
             <Button
@@ -139,7 +136,7 @@ export default function AudioOverlay() {
               size="sm"
               onClick={handleNext}
               disabled={busy}
-              onPointerDown={(e) => e.stopPropagation()}
+              onPointerDownCapture={(e) => e.stopPropagation()}
               icon={<ChevronRight className="w-4 h-4 text-teal-400" />}
             />
             <span className="text-[0.6rem] min-w-[32px] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono text-center">
@@ -155,7 +152,7 @@ export default function AudioOverlay() {
               step={1}
               value={volume * 100}
               onChange={(e) => setVolume(parseFloat(e.target.value) / 100)}
-              onPointerDown={(e) => e.stopPropagation()}
+              onPointerDownCapture={(e) => e.stopPropagation()}
               className="w-40 h-1 accent-teal-400 cursor-pointer"
             />
           </div>
