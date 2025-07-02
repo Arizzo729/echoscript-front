@@ -129,6 +129,6 @@ function ToastContainer({ children, limit = 5, position = "top-right" }) {
 }
 
 // Default export for Layout import
-export ToastContainer;
+export default ToastContainer;
 ```
 
