@@ -27,7 +27,6 @@ export default function MobileOverlay({ children }) {
     const onTouchEnd = () => {
       isDragging.current = false;
       overlay.style.transition = 'transform 0.3s ease';
-      // Snap open/close threshold
       if (translateY > 100) {
         setTranslateY(window.innerHeight);
       } else {
@@ -58,7 +57,8 @@ export default function MobileOverlay({ children }) {
   );
 }
 
-/* Add or update in src/styles/mobile.css */
+/* Note: Move the following CSS into src/styles/mobile.css */
+/*
 @media (max-width: 768px) {
   .overlay {
     position: fixed;
@@ -91,3 +91,4 @@ export default function MobileOverlay({ children }) {
     cursor: grab;
   }
 }
+*/
