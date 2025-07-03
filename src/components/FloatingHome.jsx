@@ -1,6 +1,6 @@
 /* 5. Floating home action button */
 floating-home ;
-  --size: clamp(48px, 6vw, 64px);
+  --size; clamp(48px, 6vw, 64px);
   position: fixed;
   bottom: calc(72px + env(safe-area-inset-bottom, 8px));
   right: 16px;
