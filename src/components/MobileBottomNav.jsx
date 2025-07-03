@@ -3,7 +3,7 @@
 // -----------------------------------------------------------------------------
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import '../styles/mobile.css';
+import styles from '../styles/mobile.module.css';
 
 export default function MobileBottomNav() {
   return (
