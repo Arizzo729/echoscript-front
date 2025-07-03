@@ -2,7 +2,7 @@
 // Overlay.jsx – Enhanced Mobile Overlay Component
 // -----------------------------------------------------------------------------
 import React, { useRef, useEffect } from 'react';
-import './styles/mobile.css';
+import styles from '../styles/mobile.module.css';
 
 export default function MobileOverlay({ children }) {
   const overlayRef = useRef();
