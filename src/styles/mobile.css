@@ -1,6 +1,6 @@
 /* src/styles/mobile.css */
 @media (max-width: 768px) {
-  /* Fixed header */
+  /* 1. Fixed header */
   .header {
     position: fixed;
     top: env(safe-area-inset-top, 0);
@@ -11,13 +11,13 @@
     box-shadow: var(--shadow-light);
   }
 
-  /* Main content spacing to accommodate header and bottom nav */
+  /* 2. Main content spacing */
   .content-container {
     padding-top: calc(56px + env(safe-area-inset-top, 0));
     padding-bottom: calc(80px + env(safe-area-inset-bottom, 8px));
   }
 
-  /* Bottom sheet overlay */
+  /* 3. Bottom sheet overlay */
   .overlay {
     position: fixed;
     inset-inline: 0;
@@ -45,14 +45,14 @@
     cursor: grab;
   }
 
-  /* Scrollable audio overlay inside bottom sheet */
+  /* 4. Scrollable audio overlay */
   .audio-overlay {
     padding: 12px;
     max-height: calc(70vh - 40px);
     overflow-y: auto;
   }
 
-  /* Bubble-style bottom navigation */
+  /* 5. Bubble-style bottom navigation */
   .bottom-nav {
     position: fixed;
     bottom: calc(16px + env(safe-area-inset-bottom, 8px));
@@ -69,3 +69,29 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     z-index: 1000;
   }
+
+  /* 6. Floating home action button */
+  .floating-home {
+    --size: clamp(48px, 6vw, 64px);
+    position: fixed;
+    bottom: calc(72px + env(safe-area-inset-bottom, 8px));
+    right: 16px;
+    width: var(--size);
+    height: var(--size);
+    display: grid;
+    place-items: center;
+    background-color: var(--color-primary);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    box-shadow: var(--shadow-strong);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 1003;
+  }
+  .floating-home:hover,
+  .floating-home:focus {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-strong-hover, 0 6px 16px rgba(0, 0, 0, 0.12));
+  }
+}
+
