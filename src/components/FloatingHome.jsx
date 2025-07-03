@@ -3,7 +3,7 @@
 // -----------------------------------------------------------------------------
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import './styles/mobile.css';
+import './src/styles/mobile.css';
 
 export function FloatingHome() {
   const history = useHistory();
