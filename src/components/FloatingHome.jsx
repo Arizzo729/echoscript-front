@@ -1,20 +1,23 @@
-// src/components/FloatingHome.jsx
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ReactComponent as HomeIcon } from '../assets/icons/home.svg';
-import '../styles/mobile.css';
-
-export default function FloatingHome() {
-  const navigate = useNavigate();
-  return (
-    <button
-      type="button"
-      className="floating-home"
-      aria-label="Go to Home"
-      onClick={() => navigate('/')}
-    >
-      <HomeIcon className="floating-home-icon" aria-hidden="true" />
-    </button>
-  );
+  /* Floating home action button */
+  .floating-home {
+    position: fixed;
+    bottom: calc(72px + env(safe-area-inset-bottom, 8px));
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-primary);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    box-shadow: var(--shadow-strong);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    z-index: 1003;
+  }
+  .floating-home:hover,
+  .floating-home:focus {
+    transform: scale(1.05);
+  }
 }
-
