@@ -1,6 +1,4 @@
-// -----------------------------------------------------------------------------
 // src/App.jsx – Integrate Mobile Components into Your App
-// -----------------------------------------------------------------------------
 import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 
@@ -24,7 +22,8 @@ import TranscriptAudioPlayer from "./components/TranscriptAudioPlayer";
 import useIsMobile from "./hooks/useIsMobile";
 import MobileOverlay from "./components/MobileOverlay";
 import MobileBottomNav from "./components/MobileBottomNav";
-import { FloatingHome } from "./components/FloatingHome";
+// Fixed: default export import of FloatingHome
+import FloatingHome from "./components/FloatingHome";
 
 // Pages
 import Home from "./pages/HomePage";
