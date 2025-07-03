@@ -18,6 +18,8 @@ import AudioOverlay from './AudioOverlay';
 import { ToastProvider } from './toast/ToastProvider';
 import ToastContainer from './ToastContainer';
 import MobileBottomNav from './MobileBottomNav';
+import useIsMobile from '../hooks/useIsMobile';
+import MobileOverlay from './MobileOverlay';
 
 const Header = lazy(() => import('./Header'));
 const Sidebar = lazy(() => import('./Sidebar'));
@@ -26,13 +28,18 @@ export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {
 
 export default function Layout() {
   const location = useLocation();
+  const isMobile = useIsMobile();
   const [showIntro, setShowIntro] = useState(true);
   const [theme, setTheme] = useState(() => {
-    const stored = typeof window !== 'undefined' && localStorage.getItem('theme');
+    const stored =
+      typeof window !== 'undefined' && localStorage.getItem('theme');
     if (stored) return stored;
-    return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
+    return (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+    );
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
@@ -72,7 +79,9 @@ export default function Layout() {
         </a>
 
         <AnimatePresence>
-          {showIntro && <IntroVideo key="intro" src="/videos/intro.mp4" onFinish={handleIntroFinish} />}
+          {showIntro && (
+            <IntroVideo key="intro" src="/videos/intro.mp4" onFinish={handleIntroFinish} />
+          )}
         </AnimatePresence>
 
         {!showIntro && (
@@ -88,7 +97,10 @@ export default function Layout() {
 
             <div className="flex flex-1 overflow-hidden">
               <Suspense fallback={<div className="w-20 bg-zinc-900" />}>
-                <Sidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
+                <Sidebar
+                  collapsed={sidebarCollapsed}
+                  setCollapsed={setSidebarCollapsed}
+                />
               </Suspense>
 
               <main
@@ -113,9 +125,16 @@ export default function Layout() {
               </main>
             </div>
 
-            <AudioOverlay />
             <ToastContainer position="top-right" />
-            <MobileBottomNav className="md:hidden" />
+
+            {isMobile ? (
+              <MobileOverlay>
+                <AudioOverlay />
+                <MobileBottomNav />
+              </MobileOverlay>
+            ) : (
+              <AudioOverlay />
+            )}
           </div>
         )}
       </ThemeContext.Provider>

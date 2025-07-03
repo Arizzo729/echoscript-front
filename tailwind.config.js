@@ -8,17 +8,28 @@ module.exports = {
     './public/index.html',
   ],
   theme: {
+    // Add a custom 'mobile' screen for max-width targeting
+    screens: {
+      mobile: { max: '767px' }, // mobile-only variant
+      sm: '640px',
+      md: '768px',
+      lg: '1024px',
+      xl: '1280px',
+      '2xl': '1536px',
+    },
+
     container: {
       center: true,
       padding: {
-        DEFAULT: '1rem',
-        sm: '2rem',
+        DEFAULT: '1rem', // mobile default
+        sm: '2rem',      // sm and up
         md: '2rem',
         lg: '4rem',
         xl: '5rem',
         '2xl': '6rem',
       },
     },
+
     extend: {
       colors: {
         primary: {
@@ -121,6 +132,17 @@ module.exports = {
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
     require('@tailwindcss/aspect-ratio'),
+    // optional: add plugin for mobile-only variant utilities
+    plugin(function({ addVariant }) {
+      addVariant('mobile', ({ container }) => {
+        container.walkRules(rule => {
+          rule.selector = `.mobile\\:${rule.selector.slice(1)}`;
+          rule.walkDecls(decl => {
+            decl.value = decl.value;
+          });
+        });
+      });
+    }),
   ],
   safelist: [
     'dark',
@@ -147,4 +169,3 @@ module.exports = {
     'text-green-600',
   ],
 };
-
