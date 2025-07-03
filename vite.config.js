@@ -5,16 +5,14 @@ import svgr from 'vite-plugin-svgr';
 import environmentPlugin from 'vite-plugin-environment';
 
 export default defineConfig(({ mode }) => {
-  // Load .env files and merge into process.env
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
     base: '/',
     plugins: [
       react(),
-      svgr({ exportAsDefault: false }), // enable ReactComponent imports
+      svgr({ exportAsDefault: false }),
       environmentPlugin({
-        // Expose only VITE_ variables (avoid REACT_APP_ prefix)
         VITE_OPENAI_API_KEY: env.VITE_OPENAI_API_KEY,
         VITE_BROWSE_AI_API_KEY: env.VITE_BROWSE_AI_API_KEY,
         VITE_APIFY_API_TOKEN: env.VITE_APIFY_API_TOKEN,
@@ -38,15 +36,34 @@ export default defineConfig(({ mode }) => {
   };
 });
 
-/*
-- Run:
-    npm install --save-dev vite-plugin-environment vite-plugin-svgr
-  OR
-    yarn add -D vite-plugin-environment vite-plugin-svgr
+/* Troubleshooting bundle errors on Netlify CI
 
-- Ensure you have .env and .env.production with VITE_ prefixed keys, e.g.: 
-    VITE_OPENAI_API_KEY=your_key_here
-    VITE_APIFY_API_TOKEN=token
+1. Ensure both plugins are installed in your package.json:
+   "devDependencies": {
+     "vite-plugin-svgr": "^3.0.0",
+     "vite-plugin-environment": "^1.0.0"
+   }
 
-- In code, access via import.meta.env.VITE_OPENAI_API_KEY
+   Run:
+     npm install --save-dev vite-plugin-svgr vite-plugin-environment
+   OR
+     yarn add -D vite-plugin-svgr vite-plugin-environment
+
+2. Netlify by default skips devDependencies when NODE_ENV=production. Options:
+   a) Move plugins to "dependencies" instead of devDependencies. (Less ideal)
+   b) In Netlify UI or your netlify.toml, set the build environment:
+        [build.environment]
+        NODE_ENV = "development"
+        NPM_FLAGS = "--include=dev"
+
+3. Verify install and rebuild:
+   Run locally:
+     npm run build
+   On Netlify:
+     netlify build --context=production
+
+4. Access env vars in code via:
+     console.log(import.meta.env.VITE_OPENAI_API_KEY);
+
 */
+
