@@ -1,6 +1,8 @@
-// src/App.jsx
+// -----------------------------------------------------------------------------
+// src/App.jsx – Integrate Mobile Components into Your App
+// -----------------------------------------------------------------------------
 import React, { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 
 // Context Providers
 import { AuthProvider } from "./context/AuthContext";
@@ -16,7 +18,13 @@ import OnboardingModal from "./components/OnboardingModal";
 import Layout from "./components/Layout";
 import AudioOverlay from "./components/AudioOverlay";
 import ErrorBoundary from "./components/ErrorBoundary";
-import TranscriptAudioPlayer from "./components/TranscriptAudioPlayer"; // ✅ New import
+import TranscriptAudioPlayer from "./components/TranscriptAudioPlayer";
+
+// Mobile Helpers
+import useIsMobile from "./hooks/useIsMobile";
+import MobileOverlay from "./components/MobileOverlay";
+import MobileBottomNav from "./components/MobileBottomNav";
+import { FloatingHome } from "./components/FloatingHome";
 
 // Pages
 import Home from "./pages/HomePage";
@@ -48,6 +56,8 @@ function AppInner() {
     typeof window !== "undefined" ? !!window.__introPlayed : false
   );
   const { enableSound } = useSound();
+  const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (splashDone && !localStorage.getItem("onboardingComplete")) {
@@ -59,9 +69,7 @@ function AppInner() {
   const handleIntroDone = () => {
     setShowIntro(false);
     setIntroComplete(true);
-    if (typeof window !== "undefined") {
-      window.__introPlayed = true;
-    }
+    window.__introPlayed = true;
   };
 
   return (
@@ -70,6 +78,15 @@ function AppInner() {
         <AnimatedSplash onComplete={() => setSplashDone(true)} />
       ) : (
         <>
+          {/* Overlay: mobile or desktop */}
+          {isMobile ? (
+            <MobileOverlay>
+              <AudioOverlay />
+            </MobileOverlay>
+          ) : (
+            <AudioOverlay />
+          )}
+
           <Routes>
             {/* Public Auth Pages */}
             <Route path="/signin" element={<SignIn />} />
@@ -99,6 +116,7 @@ function AppInner() {
             </Route>
           </Routes>
 
+          {/* Intro Modal */}
           {showIntro && (
             <OnboardingModal
               onClose={handleIntroDone}
@@ -106,13 +124,14 @@ function AppInner() {
             />
           )}
 
-          {/* ✅ Final condition — AudioOverlay rendered after intro */}
+          {/* Transcript Player & Floating Home on mobile */}
           {introComplete && (
             <>
-              <AudioOverlay />
               <div className="fixed bottom-24 left-4 right-4 z-50 max-w-3xl mx-auto">
                 <TranscriptAudioPlayer audioUrl="/audio/sample-audio.mp3" />
               </div>
+              {isMobile && <MobileBottomNav />}
+              {isMobile && <FloatingHome />}
             </>
           )}
         </>
