@@ -1,15 +1,22 @@
-// -----------------------------------------------------------------------------
-// FloatingHome.jsx – Quick Return to Home Button
-// -----------------------------------------------------------------------------
+// src/components/FloatingHome.jsx
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+// React Router v6: useNavigate replaces useHistory
+import { useNavigate } from 'react-router-dom';
 import '../styles/mobile.css';
 
-export function FloatingHome() {
-  const history = useHistory();
+const FloatingHome = () => {
+  const navigate = useNavigate();
+
+  // Navigate to root (home)
+  const goHome = () => {
+    navigate('/');
+  };
+
   return (
-    <div className="floating-home" onClick={() => history.push('/home')}>
-      <img src="/icons/home-white.svg" alt="Home" />
+    <div className="floating-home" onClick={goHome}>
+      <img src="/icons/home.svg" alt="Home" />
     </div>
   );
-}
+};
+
+export default FloatingHome;
