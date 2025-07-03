@@ -1,5 +1,5 @@
   /* Floating home action button */
-  .floating-home {
+  floating-home {
     position: fixed;
     bottom: calc(72px + env(safe-area-inset-bottom, 8px));
     right: 16px;
