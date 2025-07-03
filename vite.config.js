@@ -10,17 +10,22 @@ export default defineConfig(({ mode }) => {
   return {
     base: '/',
     plugins: [
+      svgr({
+        // allow named ReactComponent imports
+        exportAsDefault: false,
+        // optional SVGR config
+        icon: true,
+        svgoConfig: { plugins: [{ removeViewBox: false }] },
+      }), // run before react()
       react(),
-      svgr({ exportAsDefault: false }),
       environmentPlugin({
-        // Provide defaults to suppress warnings for missing vars
         defaults: {
           VITE_OPENAI_API_KEY: env.VITE_OPENAI_API_KEY || '',
           VITE_BROWSE_AI_API_KEY: env.VITE_BROWSE_AI_API_KEY || '',
           VITE_APIFY_API_TOKEN: env.VITE_APIFY_API_TOKEN || '',
           VITE_BRIGHTDATA_USERNAME: env.VITE_BRIGHTDATA_USERNAME || '',
           VITE_BRIGHTDATA_PASSWORD: env.VITE_BRIGHTDATA_PASSWORD || '',
-        }
+        },
       }),
     ],
     resolve: {
@@ -36,16 +41,7 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
       emptyOutDir: true,
     },
+    // explicitly include SVG assets
+    assetsInclude: ['**/*.svg'],
   };
 });
-
-/*
-- Install dependencies:
-    npm install -D vite-plugin-environment vite-plugin-svgr
-  OR
-    yarn add -D vite-plugin-environment vite-plugin-svgr
-
-- Ensure your .env files define VITE_* keys. Missing keys will default to empty strings.
-- Access in code via import.meta.env.VITE_OPENAI_API_KEY
-*/
-

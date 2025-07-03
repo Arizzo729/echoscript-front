@@ -1,6 +1,7 @@
 // File: src/components/MobileBottomNav.jsx
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+// Import SVGs as React components via SVGR:
 import { ReactComponent as HomeIcon } from '../assets/icons/home.svg';
 import { ReactComponent as DashboardIcon } from '../assets/icons/dashboard.svg';
 import { ReactComponent as UploadIcon } from '../assets/icons/upload.svg';
@@ -30,5 +31,12 @@ export default function MobileBottomNav() {
     </nav>
   );
 }
+
+// -- Alternative fallback without SVGR --
+// If you prefer not to use SVGR, import SVGs as URLs and render with <img>:
+// import homeSrc from '../assets/icons/home.svg';
+// ...
+// <img src={homeSrc} className="nav-icon" alt="Home" />
+
 
 
