@@ -4,12 +4,12 @@ import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Assets & Components
 import IconButton from './IconButton';
 import Logo from '../assets/EchoScriptAI_Transparent_Dark.png';
 import MobileBottomNav from './MobileBottomNav';
+import AudioOverlay from './AudioOverlay'; // <-- Import this!
+import { Music } from 'lucide-react';
 
-// Lucide Icons (alphabetized)
 import {
   Bell,
   Home as HomeIcon,
@@ -158,12 +158,14 @@ function AnimatedBottomNav() {
   );
 }
 
-/** Main advanced mobile layout */
+// ---- FAB and Overlay logic below ----
+
 export default function MobileLayout({ children, onSearch }) {
   const { t } = useTranslation();
   const [theme, setTheme] = useState(
     document.documentElement.classList.contains('dark') ? 'dark' : 'light'
   );
+  const [audioOpen, setAudioOpen] = useState(false);
 
   // Theme toggler
   const handleThemeToggle = () => {
@@ -177,12 +179,12 @@ export default function MobileLayout({ children, onSearch }) {
     localStorage.setItem('theme', nextTheme);
   };
 
-  // Action icons (can wire up handlers as needed)
+  // Actions (handlers as needed)
   const actions = [
     {
       icon: <SpeakerWaveIcon className="w-5 h-5" />,
       label: t('Ambient Audio'),
-      onClick: () => {}, // Overlay handled at higher level (Layout)
+      onClick: () => setAudioOpen(true),
     },
     {
       icon: <CogIcon className="w-5 h-5" />,
@@ -245,9 +247,47 @@ export default function MobileLayout({ children, onSearch }) {
 
         {/* Bottom nav */}
         <AnimatedBottomNav />
+
+        {/* FAB for audio overlay */}
+        {!audioOpen && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.93 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.93 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.93 }}
+            onClick={() => setAudioOpen(true)}
+            className="fixed bottom-[84px] right-5 z-50 bg-zinc-900/90 border border-teal-400/60 shadow-lg rounded-full w-14 h-14 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-teal-300"
+            aria-label="Ambient Audio"
+            tabIndex={0}
+            style={{ boxShadow: '0 4px 28px 0 rgba(0,0,0,0.11)' }}
+          >
+            <Music className="w-7 h-7 text-teal-400" />
+          </motion.button>
+        )}
+
+        {/* Overlay modal */}
+        <AnimatePresence>
+          {audioOpen && (
+            <motion.div
+              key="audio-overlay"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+              className="fixed inset-0 z-50 pointer-events-auto flex items-end justify-center"
+              aria-modal="true"
+              role="dialog"
+            >
+              <div className="absolute inset-0 bg-black/20" onClick={() => setAudioOpen(false)} />
+              <div className="relative w-full max-w-md mx-auto">
+                <AudioOverlay onClose={() => setAudioOpen(false)} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </SafeAreaWrapper>
   );
 }
-
 
