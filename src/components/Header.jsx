@@ -5,6 +5,8 @@ import {
   MagnifyingGlassIcon,
   ChevronDownIcon,
   UserCircleIcon,
+  SunIcon,
+  MoonIcon,
 } from "@heroicons/react/24/outline";
 import { Volume2, VolumeX, Cog } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,10 +19,14 @@ import { useTranslation } from "react-i18next";
 
 const LOCAL_SEARCH_INDEX = [
   { type: "Page", name: "Dashboard", path: "/dashboard" },
-  /* ... */
+  /* ...other searchable items... */
 ];
 
-export default function Header({ onLogout = () => {}, isDarkMode = false }) {
+export default function Header({
+  onLogout = () => {},
+  isDarkMode = false,
+  onToggleTheme = () => {},
+}) {
   const { user } = useAuth();
   const { t } = useTranslation();
   const { isMuted, toggleMute } = useSound();
@@ -55,13 +61,21 @@ export default function Header({ onLogout = () => {}, isDarkMode = false }) {
     };
     document.addEventListener("mousedown", closeAll);
     document.addEventListener("keydown", (e) => e.key === "Escape" && closeAll(e));
-    return () => document.removeEventListener("mousedown", closeAll);
+    return () => {
+      document.removeEventListener("mousedown", closeAll);
+      document.removeEventListener("keydown", (e) => e.key === "Escape" && closeAll(e));
+    };
   }, []);
 
-  // Search logic unchanged...
+  // (Search logic and dropdown rendering would go here...)
 
   return (
-    <motion.header className="sticky top-0 z-50 bg-zinc-900/80 backdrop-blur border-b border-zinc-800 shadow" initial={{ opacity: 0, y: -15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+    <motion.header
+      className="sticky top-0 z-50 bg-zinc-900/80 backdrop-blur border-b border-zinc-800 shadow"
+      initial={{ opacity: 0, y: -15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="flex flex-wrap items-center justify-between px-4 sm:px-6 py-3 gap-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 min-w-[120px]">
@@ -71,9 +85,10 @@ export default function Header({ onLogout = () => {}, isDarkMode = false }) {
           </span>
         </Link>
 
-        {/* Search - full width on mobile */}
+        {/* Search Input */}
         <div ref={searchRef} className="relative w-full md:flex-1 max-w-lg min-w-[200px]">
           <input
+            id="search-input"
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -86,7 +101,7 @@ export default function Header({ onLogout = () => {}, isDarkMode = false }) {
           </AnimatePresence>
         </div>
 
-        {/* Mobile Action Buttons: search, mute, settings, notifications, user */}
+        {/* Mobile Actions */}
         <div className="flex items-center gap-2 md:hidden">
           <Button
             variant="ghost"
@@ -125,10 +140,9 @@ export default function Header({ onLogout = () => {}, isDarkMode = false }) {
           </button>
         </div>
 
-        {/* Desktop Action Buttons: theme & overlay hidden on mobile */}
+        {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-2 sm:gap-3">
           <Button
-            className="hidden md:inline-flex"
             variant="ghost"
             size="sm"
             onClick={toggleMute}
@@ -136,7 +150,6 @@ export default function Header({ onLogout = () => {}, isDarkMode = false }) {
             icon={isMuted ? <VolumeX className="w-5 h-5 text-red-500" /> : <Volume2 className="w-5 h-5 text-teal-400" />}
           />
           <Button
-            className="hidden md:inline-flex"
             variant="ghost"
             size="sm"
             onClick={onToggleTheme}
@@ -144,10 +157,9 @@ export default function Header({ onLogout = () => {}, isDarkMode = false }) {
             icon={isDarkMode ? <SunIcon className="w-5 h-5 text-yellow-300" /> : <MoonIcon className="w-5 h-5 text-blue-300" />}
           />
           <Button
-            className="hidden md:inline-flex"
             variant="ghost"
             size="sm"
-            onClick={() => document.getElementById("audio-overlay").dataset.minimized = "true"}
+            onClick={() => (document.getElementById("audio-overlay").dataset.minimized = "true")}
             aria-label="Toggle Audio Overlay"
             icon={<span className="text-lg text-teal-400">🎵</span>}
           />
@@ -159,13 +171,14 @@ export default function Header({ onLogout = () => {}, isDarkMode = false }) {
             icon={<Cog className="w-5 h-5 text-white" />}
           />
           <div className="relative" ref={notifRef}>
-            {/* notification dropdown same as before */}
+            {/* Notification dropdown */}
           </div>
           <div className="relative" ref={userRef}>
-            {/* user dropdown same as before */}
+            {/* User dropdown */}
           </div>
         </div>
       </div>
     </motion.header>
   );
 }
+
