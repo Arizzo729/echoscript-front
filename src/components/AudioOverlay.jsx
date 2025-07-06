@@ -8,6 +8,8 @@ import {
   Pause,
   Play,
   X,
+  ChevronUp,     
+  ChevronDown,
   Volume2,
   VolumeX,
   Music
