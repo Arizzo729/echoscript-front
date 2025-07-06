@@ -62,6 +62,5 @@
               <AudioOverlay />
             </div>
           ))}
-...
 
 
