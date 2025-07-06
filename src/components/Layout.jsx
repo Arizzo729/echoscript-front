@@ -1,5 +1,4 @@
 // src/components/Layout.jsx (final version)
-...
         {!showIntro &&
           (isMobile ? (
             // Mobile: ONLY MobileLayout, AudioOverlay handled INSIDE MobileLayout if you want mobile overlay.
