@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import IconButton from './IconButton';
 import MobileBottomNav from './MobileBottomNav';
-import AudioOverlay from './AudioOverlay';
 import Logo from '../assets/EchoScriptAI_Transparent_Dark.png';
 import {
   Search as MagnifyingGlassIcon,
@@ -16,7 +15,7 @@ import {
   Home as HomeIcon,
 } from 'lucide-react';
 
-// Helper: Safe area wrapper for notch/home indicator devices
+// Safe area wrapper for notch/home indicator devices
 function SafeAreaWrapper({ children }) {
   return (
     <div
@@ -42,7 +41,7 @@ function AnimatedHeader({ children }) {
       transition={{ type: 'spring', stiffness: 220, damping: 22 }}
       className="fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-zinc-900/95 shadow-md backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800"
       style={{
-        height: 'var(--header-height, 104px)', // 2 rows, can adjust via CSS variable
+        height: 'var(--header-height, 104px)',
       }}
     >
       {children}
@@ -50,7 +49,7 @@ function AnimatedHeader({ children }) {
   );
 }
 
-// Controlled, accessible search input with debounce
+// Search input with debounce
 function AnimatedSearchInput({ placeholder, onSearch }) {
   const [value, setValue] = useState('');
   const timeout = useRef(null);
@@ -101,7 +100,7 @@ function ThemeToggle({ theme, onToggle }) {
   );
 }
 
-// Logo, home button, and action icons, all accessible
+// Logo, home button, and action icons
 function LogoAndActions({ t, onHome, theme, onThemeToggle, actions }) {
   return (
     <div className="px-4 py-1 flex items-center justify-between gap-2">
@@ -137,7 +136,7 @@ function LogoAndActions({ t, onHome, theme, onThemeToggle, actions }) {
   );
 }
 
-// Animated, safe bottom nav
+// Animated bottom nav
 function AnimatedBottomNav() {
   return (
     <AnimatePresence>
@@ -155,33 +154,12 @@ function AnimatedBottomNav() {
   );
 }
 
-// Optional: Audio FAB for mobile, highly discoverable
-function AudioFAB({ onClick }) {
-  return (
-    <motion.button
-      initial={{ opacity: 0, scale: 0.93 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.93 }}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.93 }}
-      onClick={onClick}
-      className="fixed bottom-[84px] right-5 z-50 bg-zinc-900/90 border border-teal-400/60 shadow-lg rounded-full w-14 h-14 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-teal-300"
-      aria-label="Ambient Audio"
-      tabIndex={0}
-      style={{ boxShadow: '0 4px 28px 0 rgba(0,0,0,0.11)' }}
-    >
-      <SpeakerWaveIcon className="w-7 h-7 text-teal-400" />
-    </motion.button>
-  );
-}
-
-// Main advanced layout
+// Main advanced mobile layout
 export default function MobileLayout({ children, onSearch }) {
   const { t } = useTranslation();
   const [theme, setTheme] = useState(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-  const [audioOpen, setAudioOpen] = useState(false);
 
-  // Theme toggler: for best results, syncs with Tailwind's dark class
+  // Theme toggler
   const handleThemeToggle = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
@@ -193,27 +171,27 @@ export default function MobileLayout({ children, onSearch }) {
     localStorage.setItem('theme', nextTheme);
   };
 
-  // Professional action icons: Replace onClick with real handlers
+  // Action icons (replace handlers as needed)
   const actions = [
     {
       icon: <SpeakerWaveIcon className="w-5 h-5" />,
       label: t('Ambient Audio'),
-      onClick: () => setAudioOpen(v => !v),
+      onClick: () => {}, // Audio overlay is handled at Layout level
     },
     {
       icon: <CogIcon className="w-5 h-5" />,
       label: t('Settings'),
-      onClick: () => {/* open settings */},
+      onClick: () => {},
     },
     {
       icon: <Bell className="w-5 h-5" />,
       label: t('Notifications'),
-      onClick: () => {/* open notifications */},
+      onClick: () => {},
     },
     {
       icon: <User className="w-5 h-5" />,
       label: t('Sign in'),
-      onClick: () => {/* open login modal */},
+      onClick: () => {},
     },
   ];
 
@@ -222,7 +200,6 @@ export default function MobileLayout({ children, onSearch }) {
     window.location.href = '/';
   };
 
-  // Responsive content padding for header and nav
   const mainStyle = {
     paddingTop: 'calc(var(--header-height, 104px) + 0.5rem)',
     paddingBottom: 'calc(var(--bottom-nav-height, 64px) + 0.5rem)',
@@ -234,14 +211,12 @@ export default function MobileLayout({ children, onSearch }) {
       <div className="flex flex-col min-h-screen w-full bg-white dark:bg-zinc-900 relative">
         {/* Animated header */}
         <AnimatedHeader>
-          {/* Row 1: Search bar */}
           <div className="px-4 pt-2">
             <AnimatedSearchInput
               placeholder={t('search.placeholder')}
               onSearch={onSearch}
             />
           </div>
-          {/* Row 2: Logo, Home, and Actions */}
           <LogoAndActions
             t={t}
             onHome={handleHome}
@@ -251,7 +226,7 @@ export default function MobileLayout({ children, onSearch }) {
           />
         </AnimatedHeader>
 
-        {/* Main content area with safe content padding */}
+        {/* Main content */}
         <main
           className="flex-1 overflow-auto px-4 transition-colors"
           style={mainStyle}
@@ -263,36 +238,11 @@ export default function MobileLayout({ children, onSearch }) {
           {children}
         </main>
 
-        {/* Animated bottom navigation */}
+        {/* Bottom nav */}
         <AnimatedBottomNav />
-
-        {/* Floating Audio FAB, only on mobile and only if overlay not open */}
-        {!audioOpen && (
-          <AudioFAB onClick={() => setAudioOpen(true)} />
-        )}
-
-        {/* Audio Overlay, over content, managed by FAB */}
-        <AnimatePresence>
-          {audioOpen && (
-            <motion.div
-              key="audio-overlay"
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 40 }}
-              transition={{ type: 'spring', stiffness: 220, damping: 20 }}
-              className="fixed inset-0 z-50 pointer-events-auto flex items-end justify-center"
-              aria-modal="true"
-              role="dialog"
-            >
-              <div className="absolute inset-0 bg-black/20" onClick={() => setAudioOpen(false)} />
-              <div className="relative w-full max-w-md mx-auto">
-                <AudioOverlay onClose={() => setAudioOpen(false)} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </SafeAreaWrapper>
   );
 }
+
 

@@ -1,4 +1,5 @@
 // src/App.jsx
+
 import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 
@@ -14,13 +15,9 @@ import { SoundProvider, useSound } from "./context/SoundContext";
 import AnimatedSplash from "./components/AnimatedSplash";
 import OnboardingModal from "./components/OnboardingModal";
 import Layout from "./components/Layout";
-import AudioOverlay from "./components/AudioOverlay";
 import ErrorBoundary from "./components/ErrorBoundary";
 import TranscriptAudioPlayer from "./components/TranscriptAudioPlayer";
-
-// Mobile Helpers
 import useIsMobile from "./hooks/useIsMobile";
-import MobileOverlay from "./components/MobileOverlay";
 import MobileBottomNav from "./components/MobileBottomNav";
 import FloatingHome from "./components/FloatingHome";
 
@@ -77,15 +74,6 @@ function AppInner() {
         <AnimatedSplash onComplete={() => setSplashDone(true)} />
       ) : (
         <>
-          {/* Audio overlay: inside a mobile sheet on phones */}
-          {isMobile ? (
-            <MobileOverlay>
-              <AudioOverlay />
-            </MobileOverlay>
-          ) : (
-            <AudioOverlay />
-          )}
-
           <Routes>
             {/* Public auth routes */}
             <Route path="/signin" element={<SignIn />} />
