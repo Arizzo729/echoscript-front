@@ -1,5 +1,7 @@
 // src/components/MobileOverlay.jsx
 import React, { useRef, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Home, X } from 'lucide-react';
 import '../styles/mobile.css';
 
 export default function MobileOverlay({ children }) {
@@ -7,6 +9,7 @@ export default function MobileOverlay({ children }) {
   const [translateY, setTranslateY] = useState(0);
   const startY = useRef(0);
   const isDragging = useRef(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const overlay = overlayRef.current;
@@ -48,47 +51,27 @@ export default function MobileOverlay({ children }) {
   return (
     <div
       ref={overlayRef}
-      className="overlay fade-in"
+      className="md:hidden fixed bottom-16 left-1/2 transform -translate-x-1/2 w-[90%] max-h-[70vh] bg-zinc-900/90 backdrop-blur-lg rounded-t-xl shadow-lg z-20 transition-transform duration-300"
       style={{ transform: `translateY(${translateY}px)` }}
     >
-      <div className="drag-handle" aria-hidden="true" />
-      {children}
+      {/* Header: drag handle, home & close buttons */}
+      <div className="flex items-center justify-between p-2">
+        <div
+          className="drag-handle w-10 h-1 bg-zinc-500 rounded-full mx-auto touch-pan-y"
+          aria-hidden="true"
+        />
+        <button onClick={() => navigate('/')} className="p-1 focus:outline-none">
+          <Home className="w-6 h-6 text-teal-400" aria-hidden="true" />
+        </button>
+        <button onClick={() => setTranslateY(window.innerHeight)} className="p-1 focus:outline-none">
+          <X className="w-6 h-6 text-zinc-200" aria-hidden="true" />
+        </button>
+      </div>
+
+      {/* Content area */}
+      <div className="px-4 pb-4 overflow-auto">
+        {children}
+      </div>
     </div>
   );
 }
-
-/* Note: Move the following CSS into src/styles/mobile.css */
-/*
-@media (max-width: 768px) {
-  .overlay {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    max-height: 80vh;
-    background: rgba(255,255,255,0.9);
-    backdrop-filter: blur(12px);
-    border-top-left-radius: var(--radius-lg);
-    border-top-right-radius: var(--radius-lg);
-    box-shadow: var(--shadow-strong);
-    overflow: hidden;
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-    z-index: 1000;
-  }
-
-  .overlay.fade-in {
-    transform: translateY(0);
-  }
-
-  .drag-handle {
-    width: 40px;
-    height: 4px;
-    background: var(--color-secondary-text);
-    border-radius: 2px;
-    margin: 8px auto;
-    touch-action: none;
-    cursor: grab;
-  }
-}
-*/

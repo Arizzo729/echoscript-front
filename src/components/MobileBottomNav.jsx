@@ -1,42 +1,50 @@
-// File: src/components/MobileBottomNav.jsx
+// src/components/MobileBottomNav.jsx
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-// Import SVGs as React components via SVGR:
+import { motion } from 'framer-motion';
 import { ReactComponent as HomeIcon } from '../assets/icons/home.svg';
 import { ReactComponent as DashboardIcon } from '../assets/icons/dashboard.svg';
 import { ReactComponent as UploadIcon } from '../assets/icons/upload.svg';
 import { ReactComponent as ShopIcon } from '../assets/icons/shop.svg';
-import '../styles/mobile.css';
+import { useSound } from '../context/SoundContext';
 
 export default function MobileBottomNav() {
   const links = [
-    { to: '/', Icon: HomeIcon, label: 'Home' },
-    { to: '/dashboard', Icon: DashboardIcon, label: 'Dashboard' },
-    { to: '/upload', Icon: UploadIcon, label: 'Upload' },
-    { to: '/shop', Icon: ShopIcon, label: 'Shop' },
+    { to: '/', Icon: HomeIcon },
+    { to: '/dashboard', Icon: DashboardIcon },
+    { to: '/upload', Icon: UploadIcon },
+    { to: '/shop', Icon: ShopIcon },
   ];
 
+  const { playPop } = useSound();
+
   return (
-    <nav className="bottom-nav">
-      {links.map(({ to, Icon, label }) => (
-        <NavLink
-          key={to}
-          to={to}
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-        >
-          <Icon className="nav-icon" aria-hidden />
-          <span className="nav-label">{label}</span>
+    <nav
+      className="fixed bottom-0 inset-x-0 h-16 flex justify-around items-center bg-zinc-900/80 backdrop-blur-sm border-t border-teal-600/40 safe-area-inset md:hidden"
+    >
+      {links.map(({ to, Icon }) => (
+        <NavLink key={to} to={to} className="flex-1 flex justify-center items-center">
+          {({ isActive }) => (
+            <motion.div
+              onTap={() => playPop()}
+              whileTap={{ scale: 0.75 }}
+              className={
+                `w-full h-full flex flex-col justify-center items-center 
+                 ${isActive ? 'bg-teal-600/20' : 'hover:bg-zinc-700/50'}
+                 `
+              }
+            >
+              <Icon
+                className={`w-6 h-6 ${isActive ? 'text-teal-400' : 'text-zinc-400'}`} 
+                aria-hidden="true"
+              />
+            </motion.div>
+          )}
         </NavLink>
       ))}
     </nav>
   );
 }
-
-// -- Alternative fallback without SVGR --
-// If you prefer not to use SVGR, import SVGs as URLs and render with <img>:
-// import homeSrc from '../assets/icons/home.svg';
-// ...
-// <img src={homeSrc} className="nav-icon" alt="Home" />
 
 
 

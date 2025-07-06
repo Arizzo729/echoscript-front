@@ -1,4 +1,4 @@
-// File: vite.config.js
+/// vite.config.js
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
@@ -11,18 +11,16 @@ export default defineConfig(({ mode }) => {
     base: '/',
     plugins: [
       svgr({
-        // allow named ReactComponent imports
         exportAsDefault: false,
-        // optional SVGR config
         icon: true,
         svgoConfig: { plugins: [{ removeViewBox: false }] },
-      }), // run before react()
+      }), // must precede react()
       react(),
       environmentPlugin({
         defaults: {
-          VITE_OPENAI_API_KEY: env.VITE_OPENAI_API_KEY || '',
+          VITE_OPENAI_API_KEY:    env.VITE_OPENAI_API_KEY    || '',
           VITE_BROWSE_AI_API_KEY: env.VITE_BROWSE_AI_API_KEY || '',
-          VITE_APIFY_API_TOKEN: env.VITE_APIFY_API_TOKEN || '',
+          VITE_APIFY_API_TOKEN:   env.VITE_APIFY_API_TOKEN   || '',
           VITE_BRIGHTDATA_USERNAME: env.VITE_BRIGHTDATA_USERNAME || '',
           VITE_BRIGHTDATA_PASSWORD: env.VITE_BRIGHTDATA_PASSWORD || '',
         },
@@ -35,13 +33,11 @@ export default defineConfig(({ mode }) => {
       historyApiFallback: true,
     },
     build: {
-      rollupOptions: {
-        input: './index.html',
-      },
+      rollupOptions: { input: './index.html' },
       outDir: 'dist',
       emptyOutDir: true,
     },
-    // explicitly include SVG assets
     assetsInclude: ['**/*.svg'],
   };
 });
+

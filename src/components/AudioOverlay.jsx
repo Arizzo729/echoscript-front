@@ -16,21 +16,22 @@ export default function AudioOverlay() {
   const { trackIndex, isPlaying, volume, setVolume, playAmbientTrack, togglePlay } = useSound();
   const [showTip, setShowTip] = useState(true);
   const [busy, setBusy] = useState(false);
-  const x = useMotionValue(40);
-  const y = useMotionValue(80);
+  const [mobileVisible, setMobileVisible] = useState(true);
+  const x = useMotionValue(48);
+  const y = useMotionValue(96);
   const wrapperRef = useRef(null);
 
   // Load saved position
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
-    if (saved.x != null) x.set(saved.x);
-    if (saved.y != null) y.set(saved.y);
+    if (typeof saved.x === 'number') x.set(saved.x);
+    if (typeof saved.y === 'number') y.set(saved.y);
   }, [x, y]);
 
-  // Save position on drag end
+  // Save position
   const handleDragEnd = (_, info) => {
+    if (!wrapperRef.current) return;
     const node = wrapperRef.current;
-    if (!node) return;
     const maxX = window.innerWidth - node.offsetWidth;
     const maxY = window.innerHeight - node.offsetHeight;
     const clampedX = Math.min(Math.max(0, info.point.x), maxX);
@@ -43,123 +44,157 @@ export default function AudioOverlay() {
   // Keyboard shortcuts
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === ' ') {
+      if (e.code === 'Space') {
         e.preventDefault();
         handlePlayClick();
-      } else if (e.key === 'ArrowRight') handleNext();
-      else if (e.key === 'ArrowLeft') handlePrev();
+      } else if (e.code === 'ArrowRight') {
+        handleNext();
+      } else if (e.code === 'ArrowLeft') {
+        handlePrev();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [trackIndex, isPlaying]);
 
-  // Play/pause toggle
   const handlePlayClick = () => {
-    if (trackIndex === 0) playAmbientTrack(1);
-    else togglePlay();
+    trackIndex === 0 ? playAmbientTrack(1) : togglePlay();
   };
 
-  // Next track (throttled)
   const handleNext = () => {
     if (busy) return;
     setBusy(true);
-    const nextIdx = (trackIndex + 1) % TRACKS.length;
-    playAmbientTrack(nextIdx);
+    playAmbientTrack((trackIndex + 1) % TRACKS.length);
     setTimeout(() => setBusy(false), 300);
   };
 
-  // Previous track (throttled)
   const handlePrev = () => {
     if (busy) return;
     setBusy(true);
-    const prevIdx = (trackIndex - 1 + TRACKS.length) % TRACKS.length;
-    playAmbientTrack(prevIdx);
+    playAmbientTrack((trackIndex - 1 + TRACKS.length) % TRACKS.length);
     setTimeout(() => setBusy(false), 300);
   };
 
   const currentLabel = TRACKS[trackIndex]?.label;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        ref={wrapperRef}
-        drag
-        dragMomentum={false}
-        dragElastic={0}
-        onDragEnd={handleDragEnd}
-        style={{ x, y, cursor: 'grab' }}
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-        className="fixed z-[9999] flex flex-col items-center gap-1 select-none drop-shadow-xl"
-      >
-        {showTip && (
-          <div className="flex items-start gap-2 px-3 py-2 mb-1 bg-zinc-800/90 border border-teal-500/30 text-white text-xs rounded-md">
-            <Lightbulb className="w-3.5 h-3.5 text-teal-300 mt-0.5" />
-            <span className="text-[0.65rem] leading-tight">Tip: Use ← → to switch, Space to play/pause.</span>
-            <button
-              onClick={() => setShowTip(false)}
-              onPointerDownCapture={(e) => e.stopPropagation()}
-              className="ml-auto p-0 bg-transparent text-white hover:opacity-75 focus:outline-none"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-
-        <div
-          className="rounded-2xl backdrop-blur-xl border border-teal-500/40 bg-zinc-900/80 shadow-md"
-          onPointerDownCapture={(e) => {
-            const tag = e.target.tagName.toLowerCase();
-            if (tag !== 'div') e.stopPropagation();
-          }}
+    <>
+      {/* Desktop Overlay */}
+      <AnimatePresence>
+        <motion.div
+          ref={wrapperRef}
+          drag
+          dragMomentum={false}
+          dragElastic={0}
+          onDragEnd={handleDragEnd}
+          style={{ x, y, cursor: 'grab' }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.85 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+          className="hidden md:flex fixed z-[9999] flex-col items-center gap-2 select-none shadow-lg"
         >
-          <div className="flex items-center gap-3 px-4 py-2">
+          {showTip && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-zinc-800/80 border border-teal-400/50 text-white text-[0.65rem] rounded-lg">
+              <Lightbulb className="w-4 h-4 text-teal-300" />
+              <span>Tip: ← → to switch, Space to play/pause.</span>
+              <button
+                onClick={() => setShowTip(false)}
+                onPointerDownCapture={(e) => e.stopPropagation()}
+                className="ml-auto p-1 bg-transparent hover:bg-zinc-700 rounded"
+              >
+                <X className="w-4 h-4 text-white" />
+              </button>
+            </div>
+          )}
+          <div className="flex items-center gap-4 px-5 py-3 rounded-2xl backdrop-blur-lg bg-zinc-900/75 border border-teal-400/50">
             <Button
               variant="ghost"
               size="sm"
               onClick={handlePrev}
               disabled={busy}
-              onPointerDownCapture={(e) => e.stopPropagation()}
-              icon={<ChevronLeft className="w-4 h-4 text-teal-400" />}
+              icon={<ChevronLeft className="w-5 h-5 text-teal-400" />}
             />
             <Button
               variant="ghost"
               size="sm"
               onClick={handlePlayClick}
-              onPointerDownCapture={(e) => e.stopPropagation()}
-              icon={isPlaying ? <Pause className="w-4 h-4 text-teal-400" /> : <Play className="w-4 h-4 text-teal-400" />}
+              icon={
+                isPlaying
+                  ? <Pause className="w-5 h-5 text-teal-400" />
+                  : <Play className="w-5 h-5 text-teal-400" />
+              }
             />
             <Button
               variant="ghost"
               size="sm"
               onClick={handleNext}
               disabled={busy}
-              onPointerDownCapture={(e) => e.stopPropagation()}
-              icon={<ChevronRight className="w-4 h-4 text-teal-400" />}
+              icon={<ChevronRight className="w-5 h-5 text-teal-400" />}
             />
-            <span className="text-[0.6rem] min-w-[32px] px-2 py-0.5 rounded-full bg-zinc-800/70 text-teal-300 font-mono text-center">
+            <div className="px-3 py-1 bg-zinc-800/70 rounded-full text-[0.7rem] text-teal-300 font-mono">
               {currentLabel}
-            </span>
-          </div>
-
-          <div className="w-full flex justify-center pb-2 px-4">
+            </div>
             <input
               type="range"
               min={0}
               max={100}
               step={1}
               value={volume * 100}
-              onChange={(e) => setVolume(parseFloat(e.target.value) / 100)}
+              onChange={(e) => setVolume(e.target.value / 100)}
               onPointerDownCapture={(e) => e.stopPropagation()}
-              className="w-40 h-1 accent-teal-400 cursor-pointer"
+              className="w-32 h-1 accent-teal-400 cursor-pointer"
             />
           </div>
-        </div>
-      </motion.div>
-    </AnimatePresence>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {mobileVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 60 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+            className="flex md:hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 items-center gap-3 px-3 py-2 bg-zinc-800/90 backdrop-blur border border-teal-400/50 rounded-full shadow-xl"
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handlePrev}
+              disabled={busy}
+              icon={<ChevronLeft className="w-5 h-5 text-teal-300" />}
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handlePlayClick}
+              icon={
+                isPlaying
+                  ? <Pause className="w-5 h-5 text-teal-300" />
+                  : <Play className="w-5 h-5 text-teal-300" />
+              }
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleNext}
+              disabled={busy}
+              icon={<ChevronRight className="w-5 h-5 text-teal-300" />}
+            />
+            <div className="text-xs font-mono text-teal-300 px-2">
+              {currentLabel}
+            </div>
+            <button
+              onClick={() => setMobileVisible(false)}
+              className="p-1 bg-transparent hover:bg-zinc-700 rounded"
+            >
+              <X className="w-5 h-5 text-teal-300" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
-
-

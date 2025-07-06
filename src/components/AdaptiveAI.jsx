@@ -1,3 +1,4 @@
+// src/components/AdaptiveAI.jsx
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { AutomationService, PROVIDERS } from "../services/AutomationService";
 
@@ -19,7 +20,8 @@ export default function AdaptiveAI({
     setLog((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
 
   const chooseProviderAdaptive = useCallback(() => {
-    if (typeof inputData === "string" && inputData.length > 1000) return PROVIDERS.OCTOPARSE;
+    if (typeof inputData === "string" && inputData.length > 1000)
+      return PROVIDERS.OCTOPARSE;
     return initialProvider;
   }, [inputData, initialProvider]);
 
@@ -33,10 +35,15 @@ export default function AdaptiveAI({
     appendLog(`🔁 Starting automation with provider: ${provider}`);
 
     try {
-      const res = await service.runAutomation(provider, automationId, inputData, {
-        signal: abortRef.current.signal,
-        context: adaptiveContext,
-      });
+      const res = await service.runAutomation(
+        provider,
+        automationId,
+        inputData,
+        {
+          signal: abortRef.current.signal,
+          context: adaptiveContext,
+        }
+      );
       appendLog(`✅ Automation completed successfully.`);
       setResult(res);
       setStatus("success");
@@ -57,7 +64,7 @@ export default function AdaptiveAI({
       appendLog(`🤖 Adaptive AI switched provider → ${newProvider}`);
       setProvider(newProvider);
     }
-  }, [chooseProviderAdaptive]);
+  }, [chooseProviderAdaptive, provider]);
 
   useEffect(() => {
     if (automationId && inputData) runAutomation();
@@ -66,7 +73,9 @@ export default function AdaptiveAI({
   return (
     <div className="adaptive-ai-widget p-6 bg-gradient-to-br from-white via-zinc-50 to-zinc-100 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-900 rounded-2xl shadow-xl max-w-3xl mx-auto font-inter space-y-6">
       <header>
-        <h2 className="text-2xl font-bold text-teal-600 dark:text-teal-400 mb-1">Adaptive AI Automation</h2>
+        <h2 className="text-2xl font-bold text-teal-600 dark:text-teal-400 mb-1">
+          Adaptive AI Automation
+        </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Our system auto-selects the best provider based on your input context.
         </p>
@@ -92,7 +101,11 @@ export default function AdaptiveAI({
       </div>
 
       <div className="min-h-[64px]">
-        {status === "idle" && <p className="text-gray-500 dark:text-gray-400">Awaiting input to run automation...</p>}
+        {status === "idle" && (
+          <p className="text-gray-500 dark:text-gray-400">
+            Awaiting input to run automation...
+          </p>
+        )}
         {status === "running" && (
           <p className="text-blue-600 dark:text-blue-400 font-medium flex items-center animate-pulse">
             Running automation... <LoadingSpinner />
@@ -104,7 +117,9 @@ export default function AdaptiveAI({
               {JSON.stringify(result, null, 2)}
             </pre>
             <button
-              onClick={() => navigator.clipboard.writeText(JSON.stringify(result, null, 2))}
+              onClick={() =>
+                navigator.clipboard.writeText(JSON.stringify(result, null, 2))
+              }
               className="absolute top-2 right-2 px-2 py-1 text-xs bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 rounded"
               aria-label="Copy result to clipboard"
             >
@@ -113,7 +128,9 @@ export default function AdaptiveAI({
           </div>
         )}
         {status === "error" && (
-          <p className="text-red-600 dark:text-red-400 font-medium">❌ Error: {error}</p>
+          <p className="text-red-600 dark:text-red-400 font-medium">
+            ❌ Error: {error}
+          </p>
         )}
       </div>
 
@@ -128,7 +145,9 @@ export default function AdaptiveAI({
       </div>
 
       <details className="bg-zinc-50 dark:bg-zinc-800 rounded-xl p-4 text-sm">
-        <summary className="cursor-pointer font-semibold">View Logs ({log.length})</summary>
+        <summary className="cursor-pointer font-semibold">
+          View Logs ({log.length})
+        </summary>
         <div className="mt-2 max-h-48 overflow-y-auto font-mono whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
           {log.map((line, i) => (
             <div key={i}>{line}</div>
@@ -139,6 +158,7 @@ export default function AdaptiveAI({
   );
 }
 
+// Spinner component for loading state
 const LoadingSpinner = () => (
   <svg
     className="inline animate-spin h-5 w-5 ml-2 text-blue-600 dark:text-blue-400"
@@ -146,7 +166,14 @@ const LoadingSpinner = () => (
     fill="none"
     viewBox="0 0 24 24"
   >
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="4"
+    />
     <path
       className="opacity-75"
       fill="currentColor"
@@ -154,5 +181,3 @@ const LoadingSpinner = () => (
     />
   </svg>
 );
-
-
