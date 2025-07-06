@@ -212,4 +212,5 @@ export default function AudioOverlay() {
             <button
               onClick={() => setMobileVisible(false)}
               className="p-1 bg-transparent hover:bg-zinc-700 rounded"
+>
 
