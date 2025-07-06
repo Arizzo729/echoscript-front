@@ -1,20 +1,22 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import IconButton from './IconButton';
 import MobileBottomNav from './MobileBottomNav';
+import AudioOverlay from './AudioOverlay';
 import Logo from '../assets/EchoScriptAI_Transparent_Dark.png';
 import {
-  MagnifyingGlassIcon,
-  BellIcon,
-  CogIcon,
-  UserCircleIcon,
-  SpeakerWaveIcon
-} from './HeaderIcons';
+  Search as MagnifyingGlassIcon,
+  Bell,
+  Settings as CogIcon,
+  User,
+  Volume2 as SpeakerWaveIcon,
+  Sun,
+  Moon,
+  Home as HomeIcon,
+} from 'lucide-react';
 
-/**
- * SafeAreaWrapper handles device notch/home indicator insets
- */
+// Helper: Safe area wrapper for notch/home indicator devices
 function SafeAreaWrapper({ children }) {
   return (
     <div
@@ -22,7 +24,7 @@ function SafeAreaWrapper({ children }) {
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',
         paddingLeft: 'env(safe-area-inset-left)',
-        paddingRight: 'env(safe-area-inset-right)'
+        paddingRight: 'env(safe-area-inset-right)',
       }}
       className="bg-white dark:bg-zinc-900 min-h-screen w-full"
     >
@@ -31,63 +33,103 @@ function SafeAreaWrapper({ children }) {
   );
 }
 
-/**
- * Header that animates down on mount
- */
+// Header bar with spring animation
 function AnimatedHeader({ children }) {
   return (
     <motion.header
-      initial={{ y: -100 }}
+      initial={{ y: -120 }}
       animate={{ y: 0 }}
-      transition={{ type: 'spring', stiffness: 220, damping: 20 }}
-      className="fixed top-0 left-0 right-0 z-20"
+      transition={{ type: 'spring', stiffness: 220, damping: 22 }}
+      className="fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-zinc-900/95 shadow-md backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800"
+      style={{
+        height: 'var(--header-height, 104px)', // 2 rows, can adjust via CSS variable
+      }}
     >
       {children}
     </motion.header>
   );
 }
 
-/**
- * Search input with press animation
- */
-function AnimatedSearchInput({ placeholder }) {
+// Controlled, accessible search input with debounce
+function AnimatedSearchInput({ placeholder, onSearch }) {
+  const [value, setValue] = useState('');
+  const timeout = useRef(null);
+
+  function handleInput(e) {
+    setValue(e.target.value);
+    if (timeout.current) clearTimeout(timeout.current);
+    timeout.current = setTimeout(() => {
+      onSearch && onSearch(e.target.value);
+    }, 300);
+  }
+
   return (
-    <div className="flex-1 relative">
+    <div className="flex-1 relative group">
       <motion.input
         type="search"
+        value={value}
         placeholder={placeholder}
-        whileFocus={{ scale: 1.02 }}
-        transition={{ type: 'spring', stiffness: 300 }}
-        className="w-full h-10 pl-4 pr-4 text-sm rounded-2xl bg-zinc-100 dark:bg-zinc-800 shadow-md border-0 focus:outline-none focus:ring-2 focus:ring-teal-400"
+        aria-label={placeholder}
+        onChange={handleInput}
+        whileFocus={{ scale: 1.03, boxShadow: '0 0 0 3px #2dd4bf50' }}
+        transition={{ type: 'spring', stiffness: 320 }}
+        className="w-full h-11 pl-10 pr-4 text-[1rem] rounded-full bg-zinc-100 dark:bg-zinc-800 shadow-inner border-0 focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all"
+        role="searchbox"
+        tabIndex={0}
+        autoComplete="off"
       />
-      <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 dark:text-zinc-400" />
+      <MagnifyingGlassIcon
+        className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 dark:text-zinc-400 pointer-events-none"
+        aria-hidden="true"
+      />
     </div>
   );
 }
 
-/**
- * Logo with hover effect and action icons with tap scale
- */
-function LogoAndActions({ t }) {
-  const icons = [
-    { icon: <SpeakerWaveIcon className="w-5 h-5" />, label: t('Toggle sound') },
-    { icon: <CogIcon className="w-5 h-5" />, label: t('Settings') },
-    { icon: <BellIcon className="w-5 h-5" />, label: t('Notifications') },
-    { icon: <UserCircleIcon className="w-5 h-5" />, label: t('Sign in') }
-  ];
+// Theme switcher (sun/moon)
+function ThemeToggle({ theme, onToggle }) {
   return (
-    <div className="px-4 py-1 flex items-center justify-between">
-      <motion.img
-        src={Logo}
-        alt="EchoScript.AI"
-        className="h-6"
-        whileHover={{ scale: 1.1 }}
-        transition={{ type: 'spring', stiffness: 200 }}
-      />
+    <IconButton
+      icon={theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+      label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      variant="ghost"
+      size="sm"
+      onClick={onToggle}
+      aria-pressed={theme === 'dark'}
+      tabIndex={0}
+    />
+  );
+}
+
+// Logo, home button, and action icons, all accessible
+function LogoAndActions({ t, onHome, theme, onThemeToggle, actions }) {
+  return (
+    <div className="px-4 py-1 flex items-center justify-between gap-2">
+      <motion.button
+        type="button"
+        aria-label={t('Home')}
+        onClick={onHome}
+        whileHover={{ scale: 1.07 }}
+        transition={{ type: 'spring', stiffness: 180 }}
+        className="focus:outline-none flex items-center gap-2"
+        tabIndex={0}
+        style={{ minWidth: 36 }}
+      >
+        <HomeIcon className="w-5 h-5 text-teal-400" />
+        <img src={Logo} alt="EchoScript.AI logo" className="h-7 select-none" draggable={false} />
+      </motion.button>
       <div className="flex items-center space-x-2">
-        {icons.map(({ icon, label }, idx) => (
-          <motion.div key={idx} whileTap={{ scale: 0.9 }}>
-            <IconButton icon={icon} label={label} size="sm" variant="ghost" />
+        <ThemeToggle theme={theme} onToggle={onThemeToggle} />
+        {actions.map(({ icon, label, onClick }, idx) => (
+          <motion.div key={idx} whileTap={{ scale: 0.93 }}>
+            <IconButton
+              icon={icon}
+              label={label}
+              size="sm"
+              variant="ghost"
+              onClick={onClick}
+              tabIndex={0}
+            />
           </motion.div>
         ))}
       </div>
@@ -95,18 +137,17 @@ function LogoAndActions({ t }) {
   );
 }
 
-/**
- * Bottom nav slides up on mount
- */
+// Animated, safe bottom nav
 function AnimatedBottomNav() {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ y: 100 }}
+        initial={{ y: 110 }}
         animate={{ y: 0 }}
-        exit={{ y: 100 }}
-        transition={{ type: 'tween', duration: 0.3 }}
-        className="fixed bottom-0 left-0 right-0 z-20"
+        exit={{ y: 110 }}
+        transition={{ type: 'spring', stiffness: 220, damping: 26 }}
+        className="fixed bottom-0 left-0 right-0 z-40 pointer-events-auto"
+        style={{ height: 'var(--bottom-nav-height, 64px)' }}
       >
         <MobileBottomNav />
       </motion.div>
@@ -114,32 +155,144 @@ function AnimatedBottomNav() {
   );
 }
 
-/**
- * MobileLayout: wraps pages with safe area, animated header, content padding, and bottom nav
- */
-export default function MobileLayout({ children }) {
+// Optional: Audio FAB for mobile, highly discoverable
+function AudioFAB({ onClick }) {
+  return (
+    <motion.button
+      initial={{ opacity: 0, scale: 0.93 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.93 }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.93 }}
+      onClick={onClick}
+      className="fixed bottom-[84px] right-5 z-50 bg-zinc-900/90 border border-teal-400/60 shadow-lg rounded-full w-14 h-14 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-teal-300"
+      aria-label="Ambient Audio"
+      tabIndex={0}
+      style={{ boxShadow: '0 4px 28px 0 rgba(0,0,0,0.11)' }}
+    >
+      <SpeakerWaveIcon className="w-7 h-7 text-teal-400" />
+    </motion.button>
+  );
+}
+
+// Main advanced layout
+export default function MobileLayout({ children, onSearch }) {
   const { t } = useTranslation();
+  const [theme, setTheme] = useState(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  const [audioOpen, setAudioOpen] = useState(false);
+
+  // Theme toggler: for best results, syncs with Tailwind's dark class
+  const handleThemeToggle = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    if (nextTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', nextTheme);
+  };
+
+  // Professional action icons: Replace onClick with real handlers
+  const actions = [
+    {
+      icon: <SpeakerWaveIcon className="w-5 h-5" />,
+      label: t('Ambient Audio'),
+      onClick: () => setAudioOpen(v => !v),
+    },
+    {
+      icon: <CogIcon className="w-5 h-5" />,
+      label: t('Settings'),
+      onClick: () => {/* open settings */},
+    },
+    {
+      icon: <Bell className="w-5 h-5" />,
+      label: t('Notifications'),
+      onClick: () => {/* open notifications */},
+    },
+    {
+      icon: <User className="w-5 h-5" />,
+      label: t('Sign in'),
+      onClick: () => {/* open login modal */},
+    },
+  ];
+
+  // Home navigation
+  const handleHome = () => {
+    window.location.href = '/';
+  };
+
+  // Responsive content padding for header and nav
+  const mainStyle = {
+    paddingTop: 'calc(var(--header-height, 104px) + 0.5rem)',
+    paddingBottom: 'calc(var(--bottom-nav-height, 64px) + 0.5rem)',
+    minHeight: '100dvh',
+  };
 
   return (
     <SafeAreaWrapper>
-      <div className="flex flex-col h-full w-full">
+      <div className="flex flex-col min-h-screen w-full bg-white dark:bg-zinc-900 relative">
+        {/* Animated header */}
         <AnimatedHeader>
           {/* Row 1: Search bar */}
-          <div className="px-4 py-2">
-            <AnimatedSearchInput placeholder={t('search.placeholder')} />
+          <div className="px-4 pt-2">
+            <AnimatedSearchInput
+              placeholder={t('search.placeholder')}
+              onSearch={onSearch}
+            />
           </div>
-          {/* Row 2: Logo & Actions */}
-          <LogoAndActions t={t} />
+          {/* Row 2: Logo, Home, and Actions */}
+          <LogoAndActions
+            t={t}
+            onHome={handleHome}
+            theme={theme}
+            onThemeToggle={handleThemeToggle}
+            actions={actions}
+          />
         </AnimatedHeader>
 
-        {/* Main content with top & bottom padding for header/nav */}
-        <main className="flex-1 overflow-auto pt-[calc(env(safe-area-inset-top)+5rem)] pb-[calc(env(safe-area-inset-bottom)+4rem)] px-4">
+        {/* Main content area with safe content padding */}
+        <main
+          className="flex-1 overflow-auto px-4 transition-colors"
+          style={mainStyle}
+          id="main-content"
+          role="main"
+          tabIndex={0}
+          aria-label={t('Main Content')}
+        >
           {children}
         </main>
 
         {/* Animated bottom navigation */}
         <AnimatedBottomNav />
+
+        {/* Floating Audio FAB, only on mobile and only if overlay not open */}
+        {!audioOpen && (
+          <AudioFAB onClick={() => setAudioOpen(true)} />
+        )}
+
+        {/* Audio Overlay, over content, managed by FAB */}
+        <AnimatePresence>
+          {audioOpen && (
+            <motion.div
+              key="audio-overlay"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+              className="fixed inset-0 z-50 pointer-events-auto flex items-end justify-center"
+              aria-modal="true"
+              role="dialog"
+            >
+              <div className="absolute inset-0 bg-black/20" onClick={() => setAudioOpen(false)} />
+              <div className="relative w-full max-w-md mx-auto">
+                <AudioOverlay onClose={() => setAudioOpen(false)} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </SafeAreaWrapper>
   );
 }
+

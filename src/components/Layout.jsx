@@ -1,12 +1,7 @@
 // src/components/Layout.jsx
+
 import React, {
-  useState,
-  useEffect,
-  createContext,
-  useMemo,
-  Suspense,
-  lazy,
-  useTransition
+  useState, useEffect, createContext, useMemo, Suspense, lazy, useTransition
 } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -69,13 +64,17 @@ export default function Layout() {
 
   const themeValue = useMemo(() => ({ theme, toggleTheme }), [theme]);
 
+  // CSS variables for header/sidebar
+  const SIDEBAR_WIDTH = sidebarCollapsed ? 80 : 220; // px
+  const HEADER_HEIGHT = 64; // px
+
   return (
     <ToastProvider>
       <ThemeContext.Provider value={themeValue}>
         {/* Skip link for accessibility */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only fixed top-2 left-2 p-2 bg-teal-500 text-white rounded"
+          className="sr-only focus:not-sr-only fixed top-2 left-2 p-2 bg-teal-500 text-white rounded z-[9999]"
         >
           Skip to content
         </a>
@@ -93,7 +92,6 @@ export default function Layout() {
 
         {!showIntro &&
           (isMobile ? (
-            // Mobile: use new MobileLayout wrapper
             <MobileLayout>
               <ErrorBoundary>
                 <Outlet />
@@ -101,37 +99,75 @@ export default function Layout() {
               <AudioOverlay />
             </MobileLayout>
           ) : (
-            // Desktop: existing header, sidebar, content, audio overlay
-            <div className="flex flex-col h-screen w-screen overflow-hidden bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white">
+            // Desktop Layout
+            <div
+              className="flex flex-col min-h-screen w-screen bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white"
+              style={{
+                '--sidebar-width': `${SIDEBAR_WIDTH}px`,
+                '--header-height': `${HEADER_HEIGHT}px`
+              }}
+            >
+              {/* Sticky Header */}
               <Suspense fallback={<div className="h-16 w-full bg-zinc-900" />}>
-                <Header
-                  onToggleDrawer={toggleDrawer}
-                  drawerOpen={drawerOpen}
-                  collapseSidebar={collapseSidebar}
-                  sidebarCollapsed={sidebarCollapsed}
-                />
+                <motion.div
+                  layout
+                  transition={{ type: 'spring', stiffness: 260, damping: 30 }}
+                  className="sticky top-0 z-30 w-full"
+                  style={{ height: `var(--header-height)` }}
+                >
+                  <Header
+                    onToggleDrawer={toggleDrawer}
+                    drawerOpen={drawerOpen}
+                    collapseSidebar={collapseSidebar}
+                    sidebarCollapsed={sidebarCollapsed}
+                  />
+                </motion.div>
               </Suspense>
 
-              <div className="flex flex-1 overflow-hidden">
+              <div className="flex flex-1 min-h-0 overflow-hidden">
+                {/* Sidebar */}
                 <Suspense fallback={<div className="w-20 bg-zinc-900" />}>
-                  <Sidebar
-                    collapsed={sidebarCollapsed}
-                    setCollapsed={setSidebarCollapsed}
-                  />
+                  <motion.div
+                    layout
+                    transition={{ type: 'spring', stiffness: 220, damping: 26 }}
+                    className={`h-full border-r border-zinc-900/80 bg-zinc-950/80 shadow-2xl backdrop-blur-lg z-20 transition-all`}
+                    style={{
+                      width: `var(--sidebar-width)`,
+                      minWidth: `var(--sidebar-width)`,
+                      maxWidth: `var(--sidebar-width)`,
+                    }}
+                  >
+                    <Sidebar
+                      collapsed={sidebarCollapsed}
+                      setCollapsed={setSidebarCollapsed}
+                    />
+                  </motion.div>
                 </Suspense>
 
+                {/* Main Content */}
                 <main
                   id="main-content"
-                  className={`flex-1 overflow-y-auto relative px-6 py-4 transition-all duration-300 ${
-                    sidebarCollapsed ? 'pl-20' : 'pl-56'
-                  }`}
+                  className={`flex-1 relative overflow-y-auto transition-all duration-300`}
+                  style={{
+                    paddingLeft: sidebarCollapsed ? 24 : 32,
+                    paddingRight: 24,
+                    paddingTop: 32,
+                    paddingBottom: 32,
+                    minHeight: `calc(100vh - var(--header-height))`,
+                    transition: 'padding 0.3s cubic-bezier(.25,.8,.25,1)',
+                  }}
+                  tabIndex={0}
+                  role="main"
+                  aria-label="Main content"
                 >
                   {isPending && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-40">
                       <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ loop: Infinity, duration: 1 }}
                         className="w-10 h-10 border-4 border-teal-400 border-t-transparent rounded-full"
+                        aria-label="Loading"
+                        role="status"
                       />
                     </div>
                   )}
@@ -142,8 +178,10 @@ export default function Layout() {
                 </main>
               </div>
 
+              {/* Toasts/Notifications */}
               <ToastContainer position="top-right" />
 
+              {/* Audio Overlay (desktop, always on top right) */}
               <AudioOverlay />
             </div>
           ))}
