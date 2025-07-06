@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI – Updated Checkout Page with Stripe Integration & Secure Paywall
+// ✅ EchoScript.AI – Upgraded Checkout Page with Stripe Integration & Secure Paywall
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -28,6 +28,20 @@ const planDetails = {
     featuresKey: "purchase.plans.enterprise.features",
     color: "purple",
     stripeId: null,
+  },
+};
+
+// Map tailwind color to actual class
+const colorMap = {
+  teal: {
+    bg: "bg-teal-600",
+    hover: "hover:bg-teal-500",
+    border: "border-teal-600",
+  },
+  purple: {
+    bg: "bg-purple-600",
+    hover: "hover:bg-purple-500",
+    border: "border-purple-600",
   },
 };
 
@@ -75,68 +89,72 @@ export default function Checkout() {
     }
   };
 
+  const color = colorMap[selectedPlan?.color || "teal"];
+
   return (
     <motion.div
-      className="max-w-xl mx-auto px-6 py-12 space-y-6"
+      className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 px-2 sm:px-0 py-8"
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <button
-        onClick={() => navigate("/purchase")}
-        className="text-sm text-teal-400 hover:underline flex items-center gap-1 mb-2"
-      >
-        <ArrowLeftCircle className="w-4 h-4" />
-        {t("checkout.back")}
-      </button>
-
-      <h1 className="text-3xl font-bold text-center text-white">
-        {t("checkout.title")}
-      </h1>
-
-      <div className="rounded-xl border border-zinc-700 shadow-xl bg-zinc-900 p-6 space-y-4 text-white">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
-            {t(selectedPlan.nameKey)}
-          </h2>
-          <span className="text-lg font-bold">{selectedPlan.price}</span>
-        </div>
-
-        <ul className="list-disc list-inside text-sm text-zinc-300 space-y-1">
-          {t(selectedPlan.featuresKey, { returnObjects: true }).map(
-            (feat, i) => (
-              <li key={i}>{feat}</li>
-            )
-          )}
-        </ul>
-
-        {error && (
-          <div className="text-red-400 text-sm font-medium">{error}</div>
-        )}
-
+      <div className="w-full max-w-md">
         <button
-          onClick={handlePayment}
-          disabled={loading}
-          className={`w-full flex justify-center items-center gap-2 py-2 px-4 rounded-lg transition text-white font-semibold bg-${selectedPlan.color}-600 hover:bg-${selectedPlan.color}-500`}
+          onClick={() => navigate("/purchase")}
+          className="text-sm text-teal-400 hover:underline flex items-center gap-1 mb-4"
         >
-          {loading ? (
-            <>
-              <Loader2 className="animate-spin w-4 h-4" />
-              {t("checkout.processing")}
-            </>
-          ) : (
-            <>
-              <CreditCard className="w-4 h-4" />
-              {plan === "enterprise"
-                ? t("checkout.contactUs")
-                : t("checkout.payNow")}
-            </>
-          )}
+          <ArrowLeftCircle className="w-4 h-4" />
+          {t("checkout.back")}
         </button>
 
-        <div className="text-xs text-center text-zinc-500 mt-4">
-          <ShieldCheck className="inline w-4 h-4 mr-1 text-green-400" />
-          {t("checkout.secure")}
+        <h1 className="text-3xl font-bold text-center text-white mb-5">
+          {t("checkout.title")}
+        </h1>
+
+        <div className="rounded-2xl border border-zinc-700 shadow-xl bg-zinc-900 p-7 space-y-6 text-white">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">{t(selectedPlan.nameKey)}</h2>
+            <span className="text-lg font-bold">{selectedPlan.price}</span>
+          </div>
+
+          <ul className="list-disc list-inside text-base text-zinc-300 space-y-1">
+            {(t(selectedPlan.featuresKey, { returnObjects: true }) || []).map(
+              (feat, i) => (
+                <li key={i}>{feat}</li>
+              )
+            )}
+          </ul>
+
+          {error && (
+            <div className="text-red-400 text-sm font-medium">{error}</div>
+          )}
+
+          <button
+            onClick={handlePayment}
+            disabled={loading}
+            className={`w-full flex justify-center items-center gap-2 py-3 px-4 text-base rounded-xl font-bold transition-colors focus-visible:ring-2 focus-visible:ring-teal-400 
+              ${color.bg} ${color.hover} ${loading ? "opacity-70 cursor-not-allowed" : ""}
+            `}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin w-5 h-5" />
+                {t("checkout.processing")}
+              </>
+            ) : (
+              <>
+                <CreditCard className="w-5 h-5" />
+                {plan === "enterprise"
+                  ? t("checkout.contactUs")
+                  : t("checkout.payNow")}
+              </>
+            )}
+          </button>
+
+          <div className="text-xs text-center text-zinc-500 mt-3">
+            <ShieldCheck className="inline w-4 h-4 mr-1 text-green-400" />
+            {t("checkout.secure")}
+          </div>
         </div>
       </div>
     </motion.div>

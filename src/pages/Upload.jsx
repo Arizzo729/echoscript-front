@@ -1,4 +1,3 @@
-// src/pages/Upload.jsx
 import React, { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -10,19 +9,11 @@ import LiveWaveform from "../components/LiveWaveform";
 import TranscriptEditor from "../components/TranscriptEditor";
 import TranscriptExportPanel from "../components/TranscriptExportPanel";
 import {
-  Mic,
-  MicOff,
-  Timer,
-  Download,
-  Globe,
-  FileText,
-  Subtitles,
-  Info,
-  XCircle,
+  Mic, MicOff, Timer, Download, Globe, FileText, Subtitles, Info, XCircle,
 } from "lucide-react";
 
-const AUDIO = ["mp3","wav","flac","m4a","aac","ogg"];
-const VIDEO = ["mp4","mkv","mov"];
+const AUDIO = ["mp3", "wav", "flac", "m4a", "aac", "ogg"];
+const VIDEO = ["mp4", "mkv", "mov"];
 const MAX_MB = 500;
 
 export default function UploadPage() {
@@ -37,41 +28,39 @@ export default function UploadPage() {
   const [paywall, setPaywall] = useState(null);
   const [note, setNote] = useState(null);
 
-  // load draft if exists
   useEffect(() => {
     if (!file) return;
     const key = `draft_${file.name}`;
     const draft = localStorage.getItem(key);
     if (draft) {
       const d = JSON.parse(draft);
-      setTranscript(d.transcript||"");
-      setTranslated(d.translated||"");
+      setTranscript(d.transcript || "");
+      setTranslated(d.translated || "");
       setNote(t("Loaded previous draft."));
     }
-  }, [file,t]);
+  }, [file, t]);
 
-  // clear notifications
   useEffect(() => {
     if (!note) return;
-    const id = setTimeout(()=>setNote(null),3000);
-    return ()=>clearTimeout(id);
+    const id = setTimeout(() => setNote(null), 3000);
+    return () => clearTimeout(id);
   }, [note]);
 
   const handleFile = useCallback((uploaded) => {
     const ext = uploaded.name.split(".").pop().toLowerCase();
-    const valid = AUDIO.includes(ext)||VIDEO.includes(ext);
-    const tooBig = uploaded.size > MAX_MB*1024*1024;
-    if (!valid||tooBig) {
-      alert(`${t("Invalid file or too large")} (max ${MAX_MB}MB). ${t("Accepted formats")}: ${[...AUDIO,...VIDEO].map(f=>f.toUpperCase()).join(",")}.`);
+    const valid = AUDIO.includes(ext) || VIDEO.includes(ext);
+    const tooBig = uploaded.size > MAX_MB * 1024 * 1024;
+    if (!valid || tooBig) {
+      alert(`${t("Invalid file or too large")} (max ${MAX_MB}MB). ${t("Accepted formats")}: ${[...AUDIO, ...VIDEO].map(f => f.toUpperCase()).join(",")}.`);
       return;
     }
     setFile(uploaded);
     setTranscript("");
     setTranslated("");
-  },[t]);
+  }, [t]);
 
   const handleTranscript = useCallback((res) => {
-    if (res?.status===403 && res.detail) {
+    if (res?.status === 403 && res.detail) {
       setPaywall(res.detail);
       setTranscript("");
       setTranslated("");
@@ -80,41 +69,41 @@ export default function UploadPage() {
     setPaywall(null);
     if (res.transcript) {
       setTranscript(res.transcript);
-      setTranslated(translateEnabled?`🌍 [${t("Translated")}]: ${res.transcript}`:"");
+      setTranslated(translateEnabled ? `🌍 [${t("Translated")}]: ${res.transcript}` : "");
     }
-  },[translateEnabled,t]);
+  }, [translateEnabled, t]);
 
   const downloadText = useCallback((txt, name) => {
     if (!txt) return;
-    const blob = new Blob([txt],{type:"text/plain"});
+    const blob = new Blob([txt], { type: "text/plain" });
     const a = document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download=name;
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
     a.click();
-  },[]);
+  }, []);
 
   const saveDraft = () => {
     if (!file) return;
-    localStorage.setItem(`draft_${file.name}`,JSON.stringify({
-      transcript,translated,time:Date.now()
+    localStorage.setItem(`draft_${file.name}`, JSON.stringify({
+      transcript, translated, time: Date.now(),
     }));
     setNote(t("Draft saved."));
   };
 
   const submit = () => {
     if (!file) return;
-    fetch("/api/submitTranscript",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        fileName:file.name,
+    fetch("/api/submitTranscript", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fileName: file.name,
         transcript,
-        translated: translateEnabled?translated:null
+        translated: translateEnabled ? translated : null,
       })
     })
-    .then(r=>{ if (!r.ok) throw new Error(); return r.json(); })
-    .then(()=>setNote(t("Submitted successfully!")))
-    .catch(()=>setNote(t("Submission failed. Try again.")));
+      .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+      .then(() => setNote(t("Submitted successfully!")))
+      .catch(() => setNote(t("Submission failed. Try again.")));
   };
 
   const onDrop = e => {
@@ -126,48 +115,55 @@ export default function UploadPage() {
   return (
     <>
       <motion.div
-        initial={{opacity:0,y:30}}
-        animate={{opacity:1,y:0}}
-        transition={{duration:0.6}}
-        className="min-h-screen px-4 py-10 md:px-10 md:py-16 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="min-h-screen px-2 sm:px-5 py-7 sm:py-14 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white"
       >
-        <div className="max-w-5xl mx-auto space-y-10">
+        <div className="max-w-3xl mx-auto space-y-9">
           {/* Header */}
-          <div className="text-center space-y-2">
-            <h1 className="text-4xl font-extrabold tracking-tight">
+          <div className="text-center space-y-1">
+            <h1 className="text-2xl xs:text-3xl md:text-4xl font-extrabold tracking-tight">
               {t("Upload or Record Audio/Video")}
             </h1>
-            <p className="text-zinc-400 text-sm md:text-base">
+            <p className="text-zinc-400 text-base">
               {t("Supports")} MP3, WAV, MP4, MKV, MOV, FLAC —{" "}
               {t("click or drag to upload, or record live.")}
             </p>
           </div>
 
           {/* Notification */}
-          {note && <div className="text-center text-sm text-teal-300">{note}</div>}
+          {note && (
+            <div className="text-center text-sm text-teal-300 bg-zinc-800/70 px-4 py-2 rounded-lg">
+              {note}
+            </div>
+          )}
 
           {/* Controls */}
-          <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-4">
-            <div className="flex items-center gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3 border border-zinc-700">
               <Timer className="w-5 h-5 text-teal-400" />
               <CountdownSelector value={countdown} onChange={setCountdown} />
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3 border border-zinc-700">
               <Globe className="w-5 h-5 text-yellow-400" />
               <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <input
                   type="checkbox"
                   className="form-checkbox accent-teal-600"
                   checked={translateEnabled}
-                  onChange={()=>setTranslateEnabled(x=>!x)}
+                  onChange={() => setTranslateEnabled(x => !x)}
                   aria-label={t("Enable translation")}
                 />
                 {t("Enable Translation")}
               </label>
             </div>
             {file && (
-              <button onClick={()=>setFile(null)} className="flex items-center gap-2 text-sm text-red-400 hover:underline">
-                <XCircle className="w-5 h-5"/> {t("Clear File")}
+              <button
+                onClick={() => setFile(null)}
+                className="flex items-center gap-2 text-sm text-red-400 hover:underline px-3 py-3 bg-zinc-800 rounded-xl border border-zinc-700"
+              >
+                <XCircle className="w-5 h-5" /> {t("Clear File")}
               </button>
             )}
           </div>
@@ -175,54 +171,57 @@ export default function UploadPage() {
           {/* Upload / Record */}
           <div
             onDrop={onDrop}
-            onDragOver={e=>e.preventDefault()}
-            onClick={()=>document.getElementById("hiddenFileInput")?.click()}
-            className="p-6 border-2 border-dashed border-teal-600 bg-zinc-800 rounded-lg text-sm text-zinc-300 text-center cursor-pointer hover:bg-zinc-700 transition"
+            onDragOver={e => e.preventDefault()}
+            onClick={() => document.getElementById("hiddenFileInput")?.click()}
+            className="p-7 border-2 border-dashed border-teal-600 bg-zinc-800 rounded-2xl text-base text-zinc-300 text-center cursor-pointer hover:bg-zinc-700 transition-all shadow focus:outline-none"
+            tabIndex={0}
+            aria-label={t("Click or drag your audio/video file here")}
           >
-            {file?file.name:t("Click or drag your audio/video file here")}
+            {file ? file.name : t("Click or drag your audio/video file here")}
             <input
               id="hiddenFileInput"
               type="file"
-              accept={[...AUDIO,...VIDEO].map(f=>`.${f}`).join(",")}
+              accept={[...AUDIO, ...VIDEO].map(f => `.${f}`).join(",")}
               className="hidden"
-              onChange={e=>e.target.files?.[0]&&handleFile(e.target.files[0])}
+              onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])}
+              disabled={!!file}
             />
           </div>
 
           {/* Recording */}
           {showCountdown
-            ? <CountdownTimer seconds={countdown} onComplete={()=>{setShowCountdown(false); setRecording(true);}}/>
+            ? <CountdownTimer seconds={countdown} onComplete={() => { setShowCountdown(false); setRecording(true); }} />
             : (
-              <div className="flex flex-col items-center gap-4">
+              <div className="flex flex-col items-center gap-3">
                 <button
-                  onClick={()=>{
+                  onClick={() => {
                     recording
                       ? setRecording(false)
-                      : countdown>0
+                      : countdown > 0
                         ? setShowCountdown(true)
                         : setRecording(true);
                   }}
-                  className="flex items-center gap-2 px-5 py-2 bg-teal-600 text-white rounded-lg shadow hover:bg-teal-700 transition"
+                  className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl shadow hover:bg-teal-700 text-lg font-semibold transition-all"
                 >
-                  {recording?<MicOff className="w-5 h-5"/>:<Mic className="w-5 h-5"/>}
-                  {recording?t("Stop"):t("Record")}
+                  {recording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                  {recording ? t("Stop") : t("Record")}
                 </button>
                 <span className="text-sm text-zinc-400">
-                  {recording?t("Recording..."):t("Ready to record")}
+                  {recording ? t("Recording...") : t("Ready to record")}
                 </span>
               </div>
             )
           }
 
-          {recording && <LiveWaveform sourceType="mic"/>}
+          {recording && <LiveWaveform sourceType="mic" />}
 
           {file && (
             <UploadAndTranscribe
               fileInput={file}
               countdown={countdown}
               translate={translateEnabled}
-              onRecordingStart={()=>setRecording(true)}
-              onRecordingEnd={()=>setRecording(false)}
+              onRecordingStart={() => setRecording(true)}
+              onRecordingEnd={() => setRecording(false)}
               onTranscriptComplete={handleTranscript}
             />
           )}
@@ -230,40 +229,40 @@ export default function UploadPage() {
           {/* Transcript & Translation */}
           {!paywall && transcript && (
             <>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="p-4 bg-zinc-800 rounded-lg border border-zinc-700 space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+                <div className="p-5 bg-zinc-900 rounded-2xl border border-zinc-800 space-y-3 shadow">
                   <h3 className="font-semibold text-lg text-white flex gap-2 items-center">
-                    <FileText className="w-5 h-5 text-teal-400"/>
+                    <FileText className="w-5 h-5 text-teal-400" />
                     {t("Transcript")}
                   </h3>
-                  <TranscriptEditor value={transcript} onChange={setTranscript}/>
+                  <TranscriptEditor value={transcript} onChange={setTranscript} />
                 </div>
                 {translateEnabled && translated && (
-                  <div className="p-4 bg-zinc-800 rounded-lg border border-zinc-700 space-y-3">
+                  <div className="p-5 bg-zinc-900 rounded-2xl border border-zinc-800 space-y-3 shadow">
                     <h3 className="font-semibold text-lg text-white flex gap-2 items-center">
-                      <Subtitles className="w-5 h-5 text-yellow-400"/>
+                      <Subtitles className="w-5 h-5 text-yellow-400" />
                       {t("Translated Output")}
                     </h3>
                     <pre className="text-zinc-300 text-sm whitespace-pre-wrap max-h-64 overflow-auto">
                       {translated}
                     </pre>
-                    <button onClick={()=>downloadText(translated,"translated.txt")}
+                    <button onClick={() => downloadText(translated, "translated.txt")}
                       className="text-sm text-yellow-300 flex items-center gap-2 hover:underline"
                     >
-                      <Download className="w-4 h-4"/> {t("Download Translation")}
+                      <Download className="w-4 h-4" /> {t("Download Translation")}
                     </button>
                   </div>
                 )}
               </div>
-              <div className="mt-6 flex justify-center space-x-4">
-                <TranscriptExportPanel transcriptText={transcript}/>
+              <div className="mt-7 flex flex-col sm:flex-row justify-center items-center gap-4">
+                <TranscriptExportPanel transcriptText={transcript} />
                 <button onClick={saveDraft} disabled={!transcript}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 disabled:opacity-50 transition"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 disabled:opacity-50 font-semibold transition"
                 >
                   {t("Save Draft")}
                 </button>
                 <button onClick={submit} disabled={!transcript}
-                  className="px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 disabled:opacity-50 transition"
+                  className="px-6 py-2 bg-green-600 text-white rounded-xl shadow hover:bg-green-700 disabled:opacity-50 font-semibold transition"
                 >
                   {t("Submit for Review")}
                 </button>
@@ -272,13 +271,17 @@ export default function UploadPage() {
           )}
 
           {/* Info */}
-          <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-5 text-sm text-zinc-400 space-y-3 mt-8">
-            <p className="flex items-center gap-2"><Mic className="w-4 h-4 text-teal-400"/> {t("Record or upload your voice or video — EchoScript will auto-clean and transcribe it.")}</p>
-            <p className="flex items-center gap-2"><Info className="w-4 h-4 text-zinc-400"/> {t(`Files up to ${MAX_MB}MB are supported.`)}</p>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-base text-zinc-400 space-y-3 mt-7 shadow">
+            <p className="flex items-center gap-2">
+              <Mic className="w-4 h-4 text-teal-400" /> {t("Record or upload your voice or video — EchoScript will auto-clean and transcribe it.")}
+            </p>
+            <p className="flex items-center gap-2">
+              <Info className="w-4 h-4 text-zinc-400" /> {t(`Files up to ${MAX_MB}MB are supported.`)}
+            </p>
           </div>
         </div>
       </motion.div>
-      {paywall && <PaywallModal info={paywall} onClose={()=>setPaywall(null)}/>}
+      {paywall && <PaywallModal info={paywall} onClose={() => setPaywall(null)} />}
     </>
   );
 }
