@@ -3,16 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ChevronLeft,
-  ChevronRight,
-  Pause,
-  Play,
-  X,
-  ChevronUp,
-  ChevronDown,
-  Volume2,
-  VolumeX,
-  Music
+  ChevronLeft, ChevronRight, Pause, Play, X, ChevronUp, ChevronDown, Volume2, VolumeX, Music
 } from 'lucide-react';
 import Button from './ui/Button';
 import { useSound } from '../context/SoundContext';
@@ -25,70 +16,56 @@ const TRACKS = [
   { label: 'BG 3' }
 ];
 
-// --- Custom drag hook for mobile overlay, centers under finger instantly ---
-function useTouchDrag({
-  enabled = true,
-  onDragEnd,
-  initial = { x: 0, y: 0 },
-  bounds = { bottom: 80 }, // px from bottom to avoid nav
-}) {
+// ---- ABSOLUTELY STICKY DRAG LOGIC FOR MOBILE ONLY ----
+function useStickyTouchDrag({ enabled = true, onDragEnd, initial = { x: 0, y: 0 } }) {
   const [pos, setPos] = useState(initial);
-  const nodeRef = useRef(null);
+  const overlayRef = useRef(null);
   const dragging = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
 
-  // Reset to initial when needed
-  useEffect(() => {
-    setPos(initial);
-  }, [initial.x, initial.y]);
+  // Only set initial position on mount
+  useEffect(() => { setPos(initial); }, [initial.x, initial.y]);
 
   useEffect(() => {
     if (!enabled) return;
-    const node = nodeRef.current;
+    const node = overlayRef.current;
     if (!node) return;
-
-    function getClamped(x, y) {
-      const width = node.offsetWidth;
-      const height = node.offsetHeight;
-      const clampX = Math.max(0, Math.min(window.innerWidth - width, x));
-      const clampY = Math.max(
-        0,
-        Math.min(window.innerHeight - height - (bounds.bottom || 0), y)
-      );
-      return { x: clampX, y: clampY };
-    }
+    // Set starting position
+    node.style.left = `${pos.x}px`;
+    node.style.top = `${pos.y}px`;
 
     function onTouchStart(e) {
       if (!enabled) return;
       dragging.current = true;
       const touch = e.touches[0];
-      // Center overlay under the finger
+      const rect = node.getBoundingClientRect();
       dragOffset.current = {
-        x: node.offsetWidth / 2,
-        y: node.offsetHeight / 2
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
       };
-      const { x, y } = getClamped(
-        touch.clientX - dragOffset.current.x,
-        touch.clientY - dragOffset.current.y
-      );
-      setPos({ x, y });
     }
 
     function onTouchMove(e) {
       if (!dragging.current || !enabled) return;
       const touch = e.touches[0];
-      const { x, y } = getClamped(
-        touch.clientX - dragOffset.current.x,
-        touch.clientY - dragOffset.current.y
-      );
-      setPos({ x, y });
+      let x = touch.clientX - dragOffset.current.x;
+      let y = touch.clientY - dragOffset.current.y;
+      // Clamp to viewport
+      const width = node.offsetWidth;
+      const height = node.offsetHeight;
+      x = Math.max(0, Math.min(window.innerWidth - width, x));
+      y = Math.max(0, Math.min(window.innerHeight - height - 80, y));
+      node.style.left = `${x}px`;
+      node.style.top = `${y}px`;
     }
 
     function onTouchEnd() {
-      if (dragging.current) {
-        dragging.current = false;
-        onDragEnd && onDragEnd(pos);
-      }
+      if (!dragging.current) return;
+      dragging.current = false;
+      // Get the final position from DOM
+      const rect = node.getBoundingClientRect();
+      setPos({ x: rect.left, y: rect.top });
+      onDragEnd && onDragEnd({ x: rect.left, y: rect.top });
     }
 
     node.addEventListener('touchstart', onTouchStart, { passive: false });
@@ -100,29 +77,31 @@ function useTouchDrag({
       node.removeEventListener('touchmove', onTouchMove);
       node.removeEventListener('touchend', onTouchEnd);
     };
-  }, [enabled, pos, onDragEnd, bounds.bottom]);
+  }, [enabled, pos, onDragEnd]);
 
-  return [nodeRef, pos, setPos];
+  // Ensure DOM always matches pos when not dragging
+  useEffect(() => {
+    const node = overlayRef.current;
+    if (!node) return;
+    if (!dragging.current) {
+      node.style.left = `${pos.x}px`;
+      node.style.top = `${pos.y}px`;
+    }
+  }, [pos]);
+
+  return [overlayRef, pos, setPos];
 }
 
 export default function AudioOverlay() {
   const isMobile = useIsMobile();
-  const {
-    trackIndex,
-    isPlaying,
-    volume,
-    setVolume,
-    playAmbientTrack,
-    togglePlay
-  } = useSound();
-
+  const { trackIndex, isPlaying, volume, setVolume, playAmbientTrack, togglePlay } = useSound();
   const [collapsed, setCollapsed] = useState(() =>
     JSON.parse(localStorage.getItem('audio-overlay-collapsed') || 'false')
   );
   const [busy, setBusy] = useState(false);
 
-  // Mobile floating card position (save to localStorage)
-  const [dragRef, dragPos, setDragPos] = useTouchDrag({
+  // --- MOBILE: use sticky drag ---
+  const [dragRef, dragPos, setDragPos] = useStickyTouchDrag({
     enabled: isMobile && !collapsed,
     initial: (() => {
       if (!isMobile) return { x: 0, y: 0 };
@@ -134,11 +113,10 @@ export default function AudioOverlay() {
     })(),
     onDragEnd: pos => {
       localStorage.setItem('audio-overlay-pos', JSON.stringify(pos));
-    },
-    bounds: { bottom: 80 },
+    }
   });
 
-  // Desktop overlay position
+  // Desktop overlay position (unchanged)
   const [position, setPosition] = useState(() => {
     if (isMobile) return { x: 0, y: 0 };
     return JSON.parse(localStorage.getItem('audio-overlay-pos') || '{"x":56,"y":96}');
@@ -149,7 +127,7 @@ export default function AudioOverlay() {
     localStorage.setItem('audio-overlay-collapsed', JSON.stringify(collapsed));
   }, [collapsed]);
 
-  // Desktop drag (framer-motion)
+  // Desktop drag (unchanged)
   const handleDesktopDragEnd = (_, info) => {
     if (!wrapperRef.current) return;
     const node = wrapperRef.current;
@@ -165,21 +143,12 @@ export default function AudioOverlay() {
 
   // --- MOBILE OVERLAY ---
   const MobileOverlay = (
-    <motion.div
+    <div
       ref={dragRef}
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{
-        opacity: 1,
-        scale: 1,
-        x: dragPos.x,
-        y: dragPos.y,
-        transition: { type: 'spring', stiffness: 260, damping: 22 }
-      }}
-      exit={{ opacity: 0, scale: 0.95 }}
       style={{
         position: 'fixed',
-        left: 0,
-        top: 0,
+        left: dragPos.x,
+        top: dragPos.y,
         zIndex: 9999,
         width: 260,
         height: 60,
@@ -254,10 +223,10 @@ export default function AudioOverlay() {
       >
         <X className="w-4 h-4 text-teal-400" />
       </button>
-    </motion.div>
+    </div>
   );
 
-  // FAB to open overlay
+  // --- Desktop, FAB, Collapsed remain unchanged ---
   const MobileFAB = (
     <motion.button
       key="audio-fab"
@@ -288,7 +257,6 @@ export default function AudioOverlay() {
     </motion.button>
   );
 
-  // --- DESKTOP OVERLAY (unchanged) ---
   const DesktopOverlay = (
     <motion.div
       ref={wrapperRef}
@@ -440,4 +408,3 @@ export default function AudioOverlay() {
     );
   }
 }
-
