@@ -1,4 +1,5 @@
 // src/components/Header.jsx
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   BellIcon,
@@ -12,43 +13,42 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "./ui/Button";
 import { useAuth } from "../context/AuthContext";
 import { useSound } from "../context/SoundContext";
-import IconOnly from "../assets/icons/Icon.png";
+import IconOnly from "../assets/icons/icon.png";
 import { useTranslation } from "react-i18next";
 
-export default function Header({ onLogout = () => {} }) {
+export default function Header({
+  onLogout = () => {},
+}) {
   const { user } = useAuth();
   const { t } = useTranslation();
   const { isMuted, toggleMute } = useSound();
   const navigate = useNavigate();
   const isGuest = !user?.email;
 
-  // State for dropdowns and notifications
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [showMoreDropdown, setShowMoreDropdown] = useState(false);
-  const [hasNotification, setHasNotification] = useState(true);
+  const [showMenuDropdown, setShowMenuDropdown] = useState(false);
 
-  // Refs for outside click
   const searchRef = useRef(null);
   const notifRef = useRef(null);
   const userRef = useRef(null);
-  const moreRef = useRef(null);
+  const menuRef = useRef(null);
 
-  // Close dropdowns on outside click
+  // Close dropdowns when clicking outside
   useEffect(() => {
-    function closeAll(e) {
+    const closeAll = (e) => {
       if (
         !searchRef.current?.contains(e.target) &&
         !notifRef.current?.contains(e.target) &&
         !userRef.current?.contains(e.target) &&
-        !moreRef.current?.contains(e.target)
+        !menuRef.current?.contains(e.target)
       ) {
         setShowNotifDropdown(false);
         setShowUserDropdown(false);
-        setShowMoreDropdown(false);
+        setShowMenuDropdown(false);
       }
-    }
+    };
     document.addEventListener("mousedown", closeAll);
     document.addEventListener("keydown", (e) => e.key === "Escape" && closeAll(e));
     return () => {
@@ -57,127 +57,98 @@ export default function Header({ onLogout = () => {} }) {
     };
   }, []);
 
-  // --- SEARCH HANDLER ---
-  function handleSearch(e) {
-    setSearchQuery(e.target.value);
-  }
+  // Notification indicator (example logic; wire up your notification count)
+  const hasNewNotifications = false; // <- set to true to test the red dot
 
-  // --- 3-Dot Dropdown (shared between desktop & mobile) ---
-  function MoreDropdown() {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 8 }}
-        className="absolute right-0 top-full mt-2 w-48 rounded-lg shadow-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50"
-      >
-        <button
-          className="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-200"
-          onClick={() => {
-            setShowMoreDropdown(false);
-            navigate("/settings");
-          }}
-        >
-          {t("Settings")}
-        </button>
-        <button
-          className="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-200"
-          onClick={() => {
-            setShowMoreDropdown(false);
-            navigate("/help");
-          }}
-        >
-          {t("Help & Support")}
-        </button>
-        <button
-          className="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-200"
-          onClick={() => {
-            setShowMoreDropdown(false);
-            navigate("/feedback");
-          }}
-        >
-          {t("Feedback")}
-        </button>
-      </motion.div>
-    );
-  }
-
-  // --- COMPONENT RENDER ---
   return (
     <motion.header
-      className="sticky top-0 z-50 bg-zinc-900/90 backdrop-blur border-b border-zinc-800 shadow"
+      className="sticky top-0 z-50 bg-zinc-900/80 backdrop-blur border-b border-zinc-800 shadow"
       initial={{ opacity: 0, y: -15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.22 }}
+      transition={{ duration: 0.3 }}
     >
-      <div className="flex items-center justify-between px-3 sm:px-6 py-2 gap-2 relative">
-        {/* --------- LOGO + NAME (DESKTOP ONLY) --------- */}
-        <Link to="/" className="hidden md:flex items-center gap-2 min-w-[120px]">
-          <img
-            src={IconOnly}
-            alt="EchoScript.AI"
-            className="h-8 w-8"
-            draggable={false}
-            style={{ objectFit: "contain" }}
-          />
-          <span className="text-xl font-bold text-white tracking-tight select-none">
-            EchoScript<span className="text-teal-400">.ai</span>
+      <div className="flex flex-wrap items-center justify-between px-4 sm:px-6 py-3 gap-4">
+
+        {/* Logo and EchoScript.AI (desktop only) */}
+        <Link to="/" className="hidden md:flex items-center gap-2 min-w-[120px] select-none">
+          <img src={IconOnly} alt="EchoScript.AI" className="h-9 w-9" />
+          <span className="text-2xl font-bold text-white tracking-tight select-none">
+            EchoScript
+            <span className="text-teal-400 ml-0.5">.AI</span>
           </span>
         </Link>
 
-        {/* --------- SEARCH BAR (all screens) --------- */}
-        <div className="flex-1 max-w-xl mx-2 relative" ref={searchRef}>
+        {/* Search Bar */}
+        <div ref={searchRef} className="relative w-full md:flex-1 max-w-lg min-w-[200px]">
           <input
             id="search-input"
             type="search"
             value={searchQuery}
-            onChange={handleSearch}
-            placeholder={t("Search…")}
-            className="w-full py-2 pl-11 pr-4 text-base rounded-full bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-400 shadow-inner transition"
-            autoComplete="off"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t("Search tools, pages, actions...")}
+            className="w-full py-2 pl-10 pr-4 text-sm rounded bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
           />
-          <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" />
         </div>
 
-        {/* --------- ACTION BUTTONS (DESKTOP) --------- */}
-        <div className="hidden md:flex items-center gap-1 relative">
-          {/* 3-Dot More Button */}
-          <div className="relative" ref={moreRef}>
+        {/* Actions (Desktop) */}
+        <div className="hidden md:flex items-center gap-2 sm:gap-3">
+
+          {/* 3-dots menu */}
+          <div className="relative" ref={menuRef}>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowMoreDropdown((v) => !v)}
-              aria-label={t("More")}
-              icon={<EllipsisVerticalIcon className="w-5 h-5 text-white" />}
+              aria-label="More menu"
+              onClick={() => setShowMenuDropdown((v) => !v)}
+              icon={<EllipsisVerticalIcon className="w-5 h-5 text-zinc-300" />}
             />
-            <AnimatePresence>{showMoreDropdown && <MoreDropdown />}</AnimatePresence>
+            <AnimatePresence>
+              {showMenuDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  className="absolute right-0 top-full mt-2 w-56 rounded-lg shadow-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50 py-1"
+                >
+                  <MenuDropdownItem
+                    label={t("Settings")}
+                    onClick={() => { setShowMenuDropdown(false); navigate("/settings"); }}
+                  />
+                  <MenuDropdownItem
+                    label={t("Help & Support")}
+                    onClick={() => { setShowMenuDropdown(false); navigate("/help"); }}
+                  />
+                  <MenuDropdownItem
+                    label={t("Feedback")}
+                    onClick={() => { setShowMenuDropdown(false); navigate("/feedback"); }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-          {/* Mute */}
+
+          {/* Volume/Mute */}
           <Button
             variant="ghost"
             size="sm"
             onClick={toggleMute}
             aria-label={t("Toggle sound")}
-            icon={
-              isMuted ? (
-                <VolumeX className="w-5 h-5 text-red-500" />
-              ) : (
-                <Volume2 className="w-5 h-5 text-teal-400" />
-              )
-            }
+            icon={isMuted ? <VolumeX className="w-5 h-5 text-red-500" /> : <Volume2 className="w-5 h-5 text-teal-400" />}
           />
-          {/* Notification Bell */}
+
+          {/* Notifications */}
           <div className="relative" ref={notifRef}>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowNotifDropdown((v) => !v)}
               aria-label="Notifications"
+              onClick={() => setShowNotifDropdown((v) => !v)}
               icon={
                 <span className="relative">
                   <BellIcon className="w-5 h-5 text-white" />
-                  {hasNotification && (
-                    <span className="absolute top-0 right-0 inline-block w-2.5 h-2.5 bg-teal-400 rounded-full border-2 border-zinc-900"></span>
+                  {hasNewNotifications && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-zinc-900" />
                   )}
                 </span>
               }
@@ -191,19 +162,20 @@ export default function Header({ onLogout = () => {} }) {
                   className="absolute right-0 top-full mt-2 w-64 rounded-lg shadow-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50 py-3"
                 >
                   <div className="text-sm text-zinc-800 dark:text-zinc-200 p-4">
-                    No notifications yet
+                    {t("No notifications yet")}
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
+
           {/* Account/User */}
           <div className="relative" ref={userRef}>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowUserDropdown((v) => !v)}
               aria-label="Account"
+              onClick={() => setShowUserDropdown((v) => !v)}
               icon={<UserCircleIcon className="w-5 h-5 text-white" />}
             />
             <AnimatePresence>
@@ -218,104 +190,16 @@ export default function Header({ onLogout = () => {} }) {
                     {isGuest ? (
                       <>
                         <div className="mb-1 font-medium">{t("Guest")}</div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full mt-1"
-                          onClick={() => navigate("/signin")}
-                        >
-                          {t("Sign in")}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="w-full mt-1"
-                          onClick={() => navigate("/signup")}
-                        >
-                          {t("Sign up")}
-                        </Button>
+                        <Button size="sm" variant="outline" className="w-full mt-1" onClick={() => navigate("/signin")}>{t("Sign in")}</Button>
+                        <Button size="sm" variant="ghost" className="w-full mt-1" onClick={() => navigate("/signup")}>{t("Sign up")}</Button>
                       </>
                     ) : (
                       <>
                         <div className="mb-1 font-medium">{user.email}</div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full mt-1"
-                          onClick={() => navigate("/account")}
-                        >
-                          {t("Account settings")}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="w-full mt-1"
-                          onClick={onLogout}
-                        >
-                          {t("Sign out")}
-                        </Button>
+                        <Button size="sm" variant="outline" className="w-full mt-1" onClick={() => navigate("/account")}>{t("Account settings")}</Button>
+                        <Button size="sm" variant="ghost" className="w-full mt-1" onClick={onLogout}>{t("Sign out")}</Button>
                       </>
                     )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* --------- MOBILE ACTION BUTTONS --------- */}
-        <div className="flex md:hidden items-center gap-1 relative">
-          {/* 3-Dot More */}
-          <div className="relative" ref={moreRef}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowMoreDropdown((v) => !v)}
-              aria-label={t("More")}
-              icon={<EllipsisVerticalIcon className="w-5 h-5 text-white" />}
-            />
-            <AnimatePresence>{showMoreDropdown && <MoreDropdown />}</AnimatePresence>
-          </div>
-          {/* Mute */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleMute}
-            aria-label={t("Toggle sound")}
-            icon={
-              isMuted ? (
-                <VolumeX className="w-5 h-5 text-red-500" />
-              ) : (
-                <Volume2 className="w-5 h-5 text-teal-400" />
-              )
-            }
-          />
-          {/* Notification Bell */}
-          <div className="relative" ref={notifRef}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowNotifDropdown((v) => !v)}
-              aria-label="Notifications"
-              icon={
-                <span className="relative">
-                  <BellIcon className="w-5 h-5 text-white" />
-                  {hasNotification && (
-                    <span className="absolute top-0 right-0 inline-block w-2.5 h-2.5 bg-teal-400 rounded-full border-2 border-zinc-900"></span>
-                  )}
-                </span>
-              }
-            />
-            <AnimatePresence>
-              {showNotifDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 top-full mt-2 w-60 rounded-lg shadow-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50 py-3"
-                >
-                  <div className="text-sm text-zinc-800 dark:text-zinc-200 p-4">
-                    No notifications yet
                   </div>
                 </motion.div>
               )}
@@ -326,4 +210,19 @@ export default function Header({ onLogout = () => {} }) {
     </motion.header>
   );
 }
+
+// --- Helper for dropdown menu items (no blue, always theme matching) ---
+function MenuDropdownItem({ label, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full text-left px-4 py-2 rounded transition text-sm text-zinc-800 dark:text-zinc-200 hover:bg-teal-50 dark:hover:bg-zinc-800 focus:bg-teal-50 dark:focus:bg-zinc-800"
+      tabIndex={0}
+    >
+      {label}
+    </button>
+  );
+}
+
 
