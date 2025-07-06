@@ -1,14 +1,11 @@
 const MobileOverlay = (() => {
-  // Don’t use React state for position — useRef for x/y
-  const posRef = useRef({
-    x: dragPos.x,
-    y: dragPos.y
-  });
+  // Don’t use React state for drag position!
+  const posRef = useRef({ x: dragPos.x, y: dragPos.y });
   const dragging = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
-  const overlayRef = dragRef; // Alias for clarity
+  const overlayRef = dragRef;
 
-  // Snap to last dragPos when not dragging (for e.g. when opened)
+  // Sync DOM with dragPos when not dragging
   useEffect(() => {
     if (!dragging.current && overlayRef.current) {
       overlayRef.current.style.left = `${dragPos.x}px`;
@@ -28,8 +25,10 @@ const MobileOverlay = (() => {
       const rect = node.getBoundingClientRect();
       dragOffset.current = {
         x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top
+        y: touch.clientY - rect.top,
       };
+      // Remove CSS transitions during drag for instant stickiness
+      node.style.transition = 'none';
     }
 
     function onTouchMove(e) {
@@ -37,17 +36,18 @@ const MobileOverlay = (() => {
       const touch = e.touches[0];
       let x = touch.clientX - dragOffset.current.x;
       let y = touch.clientY - dragOffset.current.y;
-      // Clamp
+      // Clamp to screen
       x = Math.max(0, Math.min(window.innerWidth - node.offsetWidth, x));
       y = Math.max(0, Math.min(window.innerHeight - node.offsetHeight - 80, y));
-      // Set position instantly
       node.style.left = `${x}px`;
       node.style.top = `${y}px`;
       posRef.current = { x, y };
     }
 
-    function onTouchEnd(e) {
+    function onTouchEnd() {
       dragging.current = false;
+      // Smoothly snap back if needed
+      node.style.transition = 'left 0.13s, top 0.13s';
       setDragPos(posRef.current);
       localStorage.setItem('audio-overlay-pos', JSON.stringify(posRef.current));
     }
@@ -63,7 +63,6 @@ const MobileOverlay = (() => {
     };
   }, [isMobile, collapsed, overlayRef, setDragPos]);
 
-  // Render absolutely positioned overlay, not using React state for position
   return (
     <div
       ref={overlayRef}
@@ -84,7 +83,7 @@ const MobileOverlay = (() => {
         gap: 6,
         padding: '0 10px 0 8px',
         touchAction: 'none',
-        userSelect: 'none'
+        userSelect: 'none',
       }}
     >
       {/* ...your buttons/content here... */}
@@ -149,6 +148,7 @@ const MobileOverlay = (() => {
     </div>
   );
 })();
+
 
 
 
