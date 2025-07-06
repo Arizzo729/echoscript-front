@@ -6,13 +6,13 @@ import {
   UserCircleIcon,
   EllipsisVerticalIcon,
 } from "@heroicons/react/24/outline";
-import { Volume2, VolumeX, Cog } from "lucide-react";
+import { Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "./ui/Button";
 import { useAuth } from "../context/AuthContext";
 import { useSound } from "../context/SoundContext";
-import IconOnly from "../assets/icons/Icon.png"; // Correct relative path!
+import IconOnly from "../assets/icons/Icon.png";
 import { useTranslation } from "react-i18next";
 
 export default function Header({ onLogout = () => {} }) {
@@ -22,21 +22,20 @@ export default function Header({ onLogout = () => {} }) {
   const navigate = useNavigate();
   const isGuest = !user?.email;
 
-  // --- UI State ---
+  // State for dropdowns and notifications
   const [searchQuery, setSearchQuery] = useState("");
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showMoreDropdown, setShowMoreDropdown] = useState(false);
-  // --- Example: notification dot state (replace with your logic) ---
   const [hasNotification, setHasNotification] = useState(true);
 
-  // --- Refs ---
+  // Refs for outside click
   const searchRef = useRef(null);
   const notifRef = useRef(null);
   const userRef = useRef(null);
   const moreRef = useRef(null);
 
-  // --- Click outside to close dropdowns ---
+  // Close dropdowns on outside click
   useEffect(() => {
     function closeAll(e) {
       if (
@@ -58,10 +57,49 @@ export default function Header({ onLogout = () => {} }) {
     };
   }, []);
 
-  // --- SEARCH HANDLER (for future expansion) ---
+  // --- SEARCH HANDLER ---
   function handleSearch(e) {
     setSearchQuery(e.target.value);
-    // You can add search suggestions here if needed
+  }
+
+  // --- 3-Dot Dropdown (shared between desktop & mobile) ---
+  function MoreDropdown() {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 8 }}
+        className="absolute right-0 top-full mt-2 w-48 rounded-lg shadow-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50"
+      >
+        <button
+          className="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-200"
+          onClick={() => {
+            setShowMoreDropdown(false);
+            navigate("/settings");
+          }}
+        >
+          {t("Settings")}
+        </button>
+        <button
+          className="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-200"
+          onClick={() => {
+            setShowMoreDropdown(false);
+            navigate("/help");
+          }}
+        >
+          {t("Help & Support")}
+        </button>
+        <button
+          className="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-200"
+          onClick={() => {
+            setShowMoreDropdown(false);
+            navigate("/feedback");
+          }}
+        >
+          {t("Feedback")}
+        </button>
+      </motion.div>
+    );
   }
 
   // --- COMPONENT RENDER ---
@@ -70,9 +108,9 @@ export default function Header({ onLogout = () => {} }) {
       className="sticky top-0 z-50 bg-zinc-900/90 backdrop-blur border-b border-zinc-800 shadow"
       initial={{ opacity: 0, y: -15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: 0.22 }}
     >
-      <div className="flex items-center justify-between px-4 sm:px-6 py-2 gap-2 relative">
+      <div className="flex items-center justify-between px-3 sm:px-6 py-2 gap-2 relative">
         {/* --------- LOGO + NAME (DESKTOP ONLY) --------- */}
         <Link to="/" className="hidden md:flex items-center gap-2 min-w-[120px]">
           <img
@@ -102,8 +140,19 @@ export default function Header({ onLogout = () => {} }) {
         </div>
 
         {/* --------- ACTION BUTTONS (DESKTOP) --------- */}
-        <div className="hidden md:flex items-center gap-1">
-          {/* Mute Button */}
+        <div className="hidden md:flex items-center gap-1 relative">
+          {/* 3-Dot More Button */}
+          <div className="relative" ref={moreRef}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowMoreDropdown((v) => !v)}
+              aria-label={t("More")}
+              icon={<EllipsisVerticalIcon className="w-5 h-5 text-white" />}
+            />
+            <AnimatePresence>{showMoreDropdown && <MoreDropdown />}</AnimatePresence>
+          </div>
+          {/* Mute */}
           <Button
             variant="ghost"
             size="sm"
@@ -117,7 +166,6 @@ export default function Header({ onLogout = () => {} }) {
               )
             }
           />
-
           {/* Notification Bell */}
           <div className="relative" ref={notifRef}>
             <Button
@@ -149,7 +197,6 @@ export default function Header({ onLogout = () => {} }) {
               )}
             </AnimatePresence>
           </div>
-
           {/* Account/User */}
           <div className="relative" ref={userRef}>
             <Button
@@ -216,8 +263,19 @@ export default function Header({ onLogout = () => {} }) {
           </div>
         </div>
 
-        {/* --------- MOBILE ACTION BUTTONS (NO LOGO, NO ACCOUNT) --------- */}
-        <div className="flex md:hidden items-center gap-1">
+        {/* --------- MOBILE ACTION BUTTONS --------- */}
+        <div className="flex md:hidden items-center gap-1 relative">
+          {/* 3-Dot More */}
+          <div className="relative" ref={moreRef}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowMoreDropdown((v) => !v)}
+              aria-label={t("More")}
+              icon={<EllipsisVerticalIcon className="w-5 h-5 text-white" />}
+            />
+            <AnimatePresence>{showMoreDropdown && <MoreDropdown />}</AnimatePresence>
+          </div>
           {/* Mute */}
           <Button
             variant="ghost"
@@ -263,56 +321,9 @@ export default function Header({ onLogout = () => {} }) {
               )}
             </AnimatePresence>
           </div>
-          {/* Three Dots More */}
-          <div className="relative" ref={moreRef}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowMoreDropdown((v) => !v)}
-              aria-label={t("More")}
-              icon={<EllipsisVerticalIcon className="w-5 h-5 text-white" />}
-            />
-            <AnimatePresence>
-              {showMoreDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  className="absolute right-0 top-full mt-2 w-48 rounded-lg shadow-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50"
-                >
-                  <button
-                    className="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-200"
-                    onClick={() => {
-                      setShowMoreDropdown(false);
-                      navigate("/settings");
-                    }}
-                  >
-                    {t("Settings")}
-                  </button>
-                  <button
-                    className="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-200"
-                    onClick={() => {
-                      setShowMoreDropdown(false);
-                      navigate("/help");
-                    }}
-                  >
-                    {t("Help & Support")}
-                  </button>
-                  <button
-                    className="w-full text-left px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-sm text-zinc-800 dark:text-zinc-200"
-                    onClick={() => {
-                      setShowMoreDropdown(false);
-                      navigate("/feedback");
-                    }}
-                  >
-                    {t("Feedback")}
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </div>
       </div>
     </motion.header>
   );
 }
+
