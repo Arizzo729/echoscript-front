@@ -1,13 +1,19 @@
 // src/components/MobileBottomNav.jsx
-import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { ReactComponent as HomeIcon } from '../assets/icons/home.svg';
-import { ReactComponent as DashboardIcon } from '../assets/icons/dashboard.svg';
-import { ReactComponent as UploadIcon } from '../assets/icons/upload.svg';
-import { ReactComponent as ShopIcon } from '../assets/icons/shop.svg';
-import '../styles/mobile.css';
-import { motion } from 'framer-motion';
-import { useSound } from '../context/SoundContext';
+-import React from 'react';
++import React from 'react';
+ import { NavLink } from 'react-router-dom';
+-import { ReactComponent as HomeIcon } from '../assets/icons/home.svg';
+-import { ReactComponent as DashboardIcon } from '../assets/icons/dashboard.svg';
+-import { ReactComponent as UploadIcon } from '../assets/icons/upload.svg';
+-import { ReactComponent as ShopIcon } from '../assets/icons/shop.svg';
++import HomeIcon from '../assets/icons/home.svg?react';
++import DashboardIcon from '../assets/icons/dashboard.svg?react';
++import UploadIcon from '../assets/icons/upload.svg?react';
++import ShopIcon from '../assets/icons/shop.svg?react';
+ import '../styles/mobile.css';
+ import { motion } from 'framer-motion';
+ import { useSound } from '../context/SoundContext';
+
 
 export default function MobileBottomNav() {
   const links = [
