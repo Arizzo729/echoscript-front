@@ -1,21 +1,27 @@
+// src/components/MobileLayout.jsx
+
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Assets & Components
 import IconButton from './IconButton';
-import MobileBottomNav from './MobileBottomNav';
 import Logo from '../assets/EchoScriptAI_Transparent_Dark.png';
+import MobileBottomNav from './MobileBottomNav';
+
+// Lucide Icons (alphabetized)
 import {
-  Search as MagnifyingGlassIcon,
   Bell,
+  Home as HomeIcon,
+  Moon,
+  Search as MagnifyingGlassIcon,
   Settings as CogIcon,
+  Sun,
   User,
   Volume2 as SpeakerWaveIcon,
-  Sun,
-  Moon,
-  Home as HomeIcon,
 } from 'lucide-react';
 
-// Safe area wrapper for notch/home indicator devices
+/** Safe area wrapper for notch/home indicator devices */
 function SafeAreaWrapper({ children }) {
   return (
     <div
@@ -32,7 +38,7 @@ function SafeAreaWrapper({ children }) {
   );
 }
 
-// Header bar with spring animation
+/** Header with spring animation */
 function AnimatedHeader({ children }) {
   return (
     <motion.header
@@ -40,16 +46,14 @@ function AnimatedHeader({ children }) {
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 220, damping: 22 }}
       className="fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-zinc-900/95 shadow-md backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800"
-      style={{
-        height: 'var(--header-height, 104px)',
-      }}
+      style={{ height: 'var(--header-height, 104px)' }}
     >
       {children}
     </motion.header>
   );
 }
 
-// Search input with debounce
+/** Debounced, accessible search input */
 function AnimatedSearchInput({ placeholder, onSearch }) {
   const [value, setValue] = useState('');
   const timeout = useRef(null);
@@ -85,7 +89,7 @@ function AnimatedSearchInput({ placeholder, onSearch }) {
   );
 }
 
-// Theme switcher (sun/moon)
+/** Theme (sun/moon) toggle */
 function ThemeToggle({ theme, onToggle }) {
   return (
     <IconButton
@@ -100,7 +104,7 @@ function ThemeToggle({ theme, onToggle }) {
   );
 }
 
-// Logo, home button, and action icons
+/** Logo, home, and action icons row */
 function LogoAndActions({ t, onHome, theme, onThemeToggle, actions }) {
   return (
     <div className="px-4 py-1 flex items-center justify-between gap-2">
@@ -136,7 +140,7 @@ function LogoAndActions({ t, onHome, theme, onThemeToggle, actions }) {
   );
 }
 
-// Animated bottom nav
+/** Animated bottom nav */
 function AnimatedBottomNav() {
   return (
     <AnimatePresence>
@@ -154,10 +158,12 @@ function AnimatedBottomNav() {
   );
 }
 
-// Main advanced mobile layout
+/** Main advanced mobile layout */
 export default function MobileLayout({ children, onSearch }) {
   const { t } = useTranslation();
-  const [theme, setTheme] = useState(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  const [theme, setTheme] = useState(
+    document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+  );
 
   // Theme toggler
   const handleThemeToggle = () => {
@@ -171,12 +177,12 @@ export default function MobileLayout({ children, onSearch }) {
     localStorage.setItem('theme', nextTheme);
   };
 
-  // Action icons (replace handlers as needed)
+  // Action icons (can wire up handlers as needed)
   const actions = [
     {
       icon: <SpeakerWaveIcon className="w-5 h-5" />,
       label: t('Ambient Audio'),
-      onClick: () => {}, // Audio overlay is handled at Layout level
+      onClick: () => {}, // Overlay handled at higher level (Layout)
     },
     {
       icon: <CogIcon className="w-5 h-5" />,
@@ -195,7 +201,6 @@ export default function MobileLayout({ children, onSearch }) {
     },
   ];
 
-  // Home navigation
   const handleHome = () => {
     window.location.href = '/';
   };
