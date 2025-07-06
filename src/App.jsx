@@ -24,15 +24,34 @@ import MobileOverlay from "./components/MobileOverlay";
 import MobileBottomNav from "./components/MobileBottomNav";
 import FloatingHome from "./components/FloatingHome";
 
-// Pages...
+// Pages
 import Home from "./pages/HomePage";
-// (other page imports omitted for brevity)
+import Dashboard from "./pages/Dashboard";
+import UploadPage from "./pages/Upload";
+import AIAssistant from "./pages/AIAssistant";
+import Settings from "./pages/Settings";
+import Account from "./pages/Account";
+import Purchase from "./pages/Purchase";
+import BuyExtraMinutes from "./pages/BuyExtraMinutes";
+import ApifyTest from "./pages/ApifyTest";
+import Contact from "./pages/Contact";
+import VideoUpload from "./pages/VideoUpload";
+import TranscriptsPage from "./pages/Transcripts";
+import SummaryPage from "./pages/Summary";
+import HistoryPage from "./pages/History";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import VerifyEmail from "./pages/VerifyEmail";
+import ResetPassword from "./pages/ResetPassword";
+import Unsubscribe from "./pages/Unsubscribe";
+import Unsubscribed from "./pages/Unsubscribed";
+import NotFound from "./pages/NotFound";
 
 function AppInner() {
   const [splashDone, setSplashDone] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
   const [introComplete, setIntroComplete] = useState(
-    () => !!window.__introPlayed
+    () => typeof window !== "undefined" && !!window.__introPlayed
   );
   const { enableSound } = useSound();
   const isMobile = useIsMobile();
@@ -40,8 +59,8 @@ function AppInner() {
 
   useEffect(() => {
     if (splashDone && !localStorage.getItem("onboardingComplete")) {
-      const t = setTimeout(() => setShowIntro(true), 300);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setShowIntro(true), 300);
+      return () => clearTimeout(timer);
     }
   }, [splashDone]);
 
@@ -49,6 +68,7 @@ function AppInner() {
     setShowIntro(false);
     setIntroComplete(true);
     window.__introPlayed = true;
+    localStorage.setItem("onboardingComplete", "true");
   };
 
   return (
@@ -57,7 +77,7 @@ function AppInner() {
         <AnimatedSplash onComplete={() => setSplashDone(true)} />
       ) : (
         <>
-          {/* AudioOverlay in a mobile sheet vs. desktop */}
+          {/* Audio overlay: inside a mobile sheet on phones */}
           {isMobile ? (
             <MobileOverlay>
               <AudioOverlay />
@@ -67,17 +87,35 @@ function AppInner() {
           )}
 
           <Routes>
-            {/* Public pages */}
+            {/* Public auth routes */}
             <Route path="/signin" element={<SignIn />} />
-            {/* …other auth routes… */}
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/verify" element={<VerifyEmail />} />
+            <Route path="/reset" element={<ResetPassword />} />
+            <Route path="/unsubscribe" element={<Unsubscribe />} />
+            <Route path="/unsubscribed" element={<Unsubscribed />} />
 
-            {/* App pages */}
+            {/* All other pages wrapped in main Layout */}
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
-              {/* …other routes… */}
+              <Route path="/purchase" element={<Purchase />} />
+              <Route path="/purchase/minutes" element={<BuyExtraMinutes />} />
+              <Route path="/apify" element={<ApifyTest />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/video" element={<VideoUpload />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/upload" element={<UploadPage />} />
+              <Route path="/assistant" element={<AIAssistant />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/account" element={<Account />} />
+              <Route path="/transcripts" element={<TranscriptsPage />} />
+              <Route path="/summary" element={<SummaryPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
 
+          {/* Intro Modal */}
           {showIntro && (
             <OnboardingModal
               onClose={handleIntroDone}
@@ -85,6 +123,7 @@ function AppInner() {
             />
           )}
 
+          {/* Transcript player + mobile nav & floating home */}
           {introComplete && (
             <>
               <div className="fixed bottom-24 left-4 right-4 z-50 max-w-3xl mx-auto">
@@ -119,3 +158,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
+ 
