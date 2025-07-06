@@ -1,10 +1,10 @@
 // src/components/MobileBottomNav.jsx
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { ReactComponent as HomeIcon } from '../assets/icons/home.svg?component';
-import { ReactComponent as DashboardIcon } from '../assets/icons/dashboard.svg?component';
-import { ReactComponent as UploadIcon } from '../assets/icons/upload.svg?component';
-import { ReactComponent as ShopIcon } from '../assets/icons/shop.svg?component';
+import { ReactComponent as HomeIcon } from '../assets/icons/home.svg';
+import { ReactComponent as DashboardIcon } from '../assets/icons/dashboard.svg';
+import { ReactComponent as UploadIcon } from '../assets/icons/upload.svg';
+import { ReactComponent as ShopIcon } from '../assets/icons/shop.svg';
 import '../styles/mobile.css';
 import { motion } from 'framer-motion';
 import { useSound } from '../context/SoundContext';
@@ -27,10 +27,10 @@ export default function MobileBottomNav() {
             <motion.div
               onTap={playPop}
               whileTap={{ scale: 0.75 }}
-              className={
-                `w-full h-full flex items-center justify-center 
-                 ${isActive ? 'bg-teal-600/20' : 'hover:bg-zinc-700/50'}`
-              }
+              className={`
+                w-full h-full flex items-center justify-center
+                ${isActive ? 'bg-teal-600/20' : 'hover:bg-zinc-700/50'}
+              `}
             >
               <Icon
                 className={`w-6 h-6 ${isActive ? 'text-teal-400' : 'text-zinc-400'}`}
@@ -43,6 +43,7 @@ export default function MobileBottomNav() {
     </nav>
   );
 }
+
 
 
 
