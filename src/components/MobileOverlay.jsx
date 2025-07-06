@@ -1,41 +1,55 @@
-// --- MOBILE OVERLAY (with perfect sticky drag, no lag, no animation delay) ---
 const MobileOverlay = (() => {
-  const [touchDragging, setTouchDragging] = useState(false);
-  const [touchPos, setTouchPos] = useState(dragPos);
+  // Don’t use React state for position — useRef for x/y
+  const posRef = useRef({
+    x: dragPos.x,
+    y: dragPos.y
+  });
+  const dragging = useRef(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
+  const overlayRef = dragRef; // Alias for clarity
 
-  // Always snap to dragPos if not actively dragging
+  // Snap to last dragPos when not dragging (for e.g. when opened)
   useEffect(() => {
-    if (!touchDragging) setTouchPos(dragPos);
-  }, [dragPos, touchDragging]);
+    if (!dragging.current && overlayRef.current) {
+      overlayRef.current.style.left = `${dragPos.x}px`;
+      overlayRef.current.style.top = `${dragPos.y}px`;
+      posRef.current = dragPos;
+    }
+  }, [dragPos, overlayRef]);
 
   useEffect(() => {
     if (!isMobile || collapsed) return;
-    const node = dragRef.current;
+    const node = overlayRef.current;
     if (!node) return;
 
     function onTouchStart(e) {
-      setTouchDragging(true);
-      // Optional: snap overlay center to finger immediately
+      dragging.current = true;
       const touch = e.touches[0];
-      let x = touch.clientX - node.offsetWidth / 2;
-      let y = touch.clientY - node.offsetHeight / 2;
-      x = Math.max(0, Math.min(window.innerWidth - node.offsetWidth, x));
-      y = Math.max(0, Math.min(window.innerHeight - node.offsetHeight - 80, y));
-      setTouchPos({ x, y });
+      const rect = node.getBoundingClientRect();
+      dragOffset.current = {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
+      };
     }
+
     function onTouchMove(e) {
-      if (!touchDragging) return;
+      if (!dragging.current) return;
       const touch = e.touches[0];
-      let x = touch.clientX - node.offsetWidth / 2;
-      let y = touch.clientY - node.offsetHeight / 2;
+      let x = touch.clientX - dragOffset.current.x;
+      let y = touch.clientY - dragOffset.current.y;
+      // Clamp
       x = Math.max(0, Math.min(window.innerWidth - node.offsetWidth, x));
       y = Math.max(0, Math.min(window.innerHeight - node.offsetHeight - 80, y));
-      setTouchPos({ x, y });
+      // Set position instantly
+      node.style.left = `${x}px`;
+      node.style.top = `${y}px`;
+      posRef.current = { x, y };
     }
-    function onTouchEnd() {
-      setTouchDragging(false);
-      setDragPos(touchPos);
-      localStorage.setItem('audio-overlay-pos', JSON.stringify(touchPos));
+
+    function onTouchEnd(e) {
+      dragging.current = false;
+      setDragPos(posRef.current);
+      localStorage.setItem('audio-overlay-pos', JSON.stringify(posRef.current));
     }
 
     node.addEventListener('touchstart', onTouchStart, { passive: false });
@@ -47,15 +61,16 @@ const MobileOverlay = (() => {
       node.removeEventListener('touchmove', onTouchMove);
       node.removeEventListener('touchend', onTouchEnd);
     };
-  }, [isMobile, collapsed, touchDragging, touchPos, setDragPos, dragRef]);
+  }, [isMobile, collapsed, overlayRef, setDragPos]);
 
+  // Render absolutely positioned overlay, not using React state for position
   return (
     <div
-      ref={dragRef}
+      ref={overlayRef}
       style={{
         position: 'fixed',
-        left: touchPos.x,
-        top: touchPos.y,
+        left: `${dragPos.x}px`,
+        top: `${dragPos.y}px`,
         zIndex: 9999,
         width: 260,
         height: 60,
@@ -69,11 +84,10 @@ const MobileOverlay = (() => {
         gap: 6,
         padding: '0 10px 0 8px',
         touchAction: 'none',
-        userSelect: 'none',
-        transition: touchDragging ? 'none' : 'left 0.12s, top 0.12s',
-        willChange: 'left,top',
+        userSelect: 'none'
       }}
     >
+      {/* ...your buttons/content here... */}
       <Button
         variant="ghost"
         size="icon"
@@ -135,5 +149,6 @@ const MobileOverlay = (() => {
     </div>
   );
 })();
+
 
 
