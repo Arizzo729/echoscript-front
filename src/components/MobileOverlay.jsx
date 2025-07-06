@@ -1,23 +1,27 @@
-// ... everything else remains unchanged above ...
-
-// --- MOBILE OVERLAY (with sticky drag, no lag) ---
+// --- MOBILE OVERLAY (with perfect sticky drag, no lag, no animation delay) ---
 const MobileOverlay = (() => {
-  // Are we dragging? Local state!
   const [touchDragging, setTouchDragging] = useState(false);
   const [touchPos, setTouchPos] = useState(dragPos);
 
+  // Always snap to dragPos if not actively dragging
   useEffect(() => {
     if (!touchDragging) setTouchPos(dragPos);
   }, [dragPos, touchDragging]);
 
   useEffect(() => {
     if (!isMobile || collapsed) return;
-
     const node = dragRef.current;
     if (!node) return;
 
     function onTouchStart(e) {
       setTouchDragging(true);
+      // Optional: snap overlay center to finger immediately
+      const touch = e.touches[0];
+      let x = touch.clientX - node.offsetWidth / 2;
+      let y = touch.clientY - node.offsetHeight / 2;
+      x = Math.max(0, Math.min(window.innerWidth - node.offsetWidth, x));
+      y = Math.max(0, Math.min(window.innerHeight - node.offsetHeight - 80, y));
+      setTouchPos({ x, y });
     }
     function onTouchMove(e) {
       if (!touchDragging) return;
@@ -28,7 +32,7 @@ const MobileOverlay = (() => {
       y = Math.max(0, Math.min(window.innerHeight - node.offsetHeight - 80, y));
       setTouchPos({ x, y });
     }
-    function onTouchEnd(e) {
+    function onTouchEnd() {
       setTouchDragging(false);
       setDragPos(touchPos);
       localStorage.setItem('audio-overlay-pos', JSON.stringify(touchPos));
@@ -45,7 +49,6 @@ const MobileOverlay = (() => {
     };
   }, [isMobile, collapsed, touchDragging, touchPos, setDragPos, dragRef]);
 
-  // Use left/top style directly for instant update, not motion.div x/y
   return (
     <div
       ref={dragRef}
@@ -67,10 +70,10 @@ const MobileOverlay = (() => {
         padding: '0 10px 0 8px',
         touchAction: 'none',
         userSelect: 'none',
-        transition: touchDragging ? 'none' : 'left 0.14s, top 0.14s'
+        transition: touchDragging ? 'none' : 'left 0.12s, top 0.12s',
+        willChange: 'left,top',
       }}
     >
-      {/* ... the rest stays exactly as you wrote ... */}
       <Button
         variant="ghost"
         size="icon"
