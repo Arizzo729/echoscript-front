@@ -16,9 +16,7 @@ import { useSound } from "../context/SoundContext";
 import IconOnly from "../assets/Icon.png";
 import { useTranslation } from "react-i18next";
 
-export default function Header({
-  onLogout = () => {},
-}) {
+export default function Header({ onLogout = () => {} }) {
   const { user } = useAuth();
   const { t } = useTranslation();
   const { isMuted, toggleMute } = useSound();
@@ -35,7 +33,7 @@ export default function Header({
   const userRef = useRef(null);
   const menuRef = useRef(null);
 
-  // Close dropdowns when clicking outside
+  // Handle clicking outside dropdowns to close
   useEffect(() => {
     const closeAll = (e) => {
       if (
@@ -57,8 +55,8 @@ export default function Header({
     };
   }, []);
 
-  // Notification indicator (example logic; wire up your notification count)
-  const hasNewNotifications = false; // <- set to true to test the red dot
+  // For notification dot
+  const hasNewNotifications = false; // Wire this up as needed
 
   return (
     <motion.header
@@ -66,15 +64,15 @@ export default function Header({
       initial={{ opacity: 0, y: -15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
+      role="banner"
     >
       <div className="flex flex-wrap items-center justify-between px-4 sm:px-6 py-3 gap-4">
-
-        {/* Logo and EchoScript.AI (desktop only) */}
-        <Link to="/" className="hidden md:flex items-center gap-2 min-w-[120px] select-none">
-          <img src={IconOnly} alt="EchoScript.AI" className="h-9 w-9" />
+        {/* Logo and EchoScript.AI */}
+        <Link to="/" className="hidden md:flex items-center gap-2 min-w-[140px] select-none">
+          <img src={IconOnly} alt="EchoScript.AI" className="h-9 w-9" draggable={false} />
           <span className="text-2xl font-bold text-white tracking-tight select-none">
             EchoScript
-            <span className="text-teal-400 ml-0.5">.AI</span>
+            <span className="text-teal-400 ml-1">.AI</span>
           </span>
         </Link>
 
@@ -86,20 +84,21 @@ export default function Header({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t("Search tools, pages, actions...")}
-            className="w-full py-2 pl-10 pr-4 text-sm rounded bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-400"
+            className="w-full py-2 pl-10 pr-4 text-sm rounded bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-400 transition"
+            aria-label={t("Search")}
           />
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" />
         </div>
 
-        {/* Actions (Desktop) */}
+        {/* Actions */}
         <div className="hidden md:flex items-center gap-2 sm:gap-3">
 
-          {/* 3-dots menu */}
+          {/* --- Three Dots Menu --- */}
           <div className="relative" ref={menuRef}>
             <Button
               variant="ghost"
               size="sm"
-              aria-label="More menu"
+              aria-label={t("More menu")}
               onClick={() => setShowMenuDropdown((v) => !v)}
               icon={<EllipsisVerticalIcon className="w-5 h-5 text-zinc-300" />}
             />
@@ -110,39 +109,53 @@ export default function Header({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 8 }}
                   className="absolute right-0 top-full mt-2 w-56 rounded-lg shadow-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50 py-1"
+                  role="menu"
                 >
                   <MenuDropdownItem
                     label={t("Settings")}
-                    onClick={() => { setShowMenuDropdown(false); navigate("/settings"); }}
+                    onClick={() => {
+                      setShowMenuDropdown(false);
+                      navigate("/settings");
+                    }}
                   />
                   <MenuDropdownItem
                     label={t("Help & Support")}
-                    onClick={() => { setShowMenuDropdown(false); navigate("/help"); }}
+                    onClick={() => {
+                      setShowMenuDropdown(false);
+                      navigate("/help");
+                    }}
                   />
                   <MenuDropdownItem
                     label={t("Feedback")}
-                    onClick={() => { setShowMenuDropdown(false); navigate("/feedback"); }}
+                    onClick={() => {
+                      setShowMenuDropdown(false);
+                      navigate("/feedback");
+                    }}
                   />
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          {/* Volume/Mute */}
+          {/* --- Volume / Mute --- */}
           <Button
             variant="ghost"
             size="sm"
             onClick={toggleMute}
             aria-label={t("Toggle sound")}
-            icon={isMuted ? <VolumeX className="w-5 h-5 text-red-500" /> : <Volume2 className="w-5 h-5 text-teal-400" />}
+            icon={
+              isMuted
+                ? <VolumeX className="w-5 h-5 text-red-500" />
+                : <Volume2 className="w-5 h-5 text-teal-400" />
+            }
           />
 
-          {/* Notifications */}
+          {/* --- Notifications --- */}
           <div className="relative" ref={notifRef}>
             <Button
               variant="ghost"
               size="sm"
-              aria-label="Notifications"
+              aria-label={t("Notifications")}
               onClick={() => setShowNotifDropdown((v) => !v)}
               icon={
                 <span className="relative">
@@ -160,6 +173,7 @@ export default function Header({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
                   className="absolute right-0 top-full mt-2 w-64 rounded-lg shadow-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50 py-3"
+                  role="menu"
                 >
                   <div className="text-sm text-zinc-800 dark:text-zinc-200 p-4">
                     {t("No notifications yet")}
@@ -169,12 +183,12 @@ export default function Header({
             </AnimatePresence>
           </div>
 
-          {/* Account/User */}
+          {/* --- User Account --- */}
           <div className="relative" ref={userRef}>
             <Button
               variant="ghost"
               size="sm"
-              aria-label="Account"
+              aria-label={t("Account")}
               onClick={() => setShowUserDropdown((v) => !v)}
               icon={<UserCircleIcon className="w-5 h-5 text-white" />}
             />
@@ -185,19 +199,48 @@ export default function Header({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
                   className="absolute right-0 top-full mt-2 w-44 rounded-lg shadow-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50"
+                  role="menu"
                 >
                   <div className="p-3 text-zinc-800 dark:text-zinc-200">
                     {isGuest ? (
                       <>
                         <div className="mb-1 font-medium">{t("Guest")}</div>
-                        <Button size="sm" variant="outline" className="w-full mt-1" onClick={() => navigate("/signin")}>{t("Sign in")}</Button>
-                        <Button size="sm" variant="ghost" className="w-full mt-1" onClick={() => navigate("/signup")}>{t("Sign up")}</Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full mt-1"
+                          onClick={() => navigate("/signin")}
+                        >
+                          {t("Sign in")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="w-full mt-1"
+                          onClick={() => navigate("/signup")}
+                        >
+                          {t("Sign up")}
+                        </Button>
                       </>
                     ) : (
                       <>
                         <div className="mb-1 font-medium">{user.email}</div>
-                        <Button size="sm" variant="outline" className="w-full mt-1" onClick={() => navigate("/account")}>{t("Account settings")}</Button>
-                        <Button size="sm" variant="ghost" className="w-full mt-1" onClick={onLogout}>{t("Sign out")}</Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full mt-1"
+                          onClick={() => navigate("/account")}
+                        >
+                          {t("Account settings")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="w-full mt-1"
+                          onClick={onLogout}
+                        >
+                          {t("Sign out")}
+                        </Button>
                       </>
                     )}
                   </div>
@@ -211,7 +254,7 @@ export default function Header({
   );
 }
 
-// --- Helper for dropdown menu items (no blue, always theme matching) ---
+// Dropdown menu item helper with theme-matching highlight
 function MenuDropdownItem({ label, onClick }) {
   return (
     <button
@@ -219,10 +262,9 @@ function MenuDropdownItem({ label, onClick }) {
       onClick={onClick}
       className="w-full text-left px-4 py-2 rounded transition text-sm text-zinc-800 dark:text-zinc-200 hover:bg-teal-50 dark:hover:bg-zinc-800 focus:bg-teal-50 dark:focus:bg-zinc-800"
       tabIndex={0}
+      role="menuitem"
     >
       {label}
     </button>
   );
 }
-
-
