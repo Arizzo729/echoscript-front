@@ -94,15 +94,15 @@ export default function Layout() {
 
         {!showIntro &&
           (isMobile ? (
-            // Mobile: use new MobileLayout wrapper (MobileLayout manages overlay state)
+            // Mobile: use MobileLayout wrapper only, AudioOverlay handled *inside* MobileLayout, not here!
             <MobileLayout>
               <ErrorBoundary>
                 <Outlet />
               </ErrorBoundary>
-              {/* DO NOT RENDER <AudioOverlay /> HERE; MobileLayout manages it */}
+              {/* DO NOT RENDER <AudioOverlay /> HERE */}
             </MobileLayout>
           ) : (
-            // Desktop: header, sidebar, content, audio overlay (only render once here)
+            // Desktop: header, sidebar, content, audio overlay (render only once)
             <div className="flex flex-col h-screen w-screen overflow-hidden bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white">
               <Suspense fallback={<div className="h-16 w-full bg-zinc-900" />}>
                 <Header
@@ -150,7 +150,7 @@ export default function Layout() {
 
               <ToastContainer position="top-right" />
 
-              {/* Desktop overlay: render only once, outside main content */}
+              {/* Desktop overlay: render only once here */}
               <AudioOverlay />
             </div>
           ))}
@@ -158,3 +158,4 @@ export default function Layout() {
     </ToastProvider>
   );
 }
+
