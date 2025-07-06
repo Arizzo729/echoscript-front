@@ -1,4 +1,4 @@
-// ✅ EchoScript.AI — useIsMobile Responsive Hook (Final Polished Version)
+// src/hooks/useIsMobile.js
 import { useEffect, useState } from "react";
 
 export default function useIsMobile(breakpoint = 768) {
@@ -9,13 +9,11 @@ export default function useIsMobile(breakpoint = 768) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    const mediaQuery = window.matchMedia(`(max-width: ${breakpoint}px)`);
-    const handleChange = () => setIsMobile(mediaQuery.matches);
-
-    handleChange(); // initial check
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const handler = () => setIsMobile(mq.matches);
+    handler();
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, [breakpoint]);
 
   return isMobile;

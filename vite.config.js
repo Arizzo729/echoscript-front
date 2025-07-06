@@ -10,22 +10,33 @@ export default defineConfig(({ mode }) => {
   return {
     base: '/',
     plugins: [
-      // Move SVGR before react, and export SVGs as the default export:
+      // SVGs become default React components:
       svgr({
         exportAsDefault: true,
         icon: true,
-        svgoConfig: { plugins: [{ removeViewBox: false }] },
+        svgoConfig: [{ removeViewBox: false }],
       }),
       react(),
-      environmentPlugin({ /* ... */ }),
+      environmentPlugin({
+        defaults: {
+          VITE_OPENAI_API_KEY:    env.VITE_OPENAI_API_KEY    || '',
+          VITE_BROWSE_AI_API_KEY: env.VITE_BROWSE_AI_API_KEY || '',
+          VITE_APIFY_API_TOKEN:   env.VITE_APIFY_API_TOKEN   || '',
+          VITE_BRIGHTDATA_USERNAME: env.VITE_BRIGHTDATA_USERNAME || '',
+          VITE_BRIGHTDATA_PASSWORD: env.VITE_BRIGHTDATA_PASSWORD || '',
+        },
+      }),
     ],
-    resolve: { /* ... */ },
-    server: { historyApiFallback: true },
+    resolve: {
+      extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+    },
+    server: {
+      historyApiFallback: true,
+    },
     build: {
       rollupOptions: { input: './index.html' },
       outDir: 'dist',
       emptyOutDir: true,
     },
-    // You can remove assetsInclude here; SVGR will handle the SVG imports
   };
 });
