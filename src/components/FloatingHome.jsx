@@ -1,7 +1,7 @@
 // src/components/FloatingHome.jsx
 import React, { useState, useCallback } from 'react';
 import { motion, useMotionValue, animate } from 'framer-motion';
-import { ReactComponent as HomeIcon } from '../assets/icons/home.svg';
+import HomeIcon from '../assets/icons/home.svg';
 
 export default function FloatingHome() {
   const [collapsedEdge, setCollapsedEdge] = useState(null);  // 'top' or 'bottom'
@@ -10,7 +10,6 @@ export default function FloatingHome() {
   const size = 56;
   const tabSize = 32;
   const threshold = 100;
-
   const x = useMotionValue(window.innerWidth - size - 16);
   const y = useMotionValue(window.innerHeight - size - 16);
 
@@ -37,11 +36,12 @@ export default function FloatingHome() {
       animate(x, newX, { type: 'spring', stiffness: 200, damping: 20 });
       animate(y, newY, { type: 'spring', stiffness: 200, damping: 20 });
     }
-  }, [y, x]);
+  }, [x, y]);
 
   if (collapsedEdge) {
     const isTop = collapsedEdge === 'top';
     const tabClass = `w-${tabSize} h-${tabSize / 2} bg-teal-500 rounded-${isTop ? 'b' : 't'}-full shadow-lg flex items-center justify-center`;
+
     return (
       <motion.div
         style={{ x, y }}
@@ -67,7 +67,12 @@ export default function FloatingHome() {
       style={{ x, y, touchAction: 'none' }}
       drag
       dragMomentum={false}
-      dragConstraints={{ top: 0, left: 0, right: window.innerWidth - size - 16, bottom: window.innerHeight - size - 16 }}
+      dragConstraints={{
+        top: 0,
+        left: 0,
+        right: window.innerWidth - size - 16,
+        bottom: window.innerHeight - size - 16,
+      }}
       onDragEnd={handleDragEnd}
       onClick={() => window.location.assign('/')}
       className="fixed z-50 w-14 h-14 bg-teal-500 rounded-full shadow-lg flex items-center justify-center touch-manipulation"
