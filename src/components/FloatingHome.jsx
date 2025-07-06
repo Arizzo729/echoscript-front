@@ -4,7 +4,7 @@ import { motion, useMotionValue, animate } from 'framer-motion';
 import HomeIcon from '../assets/icons/home.svg';
 
 export default function FloatingHome() {
-  const [collapsedEdge, setCollapsedEdge] = useState(null);  // 'top' or 'bottom'
+  const [collapsedEdge, setCollapsedEdge] = useState(null);
   const [prevPos, setPrevPos] = useState({ x: 0, y: 0 });
 
   const size = 56;
@@ -13,48 +13,57 @@ export default function FloatingHome() {
   const x = useMotionValue(window.innerWidth - size - 16);
   const y = useMotionValue(window.innerHeight - size - 16);
 
-  const handleDragEnd = useCallback((_, info) => {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const px = info.point.x;
-    const py = info.point.y;
+  const handleDragEnd = useCallback(
+    (_, info) => {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const px = info.point.x;
+      const py = info.point.y;
 
-    if (py < threshold) {
-      setPrevPos({ x: px, y: py });
-      setCollapsedEdge('top');
-      animate(y, -tabSize / 2, { type: 'spring', stiffness: 300, damping: 20 });
-      animate(x, vw / 2 - tabSize / 2, { type: 'spring', stiffness: 300, damping: 20 });
-    } else if (py > vh - threshold) {
-      setPrevPos({ x: px, y: py });
-      setCollapsedEdge('bottom');
-      animate(y, vh - tabSize / 2, { type: 'spring', stiffness: 300, damping: 20 });
-      animate(x, vw / 2 - tabSize / 2, { type: 'spring', stiffness: 300, damping: 20 });
-    } else {
-      setCollapsedEdge(null);
-      const newX = px > vw / 2 ? vw - size - 16 : 16;
-      const newY = Math.min(Math.max(py, 16), vh - size - 16);
-      animate(x, newX, { type: 'spring', stiffness: 200, damping: 20 });
-      animate(y, newY, { type: 'spring', stiffness: 200, damping: 20 });
-    }
-  }, [x, y]);
+      if (py < threshold) {
+        setPrevPos({ x: px, y: py });
+        setCollapsedEdge('top');
+        animate(y, -tabSize / 2, { type: 'spring', stiffness: 300, damping: 20 });
+        animate(x, vw / 2 - tabSize / 2, { type: 'spring', stiffness: 300, damping: 20 });
+      } else if (py > vh - threshold) {
+        setPrevPos({ x: px, y: py });
+        setCollapsedEdge('bottom');
+        animate(y, vh - tabSize / 2, { type: 'spring', stiffness: 300, damping: 20 });
+        animate(x, vw / 2 - tabSize / 2, { type: 'spring', stiffness: 300, damping: 20 });
+      } else {
+        setCollapsedEdge(null);
+        const targetX = px > vw / 2 ? vw - size - 16 : 16;
+        const targetY = Math.min(Math.max(py, 16), vh - size - 16);
+        animate(x, targetX, { type: 'spring', stiffness: 200, damping: 20 });
+        animate(y, targetY, { type: 'spring', stiffness: 200, damping: 20 });
+      }
+    },
+    [x, y]
+  );
+
+  const isTop = collapsedEdge === 'top';
 
   if (collapsedEdge) {
-    const isTop = collapsedEdge === 'top';
-    const tabClass = `w-${tabSize} h-${tabSize / 2} bg-teal-500 rounded-${isTop ? 'b' : 't'}-full shadow-lg flex items-center justify-center`;
+    const tabClasses = [
+      'bg-teal-500',
+      'shadow-lg',
+      'flex items-center justify-center',
+      isTop ? 'rounded-b-full h-4 w-8' : 'rounded-t-full h-4 w-8'
+    ].join(' ');
 
     return (
       <motion.div
-        style={{ x, y }}
-        className="fixed z-50 flex items-center justify-center touch-manipulation"
+        style={{ x, y, touchAction: 'none', cursor: 'grab' }}
+        className="fixed z-50 md:hidden"
         onClick={() => {
           setCollapsedEdge(null);
           animate(x, prevPos.x, { type: 'spring', stiffness: 200, damping: 20 });
           animate(y, prevPos.y, { type: 'spring', stiffness: 200, damping: 20 });
         }}
       >
-        <div className={tabClass}>
+        <div className={tabClasses}>
           <HomeIcon
-            className={`w-5 h-5 text-white transform ${isTop ? 'rotate-180' : ''}`}
+            className={`text-white ${isTop ? 'rotate-180' : ''} w-3 h-3`}
             aria-hidden="true"
           />
         </div>
@@ -64,7 +73,7 @@ export default function FloatingHome() {
 
   return (
     <motion.button
-      style={{ x, y, touchAction: 'none' }}
+      style={{ x, y, touchAction: 'none', cursor: 'grab' }}
       drag
       dragMomentum={false}
       dragConstraints={{
@@ -75,7 +84,7 @@ export default function FloatingHome() {
       }}
       onDragEnd={handleDragEnd}
       onClick={() => window.location.assign('/')}
-      className="fixed z-50 w-14 h-14 bg-teal-500 rounded-full shadow-lg flex items-center justify-center touch-manipulation"
+      className="floating-home"
       aria-label="Go Home"
     >
       <HomeIcon className="w-6 h-6 text-white" aria-hidden="true" />

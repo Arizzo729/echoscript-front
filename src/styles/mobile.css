@@ -1,97 +1,48 @@
 /* src/styles/mobile.css */
-@media (max-width: 768px) {
-  /* 1. Fixed header */
-  .header {
-    position: fixed;
-    top: env(safe-area-inset-top, 0);
-    inset-inline: 0;
-    width: 100%;
-    z-index: 1002;
-    background-color: var(--color-surface);
-    box-shadow: var(--shadow-light);
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  /* 1. Mobile header */
+  .mobile-header {
+    @apply fixed top-0 inset-x-0 z-50 bg-zinc-900/80 backdrop-blur-md border-b border-zinc-800 shadow-md md:hidden;
+    padding-top: env(safe-area-inset-top, 0);
   }
 
-  /* 2. Main content spacing */
-  .content-container {
-    padding-top: calc(56px + env(safe-area-inset-top, 0));
-    padding-bottom: calc(80px + env(safe-area-inset-bottom, 8px));
+  /* 2. Main content wrapper */
+  .mobile-content {
+    @apply pt-[calc(56px+env(safe-area-inset-top,0))] pb-[calc(80px+env(safe-area-inset-bottom,8px))] md:hidden;
   }
 
   /* 3. Bottom sheet overlay */
-  .overlay {
-    position: fixed;
-    inset-inline: 0;
-    bottom: 0;
-    max-height: 70vh;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(12px);
-    border-top-left-radius: var(--radius-lg);
-    border-top-right-radius: var(--radius-lg);
-    box-shadow: var(--shadow-strong);
-    transform: translateY(100%);
-    transition: transform 0.3s ease;
-    overflow: hidden;
-    z-index: 1001;
+  .mobile-overlay {
+    @apply fixed inset-x-0 bottom-0 max-h-[70vh] bg-white/90 backdrop-blur-lg rounded-t-lg shadow-lg transform translate-y-full transition-transform duration-300 ease-in-out md:hidden;
   }
-  .overlay.fade-in {
-    transform: translateY(0);
+  .mobile-overlay.open {
+    @apply translate-y-0;
   }
-  .overlay .drag-handle {
-    width: 40px;
-    height: 4px;
-    margin: 8px auto;
-    border-radius: 2px;
-    background-color: var(--color-secondary-text);
-    cursor: grab;
+  .mobile-overlay .drag-handle {
+    @apply w-10 h-1.5 my-2 rounded-full bg-zinc-400 cursor-grab;
   }
 
-  /* 4. Scrollable audio overlay */
-  .audio-overlay {
-    padding: 12px;
-    max-height: calc(70vh - 40px);
-    overflow-y: auto;
+  /* 4. Audio overlay container */
+  .audio-overlay-mobile {
+    @apply p-2 max-h-[calc(70vh-40px)] overflow-y-auto md:hidden;
   }
 
-  /* 5. Bubble-style bottom navigation */
+  /* 5. Bubble-style bottom nav */
   .bottom-nav {
-    position: fixed;
-    bottom: calc(16px + env(safe-area-inset-bottom, 8px));
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(480px, calc(100% - 32px));
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    border-radius: 9999px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    z-index: 1000;
+    @apply fixed bottom-[calc(16px+env(safe-area-inset-bottom,8px))] left-1/2 transform -translate-x-1/2 w-[min(480px,calc(100%-32px))] flex justify-around items-center p-2 bg-white/90 backdrop-blur-md rounded-full shadow-lg md:hidden;
   }
 
   /* 6. Floating home action button */
   .floating-home {
-    --size: clamp(48px, 6vw, 64px);
-    position: fixed;
-    bottom: calc(72px + env(safe-area-inset-bottom, 8px));
-    right: 16px;
-    width: var(--size);
-    height: var(--size);
-    display: grid;
-    place-items: center;
-    background-color: var(--color-primary);
-    backdrop-filter: blur(10px);
-    border-radius: 50%;
-    box-shadow: var(--shadow-strong);
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    z-index: 1003;
+    --size: clamp(48px,6vw,64px);
+    @apply fixed bottom-[calc(72px+env(safe-area-inset-bottom,8px))] right-4 w-[var(--size)] h-[var(--size)] grid place-items-center bg-teal-500 backdrop-blur-md rounded-full shadow-lg cursor-pointer transition-transform duration-200 ease-in-out md:hidden;
   }
   .floating-home:hover,
   .floating-home:focus {
-    transform: scale(1.1);
-    box-shadow: var(--shadow-strong-hover, 0 6px 16px rgba(0, 0, 0, 0.12));
+    @apply scale-110 shadow-xl;
   }
 }
-
