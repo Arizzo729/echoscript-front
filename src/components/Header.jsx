@@ -13,7 +13,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "./ui/Button";
 import { useAuth } from "../context/AuthContext";
 import { useSound } from "../context/SoundContext";
-import IconOnly from "../assets/icons/icon.png";
+import IconOnly from "../assets/icon.png";
 import { useTranslation } from "react-i18next";
 
 export default function Header({
