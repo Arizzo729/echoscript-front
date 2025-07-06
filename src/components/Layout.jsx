@@ -17,9 +17,8 @@ import IntroVideo from './IntroVideo';
 import AudioOverlay from './AudioOverlay';
 import { ToastProvider } from './toast/ToastProvider';
 import ToastContainer from './ToastContainer';
-import MobileBottomNav from './MobileBottomNav';
 import useIsMobile from '../hooks/useIsMobile';
-import MobileOverlay from './MobileOverlay';
+import MobileLayout from './MobileLayout';
 
 const Header = lazy(() => import('./Header'));
 const Sidebar = lazy(() => import('./Sidebar'));
@@ -31,8 +30,7 @@ export default function Layout() {
   const isMobile = useIsMobile();
   const [showIntro, setShowIntro] = useState(true);
   const [theme, setTheme] = useState(() => {
-    const stored =
-      typeof window !== 'undefined' && localStorage.getItem('theme');
+    const stored = typeof window !== 'undefined' && localStorage.getItem('theme');
     if (stored) return stored;
     return (
       typeof window !== 'undefined' &&
@@ -45,6 +43,7 @@ export default function Layout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [isPending, startTransition] = useTransition();
 
+  // NProgress for route changes
   useEffect(() => {
     NProgress.configure({ showSpinner: false, easing: 'ease', speed: 400 });
     NProgress.start();
@@ -52,11 +51,13 @@ export default function Layout() {
     return () => NProgress.done();
   }, [location.pathname]);
 
+  // Theme toggling
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  // Prevent scroll during intro
   useEffect(() => {
     document.body.style.overflow = showIntro ? 'hidden' : '';
   }, [showIntro]);
@@ -71,6 +72,7 @@ export default function Layout() {
   return (
     <ToastProvider>
       <ThemeContext.Provider value={themeValue}>
+        {/* Skip link for accessibility */}
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only fixed top-2 left-2 p-2 bg-teal-500 text-white rounded"
@@ -78,65 +80,73 @@ export default function Layout() {
           Skip to content
         </a>
 
+        {/* Intro video overlay */}
         <AnimatePresence>
           {showIntro && (
-            <IntroVideo key="intro" src="/videos/intro.mp4" onFinish={handleIntroFinish} />
+            <IntroVideo
+              key="intro"
+              src="/videos/intro.mp4"
+              onFinish={handleIntroFinish}
+            />
           )}
         </AnimatePresence>
 
-        {!showIntro && (
-          <div className="flex flex-col h-screen w-screen overflow-hidden bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white">
-            <Suspense fallback={<div className="h-16 w-full bg-zinc-900" />}>
-              <Header
-                onToggleDrawer={toggleDrawer}
-                drawerOpen={drawerOpen}
-                collapseSidebar={collapseSidebar}
-                sidebarCollapsed={sidebarCollapsed}
-              />
-            </Suspense>
-
-            <div className="flex flex-1 overflow-hidden">
-              <Suspense fallback={<div className="w-20 bg-zinc-900" />}>
-                <Sidebar
-                  collapsed={sidebarCollapsed}
-                  setCollapsed={setSidebarCollapsed}
+        {!showIntro &&
+          (isMobile ? (
+            // Mobile: use new MobileLayout wrapper
+            <MobileLayout>
+              <ErrorBoundary>
+                <Outlet />
+              </ErrorBoundary>
+              <AudioOverlay />
+            </MobileLayout>
+          ) : (
+            // Desktop: existing header, sidebar, content, audio overlay
+            <div className="flex flex-col h-screen w-screen overflow-hidden bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white">
+              <Suspense fallback={<div className="h-16 w-full bg-zinc-900" />}>
+                <Header
+                  onToggleDrawer={toggleDrawer}
+                  drawerOpen={drawerOpen}
+                  collapseSidebar={collapseSidebar}
+                  sidebarCollapsed={sidebarCollapsed}
                 />
               </Suspense>
 
-              <main
-                id="main-content"
-                className={`flex-1 overflow-y-auto relative px-6 py-4 transition-all duration-300 ${
-                  sidebarCollapsed ? 'pl-20' : 'pl-56'
-                }`}
-              >
-                {isPending && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ loop: Infinity, duration: 1 }}
-                      className="w-10 h-10 border-4 border-teal-400 border-t-transparent rounded-full"
-                    />
-                  </div>
-                )}
+              <div className="flex flex-1 overflow-hidden">
+                <Suspense fallback={<div className="w-20 bg-zinc-900" />}>
+                  <Sidebar
+                    collapsed={sidebarCollapsed}
+                    setCollapsed={setSidebarCollapsed}
+                  />
+                </Suspense>
 
-                <ErrorBoundary>
-                  <Outlet />
-                </ErrorBoundary>
-              </main>
-            </div>
+                <main
+                  id="main-content"
+                  className={`flex-1 overflow-y-auto relative px-6 py-4 transition-all duration-300 ${
+                    sidebarCollapsed ? 'pl-20' : 'pl-56'
+                  }`}
+                >
+                  {isPending && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ loop: Infinity, duration: 1 }}
+                        className="w-10 h-10 border-4 border-teal-400 border-t-transparent rounded-full"
+                      />
+                    </div>
+                  )}
 
-            <ToastContainer position="top-right" />
+                  <ErrorBoundary>
+                    <Outlet />
+                  </ErrorBoundary>
+                </main>
+              </div>
 
-            {isMobile ? (
-              <MobileOverlay>
-                <AudioOverlay />
-                <MobileBottomNav />
-              </MobileOverlay>
-            ) : (
+              <ToastContainer position="top-right" />
+
               <AudioOverlay />
-            )}
-          </div>
-        )}
+            </div>
+          ))}
       </ThemeContext.Provider>
     </ToastProvider>
   );
