@@ -15,11 +15,13 @@ import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 import ErrorBoundary from './ErrorBoundary';
 import IntroVideo from './IntroVideo';
-import AudioOverlay from './AudioOverlay';
 import { ToastProvider } from './toast/ToastProvider';
 import ToastContainer from './ToastContainer';
 import useIsMobile from '../hooks/useIsMobile';
 import MobileLayout from './MobileLayout';
+
+// Only import AudioOverlay once; don't import in MobileLayout.jsx
+import AudioOverlay from './AudioOverlay';
 
 const Header = lazy(() => import('./Header'));
 const Sidebar = lazy(() => import('./Sidebar'));
@@ -94,15 +96,14 @@ export default function Layout() {
 
         {!showIntro &&
           (isMobile ? (
-            // Mobile: use new MobileLayout wrapper (MobileLayout manages overlay state)
+            // --- Mobile: MobileLayout manages AudioOverlay, so DO NOT render AudioOverlay here!
             <MobileLayout>
               <ErrorBoundary>
                 <Outlet />
               </ErrorBoundary>
-              {/* DO NOT RENDER <AudioOverlay /> HERE; MobileLayout manages it */}
             </MobileLayout>
           ) : (
-            // Desktop: header, sidebar, content, audio overlay (only render once here)
+            // --- Desktop: Only render AudioOverlay ONCE here
             <div className="flex flex-col h-screen w-screen overflow-hidden bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white">
               <Suspense fallback={<div className="h-16 w-full bg-zinc-900" />}>
                 <Header
@@ -158,3 +159,4 @@ export default function Layout() {
     </ToastProvider>
   );
 }
+
