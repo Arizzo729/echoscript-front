@@ -1,4 +1,4 @@
-/// vite.config.js
+// vite.config.js
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
@@ -10,34 +10,22 @@ export default defineConfig(({ mode }) => {
   return {
     base: '/',
     plugins: [
+      // Move SVGR before react, and export SVGs as the default export:
       svgr({
-        exportAsDefault: false,
+        exportAsDefault: true,
         icon: true,
         svgoConfig: { plugins: [{ removeViewBox: false }] },
-      }), // must precede react()
-      react(),
-      environmentPlugin({
-        defaults: {
-          VITE_OPENAI_API_KEY:    env.VITE_OPENAI_API_KEY    || '',
-          VITE_BROWSE_AI_API_KEY: env.VITE_BROWSE_AI_API_KEY || '',
-          VITE_APIFY_API_TOKEN:   env.VITE_APIFY_API_TOKEN   || '',
-          VITE_BRIGHTDATA_USERNAME: env.VITE_BRIGHTDATA_USERNAME || '',
-          VITE_BRIGHTDATA_PASSWORD: env.VITE_BRIGHTDATA_PASSWORD || '',
-        },
       }),
+      react(),
+      environmentPlugin({ /* ... */ }),
     ],
-    resolve: {
-      extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
-    },
-    server: {
-      historyApiFallback: true,
-    },
+    resolve: { /* ... */ },
+    server: { historyApiFallback: true },
     build: {
       rollupOptions: { input: './index.html' },
       outDir: 'dist',
       emptyOutDir: true,
     },
-    assetsInclude: ['**/*.svg'],
+    // You can remove assetsInclude here; SVGR will handle the SVG imports
   };
 });
-
