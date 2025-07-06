@@ -15,7 +15,7 @@ export default function MobileBottomNav() {
     { to: '/', Icon: HomeIcon },
     { to: '/dashboard', Icon: DashboardIcon },
     { to: '/upload', Icon: UploadIcon },
-    { to: '/shop', Icon: ShopIcon },
+    { to: '/purchase', Icon: ShopIcon },
   ];
 
   return (
