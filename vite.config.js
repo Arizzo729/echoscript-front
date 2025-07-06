@@ -4,39 +4,17 @@ import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 import environmentPlugin from 'vite-plugin-environment';
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
-
-  return {
-    base: '/',
-    plugins: [
-      // SVGs become default React components:
-      svgr({
-        exportAsDefault: true,
-        icon: true,
-        svgoConfig: [{ removeViewBox: false }],
-      }),
-      react(),
-      environmentPlugin({
-        defaults: {
-          VITE_OPENAI_API_KEY:    env.VITE_OPENAI_API_KEY    || '',
-          VITE_BROWSE_AI_API_KEY: env.VITE_BROWSE_AI_API_KEY || '',
-          VITE_APIFY_API_TOKEN:   env.VITE_APIFY_API_TOKEN   || '',
-          VITE_BRIGHTDATA_USERNAME: env.VITE_BRIGHTDATA_USERNAME || '',
-          VITE_BRIGHTDATA_PASSWORD: env.VITE_BRIGHTDATA_PASSWORD || '',
-        },
-      }),
-    ],
-    resolve: {
-      extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
-    },
-    server: {
-      historyApiFallback: true,
-    },
-    build: {
-      rollupOptions: { input: './index.html' },
-      outDir: 'dist',
-      emptyOutDir: true,
-    },
-  };
-});
+export default defineConfig(({ mode }) => ({
+  // … your existing config …
+  plugins: [
+    svgr({
+      exportAsDefault: true,
+      include: '**/*.svg',           // <— add this line
+      icon: true,
+      svgoConfig: { plugins: [{ removeViewBox: false }] },
+    }),                            // :contentReference[oaicite:2]{index=2}
+    react(),
+    environmentPlugin({ /* … */ }),
+  ],
+  // …
+}));
