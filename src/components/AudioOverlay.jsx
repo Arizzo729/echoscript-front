@@ -1,4 +1,109 @@
-// ...everything above unchanged...
+// src/components/AudioOverlay.jsx
+
+import React, { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Pause,
+  Play,
+  X,
+  ChevronUp,
+  ChevronDown,
+  Volume2,
+  VolumeX,
+  Music
+} from 'lucide-react';
+import Button from './ui/Button';
+import { useSound } from '../context/SoundContext';
+import useIsMobile from '../hooks/useIsMobile';
+
+const TRACKS = [
+  { label: 'OFF' },
+  { label: 'BG 1' },
+  { label: 'BG 2' },
+  { label: 'BG 3' }
+];
+
+// --- Custom drag hook for mobile overlay, centers under finger instantly ---
+function useTouchDrag({
+  enabled = true,
+  onDragEnd,
+  initial = { x: 0, y: 0 },
+  bounds = { bottom: 80 }, // px from bottom to avoid nav
+}) {
+  const [pos, setPos] = useState(initial);
+  const nodeRef = useRef(null);
+  const dragging = useRef(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
+
+  // Reset to initial when needed
+  useEffect(() => {
+    setPos(initial);
+  }, [initial.x, initial.y]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const node = nodeRef.current;
+    if (!node) return;
+
+    function getClamped(x, y) {
+      const width = node.offsetWidth;
+      const height = node.offsetHeight;
+      const clampX = Math.max(0, Math.min(window.innerWidth - width, x));
+      const clampY = Math.max(
+        0,
+        Math.min(window.innerHeight - height - (bounds.bottom || 0), y)
+      );
+      return { x: clampX, y: clampY };
+    }
+
+    function onTouchStart(e) {
+      if (!enabled) return;
+      dragging.current = true;
+      const touch = e.touches[0];
+      // Center overlay under the finger
+      dragOffset.current = {
+        x: node.offsetWidth / 2,
+        y: node.offsetHeight / 2
+      };
+      const { x, y } = getClamped(
+        touch.clientX - dragOffset.current.x,
+        touch.clientY - dragOffset.current.y
+      );
+      setPos({ x, y });
+    }
+
+    function onTouchMove(e) {
+      if (!dragging.current || !enabled) return;
+      const touch = e.touches[0];
+      const { x, y } = getClamped(
+        touch.clientX - dragOffset.current.x,
+        touch.clientY - dragOffset.current.y
+      );
+      setPos({ x, y });
+    }
+
+    function onTouchEnd() {
+      if (dragging.current) {
+        dragging.current = false;
+        onDragEnd && onDragEnd(pos);
+      }
+    }
+
+    node.addEventListener('touchstart', onTouchStart, { passive: false });
+    node.addEventListener('touchmove', onTouchMove, { passive: false });
+    node.addEventListener('touchend', onTouchEnd, { passive: false });
+
+    return () => {
+      node.removeEventListener('touchstart', onTouchStart);
+      node.removeEventListener('touchmove', onTouchMove);
+      node.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [enabled, pos, onDragEnd, bounds.bottom]);
+
+  return [nodeRef, pos, setPos];
+}
 
 export default function AudioOverlay() {
   const isMobile = useIsMobile();
@@ -16,80 +121,65 @@ export default function AudioOverlay() {
   );
   const [busy, setBusy] = useState(false);
 
-  // ---- DRAG FOR MOBILE, NO REACT STATE, NO MOTION.DIV ----
-  const dragPosRef = useRef({
-    x: (() => {
+  // Mobile floating card position (save to localStorage)
+  const [dragRef, dragPos, setDragPos] = useTouchDrag({
+    enabled: isMobile && !collapsed,
+    initial: (() => {
+      if (!isMobile) return { x: 0, y: 0 };
       const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
-      return typeof saved.x === 'number' ? saved.x : window.innerWidth - 260 - 16;
+      return {
+        x: typeof saved.x === 'number' ? saved.x : window.innerWidth - 260 - 16,
+        y: typeof saved.y === 'number' ? saved.y : window.innerHeight - 120,
+      };
     })(),
-    y: (() => {
-      const saved = JSON.parse(localStorage.getItem('audio-overlay-pos') || '{}');
-      return typeof saved.y === 'number' ? saved.y : window.innerHeight - 120;
-    })()
+    onDragEnd: pos => {
+      localStorage.setItem('audio-overlay-pos', JSON.stringify(pos));
+    },
+    bounds: { bottom: 80 },
   });
-  const overlayRef = useRef(null);
-  const dragging = useRef(false);
-  const dragOffset = useRef({ x: 0, y: 0 });
+
+  // Desktop overlay position
+  const [position, setPosition] = useState(() => {
+    if (isMobile) return { x: 0, y: 0 };
+    return JSON.parse(localStorage.getItem('audio-overlay-pos') || '{"x":56,"y":96}');
+  });
+  const wrapperRef = useRef(null);
 
   useEffect(() => {
-    if (!isMobile || collapsed) return;
-    const node = overlayRef.current;
-    if (!node) return;
+    localStorage.setItem('audio-overlay-collapsed', JSON.stringify(collapsed));
+  }, [collapsed]);
 
-    // Set start position
-    node.style.left = `${dragPosRef.current.x}px`;
-    node.style.top = `${dragPosRef.current.y}px`;
+  // Desktop drag (framer-motion)
+  const handleDesktopDragEnd = (_, info) => {
+    if (!wrapperRef.current) return;
+    const node = wrapperRef.current;
+    const maxX = window.innerWidth - node.offsetWidth;
+    const maxY = window.innerHeight - node.offsetHeight;
+    const clampedX = Math.min(Math.max(0, info.point.x), maxX);
+    const clampedY = Math.min(Math.max(0, info.point.y), maxY);
+    setPosition({ x: clampedX, y: clampedY });
+    localStorage.setItem('audio-overlay-pos', JSON.stringify({ x: clampedX, y: clampedY }));
+  };
 
-    function onTouchStart(e) {
-      dragging.current = true;
-      const touch = e.touches[0];
-      const rect = node.getBoundingClientRect();
-      dragOffset.current = {
-        x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top,
-      };
-      node.style.transition = 'none';
-    }
+  const currentLabel = TRACKS[trackIndex]?.label;
 
-    function onTouchMove(e) {
-      if (!dragging.current) return;
-      const touch = e.touches[0];
-      let x = touch.clientX - dragOffset.current.x;
-      let y = touch.clientY - dragOffset.current.y;
-      // Clamp to screen
-      x = Math.max(0, Math.min(window.innerWidth - node.offsetWidth, x));
-      y = Math.max(0, Math.min(window.innerHeight - node.offsetHeight - 80, y));
-      node.style.left = `${x}px`;
-      node.style.top = `${y}px`;
-      dragPosRef.current = { x, y };
-    }
-
-    function onTouchEnd() {
-      dragging.current = false;
-      node.style.transition = 'left 0.13s, top 0.13s';
-      // Save to localStorage, so next open returns to same place
-      localStorage.setItem('audio-overlay-pos', JSON.stringify(dragPosRef.current));
-    }
-
-    node.addEventListener('touchstart', onTouchStart, { passive: false });
-    node.addEventListener('touchmove', onTouchMove, { passive: false });
-    node.addEventListener('touchend', onTouchEnd, { passive: false });
-
-    return () => {
-      node.removeEventListener('touchstart', onTouchStart);
-      node.removeEventListener('touchmove', onTouchMove);
-      node.removeEventListener('touchend', onTouchEnd);
-    };
-  }, [isMobile, collapsed]);
-
-  // ---- MOBILE OVERLAY: NO MOTION.DIV ----
+  // --- MOBILE OVERLAY ---
   const MobileOverlay = (
-    <div
-      ref={overlayRef}
+    <motion.div
+      ref={dragRef}
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{
+        opacity: 1,
+        scale: 1,
+        x: dragPos.x,
+        y: dragPos.y,
+        transition: { type: 'spring', stiffness: 260, damping: 22 }
+      }}
+      exit={{ opacity: 0, scale: 0.95 }}
       style={{
         position: 'fixed',
-        left: dragPosRef.current.x,
-        top: dragPosRef.current.y,
+        left: 0,
+        top: 0,
         zIndex: 9999,
         width: 260,
         height: 60,
@@ -148,7 +238,7 @@ export default function AudioOverlay() {
         icon={<ChevronRight className="w-5 h-5 text-teal-400" />}
       />
       <span className="ml-1 mr-1 font-mono text-[0.83rem] text-teal-200 tracking-wider select-none">
-        {TRACKS[trackIndex]?.label}
+        {currentLabel}
       </span>
       <button
         onClick={() => setCollapsed(true)}
@@ -164,11 +254,10 @@ export default function AudioOverlay() {
       >
         <X className="w-4 h-4 text-teal-400" />
       </button>
-    </div>
+    </motion.div>
   );
 
-  // ---- REST: Desktop unchanged ----
-
+  // FAB to open overlay
   const MobileFAB = (
     <motion.button
       key="audio-fab"
@@ -199,9 +288,136 @@ export default function AudioOverlay() {
     </motion.button>
   );
 
-  // DesktopOverlay and DesktopCollapsed remain exactly as you have them!
+  // --- DESKTOP OVERLAY (unchanged) ---
+  const DesktopOverlay = (
+    <motion.div
+      ref={wrapperRef}
+      drag={!isMobile && !collapsed}
+      dragMomentum={false}
+      dragElastic={0}
+      onDragEnd={handleDesktopDragEnd}
+      style={{
+        x: position.x,
+        y: position.y,
+        width: 324,
+        height: 44,
+        minHeight: 44,
+        cursor: 'grab',
+        touchAction: 'none',
+        userSelect: 'none',
+        position: 'fixed',
+        zIndex: 9999,
+        top: 0,
+        left: 0,
+        background: 'rgba(24,24,30,0.98)',
+        borderRadius: 16,
+        boxShadow: '0 4px 24px 0 rgba(0,0,0,0.13)',
+        border: '1.5px solid #14b8a6a6',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 0,
+        padding: '0 10px'
+      }}
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 240, damping: 20 }}
+    >
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-label="Previous"
+        onClick={() => {
+          if (!busy) {
+            setBusy(true);
+            playAmbientTrack((trackIndex - 1 + TRACKS.length) % TRACKS.length);
+            setTimeout(() => setBusy(false), 300);
+          }
+        }}
+        className="px-1"
+        icon={<ChevronLeft className="w-4 h-4 text-teal-400" />}
+      />
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-label={isPlaying ? "Pause" : "Play"}
+        onClick={() =>
+          trackIndex === 0 ? playAmbientTrack(1) : togglePlay()
+        }
+        className="px-1"
+        icon={
+          isPlaying ? (
+            <Pause className="w-4 h-4 text-teal-400" />
+          ) : (
+            <Play className="w-4 h-4 text-teal-400" />
+          )
+        }
+      />
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-label="Next"
+        onClick={() => {
+          if (!busy) {
+            setBusy(true);
+            playAmbientTrack((trackIndex + 1) % TRACKS.length);
+            setTimeout(() => setBusy(false), 300);
+          }
+        }}
+        className="px-1"
+        icon={<ChevronRight className="w-4 h-4 text-teal-400" />}
+      />
+      <span className="ml-1 mr-1 font-mono text-[0.80rem] text-teal-200 tracking-wider select-none">
+        {currentLabel}
+      </span>
+      <span>
+        {volume === 0 ? <VolumeX className="w-4 h-4 text-zinc-400" /> : <Volume2 className="w-4 h-4 text-teal-400" />}
+      </span>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        step={1}
+        value={Math.round(volume * 100)}
+        onChange={e => setVolume(e.target.value / 100)}
+        className="w-20 h-1 accent-teal-400 cursor-pointer mx-1"
+        aria-label="Volume"
+        style={{ minWidth: 64 }}
+      />
+      <button
+        onClick={() => setCollapsed(true)}
+        className="ml-auto flex items-center justify-center p-0 w-7 h-7 rounded-full hover:scale-110 transition"
+        aria-label="Collapse"
+        tabIndex={0}
+        style={{
+          background: 'none',
+          border: 'none',
+          outline: 'none',
+          boxShadow: 'none'
+        }}
+      >
+        <ChevronUp className="w-4 h-4 text-teal-400" />
+      </button>
+    </motion.div>
+  );
 
-  // Render logic
+  const DesktopCollapsed = (
+    <motion.div
+      key="collapsed"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+      className="fixed top-2 left-1/2 -translate-x-1/2 flex items-center gap-2 z-[9999] shadow-lg rounded-full bg-zinc-900/85 border border-teal-400/40 px-3 h-[30px] min-h-0 select-none"
+      style={{ width: 200, cursor: 'pointer', userSelect: 'none' }}
+      onClick={() => setCollapsed(false)}
+    >
+      <Music className="w-4 h-4 text-teal-400" />
+      <span className="text-teal-200 text-[0.8rem] font-medium tracking-wide">Ambient Audio</span>
+      <ChevronDown className="w-3 h-3 text-teal-300 ml-auto" />
+    </motion.div>
+  );
+
   if (isMobile) {
     return (
       <AnimatePresence>
