@@ -1,7 +1,7 @@
 // src/App.jsx
 
 import React, { useState, useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 // Context Providers
 import { AuthProvider } from "./context/AuthContext";
@@ -45,7 +45,6 @@ import Unsubscribed from "./pages/Unsubscribed";
 import NotFound from "./pages/NotFound";
 
 function OverlayManager() {
-  // Handles splash, onboarding, and overlays -- doesn't block router.
   const [splashDone, setSplashDone] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
   const [introComplete, setIntroComplete] = useState(
@@ -102,15 +101,13 @@ export default function App() {
               <SoundProvider>
                 <ErrorBoundary>
                   <Routes>
-                    {/* Public auth routes */}
-                    <Route path="/signin" element={<SignIn />} />
-                    <Route path="/signup" element={<SignUp />} />
-                    <Route path="/verify" element={<VerifyEmail />} />
-                    <Route path="/reset" element={<ResetPassword />} />
-                    <Route path="/unsubscribe" element={<Unsubscribe />} />
-                    <Route path="/unsubscribed" element={<Unsubscribed />} />
-                    {/* All other pages wrapped in main Layout */}
                     <Route element={<Layout />}>
+                      <Route path="/signin" element={<SignIn />} />
+                      <Route path="/signup" element={<SignUp />} />
+                      <Route path="/verify" element={<VerifyEmail />} />
+                      <Route path="/reset" element={<ResetPassword />} />
+                      <Route path="/unsubscribe" element={<Unsubscribe />} />
+                      <Route path="/unsubscribed" element={<Unsubscribed />} />
                       <Route path="/" element={<Home />} />
                       <Route path="/purchase" element={<Purchase />} />
                       <Route path="/purchase/minutes" element={<BuyExtraMinutes />} />
@@ -128,7 +125,6 @@ export default function App() {
                       <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>
-                  {/* Render overlays above everything */}
                   <OverlayManager />
                 </ErrorBoundary>
               </SoundProvider>
