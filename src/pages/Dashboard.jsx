@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+// src/pages/Dashboard.jsx
+
+import React from "react";
 import { motion } from "framer-motion";
 import {
   Mic,
-  UploadCloud,
   FileText,
   Sparkles,
   Video,
@@ -10,12 +11,12 @@ import {
   User,
   Settings2,
 } from "lucide-react";
-import Button from "../components/ui/Button";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
+  // You should replace this with your real user context in production!
   const user = {
     name: "Guest Echo",
     email: "guest@echoscript.ai",
@@ -48,13 +49,16 @@ export default function Dashboard() {
         Welcome back, <span className="text-teal-400">{user.name}</span> 👋
       </h1>
 
+      {/* Dashboard quick actions grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
         {sections.map(({ icon, label, route, color }) => (
           <DashboardCard key={label} icon={icon} label={label} color={color} onClick={() => navigate(route)} />
         ))}
       </div>
 
+      {/* Usage & profile cards */}
       <div className="grid md:grid-cols-2 gap-6 mb-16">
+        {/* Usage Summary */}
         <motion.div
           className="rounded-2xl border border-zinc-700 bg-zinc-900 shadow-xl p-6"
           initial={{ opacity: 0, y: 20 }}
@@ -83,6 +87,7 @@ export default function Dashboard() {
           </p>
         </motion.div>
 
+        {/* User Profile */}
         <motion.div
           className="rounded-2xl border border-zinc-700 bg-zinc-900 shadow-xl p-6 flex items-center gap-5"
           initial={{ opacity: 0, y: 20 }}
@@ -101,6 +106,7 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
+      {/* Pro tip card */}
       <div className="mt-5 p-5 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700">
         <div className="flex items-center gap-2 mb-1">
           <Sparkles className="w-4 h-4 text-teal-300" />
@@ -114,6 +120,7 @@ export default function Dashboard() {
   );
 }
 
+// Reusable dashboard card
 function DashboardCard({ icon, label, color, onClick }) {
   return (
     <motion.button
@@ -132,5 +139,3 @@ function DashboardCard({ icon, label, color, onClick }) {
     </motion.button>
   );
 }
-
-
