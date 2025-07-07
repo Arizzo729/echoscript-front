@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 export default function SignUp() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { signUp } = useAuth();
+  const { signUp, user } = useAuth(); // <-- Grab user from context
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,13 +57,13 @@ export default function SignUp() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1, duration: 0.35, type: "spring" }}
       >
-        {/* Back to Dashboard */}
+        {/* Back Link: Dynamic */}
         <Link
-          to="/dashboard"
+          to={user ? "/dashboard" : "/"}
           className="flex items-center text-sm font-semibold text-teal-400 hover:underline focus-visible:ring-2 focus-visible:ring-teal-400 w-max"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          {t("dashboard", "Dashboard")}
+          {user ? t("dashboard", "Dashboard") : t("home", "Home")}
         </Link>
 
         {/* Header */}
