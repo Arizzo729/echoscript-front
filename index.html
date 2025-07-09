@@ -4,11 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EchoScript.AI – The Best Listener</title>
+
+    <!-- Meta Tags -->
     <meta name="description" content="EchoScript.AI: Upload, transcribe, and manage audio with AI precision." />
+    <meta name="keywords" content="AI transcription, voice-to-text, audio summarization, podcast transcription, meeting notes" />
+    <meta name="author" content="EchoScript.AI Team" />
     <meta name="theme-color" content="#14b8a6" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://*.googleapis.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:;" />
+
+    <!-- Mobile PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.json" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -21,7 +30,8 @@
     <link rel="icon" href="/favicon_dark.ico" media="(prefers-color-scheme: dark)" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    <!-- Open Graph / SEO -->
+    <!-- SEO / Open Graph -->
+    <link rel="canonical" href="https://echoscriptai.com" />
     <meta property="og:title" content="EchoScript.AI – The Best Listener" />
     <meta property="og:description" content="Transcribe podcasts, meetings, and recordings with AI-level precision." />
     <meta property="og:image" content="/og-image.png" />
@@ -30,7 +40,8 @@
   </head>
 
   <body class="bg-white text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100 font-sans antialiased">
-    <div id="root"></div>
-    <script type="module" src="/src/index.jsx"></script>
+    <a class="sr-only focus:not-sr-only" href="#main">Skip to content</a>
+    <div id="root" role="main"></div>
+    <script type="module" src="/src/index.jsx" defer></script>
   </body>
 </html>
