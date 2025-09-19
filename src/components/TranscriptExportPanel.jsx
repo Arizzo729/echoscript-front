@@ -27,6 +27,7 @@ export default function TranscriptExportPanel({ transcriptText, segments }) {
         break;
 
       case "pdf":
+        // simple HTML-as-PDF container (good enough for now)
         const html = `<html><body><pre>${plainText}</pre></body></html>`;
         blob = new Blob([html], { type: "application/pdf" });
         filename = `${baseFilename}.pdf`;

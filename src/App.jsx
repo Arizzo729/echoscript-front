@@ -1,5 +1,4 @@
 // src/App.jsx
-
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 
@@ -10,6 +9,9 @@ import { GPTProvider } from "./context/GPTContext";
 import { FontSizeProvider } from "./context/useFontSize";
 import { LanguageProvider } from "./context/LanguageContext";
 import { SoundProvider, useSound } from "./context/SoundContext";
+
+// Components
+import TranscribeUploader from "./components/TranscribeUploader";
 
 // Layout & Shared UI
 import AnimatedSplash from "./components/AnimatedSplash";
@@ -73,10 +75,7 @@ function OverlayManager() {
         <AnimatedSplash onComplete={() => setSplashDone(true)} />
       )}
       {showIntro && (
-        <OnboardingModal
-          onClose={handleIntroDone}
-          onEnableAudio={enableSound}
-        />
+        <OnboardingModal onClose={handleIntroDone} onEnableAudio={enableSound} />
       )}
       {introComplete && (
         <>
@@ -108,6 +107,7 @@ export default function App() {
                       <Route path="/reset" element={<ResetPassword />} />
                       <Route path="/unsubscribe" element={<Unsubscribe />} />
                       <Route path="/unsubscribed" element={<Unsubscribed />} />
+
                       <Route path="/" element={<Home />} />
                       <Route path="/purchase" element={<Purchase />} />
                       <Route path="/purchase/minutes" element={<BuyExtraMinutes />} />
@@ -122,9 +122,14 @@ export default function App() {
                       <Route path="/transcripts" element={<TranscriptsPage />} />
                       <Route path="/summary" element={<SummaryPage />} />
                       <Route path="/history" element={<HistoryPage />} />
+
+                      {/* NEW: simple page to test backend transcription */}
+                      <Route path="/transcribe" element={<TranscribeUploader />} />
+
                       <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>
+
                   <OverlayManager />
                 </ErrorBoundary>
               </SoundProvider>

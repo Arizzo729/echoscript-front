@@ -1,15 +1,7 @@
-// postcss.config.js
-
-const isProduction = process.env.NODE_ENV === 'production';
-
+﻿// postcss.config.js
 module.exports = {
   plugins: {
-    'tailwindcss': {},
-    'autoprefixer': {},
-    ...(isProduction && {
-      'cssnano': {
-        preset: 'default',
-      },
-    }),
+    "@tailwindcss/postcss": {},
+    autoprefixer: {},
   },
 };

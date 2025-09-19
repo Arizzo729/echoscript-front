@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import "./global.css";
+import "./i18n"; 
 import { Auth0Provider } from "@auth0/auth0-react";
 import { SoundProvider } from "./context/SoundContext"; // ✅ Add this
 

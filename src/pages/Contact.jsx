@@ -165,7 +165,7 @@ export default function Contact() {
 
         <div className="flex items-center gap-3">
           <MapPin className="w-5 h-5 text-teal-400" />
-          <span>{t("contact.address", "123 Echo Lane, Transcribe City, AI 12345")}</span>
+          <span>{t("contact.address", "Unites States EST")}</span>
         </div>
       </div>
     </motion.div>

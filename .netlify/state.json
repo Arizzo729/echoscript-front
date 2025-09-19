@@ -1,0 +1,20 @@
+{
+	"geolocation": {
+		"data": {
+			"city": "Whitehouse Station",
+			"country": {
+				"code": "US",
+				"name": "United States"
+			},
+			"subdivision": {
+				"code": "NJ",
+				"name": "New Jersey"
+			},
+			"timezone": "America/New_York",
+			"latitude": 40.6183,
+			"longitude": -74.772,
+			"postalCode": "08889"
+		},
+		"timestamp": 1748617150766
+	}
+}

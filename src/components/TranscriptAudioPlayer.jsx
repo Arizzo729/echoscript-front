@@ -29,15 +29,20 @@ export default function TranscriptAudioPlayer({ audioUrl }) {
     };
   }, []);
 
+  // reset when source changes
+  useEffect(() => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+  }, [audioUrl]);
+
   const togglePlay = () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
-    }
+    if (isPlaying) audio.pause();
+    else audio.play();
+
     setIsPlaying(!isPlaying);
   };
 
@@ -69,6 +74,7 @@ export default function TranscriptAudioPlayer({ audioUrl }) {
       <div className="flex items-center gap-4">
         <button
           onClick={togglePlay}
+          aria-label={isPlaying ? "Pause" : "Play"}
           className="p-2 rounded-full bg-zinc-700 hover:bg-teal-600 transition"
         >
           {isPlaying ? <Pause size={20} /> : <Play size={20} />}
@@ -83,6 +89,7 @@ export default function TranscriptAudioPlayer({ audioUrl }) {
             value={currentTime}
             onChange={handleSeek}
             className="w-full accent-teal-400"
+            aria-label="Seek"
           />
           <div className="flex justify-between text-xs text-zinc-300 mt-1">
             <span>{formatTime(currentTime)}</span>
@@ -94,6 +101,8 @@ export default function TranscriptAudioPlayer({ audioUrl }) {
           <button
             onClick={() => setShowSpeedMenu((s) => !s)}
             className="px-3 py-1 rounded-md bg-zinc-700 hover:bg-teal-600 text-sm transition flex items-center gap-1"
+            aria-haspopup="menu"
+            aria-expanded={showSpeedMenu}
           >
             {playbackRate}x {showSpeedMenu ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
@@ -105,6 +114,7 @@ export default function TranscriptAudioPlayer({ audioUrl }) {
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -5 }}
+                role="menu"
               >
                 {SPEED_OPTIONS.map((rate) => (
                   <li
@@ -113,6 +123,7 @@ export default function TranscriptAudioPlayer({ audioUrl }) {
                       playbackRate === rate ? "bg-zinc-700" : ""
                     }`}
                     onClick={() => handleSpeedChange(rate)}
+                    role="menuitem"
                   >
                     {rate}x
                   </li>
@@ -125,3 +136,4 @@ export default function TranscriptAudioPlayer({ audioUrl }) {
     </motion.div>
   );
 }
+
