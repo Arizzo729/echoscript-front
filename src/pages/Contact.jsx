@@ -1,34 +1,26 @@
+// src/pages/Contact.jsx
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Send, Info, Phone, MapPin, ChevronDown, ChevronUp } from "lucide-react";
+import { Mail, Send, Info, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export default function Contact() {
   const { t } = useTranslation();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: ""
-  });
+  const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [status, setStatus] = useState(null);
   const [showHours, setShowHours] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("sending");
-
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
       if (response.ok) {
         setStatus("success");
         setFormData({ name: "", email: "", subject: "", message: "" });
@@ -55,77 +47,30 @@ export default function Contact() {
       </p>
 
       <form onSubmit={handleSubmit} className="grid gap-4">
-        <input
-          id="name"
-          type="text"
-          name="name"
-          placeholder={t("contact.name", "Name")}
-          required
-          className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
-          value={formData.name}
-          onChange={handleChange}
-        />
-
-        <input
-          id="email"
-          type="email"
-          name="email"
-          placeholder={t("contact.email", "Email")}
-          required
-          className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
-          value={formData.email}
-          onChange={handleChange}
-        />
-
-        <input
-          id="subject"
-          type="text"
-          name="subject"
-          placeholder={t("contact.subject", "Subject")}
-          required
-          className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
-          value={formData.subject}
-          onChange={handleChange}
-        />
-
-        <textarea
-          id="message"
-          name="message"
-          rows={5}
-          placeholder={t("contact.message", "Message")}
-          required
-          className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
-          value={formData.message}
-          onChange={handleChange}
-        />
-
-        <button
-          type="submit"
-          className="bg-teal-600 hover:bg-teal-700 text-white py-2 px-5 rounded-lg flex items-center gap-2 transition"
-          disabled={status === "sending"}
-        >
+        <input id="name" type="text" name="name" placeholder={t("contact.name", "Name")} required
+               className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
+               value={formData.name} onChange={handleChange} />
+        <input id="email" type="email" name="email" placeholder={t("contact.email", "Email")} required
+               className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
+               value={formData.email} onChange={handleChange} />
+        <input id="subject" type="text" name="subject" placeholder={t("contact.subject", "Subject")} required
+               className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
+               value={formData.subject} onChange={handleChange} />
+        <textarea id="message" name="message" rows={5} placeholder={t("contact.message", "Message")} required
+                  className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
+                  value={formData.message} onChange={handleChange} />
+        <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white py-2 px-5 rounded-lg flex items-center gap-2 transition"
+                disabled={status === "sending"}>
           <Send className="w-4 h-4" />
           {status === "sending" ? t("contact.sending", "Sending...") : t("contact.send", "Send")}
         </button>
-
-        {status === "success" && (
-          <p className="text-green-400 mt-2">
-            {t("contact.success", "Message sent successfully!")}
-          </p>
-        )}
-        {status === "error" && (
-          <p className="text-red-400 mt-2">
-            {t("contact.error", "Something went wrong. Please try again later.")}
-          </p>
-        )}
+        {status === "success" && <p className="text-green-400 mt-2">{t("contact.success", "Message sent successfully!")}</p>}
+        {status === "error" && <p className="text-red-400 mt-2">{t("contact.error", "Something went wrong. Please try again later.")}</p>}
       </form>
 
       <div className="mt-16 grid gap-4 text-sm text-zinc-300">
         <div className="flex items-center gap-3">
           <Mail className="w-5 h-5 text-teal-400" /> <span>support@echoscript.ai</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Phone className="w-5 h-5 text-teal-400" /> <span>+1 (800) 555-9246</span>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -139,11 +84,7 @@ export default function Contact() {
           >
             <Info className="w-4 h-4 text-teal-400" />
             <span>{t("contact.hours", "Contact Hours")}</span>
-            {showHours ? (
-              <ChevronUp className="w-3 h-3 text-teal-300" />
-            ) : (
-              <ChevronDown className="w-3 h-3 text-teal-300" />
-            )}
+            {showHours ? <ChevronUp className="w-3 h-3 text-teal-300" /> : <ChevronDown className="w-3 h-3 text-teal-300" />}
           </button>
 
           <AnimatePresence>
@@ -165,7 +106,20 @@ export default function Contact() {
 
         <div className="flex items-center gap-3">
           <MapPin className="w-5 h-5 text-teal-400" />
-          <span>{t("contact.address", "Unites States EST")}</span>
+          <span>{t("contact.address", "United States (EST)")}</span>
+        </div>
+      </div>
+
+      {/* Footer with Privacy Policy + Terms links */}
+      <div className="mt-12 pt-6 border-t border-zinc-800 text-sm text-zinc-400 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
+        <span>© {new Date().getFullYear()} EchoScript.AI</span>
+        <div className="flex items-center gap-4">
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-teal-300 hover:text-teal-200 underline underline-offset-4">
+            Privacy Policy
+          </a>
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-teal-300 hover:text-teal-200 underline underline-offset-4">
+            Terms of Service
+          </a>
         </div>
       </div>
     </motion.div>

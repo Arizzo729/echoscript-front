@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 
+
 // Context Providers
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/useTheme";
@@ -45,6 +46,8 @@ import ResetPassword from "./pages/ResetPassword";
 import Unsubscribe from "./pages/Unsubscribe";
 import Unsubscribed from "./pages/Unsubscribed";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 function OverlayManager() {
   const [splashDone, setSplashDone] = useState(false);
@@ -107,7 +110,7 @@ export default function App() {
                       <Route path="/reset" element={<ResetPassword />} />
                       <Route path="/unsubscribe" element={<Unsubscribe />} />
                       <Route path="/unsubscribed" element={<Unsubscribed />} />
-
+		      <Route path="/terms" element={<TermsOfService />} />
                       <Route path="/" element={<Home />} />
                       <Route path="/purchase" element={<Purchase />} />
                       <Route path="/purchase/minutes" element={<BuyExtraMinutes />} />
@@ -122,6 +125,9 @@ export default function App() {
                       <Route path="/transcripts" element={<TranscriptsPage />} />
                       <Route path="/summary" element={<SummaryPage />} />
                       <Route path="/history" element={<HistoryPage />} />
+		      <Route path="/studio" element={<Studio />} />
+		      <Route path="/live" element={<LiveCaptions />} />
+		      <Route path="/privacy" element={<PrivacyPolicy />} />
 
                       {/* NEW: simple page to test backend transcription */}
                       <Route path="/transcribe" element={<TranscribeUploader />} />

@@ -1,26 +1,14 @@
 // src/pages/Dashboard.jsx
-
-import React, { useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Mic,
-  FileText,
-  Sparkles,
-  Video,
-  Clock,
-  User,
-  Settings2,
-  ShieldCheck,
+  Mic, FileText, Sparkles, Video, Clock, User, Settings2, ShieldCheck,
 } from "lucide-react";
-
-// If you have real authentication, import useAuth and replace guest data
-// import { useAuth } from "../context/AuthContext";
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  // Replace with real user data or context
   const user = {
     name: "Echo Pro",
     email: "pro@echoscript.ai",
@@ -31,62 +19,20 @@ export default function Dashboard() {
     isGuest: false,
   };
 
-  // Example: Redirect guest users to home
-  // const { user, isAuthenticated } = useAuth();
-  // useEffect(() => {
-  //   if (!isAuthenticated) navigate("/signin");
-  // }, [isAuthenticated, navigate]);
-
   const percentUsed = Math.min((user.minutesUsed / user.limit) * 100, 100);
 
   const sections = [
-    {
-      icon: <Mic />,
-      label: "Upload Audio",
-      desc: "Transcribe audio files instantly.",
-      route: "/upload",
-      color: "from-teal-500 to-teal-700",
-    },
-    {
-      icon: <FileText />,
-      label: "Transcripts",
-      desc: "Browse & manage your transcripts.",
-      route: "/transcripts",
-      color: "from-indigo-500 to-indigo-700",
-    },
-    {
-      icon: <Sparkles />,
-      label: "Summarize",
-      desc: "Get instant AI-powered summaries.",
-      route: "/summary",
-      color: "from-purple-500 to-purple-700",
-    },
-    {
-      icon: <Video />,
-      label: "Video Upload",
-      desc: "Extract audio & transcript from videos.",
-      route: "/video",
-      color: "from-rose-500 to-rose-700",
-    },
-    {
-      icon: <Clock />,
-      label: "History",
-      desc: "See your previous sessions.",
-      route: "/history",
-      color: "from-yellow-400 to-yellow-600",
-    },
-    {
-      icon: <Settings2 />,
-      label: "Settings",
-      desc: "Customize your preferences.",
-      route: "/settings",
-      color: "from-zinc-600 to-zinc-800",
-    },
+    { icon: <Mic />, label: "Upload Audio", desc: "Transcribe audio files instantly.", route: "/upload", color: "from-teal-500 to-teal-700" },
+    { icon: <FileText />, label: "Transcripts", desc: "Browse & manage your transcripts.", route: "/transcripts", color: "from-indigo-500 to-indigo-700" },
+    { icon: <Sparkles />, label: "Summarize", desc: "Get instant AI-powered summaries.", route: "/summary", color: "from-purple-500 to-purple-700" },
+    { icon: <Video />, label: "Video Upload", desc: "Extract audio & transcript from videos.", route: "/video", color: "from-rose-500 to-rose-700" },
+    { icon: <Clock />, label: "History", desc: "See your previous sessions.", route: "/history", color: "from-yellow-400 to-yellow-600" },
+    { icon: <Settings2 />, label: "Settings", desc: "Customize your preferences.", route: "/settings", color: "from-zinc-600 to-zinc-800" },
   ];
 
   return (
     <motion.div
-      className="max-w-7xl mx-auto px-2 md:px-6 py-10 min-h-[90vh] animate-fade-in"
+      className="max-w-7xl mx-auto px-2 md:px-6 py-10 min-h-[90vh]"
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -119,10 +65,7 @@ export default function Dashboard() {
         className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
         initial="hidden"
         animate="visible"
-        variants={{
-          visible: { transition: { staggerChildren: 0.05 } },
-          hidden: {},
-        }}
+        variants={{ visible: { transition: { staggerChildren: 0.05 } }, hidden: {} }}
       >
         {sections.map(({ icon, label, route, desc, color }) => (
           <DashboardActionCard
@@ -151,15 +94,9 @@ export default function Dashboard() {
               Usage Summary
             </h2>
             <ul className="space-y-2 text-sm text-zinc-300">
-              <li>
-                <strong className="text-white">Plan:</strong> {user.plan}
-              </li>
-              <li>
-                <strong className="text-white">Minutes Used:</strong> {user.minutesUsed} / {user.limit}
-              </li>
-              <li>
-                <strong className="text-white">Sessions:</strong> {user.sessions}
-              </li>
+              <li><strong className="text-white">Plan:</strong> {user.plan}</li>
+              <li><strong className="text-white">Minutes Used:</strong> {user.minutesUsed} / {user.limit}</li>
+              <li><strong className="text-white">Sessions:</strong> {user.sessions}</li>
             </ul>
             <div className="mt-5 h-3 bg-zinc-800 rounded-full overflow-hidden shadow-inner">
               <motion.div
@@ -231,26 +168,22 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
-      {/* Pro tip card */}
-      <motion.div
-        className="mt-6 p-5 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700 flex items-start gap-3 shadow"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35 }}
-      >
-        <Sparkles className="w-6 h-6 text-teal-300 mt-0.5" />
-        <div>
-          <p className="text-sm text-teal-300 font-semibold">Pro Tip</p>
-          <p className="text-sm text-zinc-400">
-            Upload clear audio for the best transcription quality. Try upgrading your plan to unlock even more features and faster processing!
-          </p>
+      {/* Footer with Privacy Policy + Terms links */}
+      <div className="mt-12 pt-6 border-t border-zinc-800 text-sm text-zinc-400 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
+        <span>© {new Date().getFullYear()} EchoScript.AI</span>
+        <div className="flex items-center gap-4">
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-teal-300 hover:text-teal-200 underline underline-offset-4">
+            Privacy Policy
+          </a>
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-teal-300 hover:text-teal-200 underline underline-offset-4">
+            Terms of Service
+          </a>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
 
-// Card for dashboard actions
 function DashboardActionCard({ icon, label, desc, color, onClick }) {
   return (
     <motion.button
@@ -272,4 +205,3 @@ function DashboardActionCard({ icon, label, desc, color, onClick }) {
     </motion.button>
   );
 }
-

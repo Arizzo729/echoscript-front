@@ -35,6 +35,7 @@
     "@auth0/auth0-react": "^2.5.0",
     "@headlessui/react": "^2.2.8",
     "@heroicons/react": "^2.2.0",
+    "@paypal/react-paypal-js": "^8.9.1",
     "framer-motion": "^12.23.15",
     "i18next": "^25.5.2",
     "lottie-react": "^2.4.1",
