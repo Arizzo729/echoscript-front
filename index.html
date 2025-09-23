@@ -13,26 +13,23 @@
     <meta name="referrer" content="no-referrer-when-downgrade" />
     <meta name="color-scheme" content="light dark" />
 
-    <!-- DEV-ONLY CSP (headers should enforce CSP in production) -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="
-        default-src 'self' data: blob:;
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:;
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        font-src 'self' data: https://fonts.gstatic.com;
-        img-src 'self' data: blob:;
-        connect-src 'self' http://localhost:5173 ws://localhost:5173 http://127.0.0.1:8000 https://*.loca.lt;
-        base-uri 'self';
-      "
-    />
+    <!-- IMPORTANT: Remove DEV-only CSP in production to avoid blocking API calls -->
+    <!-- (Netlify response headers should enforce your real CSP.) -->
 
-    <!-- PWA -->
+    <!-- Kill any stale service workers & caches that can cause blank screens after deploys -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations?.().then(r => r.forEach(sw => sw.unregister()));
+      }
+      if (window.caches?.keys) {
+        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+      }
+    </script>
+
+    <!-- PWA meta (optional install prompt requires a manifest link; we intentionally omit it) -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="manifest" href="/manifest.json" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -61,7 +58,7 @@
     <a class="sr-only focus:not-sr-only" href="#main">Skip to content</a>
     <div id="root" role="main"></div>
 
-    <!-- Vite entry (your src/index.jsx imports ./global.css and ./i18n) -->
+    <!-- Vite entry -->
     <script type="module" src="/src/index.jsx" defer></script>
   </body>
 </html>
