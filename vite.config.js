@@ -4,9 +4,6 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  // Important for Netlify/any static host so asset URLs resolve correctly
-  base: '/',
-  build: {
-    sourcemap: true, // helps debug if something breaks in prod
-  },
+  base: '/',          // ensure correct asset URLs on Netlify
+  build: { sourcemap: true }
 })

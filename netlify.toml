@@ -1,14 +1,24 @@
-# netlify.toml (put this at the root of the *frontend* repo)
-
 [build]
 command = "npm ci --no-audit --no-fund && npm run build"
 publish = "dist"
 
 [build.environment]
-# Force Node 20 so Vite/React Router 7 are happy
 NODE_VERSION = "20.19.0"
-
-# Ensure devDependencies (vite, plugin-react) are installed even if NODE_ENV=production gets set somewhere
 NPM_FLAGS = "--include=dev --no-audit --no-fund"
 
-# (Optional) keep your headers/redirects below if you use them
+# Never cache service workers
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-store"
+
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
