@@ -43,32 +43,45 @@ import Unsubscribed from "./pages/Unsubscribed";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
-import Status from "./pages/Status"; // <-- NEW
+import Status from "./pages/Status";
 
 const Studio = () => <NotFound />;
 const LiveCaptions = () => <NotFound />;
 
 function OverlayManager() {
-  const [splashDone, setSplashDone] = useState(false);
+  // ✅ If the user already finished onboarding, skip splash/intro completely
+  const onboarded =
+    typeof window !== "undefined" &&
+    localStorage.getItem("onboardingComplete") === "true";
+
+  // If onboarded, consider splash already done
+  const [splashDone, setSplashDone] = useState(onboarded);
   const [showIntro, setShowIntro] = useState(false);
   const [introComplete, setIntroComplete] = useState(
-    () => typeof window !== "undefined" && !!window.__introPlayed
+    () =>
+      onboarded ||
+      (typeof window !== "undefined" && !!window.__introPlayed)
   );
+
   const { enableSound } = useSound();
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    if (splashDone && !localStorage.getItem("onboardingComplete")) {
+    // Only show the intro exactly once after the very first splash,
+    // and only if the user hasn't onboarded yet.
+    if (splashDone && !onboarded) {
       const timer = setTimeout(() => setShowIntro(true), 300);
       return () => clearTimeout(timer);
     }
-  }, [splashDone]);
+  }, [splashDone, onboarded]);
 
   const handleIntroDone = () => {
     setShowIntro(false);
     setIntroComplete(true);
-    window.__introPlayed = true;
-    localStorage.setItem("onboardingComplete", "true");
+    if (typeof window !== "undefined") {
+      window.__introPlayed = true;
+      localStorage.setItem("onboardingComplete", "true"); // persist across reloads
+    }
   };
 
   return (
@@ -109,7 +122,7 @@ export default function App() {
                       <Route path="/unsubscribed" element={<Unsubscribed />} />
                       <Route path="/terms" element={<TermsOfService />} />
                       <Route path="/privacy" element={<PrivacyPolicy />} />
-                      <Route path="/status" element={<Status />} /> {/* NEW */}
+                      <Route path="/status" element={<Status />} />
                       <Route path="/" element={<Home />} />
                       <Route path="/purchase" element={<Purchase />} />
                       <Route path="/purchase/minutes" element={<BuyExtraMinutes />} />
