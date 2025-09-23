@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 
-// Context Providers
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/useTheme";
 import { GPTProvider } from "./context/GPTContext";
@@ -10,10 +9,8 @@ import { FontSizeProvider } from "./context/useFontSize";
 import { LanguageProvider } from "./context/LanguageContext";
 import { SoundProvider, useSound } from "./context/SoundContext";
 
-// Components
 import TranscribeUploader from "./components/TranscribeUploader";
 
-// Layout & Shared UI
 import AnimatedSplash from "./components/AnimatedSplash";
 import OnboardingModal from "./components/OnboardingModal";
 import Layout from "./components/Layout";
@@ -23,7 +20,6 @@ import useIsMobile from "./hooks/useIsMobile";
 import MobileBottomNav from "./components/MobileBottomNav";
 import FloatingHome from "./components/FloatingHome";
 
-// Pages
 import Home from "./pages/HomePage";
 import Dashboard from "./pages/Dashboard";
 import UploadPage from "./pages/Upload";
@@ -46,12 +42,11 @@ import Unsubscribe from "./pages/Unsubscribe";
 import Unsubscribed from "./pages/Unsubscribed";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService"; // <-- added import
+import TermsOfService from "./pages/TermsOfService";
+import Status from "./pages/Status"; // <-- NEW
 
-// ---- Temporary safe placeholders for pages not yet implemented ----
 const Studio = () => <NotFound />;
 const LiveCaptions = () => <NotFound />;
-// -------------------------------------------------------------------
 
 function OverlayManager() {
   const [splashDone, setSplashDone] = useState(false);
@@ -113,6 +108,8 @@ export default function App() {
                       <Route path="/unsubscribe" element={<Unsubscribe />} />
                       <Route path="/unsubscribed" element={<Unsubscribed />} />
                       <Route path="/terms" element={<TermsOfService />} />
+                      <Route path="/privacy" element={<PrivacyPolicy />} />
+                      <Route path="/status" element={<Status />} /> {/* NEW */}
                       <Route path="/" element={<Home />} />
                       <Route path="/purchase" element={<Purchase />} />
                       <Route path="/purchase/minutes" element={<BuyExtraMinutes />} />
@@ -122,14 +119,12 @@ export default function App() {
                       <Route path="/dashboard" element={<Dashboard />} />
                       <Route path="/upload" element={<UploadPage />} />
                       <Route path="/assistant" element={<AIAssistant />} />
-                      <Route path="/settings" element={<Settings />} />
                       <Route path="/account" element={<Account />} />
                       <Route path="/transcripts" element={<TranscriptsPage />} />
                       <Route path="/summary" element={<SummaryPage />} />
                       <Route path="/history" element={<HistoryPage />} />
                       <Route path="/studio" element={<Studio />} />
                       <Route path="/live" element={<LiveCaptions />} />
-                      <Route path="/privacy" element={<PrivacyPolicy />} />
                       {/* Backend test route */}
                       <Route path="/transcribe" element={<TranscribeUploader />} />
                       <Route path="*" element={<NotFound />} />

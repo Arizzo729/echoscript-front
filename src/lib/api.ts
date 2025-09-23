@@ -1,28 +1,52 @@
-// src/lib/api.ts
-const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000";
+// src/lib/api.js
+const ORIGIN_API = ''; // use Netlify proxy: /api -> backend
+const API = ORIGIN_API.replace(/\/+$/, ''); // safety
 
-export async function transcribe(
-  file: File,
-  opts?: { diarize?: boolean; vad?: boolean; language?: string }
-) {
-  const params = new URLSearchParams({
-    diarize: String(opts?.diarize ?? false),
-    vad: String(opts?.vad ?? false),
-    language: opts?.language ?? "en",
-  });
+async function request(path, { method = 'GET', headers = {}, body, authToken, isJSON = true } = {}) {
+  const url = `${API}/api${path}`;
+  const h = { ...headers };
+  if (isJSON) h['Content-Type'] = 'application/json';
+  if (authToken) h['Authorization'] = `Bearer ${authToken}`;
 
-  const fd = new FormData();
-  fd.append("file", file);
-
-  const res = await fetch(`${API_BASE}/api/v1/transcribe?${params}`, {
-    method: "POST",
-    body: fd,
-  });
+  const res = await fetch(url, { method, headers: h, body });
+  const ct = res.headers.get('content-type') || '';
+  const data = ct.includes('application/json') ? await res.json().catch(() => null) : await res.text();
 
   if (!res.ok) {
-    if (res.status === 413) throw new Error("File too large (HTTP 413). Try a shorter clip.");
-    throw new Error(`Transcribe failed: HTTP ${res.status}`);
+    const msg = (data && (data.detail || data.message)) || res.statusText || 'Request failed';
+    throw new Error(`${res.status}: ${msg}`);
   }
-
-  return res.json();
+  return data;
 }
+
+// ---- Auth ----
+export function signup({ email, password }) {
+  return request('/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export function login({ email, password }) {
+  return request('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+// ---- Transcription ----
+export function transcribe(file, authToken) {
+  const form = new FormData();
+  form.append('file', file);
+  return fetch(`${API}/api/transcribe`, {
+    method: 'POST',
+    headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+    body: form,
+  }).then(async (res) => {
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error((data && (data.detail || data.message)) || res.statusText);
+    return data;
+  });
+}
+
+export default { signup, login, transcribe };

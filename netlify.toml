@@ -6,6 +6,20 @@ publish = "dist"
 NODE_VERSION = "20.19.0"
 NPM_FLAGS = "--include=dev --no-audit --no-fund"
 
+# ✅ SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# ✅ Proxy frontend /api/* calls to your backend (no CORS headaches)
+[[redirects]]
+  from = "/api/*"
+  to = "https://<YOUR-BACKEND-URL>/api/:splat"
+  status = 200
+  force = true
+
+# (optional) never cache service worker files if they ever appear
 [[headers]]
   for = "/service-worker.js"
   [headers.values]
@@ -15,8 +29,3 @@ NPM_FLAGS = "--include=dev --no-audit --no-fund"
   for = "/sw.js"
   [headers.values]
     Cache-Control = "no-store"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200

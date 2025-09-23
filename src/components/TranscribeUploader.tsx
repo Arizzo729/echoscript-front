@@ -1,43 +1,41 @@
-import React, { useState } from 'react';
-import { transcribe } from '../lib/api';
+// src/components/TranscribeUploader.jsx
+import React, { useState } from "react";
+import api from "../lib/api";
 
 export default function TranscribeUploader() {
+  const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
-  const [text, setText] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState(null);
+  const [err, setErr] = useState("");
 
-  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    setBusy(true);
-    setError(null);
-    setText('');
+  const onPick = (e) => setFile(e.target.files?.[0] || null);
+
+  const onUpload = async () => {
+    if (!file) return;
+    setBusy(true); setErr(""); setResult(null);
     try {
-      const data = await transcribe(f, { diarize: false, vad: false, language: 'en' });
-      setText(data.text || '');
-    } catch (err: any) {
-      setError(err?.message ?? 'Upload failed');
+      // TODO: put your JWT here if your route requires auth
+      const data = await api.transcribe(file /* , token */);
+      setResult(data);
+    } catch (e) {
+      setErr(e.message || String(e));
     } finally {
       setBusy(false);
     }
-  }
+  };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-4">
-      <h1 className="text-2xl font-semibold">Transcribe Audio</h1>
-
-      <label className="block">
-        <span className="mb-2 block">Choose an audio file</span>
-        <input type="file" accept="audio/*" onChange={onFile} disabled={busy} />
-      </label>
-
-      {!busy && !text && !error && <div className="text-sm text-zinc-500">No transcript yet.</div>}
-      {busy && <div>Transcribing…</div>}
-      {error && <div className="text-red-600">{error}</div>}
-      {text && (
-        <div className="rounded-xl p-4 bg-gray-100 whitespace-pre-wrap">
-          {text}
-        </div>
+    <div className="max-w-xl mx-auto p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+      <h2 className="text-lg font-semibold">Transcribe</h2>
+      <input className="mt-3 block w-full" type="file" accept="audio/*,video/*" onChange={onPick} />
+      <button className="mt-4" disabled={!file || busy} onClick={onUpload}>
+        {busy ? "Uploading…" : "Upload & Transcribe"}
+      </button>
+      {err && <p className="mt-3 text-red-500 text-sm">{err}</p>}
+      {result && (
+        <pre className="mt-4 text-sm overflow-auto p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800">
+{JSON.stringify(result, null, 2)}
+        </pre>
       )}
     </div>
   );
