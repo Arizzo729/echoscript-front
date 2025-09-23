@@ -46,14 +46,12 @@ import Unsubscribe from "./pages/Unsubscribe";
 import Unsubscribed from "./pages/Unsubscribed";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService"; // <-- added import
 
-// ---- Temporary safe placeholders to prevent runtime ReferenceError ----
-// Replace these with real imports when pages exist, e.g.:
-//   import Studio from "./pages/Studio";
-//   import LiveCaptions from "./pages/LiveCaptions";
+// ---- Temporary safe placeholders for pages not yet implemented ----
 const Studio = () => <NotFound />;
 const LiveCaptions = () => <NotFound />;
-// ----------------------------------------------------------------------
+// -------------------------------------------------------------------
 
 function OverlayManager() {
   const [splashDone, setSplashDone] = useState(false);
