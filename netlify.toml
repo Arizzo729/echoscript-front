@@ -1,72 +1,14 @@
+# netlify.toml (put this at the root of the *frontend* repo)
+
 [build]
-  command = "npm ci --no-audit --no-fund && npm run build"
-  publish = "dist"
+command = "npm ci --no-audit --no-fund && npm run build"
+publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "18"
-  NODE_ENV = "production"
-  NPM_FLAGS = "--legacy-peer-deps"
+# Force Node 20 so Vite/React Router 7 are happy
+NODE_VERSION = "20.19.0"
 
-# --- Custom Headers ---
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    Cache-Control = "no-store"
-    X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "microphone=(), camera=(), geolocation=()"
+# Ensure devDependencies (vite, plugin-react) are installed even if NODE_ENV=production gets set somewhere
+NPM_FLAGS = "--include=dev --no-audit --no-fund"
 
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# --- Domain Canonicalization ---
-[[redirects]]
-  from = "http://echoscript.ai/*"
-  to = "https://www.echoscript.ai/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://www.echoscript.ai/*"
-  to = "https://www.echoscript.ai/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://echoscriptai.com/*"
-  to = "https://www.echoscriptai.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://www.echoscriptai.com/*"
-  to = "https://www.echoscriptai.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "https://echoscript.ai/*"
-  to = "https://www.echoscript.ai/:splat"
-  status = 301
-  force = true
-
-# --- SPA Routing ---
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-# --- Deployment Contexts ---
-[context.production.environment]
-  NODE_ENV = "production"
-
-[context.deploy-preview.environment]
-  NODE_ENV = "development"
-
-[context.branch-deploy.environment]
-  NODE_ENV = "development"
+# (Optional) keep your headers/redirects below if you use them
