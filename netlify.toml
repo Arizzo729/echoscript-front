@@ -6,7 +6,6 @@ publish = "dist"
 NODE_VERSION = "20.19.0"
 NPM_FLAGS = "--include=dev --no-audit --no-fund"
 
-# Never cache service workers
 [[headers]]
   for = "/service-worker.js"
   [headers.values]
@@ -17,7 +16,6 @@ NPM_FLAGS = "--include=dev --no-audit --no-fund"
   [headers.values]
     Cache-Control = "no-store"
 
-# SPA fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"

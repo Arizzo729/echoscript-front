@@ -9,24 +9,24 @@
     <meta name="theme-color" content="#14b8a6" />
     <meta name="color-scheme" content="light dark" />
 
-    <!-- Kill any stale service workers & caches that can blank-screen the app -->
+    <!-- Hard-kill any stale PWA workers & caches that can blank-screen -->
     <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations?.().then(r => r.forEach(sw => sw.unregister()));
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations?.().then((regs) => regs.forEach((r) => r.unregister()));
       }
       if (window.caches?.keys) {
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+        caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
       }
     </script>
 
-    <!-- We intentionally omit <link rel="manifest"> to stop install prompts -->
+    <!-- Omit manifest on purpose (no install prompt) -->
     <link rel="icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>
 
   <body class="bg-white text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100 font-sans antialiased">
     <div id="root"></div>
-    <!-- Vite entry (correct path) -->
-    <script type="module" src="/src/main.jsx"></script>
+    <!-- Correct Vite entry for your app -->
+    <script type="module" src="/src/index.jsx"></script>
   </body>
 </html>
