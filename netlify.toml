@@ -6,20 +6,28 @@
   NODE_VERSION = "20.19.0"
   NPM_FLAGS = "--include=dev --no-audit --no-fund"
 
-# Proxy API calls from the live site to your local backend via the tunnel
+# --- API proxies to your local backend via the Cloudflare tunnel ---
+# New calls (correct path)
 [[redirects]]
   from = "/api/v1/*"
   to   = "https://chem-jews-pledge-counseling.trycloudflare.com/api/v1/:splat"
   status = 200
   force  = true
 
-# ✅ SPA fallback AFTER the proxy
+# Legacy calls (some code may still hit /api/*) -> map to /api/v1/*
+[[redirects]]
+  from = "/api/*"
+  to   = "https://chem-jews-pledge-counseling.trycloudflare.com/api/v1/:splat"
+  status = 200
+  force  = true
+
+# --- SPA fallback must come after the proxies ---
 [[redirects]]
   from = "/*"
   to   = "/index.html"
   status = 200
 
-# (optional) never cache service workers
+# Optional: never cache service workers
 [[headers]]
   for = "/service-worker.js"
   [headers.values]
