@@ -1,15 +1,28 @@
 // src/components/UploadAndTranscribe.jsx
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Mic, UploadCloud, CheckCircle, AlertCircle, Clipboard, XCircle } from "lucide-react";
+import {
+  Mic, UploadCloud, CheckCircle, AlertCircle, Clipboard, XCircle,
+} from "lucide-react";
 import CountdownTimer from "./CountdownTimer";
 import RecordingWaveform from "./RecordingWaveform";
 
-// In dev, talk straight to FastAPI to avoid proxy issues
-const BASE = "http://127.0.0.1:8000";
+// Read either env var; fallback to same-origin (empty string -> relative URL)
+const BASE_FROM_ENV =
+  (import.meta.env.VITE_API_BASE || import.meta.env.VITE_API_BASE_URL || "")
+    .replace(/\/+$/, "");
+const API_BASE = BASE_FROM_ENV; // "" means same-origin + Netlify redirects
+const TRANSCRIBE_PATH = "/api/v1/transcribe";
+const makeUrl = (language) =>
+  `${API_BASE}${API_BASE ? "" : ""}${TRANSCRIBE_PATH}?language=${encodeURIComponent(
+    language || "en"
+  )}`;
 
-
-export default function UploadAndTranscribe({ language = "en" }) {
+export default function UploadAndTranscribe({
+  language = "en",
+  fileInput,                 // optional: auto-transcribe a file passed by parent
+  onTranscriptComplete,      // optional: callback with backend JSON
+}) {
   const [files, setFiles] = useState([]);
   const [loadingMap, setLoadingMap] = useState({});
   const [results, setResults] = useState({});
@@ -20,11 +33,20 @@ export default function UploadAndTranscribe({ language = "en" }) {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
+  // If parent hands us a file, enqueue & upload it
+  useEffect(() => {
+    if (!fileInput) return;
+    setFiles([fileInput]);
+    void uploadAndTranscribe(fileInput);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fileInput?.name]); // re-run if user picks a different file
+
   const handleFiles = (inputFiles) => {
     setError(null);
     const arr = Array.from(inputFiles).filter(
       (f) => f.type.startsWith("audio") || f.type.startsWith("video")
     );
+    if (!arr.length) return;
     setFiles((prev) => [...prev, ...arr]);
     arr.forEach(uploadAndTranscribe);
   };
@@ -32,23 +54,39 @@ export default function UploadAndTranscribe({ language = "en" }) {
   const uploadAndTranscribe = async (file) => {
     setLoadingMap((prev) => ({ ...prev, [file.name]: true }));
     setResults((prev) => ({ ...prev, [file.name]: null }));
+    const url = makeUrl(language);
+
+    // 60s timeout guard
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 60000);
+
     try {
       const formData = new FormData();
       formData.append("file", file);
 
-      // If you used the proxy rewrite in vite.config.js, you can call /api/transcribe instead.
-      const res = await fetch(`${BASE}/api/v1/transcribe?language=${encodeURIComponent(language)}`, {
+      const res = await fetch(url, {
         method: "POST",
         body: formData,
+        credentials: "include",
+        signal: controller.signal,
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const msg = `HTTP ${res.status}`;
+        throw new Error(msg);
+      }
       const json = await res.json();
 
       setResults((prev) => ({ ...prev, [file.name]: json }));
+      onTranscriptComplete?.(json);
     } catch (err) {
       console.error(err);
-      setError(`❌ Transcription failed for: ${file.name} (${err.message})`);
+      const message =
+        err?.name === "AbortError"
+          ? "Request timed out. Please try again."
+          : `❌ Transcription failed for: ${file.name} (${err?.message || "error"})`;
+      setError(message);
     } finally {
+      clearTimeout(t);
       setLoadingMap((prev) => ({ ...prev, [file.name]: false }));
     }
   };
@@ -65,7 +103,9 @@ export default function UploadAndTranscribe({ language = "en" }) {
       };
       mediaRecorderRef.current.onstop = () => {
         const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-        const f = new File([blob], `recording-${Date.now()}.webm`, { type: "audio/webm" });
+        const f = new File([blob], `recording-${Date.now()}.webm`, {
+          type: "audio/webm",
+        });
         handleFiles([f]);
       };
 
