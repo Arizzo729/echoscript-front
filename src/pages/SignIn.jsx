@@ -83,7 +83,7 @@ export default function SignIn() {
           {/* Email */}
           <div className="space-y-1">
             <label htmlFor="email" className="block text-xs font-medium text-zinc-400 tracking-wide">
-              {t("email_label")}
+              {t("email")}
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -93,7 +93,7 @@ export default function SignIn() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={t("email_placeholder")}
+                placeholder={t("email")}
                 required
                 className="w-full pl-11 pr-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-white text-base placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-500 transition focus:bg-zinc-900/60 shadow-sm"
               />
@@ -102,7 +102,7 @@ export default function SignIn() {
           {/* Password */}
           <div className="space-y-1">
             <label htmlFor="password" className="block text-xs font-medium text-zinc-400 tracking-wide">
-              {t("password_label")}
+              {t("password")}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -112,7 +112,7 @@ export default function SignIn() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={t("password_placeholder")}
+                placeholder={t("password")}
                 required
                 className="w-full pl-11 pr-11 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-white text-base placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-zinc-900/60 transition shadow-sm"
               />

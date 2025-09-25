@@ -91,7 +91,7 @@ export default function SignUp() {
           {/* Email */}
           <div className="space-y-1">
             <label htmlFor="email" className="block text-xs font-medium text-zinc-400 tracking-wide">
-              {t("email_label")}
+              {t("email")}
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -101,7 +101,7 @@ export default function SignUp() {
                 autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={t("email_placeholder")}
+                placeholder={t("email")}
                 required
                 disabled={loading}
                 className="w-full pl-11 pr-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-white text-base placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-500 transition focus:bg-zinc-900/60 shadow-sm"
@@ -141,7 +141,7 @@ export default function SignUp() {
           {/* Confirm Password */}
           <div className="space-y-1">
             <label htmlFor="confirm" className="block text-xs font-medium text-zinc-400 tracking-wide">
-              {t("confirm_password_label")}
+              {t("confirm_password")}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -150,7 +150,7 @@ export default function SignUp() {
                 type={showPassword ? "text" : "password"}
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-                placeholder={t("confirm_password_placeholder") || t("password_placeholder")}
+                placeholder={t("confirm_password") || t("password")}
                 required
                 disabled={loading}
                 className="w-full pl-11 pr-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-white text-base placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-zinc-900/60 transition shadow-sm"

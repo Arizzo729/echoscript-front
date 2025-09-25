@@ -1,25 +1,25 @@
 [build]
-command = "npm ci --no-audit --no-fund && npm run build"
-publish = "dist"
+  command = "npm ci --no-audit --no-fund && npm run build"
+  publish = "dist"
 
 [build.environment]
-NODE_VERSION = "20.19.0"
-NPM_FLAGS = "--include=dev --no-audit --no-fund"
+  NODE_VERSION = "20.19.0"
+  NPM_FLAGS = "--include=dev --no-audit --no-fund"
 
-# ✅ SPA fallback
+# Proxy API calls from the live site to your local backend via the tunnel
+[[redirects]]
+  from = "/api/v1/*"
+  to   = "https://chem-jews-pledge-counseling.trycloudflare.com/api/v1/:splat"
+  status = 200
+  force  = true
+
+# ✅ SPA fallback AFTER the proxy
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to   = "/index.html"
   status = 200
 
-# ✅ Proxy frontend /api/* calls to your backend (no CORS headaches)
-[[redirects]]
-  from = "/api/*"
-  to = "https://<YOUR-BACKEND-URL>/api/:splat"
-  status = 200
-  force = true
-
-# (optional) never cache service worker files if they ever appear
+# (optional) never cache service workers
 [[headers]]
   for = "/service-worker.js"
   [headers.values]
