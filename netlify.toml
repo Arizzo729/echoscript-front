@@ -22,4 +22,23 @@
   from = "/*"
   to   = "/index.html"
   status = 200
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to   = "/index.html"
+  status = 200
+
+# Proxy /api/v1/*  (transcribe)
+[[redirects]]
+  from = "/api/v1/*"
+  to   = "https://additions-symphony-translation-rooms.trycloudflare.com/api/v1/:splat"
+  status = 200
+  force = true
+
+# Proxy /api/*  (auth, contact, video-task, etc.)
+[[redirects]]
+  from = "/api/*"
+  to   = "https://additions-symphony-translation-rooms.trycloudflare.com/api/:splat"
+  status = 200
+  force = true
 
