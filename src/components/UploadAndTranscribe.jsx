@@ -7,21 +7,18 @@ import {
 import CountdownTimer from "./CountdownTimer";
 import RecordingWaveform from "./RecordingWaveform";
 
-// Read either env var; fallback to same-origin (empty string -> relative URL)
-const BASE_FROM_ENV =
-  (import.meta.env.VITE_API_BASE || import.meta.env.VITE_API_BASE_URL || "")
-    .replace(/\/+$/, "");
-const API_BASE = BASE_FROM_ENV; // "" means same-origin + Netlify redirects
+// Use env var if present (tunnel), else same-origin so Netlify redirects can proxy.
+const RAW_BASE =
+  (import.meta.env.VITE_API_BASE || import.meta.env.VITE_API_BASE_URL || "").trim();
+const API_BASE = RAW_BASE.replace(/\/+$/, ""); // strip trailing slashes
 const TRANSCRIBE_PATH = "/api/v1/transcribe";
-const makeUrl = (language) =>
-  `${API_BASE}${API_BASE ? "" : ""}${TRANSCRIBE_PATH}?language=${encodeURIComponent(
-    language || "en"
-  )}`;
+const makeUrl = (language = "en") =>
+  `${API_BASE}${API_BASE ? "" : ""}${TRANSCRIBE_PATH}?language=${encodeURIComponent(language)}`;
 
 export default function UploadAndTranscribe({
   language = "en",
-  fileInput,                 // optional: auto-transcribe a file passed by parent
-  onTranscriptComplete,      // optional: callback with backend JSON
+  fileInput,
+  onTranscriptComplete,
 }) {
   const [files, setFiles] = useState([]);
   const [loadingMap, setLoadingMap] = useState({});
@@ -33,13 +30,13 @@ export default function UploadAndTranscribe({
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
-  // If parent hands us a file, enqueue & upload it
+  // If parent provides a file, auto-transcribe it
   useEffect(() => {
     if (!fileInput) return;
     setFiles([fileInput]);
     void uploadAndTranscribe(fileInput);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fileInput?.name]); // re-run if user picks a different file
+  }, [fileInput?.name]);
 
   const handleFiles = (inputFiles) => {
     setError(null);
@@ -52,13 +49,12 @@ export default function UploadAndTranscribe({
   };
 
   const uploadAndTranscribe = async (file) => {
-    setLoadingMap((prev) => ({ ...prev, [file.name]: true }));
-    setResults((prev) => ({ ...prev, [file.name]: null }));
+    setLoadingMap((p) => ({ ...p, [file.name]: true }));
+    setResults((p) => ({ ...p, [file.name]: null }));
     const url = makeUrl(language);
 
-    // 60s timeout guard
     const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), 60000);
+    const t = setTimeout(() => controller.abort(), 60000); // 60s timeout
 
     try {
       const formData = new FormData();
@@ -70,24 +66,21 @@ export default function UploadAndTranscribe({
         credentials: "include",
         signal: controller.signal,
       });
-      if (!res.ok) {
-        const msg = `HTTP ${res.status}`;
-        throw new Error(msg);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
 
-      setResults((prev) => ({ ...prev, [file.name]: json }));
+      setResults((p) => ({ ...p, [file.name]: json }));
       onTranscriptComplete?.(json);
     } catch (err) {
       console.error(err);
-      const message =
+      setError(
         err?.name === "AbortError"
           ? "Request timed out. Please try again."
-          : `❌ Transcription failed for: ${file.name} (${err?.message || "error"})`;
-      setError(message);
+          : `❌ Transcription failed for: ${file.name} (${err?.message || "error"})`
+      );
     } finally {
       clearTimeout(t);
-      setLoadingMap((prev) => ({ ...prev, [file.name]: false }));
+      setLoadingMap((p) => ({ ...p, [file.name]: false }));
     }
   };
 
@@ -111,8 +104,7 @@ export default function UploadAndTranscribe({
 
       mediaRecorderRef.current.start();
       setRecording(true);
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("🎙️ Microphone access denied or unsupported.");
     }
   };
@@ -124,17 +116,9 @@ export default function UploadAndTranscribe({
   };
 
   const removeFile = (name) => {
-    setFiles((prev) => prev.filter((f) => f.name !== name));
-    setResults((prev) => {
-      const copy = { ...prev };
-      delete copy[name];
-      return copy;
-    });
-    setLoadingMap((prev) => {
-      const copy = { ...prev };
-      delete copy[name];
-      return copy;
-    });
+    setFiles((p) => p.filter((f) => f.name !== name));
+    setResults((p) => { const c = { ...p }; delete c[name]; return c; });
+    setLoadingMap((p) => { const c = { ...p }; delete c[name]; return c; });
   };
 
   const copyText = (text) => navigator.clipboard.writeText(text);
