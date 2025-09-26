@@ -2,29 +2,23 @@
   command = "npm ci --no-audit --no-fund && npm run build"
   publish = "dist"
 
-# Optional but recommended for Vite
 [build.environment]
   NODE_VERSION = "20"
   NPM_FLAGS = "--silent"
-  # Temporarily disable Netlify's secrets scanning so the build can ship
   SECRETS_SCAN_ENABLED = "false"
 
-# ---- API proxies ----
-# Transcribe endpoints live under /api/v1/*
 [[redirects]]
   from = "/api/v1/*"
-  to   = "https://additions-symphony-translation-rooms.trycloudflare.com/api/v1/:splat"
+  to   = "https://YOUR-TUNNEL.trycloudflare.com/api/v1/:splat"
   status = 200
   force = true
 
-# Most other endpoints (auth, contact, video-task, etc.) live under /api/*
 [[redirects]]
   from = "/api/*"
-  to   = "https://additions-symphony-translation-rooms.trycloudflare.com/api/:splat"
+  to   = "https://YOUR-TUNNEL.trycloudflare.com/api/:splat"
   status = 200
   force = true
 
-# ---- SPA fallback ----
 [[redirects]]
   from = "/*"
   to   = "/index.html"
