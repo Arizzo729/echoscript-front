@@ -9,6 +9,7 @@ import { FontSizeProvider } from "./context/useFontSize";
 import { LanguageProvider } from "./context/LanguageContext";
 import { SoundProvider, useSound } from "./context/SoundContext";
 
+import SearchResults from "./pages/SearchResults";
 import TranscribeUploader from "./components/TranscribeUploader";
 
 import AnimatedSplash from "./components/AnimatedSplash";
@@ -48,30 +49,25 @@ import Status from "./pages/Status";
 const Studio = () => <NotFound />;
 const LiveCaptions = () => <NotFound />;
 
+// Handles first-run splash + onboarding once per browser
 function OverlayManager() {
-  // ✅ If the user already finished onboarding, skip splash/intro completely
   const onboarded =
     typeof window !== "undefined" &&
     localStorage.getItem("onboardingComplete") === "true";
 
-  // If onboarded, consider splash already done
   const [splashDone, setSplashDone] = useState(onboarded);
   const [showIntro, setShowIntro] = useState(false);
   const [introComplete, setIntroComplete] = useState(
-    () =>
-      onboarded ||
-      (typeof window !== "undefined" && !!window.__introPlayed)
+    () => onboarded || (typeof window !== "undefined" && !!window.__introPlayed)
   );
 
   const { enableSound } = useSound();
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Only show the intro exactly once after the very first splash,
-    // and only if the user hasn't onboarded yet.
     if (splashDone && !onboarded) {
-      const timer = setTimeout(() => setShowIntro(true), 300);
-      return () => clearTimeout(timer);
+      const t = setTimeout(() => setShowIntro(true), 300);
+      return () => clearTimeout(t);
     }
   }, [splashDone, onboarded]);
 
@@ -80,7 +76,7 @@ function OverlayManager() {
     setIntroComplete(true);
     if (typeof window !== "undefined") {
       window.__introPlayed = true;
-      localStorage.setItem("onboardingComplete", "true"); // persist across reloads
+      localStorage.setItem("onboardingComplete", "true");
     }
   };
 
@@ -138,11 +134,14 @@ export default function App() {
                       <Route path="/history" element={<HistoryPage />} />
                       <Route path="/studio" element={<Studio />} />
                       <Route path="/live" element={<LiveCaptions />} />
+                      <Route path="/search" element={<SearchResults />} />
                       {/* Backend test route */}
                       <Route path="/transcribe" element={<TranscribeUploader />} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>
+
+                  {/* Mount overlays after routes so they sit above any page */}
                   <OverlayManager />
                 </ErrorBoundary>
               </SoundProvider>
@@ -152,4 +151,6 @@ export default function App() {
       </LanguageProvider>
     </AuthProvider>
   );
+}
+
 }
