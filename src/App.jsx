@@ -9,7 +9,7 @@ import { FontSizeProvider } from "./context/useFontSize";
 import { LanguageProvider } from "./context/LanguageContext";
 import { SoundProvider, useSound } from "./context/SoundContext";
 
-import SearchResults from "./pages/SearchResults";
+import SearchResults from "./pages/SearchResults.jsx";
 import TranscribeUploader from "./components/TranscribeUploader";
 
 import AnimatedSplash from "./components/AnimatedSplash";
@@ -152,4 +152,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
 

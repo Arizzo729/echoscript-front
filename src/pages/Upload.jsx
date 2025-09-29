@@ -1,26 +1,30 @@
+// src/pages/Upload.jsx
 import React, { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+
 import UploadAndTranscribe from "../components/UploadAndTranscribe";
 import PaywallModal from "../components/PaywallModal";
 import CountdownSelector from "../components/CountdownSelector";
-import CountdownTimer from "../components/CountdownTimer";
 import LiveWaveform from "../components/LiveWaveform";
 import TranscriptEditor from "../components/TranscriptEditor";
 import TranscriptExportPanel from "../components/TranscriptExportPanel";
+
 import {
-  Mic, MicOff, Timer, Download, Globe, FileText, Subtitles, Info, XCircle,
+  Mic, Timer, Download, Globe, FileText, Subtitles, Info,
 } from "lucide-react";
 
 const AUDIO = ["mp3", "wav", "flac", "m4a", "aac", "ogg"];
 const VIDEO = ["mp4", "mkv", "mov"];
 const MAX_MB = 500;
 
+// ✅ New: centralize API base
+const API_BASE = import.meta.env.VITE_API_BASE || "";
+
 export default function UploadPage() {
   const { t } = useTranslation();
   const [recording, setRecording] = useState(false);
   const [countdown, setCountdown] = useState(3);
-  const [showCountdown, setShowCountdown] = useState(false);
   const [file, setFile] = useState(null);
   const [transcript, setTranscript] = useState("");
   const [translated, setTranslated] = useState("");
@@ -31,12 +35,16 @@ export default function UploadPage() {
   useEffect(() => {
     if (!file) return;
     const key = `draft_${file.name}`;
-    const draft = localStorage.getItem(key);
-    if (draft) {
-      const d = JSON.parse(draft);
-      setTranscript(d.transcript || "");
-      setTranslated(d.translated || "");
-      setNote(t("Loaded previous draft."));
+    try {
+      const draft = localStorage.getItem(key);
+      if (draft) {
+        const d = JSON.parse(draft);
+        setTranscript(d.transcript || "");
+        setTranslated(d.translated || "");
+        setNote(t("Loaded previous draft."));
+      }
+    } catch {
+      /* ignore */
     }
   }, [file, t]);
 
@@ -46,32 +54,49 @@ export default function UploadPage() {
     return () => clearTimeout(id);
   }, [note]);
 
-  const handleFile = useCallback((uploaded) => {
-    const ext = uploaded.name.split(".").pop().toLowerCase();
-    const valid = AUDIO.includes(ext) || VIDEO.includes(ext);
-    const tooBig = uploaded.size > MAX_MB * 1024 * 1024;
-    if (!valid || tooBig) {
-      alert(`${t("Invalid file or too large")} (max ${MAX_MB}MB). ${t("Accepted formats")}: ${[...AUDIO, ...VIDEO].map(f => f.toUpperCase()).join(",")}.`);
-      return;
-    }
-    setFile(uploaded);
-    setTranscript("");
-    setTranslated("");
-  }, [t]);
+  const handleFile = useCallback(
+    (uploaded) => {
+      if (!uploaded) return;
+      const ext = uploaded.name.split(".").pop()?.toLowerCase() || "";
+      const valid = AUDIO.includes(ext) || VIDEO.includes(ext);
+      const tooBig = uploaded.size > MAX_MB * 1024 * 1024;
 
-  const handleTranscript = useCallback((res) => {
-    if (res?.status === 403 && res.detail) {
-      setPaywall(res.detail);
+      if (!valid || tooBig) {
+        alert(
+          `${t("Invalid file or too large")} (max ${MAX_MB}MB). ${t("Accepted formats")}: ${[...AUDIO, ...VIDEO]
+            .map((f) => f.toUpperCase())
+            .join(", ")}.`
+        );
+        return;
+      }
+      setFile(uploaded);
       setTranscript("");
       setTranslated("");
-      return;
-    }
-    setPaywall(null);
-    if (res.transcript) {
-      setTranscript(res.transcript);
-      setTranslated(translateEnabled ? `🌍 [${t("Translated")}]: ${res.transcript}` : "");
-    }
-  }, [translateEnabled, t]);
+    },
+    [t]
+  );
+
+  const handleTranscript = useCallback(
+    (res) => {
+      if (!res) return;
+      if (res?.status === 403 && res.detail) {
+        setPaywall(res.detail);
+        setTranscript("");
+        setTranslated("");
+        return;
+      }
+      setPaywall(null);
+
+      if (res?.detail && typeof res.detail === "string") {
+        setNote(res.detail);
+      }
+
+      const tt = res.transcript ?? res.text ?? "";
+      setTranscript(tt);
+      setTranslated(translateEnabled && tt ? `🌍 [${t("Translated")}]: ${tt}` : "");
+    },
+    [translateEnabled, t]
+  );
 
   const downloadText = useCallback((txt, name) => {
     if (!txt) return;
@@ -84,31 +109,42 @@ export default function UploadPage() {
 
   const saveDraft = () => {
     if (!file) return;
-    localStorage.setItem(`draft_${file.name}`, JSON.stringify({
-      transcript, translated, time: Date.now(),
-    }));
+    localStorage.setItem(
+      `draft_${file.name}`,
+      JSON.stringify({
+        transcript,
+        translated,
+        time: Date.now(),
+      })
+    );
     setNote(t("Draft saved."));
   };
 
+  // ✅ Updated: use API_BASE (no more hard-coded /api)
   const submit = () => {
     if (!file) return;
-    fetch("/api/submitTranscript", {
+    fetch(`${API_BASE}/api/submitTranscript`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         fileName: file.name,
         transcript,
         translated: translateEnabled ? translated : null,
-      })
+      }),
     })
-      .then(r => { if (!r.ok) throw new Error(); return r.json(); })
-      .then(() => setNote(t("Submitted successfully!")))
-      .catch(() => setNote(t("Submission failed. Try again.")));
+      .then(async (r) => {
+        const ct = r.headers.get("content-type");
+        if (!ct || !ct.includes("application/json")) throw new Error("Unexpected server response");
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.detail || "Server error");
+        setNote(t("Submitted successfully!"));
+      })
+      .catch((e) => setNote(`${t("Submission failed.")} ${e.message || ""}`));
   };
 
-  const onDrop = e => {
+  const onDrop = (e) => {
     e.preventDefault();
-    const f = e.dataTransfer.files[0];
+    const f = e.dataTransfer?.files?.[0];
     if (f) handleFile(f);
   };
 
@@ -119,20 +155,19 @@ export default function UploadPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="min-h-screen px-2 sm:px-5 py-7 sm:py-14 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white"
+        onDrop={onDrop}
+        onDragOver={(e) => e.preventDefault()}
       >
         <div className="max-w-3xl mx-auto space-y-9">
-          {/* Header */}
           <div className="text-center space-y-1">
             <h1 className="text-2xl xs:text-3xl md:text-4xl font-extrabold tracking-tight">
               {t("Upload or Record Audio/Video")}
             </h1>
             <p className="text-zinc-400 text-base">
-              {t("Supports")} MP3, WAV, MP4, MKV, MOV, FLAC —{" "}
-              {t("click or drag to upload, or record live.")}
+              {t("Supports")} MP3, WAV, MP4, MKV, MOV, FLAC — {t("click or drag to upload, or record live.")}
             </p>
           </div>
 
-          {/* Notification */}
           {note && (
             <div className="text-center text-sm text-teal-300 bg-zinc-800/70 px-4 py-2 rounded-lg">
               {note}
@@ -145,6 +180,7 @@ export default function UploadPage() {
               <Timer className="w-5 h-5 text-teal-400" />
               <CountdownSelector value={countdown} onChange={setCountdown} />
             </div>
+
             <div className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3 border border-zinc-700">
               <Globe className="w-5 h-5 text-yellow-400" />
               <label className="flex items-center gap-2 text-sm cursor-pointer">
@@ -152,66 +188,20 @@ export default function UploadPage() {
                   type="checkbox"
                   className="form-checkbox accent-teal-600"
                   checked={translateEnabled}
-                  onChange={() => setTranslateEnabled(x => !x)}
+                  onChange={() => setTranslateEnabled((x) => !x)}
                   aria-label={t("Enable translation")}
                 />
                 {t("Enable Translation")}
               </label>
             </div>
-            {file && (
-              <button
-                onClick={() => setFile(null)}
-                className="flex items-center gap-2 text-sm text-red-400 hover:underline px-3 py-3 bg-zinc-800 rounded-xl border border-zinc-700"
-              >
-                <XCircle className="w-5 h-5" /> {t("Clear File")}
-              </button>
-            )}
-          </div>
 
-          {/* Upload / Record */}
-          <div
-            onDrop={onDrop}
-            onDragOver={e => e.preventDefault()}
-            onClick={() => document.getElementById("hiddenFileInput")?.click()}
-            className="p-7 border-2 border-dashed border-teal-600 bg-zinc-800 rounded-2xl text-base text-zinc-300 text-center cursor-pointer hover:bg-zinc-700 transition-all shadow focus:outline-none"
-            tabIndex={0}
-            aria-label={t("Click or drag your audio/video file here")}
-          >
-            {file ? file.name : t("Click or drag your audio/video file here")}
-            <input
-              id="hiddenFileInput"
-              type="file"
-              accept={[...AUDIO, ...VIDEO].map(f => `.${f}`).join(",")}
-              className="hidden"
-              onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])}
-              disabled={!!file}
-            />
+            <div className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3 border border-zinc-700">
+              <Mic className="w-5 h-5 text-emerald-400" />
+              <span className="text-sm text-zinc-300">
+                {recording ? t("Recording…") : t("Ready to record")}
+              </span>
+            </div>
           </div>
-
-          {/* Recording */}
-          {showCountdown
-            ? <CountdownTimer seconds={countdown} onComplete={() => { setShowCountdown(false); setRecording(true); }} />
-            : (
-              <div className="flex flex-col items-center gap-3">
-                <button
-                  onClick={() => {
-                    recording
-                      ? setRecording(false)
-                      : countdown > 0
-                        ? setShowCountdown(true)
-                        : setRecording(true);
-                  }}
-                  className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl shadow hover:bg-teal-700 text-lg font-semibold transition-all"
-                >
-                  {recording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                  {recording ? t("Stop") : t("Record")}
-                </button>
-                <span className="text-sm text-zinc-400">
-                  {recording ? t("Recording...") : t("Ready to record")}
-                </span>
-              </div>
-            )
-          }
 
           {recording && <LiveWaveform sourceType="mic" />}
 
@@ -226,7 +216,6 @@ export default function UploadPage() {
             />
           )}
 
-          {/* Transcript & Translation */}
           {!paywall && transcript && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
@@ -237,6 +226,7 @@ export default function UploadPage() {
                   </h3>
                   <TranscriptEditor value={transcript} onChange={setTranscript} />
                 </div>
+
                 {translateEnabled && translated && (
                   <div className="p-5 bg-zinc-900 rounded-2xl border border-zinc-800 space-y-3 shadow">
                     <h3 className="font-semibold text-lg text-white flex gap-2 items-center">
@@ -246,7 +236,8 @@ export default function UploadPage() {
                     <pre className="text-zinc-300 text-sm whitespace-pre-wrap max-h-64 overflow-auto">
                       {translated}
                     </pre>
-                    <button onClick={() => downloadText(translated, "translated.txt")}
+                    <button
+                      onClick={() => downloadText(translated, "translated.txt")}
                       className="text-sm text-yellow-300 flex items-center gap-2 hover:underline"
                     >
                       <Download className="w-4 h-4" /> {t("Download Translation")}
@@ -254,14 +245,19 @@ export default function UploadPage() {
                   </div>
                 )}
               </div>
+
               <div className="mt-7 flex flex-col sm:flex-row justify-center items-center gap-4">
                 <TranscriptExportPanel transcriptText={transcript} />
-                <button onClick={saveDraft} disabled={!transcript}
+                <button
+                  onClick={saveDraft}
+                  disabled={!transcript}
                   className="px-6 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 disabled:opacity-50 font-semibold transition"
                 >
                   {t("Save Draft")}
                 </button>
-                <button onClick={submit} disabled={!transcript}
+                <button
+                  onClick={submit}
+                  disabled={!transcript}
                   className="px-6 py-2 bg-green-600 text-white rounded-xl shadow hover:bg-green-700 disabled:opacity-50 font-semibold transition"
                 >
                   {t("Submit for Review")}
@@ -270,10 +266,10 @@ export default function UploadPage() {
             </>
           )}
 
-          {/* Info */}
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-base text-zinc-400 space-y-3 mt-7 shadow">
             <p className="flex items-center gap-2">
-              <Mic className="w-4 h-4 text-teal-400" /> {t("Record or upload your voice or video — EchoScript will auto-clean and transcribe it.")}
+              <Mic className="w-4 h-4 text-teal-400" />{" "}
+              {t("Record or upload your voice or video — EchoScript will auto-clean and transcribe it.")}
             </p>
             <p className="flex items-center gap-2">
               <Info className="w-4 h-4 text-zinc-400" /> {t(`Files up to ${MAX_MB}MB are supported.`)}
@@ -281,6 +277,7 @@ export default function UploadPage() {
           </div>
         </div>
       </motion.div>
+
       {paywall && <PaywallModal info={paywall} onClose={() => setPaywall(null)} />}
     </>
   );

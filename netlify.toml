@@ -1,3 +1,5 @@
+# netlify.toml (root)
+
 [build]
   command = "npm ci --no-audit --no-fund && npm run build"
   publish = "dist"
@@ -7,20 +9,8 @@
   NPM_FLAGS = "--silent"
   SECRETS_SCAN_ENABLED = "false"
 
-[[redirects]]
-  from = "/api/v1/*"
-  to   = "https://YOUR-TUNNEL.trycloudflare.com/api/v1/:splat"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/api/*"
-  to   = "https://YOUR-TUNNEL.trycloudflare.com/api/:splat"
-  status = 200
-  force = true
-
+# SPA routing
 [[redirects]]
   from = "/*"
   to   = "/index.html"
   status = 200
-
