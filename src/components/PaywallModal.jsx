@@ -1,16 +1,22 @@
+// components/PaywallModal.jsx
 import React from "react";
 import { X } from "lucide-react";
 
-export default function PaywallModal({ usageInfo, onClose }) {
-  if (!usageInfo) return null;
+export default function PaywallModal({ usageInfo, info, onClose }) {
+  const src = usageInfo || info;
+  if (!src) return null;
 
-  const { used, limit, upgrade_url } = usageInfo;
+  // normalize
+  const used = src.used ?? src.usedMinutes ?? 0;
+  const limit = src.limit ?? src.limitMinutes ?? 0;
+  const upgradeUrl =
+    src.upgrade_url || src.upgradeUrl || "/purchase";
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
     >
       <div className="relative w-full max-w-md rounded-lg bg-white dark:bg-gray-900 p-6 shadow-xl">
         <button
@@ -31,7 +37,7 @@ export default function PaywallModal({ usageInfo, onClose }) {
           To continue transcribing, please upgrade your plan.
         </p>
         <a
-          href={upgrade_url}
+          href={upgradeUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-block w-full rounded-md bg-teal-600 px-5 py-3 text-center font-medium text-white hover:bg-teal-700 transition"
@@ -42,3 +48,4 @@ export default function PaywallModal({ usageInfo, onClose }) {
     </div>
   );
 }
+

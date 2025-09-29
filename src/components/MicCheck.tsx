@@ -7,6 +7,7 @@ export default function MicCheck() {
   const mediaStreamRef = useRef<MediaStream|null>(null);
   const recorderRef = useRef<MediaRecorder|null>(null);
   const audioChunksRef = useRef<BlobPart[]>([]);
+  const mimeTypeRef = useRef<string>("audio/webm");
 
   const getMic = async () => {
     try {
@@ -17,7 +18,7 @@ export default function MicCheck() {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
-          sampleRate: 48000, // browsers may ignore but good hint
+          sampleRate: 48000,
         },
         video: false,
       });
@@ -34,19 +35,22 @@ export default function MicCheck() {
     const preferredTypes = [
       "audio/webm;codecs=opus",
       "audio/webm",
-      "audio/mp4", // Safari may fall back to AAC MP4
+      "audio/mp4",
     ];
     let mimeType = "";
     for (const t of preferredTypes) {
       if (MediaRecorder.isTypeSupported(t)) { mimeType = t; break; }
     }
+    if (!mimeType) mimeType = "audio/webm";
+    mimeTypeRef.current = mimeType;
+
     const rec = new MediaRecorder(mediaStreamRef.current!, { mimeType });
     audioChunksRef.current = [];
     rec.ondataavailable = (e) => {
       if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
     };
     rec.onstart = () => setStatus("recording");
-    rec.start(1000); // timeslice for chunking (ms)
+    rec.start(1000);
     recorderRef.current = rec;
   };
 
@@ -57,14 +61,16 @@ export default function MicCheck() {
   };
 
   const playBack = () => {
-    const blob = new Blob(audioChunksRef.current, { type: recorderRef.current?.mimeType || "audio/webm" });
+    const blob = new Blob(audioChunksRef.current, { type: mimeTypeRef.current });
     const url = URL.createObjectURL(blob);
     const a = new Audio(url);
     a.play();
   };
 
-  useEffect(() => () => {
-    mediaStreamRef.current?.getTracks().forEach(t => t.stop());
+  useEffect(() => {
+    return () => {
+      mediaStreamRef.current?.getTracks().forEach(t => t.stop());
+    };
   }, []);
 
   return (
@@ -81,3 +87,4 @@ export default function MicCheck() {
     </div>
   );
 }
+

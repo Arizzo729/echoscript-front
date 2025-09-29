@@ -20,8 +20,8 @@ export default function AdaptiveAI({
     setLog((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
 
   const chooseProviderAdaptive = useCallback(() => {
-    if (typeof inputData === "string" && inputData.length > 1000)
-      return PROVIDERS.OCTOPARSE;
+    // Previously: PROVIDERS.OCTOPARSE (undefined). Use APIFY instead.
+    if (typeof inputData === "string" && inputData.length > 1000) return PROVIDERS.APIFY;
     return initialProvider;
   }, [inputData, initialProvider]);
 
@@ -29,21 +29,16 @@ export default function AdaptiveAI({
     setStatus("running");
     setError(null);
     setResult(null);
-    abortRef.current?.abort(); // cancel any ongoing request
+    abortRef.current?.abort();
     abortRef.current = new AbortController();
 
     appendLog(`🔁 Starting automation with provider: ${provider}`);
 
     try {
-      const res = await service.runAutomation(
-        provider,
-        automationId,
-        inputData,
-        {
-          signal: abortRef.current.signal,
-          context: adaptiveContext,
-        }
-      );
+      const res = await service.runAutomation(provider, automationId, inputData, {
+        signal: abortRef.current.signal,
+        context: adaptiveContext,
+      });
       appendLog(`✅ Automation completed successfully.`);
       setResult(res);
       setStatus("success");
@@ -101,11 +96,7 @@ export default function AdaptiveAI({
       </div>
 
       <div className="min-h-[64px]">
-        {status === "idle" && (
-          <p className="text-gray-500 dark:text-gray-400">
-            Awaiting input to run automation...
-          </p>
-        )}
+        {status === "idle" && <p className="text-gray-500 dark:text-gray-400">Awaiting input to run automation...</p>}
         {status === "running" && (
           <p className="text-blue-600 dark:text-blue-400 font-medium flex items-center animate-pulse">
             Running automation... <LoadingSpinner />
@@ -117,9 +108,7 @@ export default function AdaptiveAI({
               {JSON.stringify(result, null, 2)}
             </pre>
             <button
-              onClick={() =>
-                navigator.clipboard.writeText(JSON.stringify(result, null, 2))
-              }
+              onClick={() => navigator.clipboard.writeText(JSON.stringify(result, null, 2))}
               className="absolute top-2 right-2 px-2 py-1 text-xs bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-700 dark:hover:bg-zinc-600 rounded"
               aria-label="Copy result to clipboard"
             >
@@ -127,11 +116,7 @@ export default function AdaptiveAI({
             </button>
           </div>
         )}
-        {status === "error" && (
-          <p className="text-red-600 dark:text-red-400 font-medium">
-            ❌ Error: {error}
-          </p>
-        )}
+        {status === "error" && <p className="text-red-600 dark:text-red-400 font-medium">❌ Error: {error}</p>}
       </div>
 
       <div>
@@ -145,9 +130,7 @@ export default function AdaptiveAI({
       </div>
 
       <details className="bg-zinc-50 dark:bg-zinc-800 rounded-xl p-4 text-sm">
-        <summary className="cursor-pointer font-semibold">
-          View Logs ({log.length})
-        </summary>
+        <summary className="cursor-pointer font-semibold">View Logs ({log.length})</summary>
         <div className="mt-2 max-h-48 overflow-y-auto font-mono whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
           {log.map((line, i) => (
             <div key={i}>{line}</div>
@@ -158,26 +141,9 @@ export default function AdaptiveAI({
   );
 }
 
-// Spinner component for loading state
 const LoadingSpinner = () => (
-  <svg
-    className="inline animate-spin h-5 w-5 ml-2 text-blue-600 dark:text-blue-400"
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-  >
-    <circle
-      className="opacity-25"
-      cx="12"
-      cy="12"
-      r="10"
-      stroke="currentColor"
-      strokeWidth="4"
-    />
-    <path
-      className="opacity-75"
-      fill="currentColor"
-      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-    />
+  <svg className="inline animate-spin h-5 w-5 ml-2 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
   </svg>
 );

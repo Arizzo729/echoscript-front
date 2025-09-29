@@ -13,18 +13,22 @@ import {
 import { useSound } from '../context/SoundContext';
 
 const bundles = [
-  { id: 1, price: 0.99, minutes: 5, bonus: 0 },
-  { id: 2, price: 3.99, minutes: 25, bonus: 15 },
-  { id: 3, price: 7.49, minutes: 50, bonus: 30 },
-  { id: 4, price: 14.99, minutes: 100, bonus: 60 },
-  { id: 5, price: 29.99, minutes: 200, bonus: 120 },
-  { id: 6, price: 59.99, minutes: 500, bonus: 240 },
+  { id: 1, price: 0.99, minutes: 5, (bonus: 0) },
+  { id: 2, price: 3.99, minutes: 25, (bonus: 5) },
+  { id: 3, price: 7.99, minutes: 60, (bonus: 10) },
+  { id: 4, price: 14.99, minutes: 120, (bonus: 45) },
+  { id: 5, price: 29.99, minutes: 250, (bonus: 100) },
+  { id: 6, price: 59.99, minutes: 500, (bonus: 200) },
 ];
+
+const isValidEmail = (v) => /\S+@\S+\.\S+/.test(v);
 
 export default function BuyExtraMinutes() {
   const [cart, setCart] = useState({});
   const [gifting, setGifting] = useState(false);
   const [recipient, setRecipient] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
   const { playClick } = useSound();
   const navigate = useNavigate();
 
@@ -73,6 +77,52 @@ export default function BuyExtraMinutes() {
       ? Math.min(...Object.keys(cart).map((i) => +i)) + 1
       : null;
 
+  const handleCheckout = async () => {
+    try {
+      setBusy(true);
+      setErr('');
+
+      if (Object.keys(cart).length === 0) return;
+
+      if (gifting && !isValidEmail(recipient)) {
+        setErr('Please enter a valid recipient email for gifting.');
+        return;
+      }
+
+      // Backend should create a Stripe Checkout session and return { url }
+      // Implement endpoint: POST /api/stripe/create-minutes-session
+      const res = await fetch('/api/stripe/create-minutes-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          items: Object.entries(cart).map(([id, qty]) => {
+            const b = bundles.find((x) => x.id === +id);
+            return {
+              id: +id,
+              qty,
+              price: b.price,
+              minutes: b.minutes,
+              bonus: b.bonus,
+            };
+          }),
+          gifting,
+          recipient: gifting ? recipient : undefined,
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json?.url) {
+        throw new Error(json?.error || 'Unable to create checkout session.');
+      }
+      window.location.href = json.url;
+    } catch (e) {
+      setErr(String(e?.message || e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="flex flex-col-reverse lg:flex-row max-w-5xl mx-auto px-2 sm:px-4 py-6 gap-7">
       {/* Cart Summary (mobile first: on bottom, sticky on desktop) */}
@@ -107,7 +157,7 @@ export default function BuyExtraMinutes() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="flex justify-between items-center bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3"
+                      className="flex justify-between items-center bg-zinc-8 00 border border-zinc-700 rounded-xl px-4 py-3"
                     >
                       <div>
                         <p className="text-base text-white font-semibold">
@@ -146,6 +196,7 @@ export default function BuyExtraMinutes() {
                 })
               )}
             </AnimatePresence>
+
             {/* Totals */}
             <div className="pt-3 border-t border-zinc-700 text-base text-white space-y-1">
               <div className="flex justify-between">
@@ -157,12 +208,8 @@ export default function BuyExtraMinutes() {
                 <span className="font-bold">${total.price.toFixed(2)}</span>
               </div>
             </div>
-            {suggestedId && suggestedId <= bundles.length && (
-              <p className="mt-2 text-xs text-teal-300 italic">
-                Consider upgrading for more value!
-              </p>
-            )}
-            {/* Gifting */}
+
+            {/* Gift toggle */}
             <div className="flex items-center gap-2 pt-2">
               <input
                 id="gift"
@@ -194,15 +241,16 @@ export default function BuyExtraMinutes() {
                 </motion.div>
               </AnimatePresence>
             )}
+
+            {err && <p className="text-sm text-red-400">{err}</p>}
+
             <Button
               size="lg"
-              className="w-full bg-teal-600 hover:bg-teal-500 mt-4 text-base rounded-xl transition-colors"
-              onClick={() => {
-                /* TODO: Checkout */
-              }}
-              disabled={Object.keys(cart).length === 0}
+              className="w-full bg-teal-600 hover:bg-teal-500 mt-4 text-base rounded-xl transition-colors disabled:opacity-60"
+              onClick={handleCheckout}
+              disabled={Object.keys(cart).length === 0 || busy || (gifting && !isValidEmail(recipient))}
             >
-              Checkout
+              {busy ? 'Processing…' : 'Checkout'}
             </Button>
             {Object.keys(cart).length > 0 && (
               <button
@@ -269,3 +317,4 @@ export default function BuyExtraMinutes() {
     </div>
   );
 }
+

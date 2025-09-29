@@ -1,31 +1,38 @@
-// ✅ components/NewsletterSignup.jsx — Enhanced & Polished
+// components/NewsletterSignup.jsx
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "./ui/Button";
 import { CheckCircle, XCircle } from "lucide-react";
+
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 
 export default function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [message, setMessage] = useState("");
 
+  const valid = /^\S+@\S+\.\S+$/.test(email);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!valid) {
+      setStatus("error");
+      setMessage("Please enter a valid email.");
+      return;
+    }
     setStatus("loading");
     setMessage("");
 
     try {
-      const res = await fetch("/newsletter/subscribe", {
+      const res = await fetch(`${API_BASE}/api/newsletter/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.detail || "Something went wrong.");
-      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || "Something went wrong.");
 
       setStatus("success");
       setMessage("✅ You're subscribed!");
@@ -58,7 +65,7 @@ export default function NewsletterSignup() {
         className="w-full px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
       />
 
-      <Button type="submit" variant="primary" size="sm" className="w-full">
+      <Button type="submit" variant="primary" size="sm" className="w-full" disabled={!valid || status === "loading"}>
         {status === "loading" ? "Subscribing..." : "Subscribe"}
       </Button>
 
@@ -81,5 +88,4 @@ export default function NewsletterSignup() {
     </motion.form>
   );
 }
-
 

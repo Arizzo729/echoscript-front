@@ -6,13 +6,10 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
-// If your API lives elsewhere (e.g., ngrok), set VITE_API_BASE_URL in .env
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
 const HAS_PAYPAL = Boolean(import.meta.env.VITE_PAYPAL_CLIENT_ID);
 
 // ===== DEV/TEST AUTH BYPASS =====
-// Enable either by setting VITE_BYPASS_AUTH_FOR_PAY=1 in .env.local
-// or by adding ?demo=1 to the URL. Only works in dev/localhost/ngrok.
 const DEV_BYPASS_FLAG = import.meta.env.VITE_BYPASS_AUTH_FOR_PAY === "1";
 const hasDemoParam = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("demo");
 const isLocalHost = typeof window !== "undefined" && (
@@ -126,7 +123,6 @@ export default function PurchasePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // True guest = no user email; but allow dev bypass to pretend signed-in
   const SHOW_SIGNIN = (!user || !user.email) && !DEV_BYPASS_ACTIVE;
 
   const handleCheckout = async (planId) => {
@@ -134,7 +130,7 @@ export default function PurchasePage() {
       const res = await fetch(`${API_BASE}/api/stripe/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planId })
+        body: JSON.stringify({ plan_id: planId }) // ⬅ unified with Checkout.jsx
       });
 
       if (!res.ok) {
@@ -144,9 +140,8 @@ export default function PurchasePage() {
 
       const data = await res.json();
       if (data?.url) {
-        window.location.href = data.url; // Stripe Checkout URL
+        window.location.href = data.url;
       } else if (data?.id) {
-        // Fallback if your backend returns a session ID instead of URL
         window.location.href = `https://checkout.stripe.com/c/pay/${data.id}`;
       } else {
         throw new Error("No checkout URL or session id in response");
@@ -206,7 +201,6 @@ export default function PurchasePage() {
                   </ul>
                 </div>
 
-                {/* CTA area */}
                 {!plan.checkout ? (
                   <button
                     onClick={() => (plan.id === "guest" ? navigate("/upload") : navigate(plan.link))}
@@ -223,7 +217,6 @@ export default function PurchasePage() {
                   </button>
                 ) : (
                   <div className="mt-6 space-y-3">
-                    {/* Stripe */}
                     <button
                       onClick={() => handleCheckout(plan.id)}
                       className="w-full inline-flex items-center justify-center text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg transition"
@@ -231,7 +224,6 @@ export default function PurchasePage() {
                       {t("pay_with_card_stripe", "Pay with card (Stripe)")}
                     </button>
 
-                    {/* PayPal */}
                     {HAS_PAYPAL ? (
                       <div className="w-full rounded-lg border border-white/10 bg-white/5 p-2">
                         <PayPalScriptProvider
@@ -281,7 +273,7 @@ export default function PurchasePage() {
             {t("buy_extra_minutes", "Need More Minutes?")}
           </button>
           <p className="text-sm text-zinc-400 text-center md:text-left">
-            {t("need_help_choosing", "Need help choosing the right plan?")} {" "}
+            {t("need_help_choosing", "Need help choosing the right plan?")}{" "}
             <a href="/assistant" className="text-teal-400 underline">
               {t("help_choose_plan", "Ask our AI assistant →")}
             </a>
@@ -291,3 +283,4 @@ export default function PurchasePage() {
     </motion.div>
   );
 }
+

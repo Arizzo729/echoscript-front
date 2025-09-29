@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useSwipeable } from 'react-swipeable';
 import Lottie from 'lottie-react';
 import { ArrowLeft, ArrowRight, X } from 'lucide-react';
-import { useSound } from '../context/SoundContext';
+import { useSound } from '../context/SoundContext'; // <-- fixed
 
 const STEPS = [
   // same steps as before
@@ -56,17 +56,14 @@ export default function OnboardingModal({ onClose }) {
   useEffect(() => {
     let cancel = false;
     setAnimData(null);
-
     const currentStep = STEPS?.[step];
     if (!currentStep || !currentStep.filename) return;
 
     const controller = new AbortController();
-
     fetch(`/assets/onboarding/${currentStep.filename}`, { signal: controller.signal })
       .then((r) => r.json())
       .then((data) => !cancel && setAnimData(data))
       .catch(() => {});
-
     return () => {
       cancel = true;
       controller.abort();
@@ -109,9 +106,9 @@ export default function OnboardingModal({ onClose }) {
           aria-labelledby="onboarding-title"
           aria-describedby="onboarding-desc"
           className="relative w-full max-w-lg bg-zinc-900/90 text-white rounded-2xl shadow-xl border border-zinc-700 overflow-hidden"
-          initial={{ y: shouldReduce ? 0 : 40, opacity: 0 }}
+          initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: shouldReduce ? 0 : -40, opacity: 0 }}
+          exit={{ y: -40, opacity: 0 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
         >
           <button onClick={finishOnboarding} className="absolute top-3 right-3 text-zinc-400 hover:text-white">
@@ -121,11 +118,7 @@ export default function OnboardingModal({ onClose }) {
           <div className="px-6 pt-5 flex items-center justify-between">
             <span className="text-xs text-zinc-400">{step + 1}/{STEPS.length}</span>
             <div className="flex-1 mx-3 h-1 bg-zinc-700 rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-teal-400"
-                style={{ width: `${progress}%` }}
-                transition={{ duration: 0.3 }}
-              />
+              <motion.div className="h-full bg-teal-400" style={{ width: `${progress}%` }} transition={{ duration: 0.3 }} />
             </div>
           </div>
 

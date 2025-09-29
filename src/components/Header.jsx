@@ -1,270 +1,268 @@
 // src/components/Header.jsx
-
-import React, { useState, useRef, useEffect } from "react";
-import {
-  BellIcon,
-  MagnifyingGlassIcon,
-  UserCircleIcon,
-  EllipsisVerticalIcon,
-} from "@heroicons/react/24/outline";
-import { Volume2, VolumeX } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Button from "./ui/Button";
-import { useAuth } from "../context/AuthContext";
-import { useSound } from "../context/SoundContext";
-import IconOnly from "../assets/Icon.png";
-import { useTranslation } from "react-i18next";
+import { Command, Search, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function Header({ onLogout = () => {} }) {
-  const { user } = useAuth();
-  const { t } = useTranslation();
-  const { isMuted, toggleMute } = useSound();
-  const navigate = useNavigate();
-  const isGuest = !user?.email;
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showNotifDropdown, setShowNotifDropdown] = useState(false);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [showMenuDropdown, setShowMenuDropdown] = useState(false);
+// Simple local index of common destinations/actions.
+// You can expand this list anytime.
+const LOCAL_INDEX = [
+  { label: "Home", path: "/", type: "page", keywords: ["home", "start", "landing"] },
+  { label: "Dashboard", path: "/dashboard", type: "page", keywords: ["dashboard", "overview"] },
+  { label: "Upload", path: "/upload", type: "page", keywords: ["upload", "transcribe", "audio", "video"] },
+  { label: "Live Captions", path: "/live", type: "page", keywords: ["live", "captions", "realtime"] },
+  { label: "Transcripts", path: "/transcripts", type: "page", keywords: ["transcripts", "history", "search"] },
+  { label: "Purchase", path: "/purchase", type: "page", keywords: ["upgrade", "pro", "pricing", "purchase", "buy"] },
+  { label: "Account", path: "/account", type: "page", keywords: ["account", "profile", "settings"] },
+  { label: "Settings", path: "/settings", type: "page", keywords: ["settings", "preferences"] },
+  { label: "Contact", path: "/contact", type: "page", keywords: ["contact", "support", "help"] },
+  { label: "Community", path: "/community", type: "page", keywords: ["community", "forum"] },
+  { label: "FAQ", path: "/faq", type: "page", keywords: ["faq", "questions"] },
+  { label: "Privacy Policy", path: "/privacy", type: "page", keywords: ["privacy"] },
+  { label: "Terms of Service", path: "/terms", type: "page", keywords: ["terms", "tos"] },
 
-  const searchRef = useRef(null);
-  const notifRef = useRef(null);
-  const userRef = useRef(null);
-  const menuRef = useRef(null);
+  // “Actions” (you can handle these in onPick)
+  { label: "New Upload", action: "new-upload", type: "action", keywords: ["new", "upload", "start"] },
+  { label: "Start Recording", action: "start-recording", type: "action", keywords: ["record", "mic", "start"] },
+];
 
-  // Handle clicking outside dropdowns to close
-  useEffect(() => {
-    const closeAll = (e) => {
-      if (
-        !searchRef.current?.contains(e.target) &&
-        !notifRef.current?.contains(e.target) &&
-        !userRef.current?.contains(e.target) &&
-        !menuRef.current?.contains(e.target)
-      ) {
-        setShowNotifDropdown(false);
-        setShowUserDropdown(false);
-        setShowMenuDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", closeAll);
-    document.addEventListener("keydown", (e) => e.key === "Escape" && closeAll(e));
-    return () => {
-      document.removeEventListener("mousedown", closeAll);
-      document.removeEventListener("keydown", (e) => e.key === "Escape" && closeAll(e));
-    };
-  }, []);
-
-  // For notification dot
-  const hasNewNotifications = false; // Wire this up as needed
-
-  return (
-    <motion.header
-      className="sticky top-0 z-50 bg-zinc-900/80 backdrop-blur border-b border-zinc-800 shadow"
-      initial={{ opacity: 0, y: -15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      role="banner"
-    >
-      <div className="flex flex-wrap items-center justify-between px-4 sm:px-6 py-3 gap-4">
-        {/* Logo and EchoScript.AI */}
-        <Link to="/" className="hidden md:flex items-center gap-2 min-w-[140px] select-none">
-          <img src={IconOnly} alt="EchoScript.AI" className="h-9 w-9" draggable={false} />
-          <span className="text-2xl font-bold text-white tracking-tight select-none">
-            EchoScript
-            <span className="text-teal-400 ml-1">.AI</span>
-          </span>
-        </Link>
-
-        {/* Search Bar */}
-        <div ref={searchRef} className="relative w-full md:flex-1 max-w-lg min-w-[200px]">
-          <input
-            id="search-input"
-            type="search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t("Search tools, pages, actions...")}
-            className="w-full py-2 pl-10 pr-4 text-sm rounded bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-400 transition"
-            aria-label={t("Search")}
-          />
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" />
-        </div>
-
-        {/* Actions */}
-        <div className="hidden md:flex items-center gap-2 sm:gap-3">
-
-          {/* --- Three Dots Menu --- */}
-          <div className="relative" ref={menuRef}>
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label={t("More menu")}
-              onClick={() => setShowMenuDropdown((v) => !v)}
-              icon={<EllipsisVerticalIcon className="w-5 h-5 text-zinc-300" />}
-            />
-            <AnimatePresence>
-              {showMenuDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  className="absolute right-0 top-full mt-2 w-56 rounded-lg shadow-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50 py-1"
-                  role="menu"
-                >
-                  <MenuDropdownItem
-                    label={t("Settings")}
-                    onClick={() => {
-                      setShowMenuDropdown(false);
-                      navigate("/settings");
-                    }}
-                  />
-                  <MenuDropdownItem
-                    label={t("Help & Support")}
-                    onClick={() => {
-                      setShowMenuDropdown(false);
-                      navigate("/help");
-                    }}
-                  />
-                  <MenuDropdownItem
-                    label={t("Feedback")}
-                    onClick={() => {
-                      setShowMenuDropdown(false);
-                      navigate("/feedback");
-                    }}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* --- Volume / Mute --- */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleMute}
-            aria-label={t("Toggle sound")}
-            icon={
-              isMuted
-                ? <VolumeX className="w-5 h-5 text-red-500" />
-                : <Volume2 className="w-5 h-5 text-teal-400" />
-            }
-          />
-
-          {/* --- Notifications --- */}
-          <div className="relative" ref={notifRef}>
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label={t("Notifications")}
-              onClick={() => setShowNotifDropdown((v) => !v)}
-              icon={
-                <span className="relative">
-                  <BellIcon className="w-5 h-5 text-white" />
-                  {hasNewNotifications && (
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-zinc-900" />
-                  )}
-                </span>
-              }
-            />
-            <AnimatePresence>
-              {showNotifDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 top-full mt-2 w-64 rounded-lg shadow-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50 py-3"
-                  role="menu"
-                >
-                  <div className="text-sm text-zinc-800 dark:text-zinc-200 p-4">
-                    {t("No notifications yet")}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* --- User Account --- */}
-          <div className="relative" ref={userRef}>
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label={t("Account")}
-              onClick={() => setShowUserDropdown((v) => !v)}
-              icon={<UserCircleIcon className="w-5 h-5 text-white" />}
-            />
-            <AnimatePresence>
-              {showUserDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 top-full mt-2 w-44 rounded-lg shadow-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50"
-                  role="menu"
-                >
-                  <div className="p-3 text-zinc-800 dark:text-zinc-200">
-                    {isGuest ? (
-                      <>
-                        <div className="mb-1 font-medium">{t("Guest")}</div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full mt-1"
-                          onClick={() => navigate("/signin")}
-                        >
-                          {t("Sign in")}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="w-full mt-1"
-                          onClick={() => navigate("/signup")}
-                        >
-                          {t("Sign up")}
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <div className="mb-1 font-medium">{user.email}</div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full mt-1"
-                          onClick={() => navigate("/account")}
-                        >
-                          {t("Account settings")}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="w-full mt-1"
-                          onClick={onLogout}
-                        >
-                          {t("Sign out")}
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      </div>
-    </motion.header>
-  );
+// lightweight scorer: startsWith > includes > keyword match
+function score(item, q) {
+  const s = (str) => str.toLowerCase();
+  const query = s(q);
+  const label = s(item.label);
+  if (label.startsWith(query)) return 100 - (label.length - query.length);
+  if (label.includes(query)) return 60 - (label.indexOf(query) || 0);
+  if (item.keywords?.some((k) => s(k).startsWith(query))) return 40;
+  if (item.keywords?.some((k) => s(k).includes(query))) return 20;
+  return 0;
 }
 
-// Dropdown menu item helper with theme-matching highlight
-function MenuDropdownItem({ label, onClick }) {
+export default function Header() {
+  const navigate = useNavigate();
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [loadingRemote, setLoadingRemote] = useState(false);
+  const [remote, setRemote] = useState([]); // optional backend suggestions
+  const inputRef = useRef(null);
+  const listRef = useRef(null);
+
+  // fetch remote suggestions (optional) with debounce
+  useEffect(() => {
+    let t;
+    const run = async () => {
+      const query = q.trim();
+      if (!query) {
+        setRemote([]);
+        setLoadingRemote(false);
+        return;
+      }
+      setLoadingRemote(true);
+      try {
+        const res = await fetch(`${API_BASE}/api/search/suggest?q=${encodeURIComponent(query)}`, {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          // Expect [{ label, path }] but tolerate variations
+          const normalized = (Array.isArray(data) ? data : []).slice(0, 6).map((d) => ({
+            label: d.label || d.title || d.name || String(d),
+            path: d.path || d.url || d.href || null,
+            type: "remote",
+          }));
+          setRemote(normalized);
+        } else {
+          setRemote([]);
+        }
+      } catch {
+        setRemote([]);
+      } finally {
+        setLoadingRemote(false);
+      }
+    };
+    t = setTimeout(run, 180);
+    return () => clearTimeout(t);
+  }, [q]);
+
+  // compute local matches
+  const localMatches = useMemo(() => {
+    const query = q.trim();
+    if (!query) return [];
+    return LOCAL_INDEX
+      .map((item) => ({ item, s: score(item, query) }))
+      .filter((x) => x.s > 0)
+      .sort((a, b) => b.s - a.s)
+      .slice(0, 6)
+      .map((x) => x.item);
+  }, [q]);
+
+  // combined suggestions
+  const suggestions = useMemo(() => {
+    const seen = new Set();
+    const merged = [];
+    for (const it of localMatches) {
+      const key = it.path || it.action || it.label;
+      if (!seen.has(key)) {
+        seen.add(key);
+        merged.push(it);
+      }
+    }
+    for (const it of remote) {
+      const key = it.path || it.label;
+      if (!seen.has(key)) {
+        seen.add(key);
+        merged.push(it);
+      }
+    }
+    return merged;
+  }, [localMatches, remote]);
+
+  const openMenu = () => setOpen(true);
+  const closeMenu = () => {
+    setOpen(false);
+    setActiveIdx(0);
+  };
+
+  const submitSearch = useCallback(
+    (override) => {
+      const pick = override ?? suggestions[activeIdx];
+      // If user picked an “action”
+      if (pick?.type === "action") {
+        if (pick.action === "new-upload") {
+          navigate("/upload");
+          closeMenu();
+          return;
+        }
+        if (pick.action === "start-recording") {
+          // Broadcast a simple event; your recorder can listen for it
+          window.dispatchEvent(new CustomEvent("echo:record:start"));
+          closeMenu();
+          return;
+        }
+      }
+      // If user picked a page (with a path)
+      if (pick?.path) {
+        navigate(pick.path);
+        closeMenu();
+        return;
+      }
+      // Fallback: go to search route with query
+      const query = q.trim();
+      if (query) navigate(`/search?q=${encodeURIComponent(query)}`);
+      closeMenu();
+    },
+    [activeIdx, suggestions, q, navigate]
+  );
+
+  const onKeyDown = (e) => {
+    if (!open) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIdx((i) => Math.min(i + 1, Math.max(0, suggestions.length - 1)));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIdx((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      submitSearch();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      closeMenu();
+    }
+  };
+
+  // close when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (!open) return;
+      if (!listRef.current?.contains(e.target) && e.target !== inputRef.current) {
+        closeMenu();
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="w-full text-left px-4 py-2 rounded transition text-sm text-zinc-800 dark:text-zinc-200 hover:bg-teal-50 dark:hover:bg-zinc-800 focus:bg-teal-50 dark:focus:bg-zinc-800"
-      tabIndex={0}
-      role="menuitem"
-    >
-      {label}
-    </button>
+    <header className="w-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800">
+      <div className="max-w-screen-2xl mx-auto px-4 py-3 flex items-center gap-3">
+        <Link to="/" className="flex items-center gap-2">
+          <Command className="w-5 h-5 text-teal-500" />
+          <span className="font-semibold text-zinc-900 dark:text-white">EchoScript.AI</span>
+        </Link>
+
+        <div className="relative flex-1 max-w-xl ml-auto">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+            <input
+              ref={inputRef}
+              type="search"
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+                if (!open) setOpen(true);
+              }}
+              onFocus={openMenu}
+              onKeyDown={onKeyDown}
+              placeholder="Search tools, pages, actions…"
+              className="w-full pl-9 pr-10 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-400 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              role="combobox"
+              aria-expanded={open}
+              aria-controls="header-search-listbox"
+              aria-autocomplete="list"
+            />
+            {loadingRemote && (
+              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-zinc-400" />
+            )}
+          </div>
+
+          <AnimatePresence>
+            {open && (q.trim().length > 0 || suggestions.length > 0) && (
+              <motion.ul
+                id="header-search-listbox"
+                ref={listRef}
+                role="listbox"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6 }}
+                className="absolute z-50 mt-2 w-full max-h-72 overflow-auto rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-xl"
+              >
+                {suggestions.length === 0 && (
+                  <li className="px-3 py-2 text-sm text-zinc-500">No suggestions. Press Enter to search.</li>
+                )}
+                {suggestions.map((sug, i) => {
+                  const isActive = i === activeIdx;
+                  return (
+                    <li
+                      key={(sug.path || sug.action || sug.label) + i}
+                      role="option"
+                      aria-selected={isActive}
+                      onMouseEnter={() => setActiveIdx(i)}
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // keep focus
+                        submitSearch(sug);
+                      }}
+                      className={`px-3 py-2 cursor-pointer text-sm flex items-center justify-between ${
+                        isActive ? "bg-teal-600 text-white" : "text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      }`}
+                    >
+                      <span className="truncate">
+                        {sug.label}
+                        {sug.type === "action" && <span className="opacity-80"> · action</span>}
+                        {sug.type === "remote" && <span className="opacity-80"> · from server</span>}
+                      </span>
+                      {sug.path && <span className={`text-xs ${isActive ? "opacity-90" : "text-zinc-400"}`}>{sug.path}</span>}
+                    </li>
+                  );
+                })}
+              </motion.ul>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </header>
   );
 }

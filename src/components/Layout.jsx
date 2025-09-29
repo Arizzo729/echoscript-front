@@ -20,8 +20,8 @@ import ToastContainer from './ToastContainer';
 import useIsMobile from '../hooks/useIsMobile';
 import MobileLayout from './MobileLayout';
 
-// Only import AudioOverlay once; don't import in MobileLayout.jsx
-import AudioOverlay from './AudioOverlay';
+// Use your existing MobileOverlay as the desktop overlay to avoid missing import issues
+import MobileOverlay from './MobileOverlay';
 
 const Header = lazy(() => import('./Header'));
 const Sidebar = lazy(() => import('./Sidebar'));
@@ -88,7 +88,8 @@ export default function Layout() {
           {showIntro && (
             <IntroVideo
               key="intro"
-              src="/videos/intro.mp4"
+              // Use 'sources' prop expected by IntroVideo
+              sources={[{ src: '/videos/intro.mp4', type: 'video/mp4' }]}
               onFinish={handleIntroFinish}
             />
           )}
@@ -96,14 +97,14 @@ export default function Layout() {
 
         {!showIntro &&
           (isMobile ? (
-            // --- Mobile: MobileLayout manages AudioOverlay, so DO NOT render AudioOverlay here!
+            // --- Mobile: MobileLayout manages its own overlay/modal and footer
             <MobileLayout>
               <ErrorBoundary>
                 <Outlet />
               </ErrorBoundary>
             </MobileLayout>
           ) : (
-            // --- Desktop: Only render AudioOverlay ONCE here
+            // --- Desktop
             <div className="flex flex-col h-screen w-screen overflow-hidden bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white">
               <Suspense fallback={<div className="h-16 w-full bg-zinc-900" />}>
                 <Header
@@ -152,7 +153,7 @@ export default function Layout() {
               <ToastContainer position="top-right" />
 
               {/* Desktop overlay: render only once, outside main content */}
-              <AudioOverlay />
+              <MobileOverlay />
             </div>
           ))}
       </ThemeContext.Provider>

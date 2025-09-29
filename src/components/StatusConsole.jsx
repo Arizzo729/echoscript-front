@@ -8,6 +8,8 @@ const LOG_LEVELS = {
   error: { icon: <AlertTriangle className="text-red-600" />, color: 'text-red-600' },
 };
 
+const LOG_LIMIT = 500; // NEW: keep memory/DOM growth in check
+
 function generateRandomLog() {
   const levels = Object.keys(LOG_LEVELS);
   const level = levels[Math.floor(Math.random() * levels.length)];
@@ -31,7 +33,7 @@ function generateRandomLog() {
   };
   const message = messages[level][Math.floor(Math.random() * messages[level].length)];
   return {
-    id: crypto.randomUUID?.() || Math.random().toString(36).substr(2, 9),
+    id: crypto.randomUUID?.() || Math.random().toString(36).slice(2),
     level,
     message,
     timestamp: new Date().toISOString(),
@@ -45,10 +47,15 @@ export function StatusConsole() {
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const scrollRef = useRef(null);
 
-  // Auto-generate logs
+  // Auto-generate logs (demo)
   useEffect(() => {
     const interval = setInterval(() => {
-      setLogs((prev) => [...prev, generateRandomLog()]);
+      setLogs((prev) => {
+        const next = [...prev, generateRandomLog()];
+        // Keep only the last LOG_LIMIT entries
+        if (next.length > LOG_LIMIT) next.splice(0, next.length - LOG_LIMIT);
+        return next;
+      });
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -127,7 +134,9 @@ export function StatusConsole() {
         aria-live="polite"
       >
         {Object.entries(filteredGroups).length === 0 ? (
-          <p className="text-center text-zinc-500 dark:text-zinc-600 italic select-none">No logs found</p>
+          <p className="text-center text-zinc-500 dark:text-zinc-600 italic select-none">
+            No logs found
+          </p>
         ) : (
           Object.entries(filteredGroups).map(([date, logList]) => {
             const isCollapsed = collapsedGroups[date];

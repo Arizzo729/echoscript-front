@@ -1,0 +1,2 @@
+C:\AI collaberation\EchoScriptAI\Frontend\combined_frontend.txt
+C:\AI collaberation\EchoScriptAI\Frontend\frontend_snapshot.txt

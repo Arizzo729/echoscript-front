@@ -9,26 +9,35 @@ export default function Contact() {
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [status, setStatus] = useState(null);
   const [showHours, setShowHours] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // honeypot to reduce spam
+  const [hp, setHp] = useState("");
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("sending");
+    setErrorMsg("");
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, hp }),
       });
       if (response.ok) {
         setStatus("success");
         setFormData({ name: "", email: "", subject: "", message: "" });
+        setHp("");
       } else {
+        const txt = await response.text();
         setStatus("error");
+        setErrorMsg(txt || "Unknown error");
       }
-    } catch {
+    } catch (err) {
       setStatus("error");
+      setErrorMsg(String(err?.message || err));
     }
   };
 
@@ -59,13 +68,31 @@ export default function Contact() {
         <textarea id="message" name="message" rows={5} placeholder={t("contact.message", "Message")} required
                   className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
                   value={formData.message} onChange={handleChange} />
+
+        {/* honeypot (hidden) */}
+        <input
+          type="text"
+          name="hp"
+          value={hp}
+          onChange={(e) => setHp(e.target.value)}
+          className="hidden"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+
         <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white py-2 px-5 rounded-lg flex items-center gap-2 transition"
                 disabled={status === "sending"}>
           <Send className="w-4 h-4" />
           {status === "sending" ? t("contact.sending", "Sending...") : t("contact.send", "Send")}
         </button>
+
         {status === "success" && <p className="text-green-400 mt-2">{t("contact.success", "Message sent successfully!")}</p>}
-        {status === "error" && <p className="text-red-400 mt-2">{t("contact.error", "Something went wrong. Please try again later.")}</p>}
+        {status === "error" && (
+          <p className="text-red-400 mt-2 whitespace-pre-wrap">
+            {t("contact.error", "Something went wrong. Please try again later.")}
+            {errorMsg ? `\n${errorMsg}` : ""}
+          </p>
+        )}
       </form>
 
       <div className="mt-16 grid gap-4 text-sm text-zinc-300">
@@ -110,7 +137,6 @@ export default function Contact() {
         </div>
       </div>
 
-      {/* Footer with Privacy Policy + Terms links */}
       <div className="mt-12 pt-6 border-t border-zinc-800 text-sm text-zinc-400 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
         <span>© {new Date().getFullYear()} EchoScript.AI</span>
         <div className="flex items-center gap-4">

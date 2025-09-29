@@ -12,36 +12,53 @@ export default function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const sendCode = async () => {
+    if (!email) return;
     setError("");
-    const res = await fetch("/api/auth/send-reset-code", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    const result = await res.json();
-    if (result.status === "ok") {
-      setStep(2);
-      setMessage(t("reset.code_sent"));
-    } else {
-      setError(result.error || t("reset.email_not_found"));
+    setBusy(true);
+    try {
+      const res = await fetch("/api/auth/send-reset-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const result = await res.json();
+      if (result.status === "ok") {
+        setStep(2);
+        setMessage(t("reset.code_sent"));
+      } else {
+        setError(result.error || t("reset.email_not_found"));
+      }
+    } catch (e) {
+      setError(String(e?.message || e));
+    } finally {
+      setBusy(false);
     }
   };
 
   const verifyCode = async () => {
+    if (!code || !newPassword) return;
     setError("");
-    const res = await fetch("/api/auth/verify-reset", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, code, new_password: newPassword }),
-    });
-    const result = await res.json();
-    if (result.status === "ok") {
-      setMessage(t("reset.success"));
-      setStep(3);
-    } else {
-      setError(t("reset.failure"));
+    setBusy(true);
+    try {
+      const res = await fetch("/api/auth/verify-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code, new_password: newPassword }),
+      });
+      const result = await res.json();
+      if (result.status === "ok") {
+        setMessage(t("reset.success"));
+        setStep(3);
+      } else {
+        setError(t("reset.failure"));
+      }
+    } catch (e) {
+      setError(String(e?.message || e));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -93,15 +110,19 @@ export default function ResetPassword() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t("reset.email_placeholder")}
                     className="w-full px-4 py-2 pr-10 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    disabled={busy}
                   />
                   <Mail className="absolute right-3 top-2.5 w-5 h-5 text-zinc-400" />
                 </div>
               </div>
               <button
                 onClick={sendCode}
-                className="w-full bg-teal-500 hover:bg-teal-400 text-white font-semibold py-2 rounded-lg transition-all duration-300 shadow-md"
+                disabled={busy || !email}
+                className={`w-full text-white font-semibold py-2 rounded-lg transition-all duration-300 shadow-md ${
+                  busy ? "bg-teal-700 cursor-not-allowed opacity-80" : "bg-teal-500 hover:bg-teal-400"
+                }`}
               >
-                {t("reset.send_code")}
+                {busy ? t("reset.sending") : t("reset.send_code")}
               </button>
             </motion.div>
           )}
@@ -126,6 +147,7 @@ export default function ResetPassword() {
                   onChange={(e) => setCode(e.target.value)}
                   placeholder={t("reset.code_placeholder")}
                   className="w-full px-4 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={busy}
                 />
               </div>
 
@@ -140,14 +162,18 @@ export default function ResetPassword() {
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder={t("reset.new_password_placeholder")}
                   className="w-full px-4 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={busy}
                 />
               </div>
 
               <button
                 onClick={verifyCode}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-lg transition-all duration-300 shadow-md"
+                disabled={busy || !code || !newPassword}
+                className={`w-full text-white font-semibold py-2 rounded-lg transition-all duration-300 shadow-md ${
+                  busy ? "bg-blue-700 cursor-not-allowed opacity-80" : "bg-blue-600 hover:bg-blue-500"
+                }`}
               >
-                {t("reset.reset_button")}
+                {busy ? t("reset.processing") : t("reset.reset_button")}
               </button>
             </motion.div>
           )}
@@ -176,3 +202,4 @@ export default function ResetPassword() {
     </motion.div>
   );
 }
+

@@ -1,63 +1,88 @@
-// ✅ useVoiceInput.js — EchoScript.AI Real-time Voice Input Hook
-import { useEffect, useRef, useState } from "react";
+// src/hooks/useVoiceInput.js — EchoScript.AI real-time voice input hook
+import { useEffect, useRef, useState, useCallback } from "react";
 
-export default function useVoiceInput({ onTranscript = () => {} } = {}) {
+/**
+ * @param {Object} opts
+ * @param {(text:string)=>void} [opts.onTranscript]   called with finalized chunks
+ * @param {(text:string)=>void} [opts.onInterim]      called with interim partials
+ * @param {string} [opts.lang="en-US"]                BCP-47 locale (e.g., "en-US", "es-ES")
+ * @returns {{listening:boolean, startListening:Function, stopListening:Function, error:string|null}}
+ */
+export default function useVoiceInput({ onTranscript = () => {}, onInterim, lang = "en-US" } = {}) {
   const [listening, setListening] = useState(false);
+  const [error, setError] = useState(null);
   const recognitionRef = useRef(null);
 
+  // initialize once
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      console.warn("🛑 SpeechRecognition not supported in this browser.");
+      setError("SpeechRecognition is not supported in this browser.");
       return;
     }
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = "en-US";
+    recognition.lang = lang;
     recognitionRef.current = recognition;
 
     recognition.onresult = (event) => {
-      let finalTranscript = "";
+      let finalText = "";
+      let interimText = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript + " ";
-        }
+        const t = event.results[i][0]?.transcript || "";
+        if (event.results[i].isFinal) finalText += t + " ";
+        else interimText += t;
       }
-      if (finalTranscript.trim()) {
-        onTranscript(finalTranscript.trim());
-      }
+      if (interimText && typeof onInterim === "function") onInterim(interimText);
+      if (finalText.trim()) onTranscript(finalText.trim());
     };
 
-    recognition.onerror = (event) => {
-      console.error("🎤 Speech recognition error:", event.error);
+    recognition.onerror = (evt) => {
+      // most common: "not-allowed", "no-speech", "audio-capture"
+      setError(evt?.error || "speech_error");
       setListening(false);
     };
 
     recognition.onend = () => {
       setListening(false);
     };
-  }, [onTranscript]);
 
-  const startListening = () => {
-    if (recognitionRef.current && !listening) {
+    return () => {
       try {
-        recognitionRef.current.start();
-        setListening(true);
-      } catch (err) {
-        console.error("❌ Failed to start recognition:", err);
-      }
-    }
-  };
+        recognition.stop();
+      } catch {}
+      recognitionRef.current = null;
+    };
+    // intentionally omit onTranscript/onInterim from deps to avoid reinit
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
-  const stopListening = () => {
-    if (recognitionRef.current && listening) {
-      recognitionRef.current.stop();
+  const startListening = useCallback(() => {
+    setError(null);
+    const rec = recognitionRef.current;
+    if (!rec || listening) return;
+    try {
+      const p = rec.start();
+      // Chrome returns undefined, Safari returns a Promise
+      if (p?.catch) p.catch((e) => setError(e?.message || "start_failed"));
+      setListening(true);
+    } catch (e) {
+      setError(e?.message || "start_failed");
       setListening(false);
     }
-  };
+  }, [listening]);
 
-  return { listening, startListening, stopListening };
+  const stopListening = useCallback(() => {
+    const rec = recognitionRef.current;
+    if (!rec) return;
+    try {
+      rec.stop();
+    } catch {}
+    setListening(false);
+  }, []);
+
+  return { listening, startListening, stopListening, error };
 }
+

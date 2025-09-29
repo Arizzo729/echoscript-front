@@ -27,16 +27,19 @@ const RETRY_DELAY_MS = 1500;
 
 class AutomationService {
   /**
-   * Resilient fetch with retries
+   * Resilient fetch with retries and helpful messages
    */
   static async fetchWithRetries(url, options, retries = MAX_RETRIES) {
     try {
       const res = await fetch(url, options);
       if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`HTTP ${res.status}: ${errorText}`);
+        const errorText = await res.text().catch(() => "");
+        throw new Error(`HTTP ${res.status}: ${errorText || "Request failed"}`);
       }
-      return await res.json();
+      // prefer JSON, fall back to text
+      const ct = res.headers.get("content-type") || "";
+      if (ct.includes("application/json")) return await res.json();
+      return await res.text();
     } catch (error) {
       if (retries > 0) {
         await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
@@ -47,14 +50,15 @@ class AutomationService {
   }
 
   /**
-   * Dispatches the selected provider and automation logic
+   * Dispatch to provider handlers
    */
   static async runAutomation(provider, automationId, inputData = {}, options = {}) {
     switch (provider) {
       case PROVIDERS.BROWSE_AI:
         return await this._runBrowseAI(automationId, inputData, options);
       case PROVIDERS.APIFY:
-        return await this._runApify(automationId, options.apifyToken);
+        // allow { apifyToken, input } in options
+        return await this._runApify(automationId, options.apifyToken, options.input);
       case PROVIDERS.BRIGHTDATA:
         return await this._runBrightData(inputData);
       case PROVIDERS.BARDEEN_AI:
@@ -65,7 +69,7 @@ class AutomationService {
   }
 
   /**
-   * Browse.AI task runner
+   * Browse.AI automation runner
    */
   static async _runBrowseAI(automationId, inputData, { webhookUrl, batchId } = {}) {
     const { apiBase, apiKey } = config.browseAI;
@@ -85,51 +89,61 @@ class AutomationService {
   }
 
   /**
-   * Apify task runner (sync, returns dataset items)
+   * Apify task runner
+   * - GET for simple runs
+   * - POST with JSON body when input is provided
+   * Returns dataset items (Apify run-sync-get-dataset-items).
    */
-  static async _runApify(taskId, token = config.apify.token) {
-    const url = `${config.apify.apiBase}/actor-tasks/${taskId}/run-sync-get-dataset-items?token=${token}`;
-    const options = { method: "GET" };
+  static async _runApify(taskId, token = config.apify.token, input) {
+    const base = `${config.apify.apiBase}/actor-tasks/${taskId}/run-sync-get-dataset-items?token=${encodeURIComponent(
+      token || ""
+    )}`;
+
+    const hasInput = input && Object.keys(input).length > 0;
+    const url = base;
+    const options = hasInput
+      ? {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(input),
+        }
+      : { method: "GET" };
+
     return await this.fetchWithRetries(url, options);
   }
 
   /**
-   * BrightData proxy-based task (only use server-side)
+   * BrightData proxy-based example (client-side only as placeholder; real use should be server-side)
    */
   static async _runBrightData(inputData) {
     const { username, password, proxyEndpoint } = config.brightData;
-    const proxyUrl = `http://${username}-session-rand:${password}@${proxyEndpoint}`;
-
-    const url = "https://target-site.com/api/search"; // Replace with real scraping target
-
+    if (!username || !password) {
+      throw new Error("BrightData credentials missing — set VITE_BRIGHTDATA_USERNAME/PASSWORD.");
+    }
+    // NOTE: Real proxying must be done server-side with an HTTP agent; this is a placeholder.
+    const url = "https://target-site.com/api/search";
     const options = {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // NOTE: Proxies must be handled via server-side HTTP agent
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query: inputData }),
     };
-
     return await this.fetchWithRetries(url, options);
   }
 
   /**
-   * Runs a batch of automations for a provider
+   * Run a batch of automations for a provider
    */
   static async runBatch(provider, automations = []) {
     const results = [];
-
-    for (const { automationId, inputData } of automations) {
+    for (const { automationId, inputData, options } of automations) {
       try {
-        const result = await this.runAutomation(provider, automationId, inputData);
-        results.push({ automationId, status: "success", data: result });
+        const data = await this.runAutomation(provider, automationId, inputData, options);
+        results.push({ automationId, status: "success", data });
       } catch (err) {
         console.error(`Automation failed [${provider} → ${automationId}]`, err);
         results.push({ automationId, status: "error", error: err.message });
       }
     }
-
     return results;
   }
 }

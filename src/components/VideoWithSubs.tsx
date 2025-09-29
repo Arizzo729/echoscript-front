@@ -1,6 +1,8 @@
 // src/components/VideoWithSubs.tsx
 import { useRef, useState } from "react";
 
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
+
 export default function VideoWithSubs() {
   const [videoUrl, setVideoUrl] = useState<string>("");
   const [trackUrl, setTrackUrl] = useState<string>("");
@@ -13,14 +15,15 @@ export default function VideoWithSubs() {
   };
 
   const makeSubtitles = async () => {
-    const input = (document.getElementById("fileVideo") as HTMLInputElement);
+    const input = document.getElementById("fileVideo") as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
     const fd = new FormData();
     fd.append("file", file);
-    const res = await fetch("/api/v1/subtitles", { method: "POST", body: fd });
+
+    const res = await fetch(`${API_BASE}/api/v1/subtitles`, { method: "POST", body: fd, credentials: "include" });
     if (!res.ok) { alert("Failed to make subtitles"); return; }
-    // Create a blob URL so we can attach as track
+
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     setTrackUrl(url);
@@ -43,3 +46,4 @@ export default function VideoWithSubs() {
     </div>
   );
 }
+

@@ -1,18 +1,13 @@
 // ✅ EchoScript.AI – Upgraded Checkout Page with Stripe Integration & Secure Paywall
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { loadStripe } from "@stripe/stripe-js";
-import {
-  Loader2,
-  Lock,
-  CreditCard,
-  ShieldCheck,
-  ArrowLeftCircle,
-} from "lucide-react";
+import { Loader2, CreditCard, ShieldCheck, ArrowLeftCircle } from "lucide-react";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+const PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = PUBLISHABLE_KEY ? loadStripe(PUBLISHABLE_KEY) : null;
 
 const planDetails = {
   pro: {
@@ -20,29 +15,18 @@ const planDetails = {
     price: "$14.00",
     featuresKey: "purchase.plans.pro.features",
     color: "teal",
-    stripeId: "price_12345", // Replace with your live Stripe price ID
   },
   enterprise: {
     nameKey: "purchase.plans.enterprise.name",
     price: "Custom",
     featuresKey: "purchase.plans.enterprise.features",
     color: "purple",
-    stripeId: null,
   },
 };
 
-// Map tailwind color to actual class
 const colorMap = {
-  teal: {
-    bg: "bg-teal-600",
-    hover: "hover:bg-teal-500",
-    border: "border-teal-600",
-  },
-  purple: {
-    bg: "bg-purple-600",
-    hover: "hover:bg-purple-500",
-    border: "border-purple-600",
-  },
+  teal: { bg: "bg-teal-600", hover: "hover:bg-teal-500" },
+  purple: { bg: "bg-purple-600", hover: "hover:bg-purple-500" },
 };
 
 export default function Checkout() {
@@ -51,11 +35,12 @@ export default function Checkout() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const selectedPlan = planDetails[plan];
+
+  const selectedPlan = useMemo(() => planDetails[plan], [plan]);
 
   useEffect(() => {
     if (!selectedPlan) navigate("/purchase");
-  }, [plan]);
+  }, [selectedPlan, navigate]);
 
   const handlePayment = async () => {
     if (plan === "enterprise") return navigate("/contact");
@@ -64,7 +49,15 @@ export default function Checkout() {
     setError(null);
 
     try {
+      if (!PUBLISHABLE_KEY) {
+        throw new Error("Missing VITE_STRIPE_PUBLISHABLE_KEY in .env");
+      }
+      if (!stripePromise) {
+        throw new Error("Stripe failed to initialize.");
+      }
       const stripe = await stripePromise;
+
+      // Your backend maps plan -> price id and returns { url }
       const res = await fetch("/api/stripe/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,16 +65,15 @@ export default function Checkout() {
         body: JSON.stringify({ plan_id: plan }),
       });
 
-      const { url, error: apiError } = await res.json();
-
-      if (apiError) throw new Error(apiError);
-      if (!url) throw new Error("No Stripe session URL returned");
-
-      window.location.href = url;
+      const out = await res.json();
+      if (!res.ok || !out?.url) {
+        throw new Error(out?.error || "No Stripe session URL returned");
+      }
+      window.location.href = out.url;
     } catch (err) {
       setError(
         t("checkout.error") ||
-          "Something went wrong during checkout. Please try again."
+          `Something went wrong during checkout.\n${String(err?.message || err)}`
       );
       console.error("[Checkout Error]", err);
     } finally {
@@ -113,28 +105,25 @@ export default function Checkout() {
 
         <div className="rounded-2xl border border-zinc-700 shadow-xl bg-zinc-900 p-7 space-y-6 text-white">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">{t(selectedPlan.nameKey)}</h2>
-            <span className="text-lg font-bold">{selectedPlan.price}</span>
+            <h2 className="text-xl font-semibold">{t(selectedPlan?.nameKey || "")}</h2>
+            <span className="text-lg font-bold">{selectedPlan?.price || ""}</span>
           </div>
 
           <ul className="list-disc list-inside text-base text-zinc-300 space-y-1">
-            {(t(selectedPlan.featuresKey, { returnObjects: true }) || []).map(
-              (feat, i) => (
-                <li key={i}>{feat}</li>
-              )
-            )}
+            {(t(selectedPlan?.featuresKey || "", { returnObjects: true }) || []).map((feat, i) => (
+              <li key={i}>{feat}</li>
+            ))}
           </ul>
 
           {error && (
-            <div className="text-red-400 text-sm font-medium">{error}</div>
+            <div className="text-red-400 text-sm font-medium whitespace-pre-wrap">{error}</div>
           )}
 
           <button
             onClick={handlePayment}
             disabled={loading}
             className={`w-full flex justify-center items-center gap-2 py-3 px-4 text-base rounded-xl font-bold transition-colors focus-visible:ring-2 focus-visible:ring-teal-400 
-              ${color.bg} ${color.hover} ${loading ? "opacity-70 cursor-not-allowed" : ""}
-            `}
+              ${color.bg} ${color.hover} ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
           >
             {loading ? (
               <>
@@ -144,9 +133,7 @@ export default function Checkout() {
             ) : (
               <>
                 <CreditCard className="w-5 h-5" />
-                {plan === "enterprise"
-                  ? t("checkout.contactUs")
-                  : t("checkout.payNow")}
+                {plan === "enterprise" ? t("checkout.contactUs") : t("checkout.payNow")}
               </>
             )}
           </button>
@@ -160,3 +147,4 @@ export default function Checkout() {
     </motion.div>
   );
 }
+

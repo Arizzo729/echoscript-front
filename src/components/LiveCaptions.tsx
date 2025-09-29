@@ -9,31 +9,32 @@ export default function LiveCaptions() {
   const [listening, setListening] = useState(false);
   const wsRef = useRef<WebSocket|null>(null);
   const recRef = useRef<MediaRecorder|null>(null);
-  const startTimeRef = useRef<number>(0);
+  const streamRef = useRef<MediaStream|null>(null);
 
   const start = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount:1, echoCancellation:true, noiseSuppression:true }, video:false });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true },
+      video: false
+    });
+    streamRef.current = stream;
+
     const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
       ? "audio/webm;codecs=opus"
       : (MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "audio/webm");
 
     const ws = openTranscribeSocket();
+    ws.binaryType = "arraybuffer";
     ws.onmessage = (ev) => {
-      const msg = JSON.parse(ev.data);
+      const msg = JSON.parse(ev.data as string);
       // Expect schema: {type: "partial"|"final", id, text, start, end?}
       setCaptions((prev) => {
-        if (msg.type === "partial") {
-          const others = prev.filter(c => c.id !== msg.id);
-          return [...others, { ...msg, final:false }];
-        } else {
-          const others = prev.filter(c => c.id !== msg.id);
-          return [...others, { ...msg, final:true }];
-        }
+        const others = prev.filter(c => c.id !== msg.id);
+        const next = { ...msg, final: msg.type === "final" };
+        return [...others, next];
       });
     };
     ws.onopen = () => {
       const rec = new MediaRecorder(stream, { mimeType });
-      startTimeRef.current = performance.now();
       rec.ondataavailable = async (e) => {
         if (!e.data.size) return;
         const arrayBuf = await e.data.arrayBuffer();
@@ -45,6 +46,7 @@ export default function LiveCaptions() {
       setListening(true);
     };
     ws.onclose = () => stop();
+    ws.onerror = () => stop();
   };
 
   const stop = () => {
@@ -52,6 +54,8 @@ export default function LiveCaptions() {
     recRef.current = null;
     wsRef.current?.close();
     wsRef.current = null;
+    streamRef.current?.getTracks().forEach(t => t.stop());
+    streamRef.current = null;
     setListening(false);
   };
 

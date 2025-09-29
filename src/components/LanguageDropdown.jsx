@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Listbox } from "@headlessui/react";
 import { ChevronsUpDown } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
-
 
 const groupedLanguages = {
   Popular: [
@@ -36,17 +35,12 @@ export default function LanguageDropdown({
   const inputRef = useRef(null);
 
   const selected = flattenLanguages.find((l) => l.code === value);
-
-  const filtered = query === ""
-    ? flattenLanguages
-    : flattenLanguages.filter((lang) =>
-        lang.label.toLowerCase().includes(query.toLowerCase())
-      );
-
-  // Focus search input when dropdown opens
-  useEffect(() => {
-    if (inputRef.current) inputRef.current.focus();
-  }, [query]);
+  const filtered =
+    query === ""
+      ? flattenLanguages
+      : flattenLanguages.filter((lang) =>
+          lang.label.toLowerCase().includes(query.toLowerCase())
+        );
 
   return (
     <div className="w-64 text-sm">
@@ -66,6 +60,8 @@ export default function LanguageDropdown({
                 <div className="absolute z-50 w-full mt-1 rounded-lg bg-zinc-800 shadow-lg border border-zinc-700">
                   <input
                     ref={inputRef}
+                    // autofocus when menu opens without a useEffect dance
+                    autoFocus
                     type="text"
                     className="w-full px-3 py-2 text-sm bg-zinc-800 text-white border-b border-zinc-700 focus:outline-none"
                     placeholder="Search language..."
@@ -73,7 +69,7 @@ export default function LanguageDropdown({
                     onChange={(e) => setQuery(e.target.value)}
                     aria-label="Search languages"
                   />
-                  <ul className="max-h-48 overflow-y-auto custom-scrollbar">
+                  <ul className="max-h-48 overflow-y-auto custom-scrollbar" role="listbox">
                     {filtered.map((lang) => (
                       <Listbox.Option
                         key={lang.code}
@@ -88,9 +84,7 @@ export default function LanguageDropdown({
                       </Listbox.Option>
                     ))}
                     {filtered.length === 0 && (
-                      <li className="px-4 py-2 text-zinc-500 italic">
-                        No match found
-                      </li>
+                      <li className="px-4 py-2 text-zinc-500 italic">No match found</li>
                     )}
                   </ul>
                 </div>
@@ -107,3 +101,4 @@ export default function LanguageDropdown({
     </div>
   );
 }
+

@@ -1,32 +1,38 @@
-// ✅ components/NewsletterUnsubscribe.jsx — Clean Unsubscribe Form w/ Redirect
+// components/NewsletterUnsubscribe.jsx
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Button from "./ui/Button";
+
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 
 export default function NewsletterUnsubscribe() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle | loading | error
   const [message, setMessage] = useState("");
 
+  const valid = /^\S+@\S+\.\S+$/.test(email);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!valid) {
+      setStatus("error");
+      setMessage("Please enter a valid email.");
+      return;
+    }
     setStatus("loading");
     setMessage("");
 
     try {
-      const res = await fetch("/newsletter/unsubscribe", {
+      const res = await fetch(`${API_BASE}/api/newsletter/unsubscribe`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || "Something went wrong.");
 
-      if (!res.ok) {
-        throw new Error(data.detail || "Something went wrong.");
-      }
-
-      // ✅ Redirect to confirmation page
       window.location.href = "/unsubscribed";
     } catch (err) {
       setStatus("error");
@@ -56,13 +62,11 @@ export default function NewsletterUnsubscribe() {
         className="w-full px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-red-500 transition"
       />
 
-      <Button type="submit" variant="destructive" size="sm" className="w-full">
+      <Button type="submit" variant="destructive" size="sm" className="w-full" disabled={!valid || status === "loading"}>
         {status === "loading" ? "Removing..." : "Unsubscribe"}
       </Button>
 
-      {status === "error" && (
-        <div className="text-red-400 text-sm text-center mt-2">{message}</div>
-      )}
+      {status === "error" && <div className="text-red-400 text-sm text-center mt-2">{message}</div>}
     </motion.form>
   );
 }

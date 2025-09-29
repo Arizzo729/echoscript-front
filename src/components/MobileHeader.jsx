@@ -1,14 +1,9 @@
 // src/components/MobileHeader.jsx
-
 import React, { useState, useRef, useEffect } from "react";
-import {
-  MagnifyingGlassIcon,
-  BellIcon,
-  EllipsisVerticalIcon,
-} from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, BellIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { Volume2, VolumeX } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useSound } from "../context/SoundContext";
+import { useSound } from "../context/SoundContext"; // <-- fixed
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "./ui/Button";
 
@@ -16,7 +11,6 @@ export default function MobileHeader({ onSearch, hasNewNotifications = false }) 
   const { t } = useTranslation();
   const { isMuted, toggleMute } = useSound();
 
-  // Dropdown state
   const [showMenu, setShowMenu] = useState(false);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const menuRef = useRef(null);
@@ -24,13 +18,9 @@ export default function MobileHeader({ onSearch, hasNewNotifications = false }) 
   const inputRef = useRef(null);
   const [query, setQuery] = useState("");
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const close = (e) => {
-      if (
-        !menuRef.current?.contains(e.target) &&
-        !notifRef.current?.contains(e.target)
-      ) {
+      if (!menuRef.current?.contains(e.target) && !notifRef.current?.contains(e.target)) {
         setShowMenu(false);
         setShowNotifDropdown(false);
       }
@@ -53,30 +43,25 @@ export default function MobileHeader({ onSearch, hasNewNotifications = false }) 
       role="banner"
     >
       <div className="flex items-center justify-between gap-2 px-3 py-2" style={{ minHeight: 56 }}>
-        {/* Search input */}
         <div className="flex-1 relative">
           <input
             ref={inputRef}
             type="search"
             value={query}
-            onChange={e => {
+            onChange={(e) => {
               setQuery(e.target.value);
               if (onSearch) onSearch(e.target.value);
             }}
-            placeholder={t("Search tools, pages, actions...")}
+            placeholder={t("Search tools, pages, actions.")}
             className="w-full h-11 pl-10 pr-4 rounded-full bg-zinc-100 dark:bg-zinc-800 text-[1rem] text-zinc-900 dark:text-white placeholder-zinc-400 shadow-inner border-0 focus:outline-none focus:ring-2 focus:ring-teal-400 transition"
             aria-label={t("Search")}
             autoCorrect="off"
             spellCheck="false"
             autoComplete="off"
           />
-          <MagnifyingGlassIcon
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none"
-            aria-hidden="true"
-          />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" aria-hidden="true" />
         </div>
 
-        {/* Mute/unmute */}
         <motion.div whileTap={{ scale: 0.9 }}>
           <Button
             variant="ghost"
@@ -84,15 +69,11 @@ export default function MobileHeader({ onSearch, hasNewNotifications = false }) 
             className="ml-1"
             aria-label={isMuted ? t("Unmute") : t("Mute")}
             onClick={toggleMute}
-            icon={isMuted
-              ? <VolumeX className="w-5 h-5 text-red-500" />
-              : <Volume2 className="w-5 h-5 text-teal-400" />
-            }
+            icon={isMuted ? <VolumeX className="w-5 h-5 text-red-500" /> : <Volume2 className="w-5 h-5 text-teal-400" />}
             tabIndex={0}
           />
         </motion.div>
 
-        {/* Notifications */}
         <motion.div whileTap={{ scale: 0.9 }} className="relative" ref={notifRef}>
           <Button
             variant="ghost"
@@ -102,9 +83,7 @@ export default function MobileHeader({ onSearch, hasNewNotifications = false }) 
             icon={
               <span className="relative">
                 <BellIcon className="w-5 h-5 text-zinc-900 dark:text-white" />
-                {hasNewNotifications && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-teal-400 rounded-full border-2 border-white dark:border-zinc-900" />
-                )}
+                {hasNewNotifications && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-teal-400 rounded-full border-2 border-white dark:border-zinc-900" />}
               </span>
             }
             tabIndex={0}
@@ -118,15 +97,12 @@ export default function MobileHeader({ onSearch, hasNewNotifications = false }) 
                 className="absolute right-0 top-full mt-2 w-64 rounded-xl shadow-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50 py-3"
                 role="menu"
               >
-                <div className="text-sm text-zinc-800 dark:text-zinc-200 p-4">
-                  {t("No notifications yet")}
-                </div>
+                <div className="text-sm text-zinc-800 dark:text-zinc-200 p-4">{t("No notifications yet")}</div>
               </motion.div>
             )}
           </AnimatePresence>
         </motion.div>
 
-        {/* Three-dot menu */}
         <motion.div whileTap={{ scale: 0.9 }} className="relative" ref={menuRef}>
           <Button
             variant="ghost"
@@ -145,27 +121,9 @@ export default function MobileHeader({ onSearch, hasNewNotifications = false }) 
                 className="absolute right-0 top-full mt-2 w-56 rounded-xl shadow-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50 py-2"
                 role="menu"
               >
-                <MenuItem
-                  label={t("Settings")}
-                  onClick={() => {
-                    setShowMenu(false);
-                    window.location.href = "/settings";
-                  }}
-                />
-                <MenuItem
-                  label={t("Help & Support")}
-                  onClick={() => {
-                    setShowMenu(false);
-                    window.location.href = "/help";
-                  }}
-                />
-                <MenuItem
-                  label={t("Feedback")}
-                  onClick={() => {
-                    setShowMenu(false);
-                    window.location.href = "/feedback";
-                  }}
-                />
+                <MenuItem label={t("Settings")} onClick={() => { setShowMenu(false); window.location.href = "/settings"; }} />
+                <MenuItem label={t("Help & Support")} onClick={() => { setShowMenu(false); window.location.href = "/help"; }} />
+                <MenuItem label={t("Feedback")} onClick={() => { setShowMenu(false); window.location.href = "/feedback"; }} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -175,7 +133,6 @@ export default function MobileHeader({ onSearch, hasNewNotifications = false }) 
   );
 }
 
-// Helper for dropdown items - always perfectly themed
 function MenuItem({ label, onClick }) {
   return (
     <button
