@@ -9,8 +9,8 @@ import MobileOverlay from "./MobileOverlay";
 
 /**
  * Minimal inline modal to avoid external dependencies.
- * If you already have an AudioModal component, you can delete this
- * and use yours; the interface here is open:boolean, onClose:fn, children.
+ * If you already have an AudioModal component, you can remove this and use yours.
+ * Props: open:boolean, onClose:fn
  */
 function AudioModal({ open, onClose, children }) {
   if (!open) return null;
@@ -110,4 +110,3 @@ function MobileLayout({ children }) {
 }
 
 export default MobileLayout;
-
