@@ -13,12 +13,12 @@ import {
 import { useSound } from '../context/SoundContext';
 
 const bundles = [
-  { id: 1, price: 0.99, minutes: 5, (bonus: 0) },
-  { id: 2, price: 3.99, minutes: 25, (bonus: 5) },
-  { id: 3, price: 7.99, minutes: 60, (bonus: 10) },
-  { id: 4, price: 14.99, minutes: 120, (bonus: 45) },
-  { id: 5, price: 29.99, minutes: 250, (bonus: 100) },
-  { id: 6, price: 59.99, minutes: 500, (bonus: 200) },
+  { id: 1, price: 0.99, minutes: 5, bonus: 0 },
+  { id: 2, price: 3.99, minutes: 25, bonus: 5 },
+  { id: 3, price: 7.99, minutes: 60, bonus: 10 },
+  { id: 4, price: 14.99, minutes: 120, bonus: 45 },
+  { id: 5, price: 29.99, minutes: 250, bonus: 100 },
+  { id: 6, price: 59.99, minutes: 500, bonus: 200 },
 ];
 
 const isValidEmail = (v) => /\S+@\S+\.\S+/.test(v);
@@ -157,7 +157,7 @@ export default function BuyExtraMinutes() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="flex justify-between items-center bg-zinc-8 00 border border-zinc-700 rounded-xl px-4 py-3"
+                      className="flex justify-between items-center bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3"
                     >
                       <div>
                         <p className="text-base text-white font-semibold">
