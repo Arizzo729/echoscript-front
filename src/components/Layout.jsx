@@ -1,5 +1,4 @@
 // src/components/Layout.jsx
-
 import React, {
   useState,
   useEffect,
@@ -160,4 +159,3 @@ export default function Layout() {
     </ToastProvider>
   );
 }
-
