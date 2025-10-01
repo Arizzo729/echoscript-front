@@ -1,3 +1,4 @@
+// src/components/IntroVideo.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
@@ -12,8 +13,7 @@ const overlayVariants = {
 const controlsVariants = {
   hidden: { opacity: 0, y: 20, transition: { duration: 0.4 } },
   visible: i => ({
-    opacity: 1,
-    y: 0,
+    opacity: 1, y: 0,
     transition: { delay: 0.2 + i * 0.1, duration: 0.5, ease: 'easeOut' },
   }),
 };
@@ -24,6 +24,8 @@ export default function IntroVideo({
   skipLabel = 'Skip Intro',
   sources = [{ src: introVideo, type: 'video/mp4' }],
   onFinish,
+  playOnceKey = 'intro_seen_v1',      // <-- plays once per user (stored in localStorage)
+  force = false,                      // set true to force-show (for QA)
 }) {
   const videoRef = useRef(null);
   const controlsAnim = useAnimation();
@@ -35,11 +37,16 @@ export default function IntroVideo({
   const defaultVolume = 0.3;
 
   useEffect(() => {
-    if (!window.__introPlayed) {
-      window.__introPlayed = true;
+    const alreadySeen =
+      !force &&
+      typeof window !== 'undefined' &&
+      (window.__introPlayed || localStorage.getItem(playOnceKey) === '1');
+
+    if (!alreadySeen) {
+      window.__introPlayed = true;     // in-page
       setShowIntro(true);
     }
-  }, []);
+  }, [force, playOnceKey]);
 
   useEffect(() => {
     if (showIntro && !hasPlayed.current) {
@@ -50,7 +57,7 @@ export default function IntroVideo({
         v.preload = 'auto';
         v.defaultPlaybackRate = 1;
         v.volume = defaultVolume;
-        v.muted = true; // Must be true to allow autoplay in Safari
+        v.muted = true; // necessary for autoplay
 
         if (v.children.length === 0) {
           sources.forEach(({ src, type }) => {
@@ -61,9 +68,7 @@ export default function IntroVideo({
           });
         }
 
-        v.play().catch(() => {
-          // Fallback if autoplay fails — some Safari versions need a user gesture
-        });
+        v.play().catch(() => { /* autoplay might need user gesture on some browsers */ });
       }
     }
   }, [showIntro, sources]);
@@ -81,6 +86,7 @@ export default function IntroVideo({
   }, [showIntro, skipAfter, controlsAnim]);
 
   const handleCanPlay = () => setLoading(false);
+
   const toggleMute = () => {
     const v = videoRef.current;
     setMuted(prev => {
@@ -91,6 +97,7 @@ export default function IntroVideo({
   };
 
   const exitIntro = async () => {
+    try { localStorage.setItem(playOnceKey, '1'); } catch {}
     await controlsAnim.start('hidden');
     setShowIntro(false);
     onFinish?.();
@@ -172,4 +179,6 @@ IntroVideo.propTypes = {
     PropTypes.shape({ src: PropTypes.string.isRequired, type: PropTypes.string.isRequired })
   ),
   onFinish: PropTypes.func,
+  playOnceKey: PropTypes.string,
+  force: PropTypes.bool,
 };

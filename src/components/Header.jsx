@@ -1,13 +1,16 @@
 // src/components/Header.jsx
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Command, Search, Loader2 } from "lucide-react";
+import {
+  Command, Search, Loader2, Cog, VolumeX, Volume2, User, Home
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import IconButton from "./IconButton";
+import { useSound } from "../context/SoundContext";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 
-// Simple local index of common destinations/actions.
-// You can expand this list anytime.
+// Local quick actions / destinations used for type-ahead
 const LOCAL_INDEX = [
   { label: "Home", path: "/", type: "page", keywords: ["home", "start", "landing"] },
   { label: "Dashboard", path: "/dashboard", type: "page", keywords: ["dashboard", "overview"] },
@@ -20,15 +23,13 @@ const LOCAL_INDEX = [
   { label: "Contact", path: "/contact", type: "page", keywords: ["contact", "support", "help"] },
   { label: "Community", path: "/community", type: "page", keywords: ["community", "forum"] },
   { label: "FAQ", path: "/faq", type: "page", keywords: ["faq", "questions"] },
-  { label: "Privacy Policy", path: "/privacy", type: "page", keywords: ["privacy"] },
   { label: "Terms of Service", path: "/terms", type: "page", keywords: ["terms", "tos"] },
-
-  // “Actions” (you can handle these in onPick)
+  { label: "Privacy Policy", path: "/privacy", type: "page", keywords: ["privacy"] },
+  // Actions
   { label: "New Upload", action: "new-upload", type: "action", keywords: ["new", "upload", "start"] },
   { label: "Start Recording", action: "start-recording", type: "action", keywords: ["record", "mic", "start"] },
 ];
 
-// lightweight scorer: startsWith > includes > keyword match
 function score(item, q) {
   const s = (str) => str.toLowerCase();
   const query = s(q);
@@ -42,18 +43,21 @@ function score(item, q) {
 
 export default function Header() {
   const navigate = useNavigate();
+  const { isMuted, toggleMute } = useSound();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
   const [loadingRemote, setLoadingRemote] = useState(false);
-  const [remote, setRemote] = useState([]); // optional backend suggestions
+  const [remote, setRemote] = useState([]);
   const inputRef = useRef(null);
   const listRef = useRef(null);
 
-  // fetch remote suggestions (optional) with debounce
+  // simple auth check (swap to your real auth hook when ready)
+  const isAuthed = !!localStorage.getItem("auth_token");
+
+  // remote suggestions (optional)
   useEffect(() => {
-    let t;
-    const run = async () => {
+    const t = setTimeout(async () => {
       const query = q.trim();
       if (!query) {
         setRemote([]);
@@ -67,12 +71,13 @@ export default function Header() {
         });
         if (res.ok) {
           const data = await res.json();
-          // Expect [{ label, path }] but tolerate variations
-          const normalized = (Array.isArray(data) ? data : []).slice(0, 6).map((d) => ({
-            label: d.label || d.title || d.name || String(d),
-            path: d.path || d.url || d.href || null,
-            type: "remote",
-          }));
+          const normalized = (Array.isArray(data) ? data : [])
+            .slice(0, 6)
+            .map((d) => ({
+              label: d.label || d.title || d.name || String(d),
+              path: d.path || d.url || d.href || null,
+              type: "remote",
+            }));
           setRemote(normalized);
         } else {
           setRemote([]);
@@ -82,12 +87,10 @@ export default function Header() {
       } finally {
         setLoadingRemote(false);
       }
-    };
-    t = setTimeout(run, 180);
+    }, 180);
     return () => clearTimeout(t);
   }, [q]);
 
-  // compute local matches
   const localMatches = useMemo(() => {
     const query = q.trim();
     if (!query) return [];
@@ -99,57 +102,34 @@ export default function Header() {
       .map((x) => x.item);
   }, [q]);
 
-  // combined suggestions
   const suggestions = useMemo(() => {
     const seen = new Set();
     const merged = [];
     for (const it of localMatches) {
       const key = it.path || it.action || it.label;
-      if (!seen.has(key)) {
-        seen.add(key);
-        merged.push(it);
-      }
+      if (!seen.has(key)) { seen.add(key); merged.push(it); }
     }
     for (const it of remote) {
       const key = it.path || it.label;
-      if (!seen.has(key)) {
-        seen.add(key);
-        merged.push(it);
-      }
+      if (!seen.has(key)) { seen.add(key); merged.push(it); }
     }
     return merged;
   }, [localMatches, remote]);
 
   const openMenu = () => setOpen(true);
-  const closeMenu = () => {
-    setOpen(false);
-    setActiveIdx(0);
-  };
+  const closeMenu = () => { setOpen(false); setActiveIdx(0); };
 
   const submitSearch = useCallback(
     (override) => {
       const pick = override ?? suggestions[activeIdx];
-      // If user picked an “action”
       if (pick?.type === "action") {
-        if (pick.action === "new-upload") {
-          navigate("/upload");
-          closeMenu();
-          return;
-        }
+        if (pick.action === "new-upload") { navigate("/upload"); return closeMenu(); }
         if (pick.action === "start-recording") {
-          // Broadcast a simple event; your recorder can listen for it
           window.dispatchEvent(new CustomEvent("echo:record:start"));
-          closeMenu();
-          return;
+          return closeMenu();
         }
       }
-      // If user picked a page (with a path)
-      if (pick?.path) {
-        navigate(pick.path);
-        closeMenu();
-        return;
-      }
-      // Fallback: go to search route with query
+      if (pick?.path) { navigate(pick.path); return closeMenu(); }
       const query = q.trim();
       if (query) navigate(`/search?q=${encodeURIComponent(query)}`);
       closeMenu();
@@ -159,28 +139,16 @@ export default function Header() {
 
   const onKeyDown = (e) => {
     if (!open) return;
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveIdx((i) => Math.min(i + 1, Math.max(0, suggestions.length - 1)));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIdx((i) => Math.max(i - 1, 0));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      submitSearch();
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      closeMenu();
-    }
+    if (e.key === "ArrowDown") { e.preventDefault(); setActiveIdx((i) => Math.min(i + 1, Math.max(0, suggestions.length - 1))); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setActiveIdx((i) => Math.max(i - 1, 0)); }
+    else if (e.key === "Enter") { e.preventDefault(); submitSearch(); }
+    else if (e.key === "Escape") { e.preventDefault(); closeMenu(); }
   };
 
-  // close when clicking outside
   useEffect(() => {
     const handler = (e) => {
       if (!open) return;
-      if (!listRef.current?.contains(e.target) && e.target !== inputRef.current) {
-        closeMenu();
-      }
+      if (!listRef.current?.contains(e.target) && e.target !== inputRef.current) closeMenu();
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -189,11 +157,21 @@ export default function Header() {
   return (
     <header className="w-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800">
       <div className="max-w-screen-2xl mx-auto px-4 py-3 flex items-center gap-3">
+        {/* Home icon button (always visible) */}
+        <IconButton
+          label="Home"
+          tooltip="Home"
+          icon={<Home className="w-5 h-5" />}
+          onClick={() => navigate("/")}
+        />
+
+        {/* Brand (also clickable) */}
         <Link to="/" className="flex items-center gap-2">
           <Command className="w-5 h-5 text-teal-500" />
           <span className="font-semibold text-zinc-900 dark:text-white">EchoScript.AI</span>
         </Link>
 
+        {/* Search */}
         <div className="relative flex-1 max-w-xl ml-auto">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
@@ -201,21 +179,18 @@ export default function Header() {
               ref={inputRef}
               type="search"
               value={q}
-              onChange={(e) => {
-                setQ(e.target.value);
-                if (!open) setOpen(true);
-              }}
+              onChange={(e) => { setQ(e.target.value); if (!open) setOpen(true); }}
               onFocus={openMenu}
               onKeyDown={onKeyDown}
               placeholder="Search tools, pages, actions…"
-              className="w-full pl-9 pr-10 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-400 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full pl-9 pr-28 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-400 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
               role="combobox"
               aria-expanded={open}
               aria-controls="header-search-listbox"
               aria-autocomplete="list"
             />
             {loadingRemote && (
-              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-zinc-400" />
+              <Loader2 className="absolute right-24 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-zinc-400" />
             )}
           </div>
 
@@ -241,12 +216,11 @@ export default function Header() {
                       role="option"
                       aria-selected={isActive}
                       onMouseEnter={() => setActiveIdx(i)}
-                      onMouseDown={(e) => {
-                        e.preventDefault(); // keep focus
-                        submitSearch(sug);
-                      }}
+                      onMouseDown={(e) => { e.preventDefault(); submitSearch(sug); }}
                       className={`px-3 py-2 cursor-pointer text-sm flex items-center justify-between ${
-                        isActive ? "bg-teal-600 text-white" : "text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        isActive
+                          ? "bg-teal-600 text-white"
+                          : "text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                       }`}
                     >
                       <span className="truncate">
@@ -254,7 +228,9 @@ export default function Header() {
                         {sug.type === "action" && <span className="opacity-80"> · action</span>}
                         {sug.type === "remote" && <span className="opacity-80"> · from server</span>}
                       </span>
-                      {sug.path && <span className={`text-xs ${isActive ? "opacity-90" : "text-zinc-400"}`}>{sug.path}</span>}
+                      {sug.path && (
+                        <span className={`text-xs ${isActive ? "opacity-90" : "text-zinc-400"}`}>{sug.path}</span>
+                      )}
                     </li>
                   );
                 })}
@@ -262,7 +238,49 @@ export default function Header() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Controls: Mute / Settings / Auth */}
+        <div className="flex items-center gap-2">
+          <IconButton
+            label={isMuted ? "Unmute" : "Mute"}
+            tooltip={isMuted ? "Unmute" : "Mute"}
+            icon={isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+            onClick={toggleMute}
+          />
+          <IconButton
+            label="Settings"
+            tooltip="Settings"
+            icon={<Cog className="w-5 h-5" />}
+            onClick={() => navigate("/settings")}
+          />
+          {isAuthed ? (
+            <button
+              onClick={() => navigate("/account")}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-600 text-white font-semibold hover:bg-teal-500 transition"
+            >
+              <User className="w-4 h-4" />
+              Account
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => (window.location.href = "/signin")}
+                className="px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition"
+              >
+                Sign in
+              </button>
+              <button
+                onClick={() => (window.location.href = "/signup")}
+                className="px-3 py-2 rounded-lg bg-teal-600 text-white font-semibold hover:bg-teal-500 transition"
+              >
+                Sign up
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );
 }
+
+
