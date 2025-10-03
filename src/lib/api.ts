@@ -1,127 +1,82 @@
 // src/lib/api.ts
-// Final API helper wired for Netlify proxy: use "/api" in prod, VITE_API_URL for local
+const API_BASE =
+  (import.meta as any).env?.VITE_API_URL ??
+  (typeof window !== "undefined" ? "https://api.echoscript.ai" : "https://api.echoscript.ai");
 
-type Json = Record<string, any>;
+type JSONValue = Record<string, any>;
 
-const BASE_URL =
-  (typeof import.meta !== "undefined" &&
-    (import.meta as any).env &&
-    (import.meta as any).env.VITE_API_URL) ||
-  "/api";
+async function get<T = any>(path: string, init: RequestInit = {}): Promise<T> {
+  const r = await fetch(`${API_BASE}${path}`, {
+    mode: "cors",
+    ...init,
+    method: "GET",
+  });
+  if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+  return r.json();
+}
 
-async function apiFetch<T = any>(
-  path: string,
-  opts: RequestInit = {},
-  expectJson = true
-): Promise<T> {
-  const url = path.startsWith("http") ? path : `${BASE_URL}${path}`;
-  const res = await fetch(url, {
-    ...opts,
+async function post<T = any>(path: string, body?: JSONValue, init: RequestInit = {}): Promise<T> {
+  const r = await fetch(`${API_BASE}${path}`, {
+    mode: "cors",
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(opts.headers || {}),
+      ...(init.headers || {}),
     },
+    body: body ? JSON.stringify(body) : undefined,
+    ...init,
   });
-
-  const text = await res.text();
-  const parsed = text ? safeJson(text) : null;
-
-  if (!res.ok) {
-    const detail =
-      (parsed && (parsed.detail || parsed.message)) ||
-      `${res.status} ${res.statusText}`;
-    throw new Error(detail);
+  // many endpoints return JSON error bodies
+  const data = await r
+    .clone()
+    .json()
+    .catch(() => ({}));
+  if (!r.ok) {
+    throw new Error(data?.detail || `${r.status} ${r.statusText}`);
   }
-  return (expectJson ? (parsed as T) : (text as unknown as T))!;
-}
-
-function safeJson(s: string) {
-  try {
-    return JSON.parse(s);
-  } catch {
-    return { raw: s };
-  }
-}
-
-// --- Auth ---
-export async function signup(email: string, password: string) {
-  return apiFetch<Json>("/auth/signup", {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  });
-}
-
-export async function login(email: string, password: string) {
-  const data = await apiFetch<Json>("/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  });
-  if (data?.access_token) localStorage.setItem("auth_token", data.access_token);
   return data;
 }
 
-// --- Stripe ---
-export async function stripeDebug() {
-  // Your backend expects POST here
-  return apiFetch<Json>("/stripe/_debug-env", { method: "POST" });
-}
-
-export async function createCheckoutSession(
-  plan: "pro" | "premium" | "edu",
-  useAuth = false
-) {
-  const headers: Record<string, string> = {};
-  if (useAuth) {
-    const token = localStorage.getItem("auth_token") || "";
-    if (token) headers.Authorization = `Bearer ${token}`;
-  }
-  const data = await apiFetch<Json>(
-    "/stripe/create-checkout-session",
-    {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ plan }),
-    },
-    true
-  );
-
-  if ((data as any)?.url) location.href = (data as any).url as string;
-  return data;
-}
-
-// --- Health ---
-export async function healthz() {
-  return apiFetch<Json>("/healthz");
-}
-
-// --- Transcription ---
-export async function transcribe(
-  file: File,
-  opts?: { vad?: boolean; diarize?: boolean; lang?: string }
-) {
-  const fd = new FormData();
-  fd.append("file", file);
-  if (opts?.vad != null) fd.append("vad", String(opts.vad));
-  if (opts?.diarize != null) fd.append("diarize", String(opts.diarize));
-  if (opts?.lang) fd.append("lang", opts.lang);
-
-  const url = `${BASE_URL}/v1/transcribe`;
-  const res = await fetch(url, { method: "POST", body: fd });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.detail || "Transcription failed");
-  return data;
-}
-
-// Keep named exports (above) AND provide a default export bundle,
-// so existing `import api from "../lib/api"` works.
 const api = {
-  signup,
-  login,
-  stripeDebug,
-  createCheckoutSession,
-  healthz,
-  transcribe,
+  baseUrl: API_BASE,
+
+  // health
+  healthz: () => get("/healthz"),
+
+  // auth (note: your backend uses /api/signup & /api/login)
+  signup: (email: string, password: string) =>
+    post("/api/signup", { email, password }),
+  login: (email: string, password: string) =>
+    post("/api/login", { email, password }),
+
+  // stripe
+  stripeDebugEnv: () => get("/api/stripe/_debug-env"),
+  createCheckoutSession: (plan: "pro" | "premium" | "edu", token?: string) =>
+    post(
+      "/api/stripe/create-checkout-session",
+      { plan },
+      {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      }
+    ),
+
+  // transcription
+  transcribe: async (file: File, opts?: { diarize?: boolean; vad?: boolean; language?: string }) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    if (opts?.diarize != null) fd.append("diarize", String(!!opts.diarize));
+    if (opts?.vad != null) fd.append("vad", String(!!opts.vad));
+    if (opts?.language) fd.append("language", opts.language);
+
+    const r = await fetch(`${API_BASE}/api/v1/transcribe`, {
+      method: "POST",
+      body: fd,
+    });
+    if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+    return r.json();
+  },
 };
 
 export default api;
+export type ApiClient = typeof api;
 

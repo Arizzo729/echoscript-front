@@ -1,8 +1,13 @@
-﻿/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+﻿// tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
-    // Define screens explicitly so md/lg/xl exist
+    extend: {},
+    // ensure default screens (sm, md, lg, xl, 2xl) exist
     screens: {
       sm: "640px",
       md: "768px",
@@ -10,7 +15,6 @@ module.exports = {
       xl: "1280px",
       "2xl": "1536px",
     },
-    extend: {}, // put custom tokens here without clobbering defaults
   },
   plugins: [],
 };
