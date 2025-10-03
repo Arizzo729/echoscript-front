@@ -1,14 +1,31 @@
-# netlify.toml (complete)
 [build]
   command = "npm ci --no-audit --no-fund && npm run build"
   publish = "dist"
 
+# Keep the site fast and safe
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-store, must-revalidate"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Content-Type-Options = "nosniff"
+
+# Proxy every /api/* request to the backend, preserving the method (GET/POST/etc.)
+# Ensure the path you hit from the browser *starts* with /api/...
 [[redirects]]
   from = "/api/*"
-  to = "https://api.echoscript.ai/api/:splat"  # <-- keep /api here
+  to = "https://api.echoscript.ai/:splat"
   status = 200
   force = true
-  headers = { Host = "api.echoscript.ai" }
 
 # SPA fallback
 [[redirects]]
@@ -16,19 +33,3 @@
   to = "/index.html"
   status = 200
 
-# Helpful headers
-[[headers]]
-  for = "/index.html"
-  [headers.values]
-  Cache-Control = "no-store, must-revalidate"
-
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-  Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-  Referrer-Policy = "strict-origin-when-cross-origin"
-  X-Content-Type-Options = "nosniff"
