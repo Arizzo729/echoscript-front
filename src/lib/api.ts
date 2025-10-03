@@ -1,83 +1,127 @@
 // src/lib/api.ts
-// Works on Netlify and locally. Supports both VITE_API_BASE and VITE_API_URL.
-const API_BASE =
-  (import.meta as any).env?.VITE_API_BASE ||
-  (import.meta as any).env?.VITE_API_URL ||
-  "https://api.echoscript.ai";
+// Final API helper wired for Netlify -> Railway proxy
+// - Uses relative '/api' in production so Netlify forwards to https://api.echoscript.ai/:splat
+// - Still allows VITE_API_URL for local/dev override
 
-/** Attach Authorization header if a token is present */
-function authHeader() {
-  const t = typeof localStorage !== "undefined" ? localStorage.getItem("auth_token") : null;
-  return t ? { Authorization: `Bearer ${t}` } : {};
-}
+type Json = Record<string, any>;
 
-/** Low-level fetch wrapper (does not JSON-parse automatically) */
-export async function http(path: string, init: RequestInit = {}) {
-  const headers = {
-    ...(init.headers || {}),
-    ...authHeader(),
-  };
-  const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`${res.status} ${res.statusText} ${text}`);
-  }
-  return res;
-}
+const BASE_URL =
+  (typeof import.meta !== "undefined" &&
+    (import.meta as any).env &&
+    (import.meta as any).env.VITE_API_URL) ||
+  "/api"; // Netlify proxy in production
 
-/** Helpers that do JSON in/out */
-export async function getJSON<T = any>(path: string, init: RequestInit = {}) {
-  const r = await http(path, init);
-  return (await r.json()) as T;
-}
-export async function postJSON<T = any>(path: string, body: any, init: RequestInit = {}) {
-  const r = await http(path, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...(init.headers || {}) },
-    body: JSON.stringify(body ?? {}),
+// ---- low-level fetch wrapper -------------------------------------------------
+async function apiFetch<T = any>(
+  path: string,
+  opts: RequestInit = {},
+  expectJson = true
+): Promise<T> {
+  const url = path.startsWith("http") ? path : `${BASE_URL}${path}`;
+  const res = await fetch(url, {
+    // CORS is handled by the backend; credentials are not needed unless you add cookies
+    ...opts,
+    headers: {
+      "Content-Type": "application/json",
+      ...(opts.headers || {}),
+    },
   });
-  return (await r.json()) as T;
+
+  // attempt to parse body (even on error) so callers get details
+  const text = await res.text();
+  const body = text ? safeJson(text) : null;
+
+  if (!res.ok) {
+    const detail =
+      (body && (body.detail || body.message)) || `${res.status} ${res.statusText}`;
+    throw new Error(detail);
+  }
+
+  return (expectJson ? (body as T) : (text as unknown as T))!;
 }
 
-/** Auth */
-export async function signup(email: string, password: string, name?: string) {
-  return postJSON("/api/auth/signup", { email, password, name });
-}
-export async function login(email: string, password: string) {
-  const data = await postJSON<{ access_token?: string }>("/api/auth/login", { email, password });
-  if (data?.access_token && typeof localStorage !== "undefined") {
-    localStorage.setItem("auth_token", data.access_token);
+function safeJson(s: string) {
+  try {
+    return JSON.parse(s);
+  } catch {
+    return { raw: s };
   }
+}
+
+// ---- Auth -------------------------------------------------------------------
+export async function signup(email: string, password: string) {
+  return apiFetch<Json>("/auth/signup", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export async function login(email: string, password: string) {
+  const data = await apiFetch<Json>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+  // store token for convenience
+  if (data?.access_token) localStorage.setItem("auth_token", data.access_token);
   return data;
 }
 
-/** Stripe */
-export async function createCheckout(plan: "pro" | "premium" | "edu" = "pro") {
-  return postJSON<{ url: string }>("/api/stripe/create-checkout-session", { plan });
+// ---- Stripe -----------------------------------------------------------------
+/** Optional: sanity endpoint that returns which prices are configured */
+export async function stripeDebug() {
+  // Backend expects POST for this helper in your current app
+  return apiFetch<Json>("/stripe/_debug-env", { method: "POST" });
 }
 
-/** Transcription (expects backend to accept multipart form field "file") */
-export async function transcribe(file: File, extra?: Record<string, any>) {
+/**
+ * Create a Checkout Session.
+ * @param plan one of: 'pro' | 'premium' | 'edu'
+ * @param useAuth when true, sends Authorization header with stored token
+ */
+export async function createCheckoutSession(
+  plan: "pro" | "premium" | "edu",
+  useAuth = false
+) {
+  const headers: Record<string, string> = {};
+  if (useAuth) {
+    const token = localStorage.getItem("auth_token") || "";
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+
+  const data = await apiFetch<Json>(
+    "/stripe/create-checkout-session",
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ plan }),
+    },
+    true
+  );
+
+  // If the backend returns {url: "..."} – send user to Stripe
+  if (data?.url) {
+    location.href = data.url as string;
+  }
+
+  return data;
+}
+
+// ---- Health (useful for quick checks) ---------------------------------------
+export async function healthz() {
+  return apiFetch<Json>("/healthz", { method: "GET" });
+}
+
+// ---- Transcription (example file upload) ------------------------------------
+export async function transcribe(file: File, opts?: { vad?: boolean; diarize?: boolean; lang?: string }) {
   const fd = new FormData();
   fd.append("file", file);
-  if (extra) {
-    Object.entries(extra).forEach(([k, v]) => {
-      if (v !== undefined && v !== null) fd.append(k, String(v));
-    });
-  }
-  const r = await http("/api/transcribe", { method: "POST", body: fd });
-  return r.json();
+  if (opts?.vad != null) fd.append("vad", String(opts.vad));
+  if (opts?.diarize != null) fd.append("diarize", String(opts.diarize));
+  if (opts?.lang) fd.append("lang", opts.lang);
+
+  const url = `${BASE_URL}/v1/transcribe`;
+  const res = await fetch(url, { method: "POST", body: fd });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.detail || "Transcription failed");
+  return data;
 }
-
-/** Default export – what TranscribeUploader imports */
-const api = {
-  http,
-  getJSON,
-  postJSON,
-  signup,
-  login,
-  createCheckout,
-  transcribe,
-};
-
-export default api;
