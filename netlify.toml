@@ -22,16 +22,18 @@
 # Proxy ALL API calls to your backend (Railway) without changing paths.
 # Example: /api/auth/login → https://api.echoscript.ai/api/auth/login
 [[redirects]]
-  from = "/api/*"
-  to = "https://api.echoscript.ai/:splat"
-  status = 200
-  force = true
+from = "/api/*"
+to = "https://api.echoscript.ai/api/:splat"
+status = 200
+force = true
+# optional, but helps some backends:
+headers = { X-Forwarded-Host = "echoscript.ai" }
 
-# Single Page App fallback (keeps client-side routing working)
+# SPA fallback
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+from = "/*"
+to = "/index.html"
+status = 200
 
 # ─────────────────────────────────────────────────────────
 # Headers (sensible caching)
