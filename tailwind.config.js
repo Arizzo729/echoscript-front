@@ -1,11 +1,8 @@
 ﻿/** @type {import('tailwindcss').Config} */
 module.exports = {
-  // make sure Tailwind scans your files
-  content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
-
-  // explicitly define the default breakpoints so `md:*` etc. work
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    // Define screens explicitly so md/lg/xl exist
     screens: {
       sm: "640px",
       md: "768px",
@@ -13,7 +10,7 @@ module.exports = {
       xl: "1280px",
       "2xl": "1536px",
     },
+    extend: {}, // put custom tokens here without clobbering defaults
   },
-
   plugins: [],
 };
