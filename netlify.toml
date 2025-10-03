@@ -2,21 +2,21 @@
   command = "npm ci --no-audit --no-fund && npm run build"
   publish = "dist"
 
+# (keep secrets scan disabled while we iterate)
 [build.environment]
-  # TEMP: disable secret scan to unblock deploy
   SECRETS_SCAN_ENABLED = "false"
-  # If you prefer to keep scanning on, delete the line above and uncomment the two below:
-  # SECRETS_SCAN_OMIT_KEYS = "VITE_API_URL,VITE_PAYPAL_CLIENT_ID,STRIPE_MODE,PAYPAL_ENV,WHISPER_MODEL_SIZE,API_HOST,API_PORT,ENV,ACCESS_TOKEN_EXPIRE_MINUTES"
-  # SECRETS_SCAN_OMIT_PATHS = "public/**,dist/**"
+  SECRETS_SCAN_OMIT_KEYS = "VITE_API_URL,VITE_PAYPAL_CLIENT_ID,STRIPE_MODE,PAYPAL_ENV,WHISPER_MODEL_SIZE,API_HOST,API_PORT,ENV,ACCESS_TOKEN_EXPIRE_MINUTES"
+  SECRETS_SCAN_OMIT_PATHS = "public/**,dist/**"
 
+# ✅ Correctly forward to /api on the backend
 [[redirects]]
-from = "/api/*"
-to   = "https://api.echoscript.ai/api/:splat"
-status = 200
-force  = true
+  from = "/api/*"
+  to = "https://api.echoscript.ai/api/:splat"
+  status = 200
+  force = true
 
-
+# SPA fallback
 [[redirects]]
   from = "/*"
-  to   = "/index.html"
+  to = "/index.html"
   status = 200
