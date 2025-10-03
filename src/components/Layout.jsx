@@ -9,7 +9,7 @@ import React, {
   useTransition
 } from 'react';
 import { Outlet } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
 import ErrorBoundary from './ErrorBoundary';
@@ -17,6 +17,8 @@ import { ToastProvider } from './toast/ToastProvider';
 import ToastContainer from './ToastContainer';
 import useIsMobile from '../hooks/useIsMobile';
 import MobileLayout from './MobileLayout';
+import AudioOverlay from './AudioOverlay'; // <-- mount desktop overlay
+
 // Desktop-only components (lazy to keep bundle light)
 const Header = lazy(() => import('./Header'));
 const Sidebar = lazy(() => import('./Sidebar'));
@@ -24,7 +26,7 @@ const Sidebar = lazy(() => import('./Sidebar'));
 export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {} });
 
 export default function Layout() {
-  const isMobile = useIsMobile(); // now reliable
+  const isMobile = useIsMobile();
   const [theme, setTheme] = useState(() => {
     const stored = typeof window !== 'undefined' && localStorage.getItem('theme');
     if (stored) return stored;
@@ -38,12 +40,11 @@ export default function Layout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [isPending] = useTransition();
 
-  // Remove intro gate: render immediately
+  // render immediately
   useEffect(() => {
     document.body.style.overflow = '';
   }, []);
 
-  // NProgress for route transitions (optional—kept minimal)
   useEffect(() => {
     NProgress.configure({ showSpinner: false, easing: 'ease', speed: 400 });
     return () => NProgress.done();
@@ -72,7 +73,7 @@ export default function Layout() {
     );
   }
 
-  // Desktop layout
+  // Desktop layout (now includes AudioOverlay)
   return (
     <ToastProvider>
       <ThemeContext.Provider value={themeValue}>
@@ -117,6 +118,10 @@ export default function Layout() {
               </ErrorBoundary>
             </main>
           </div>
+
+          {/* floating, draggable, collapsible audio overlay */}
+          <AudioOverlay />
+
           <ToastContainer position="top-right" />
         </div>
       </ThemeContext.Provider>

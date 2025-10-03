@@ -1,25 +1,132 @@
 // src/pages/Dashboard.jsx
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Mic, FileText, Sparkles, Video, Clock, User, Settings2, ShieldCheck,
+  Mic,
+  FileText,
+  Sparkles,
+  Video,
+  Clock,
+  User,
+  Settings2,
+  ShieldCheck,
+  AlertTriangle,
 } from "lucide-react";
+
+/**
+ * API base (Netlify -> Environment: VITE_API_URL = https://api.echoscript.ai)
+ */
+const API = import.meta.env.VITE_API_URL?.replace(/\/+$/, "") || "";
+
+/**
+ * Plan limits – adjust easily here (minutes per billing period).
+ */
+const PLAN_LIMITS = {
+  guest: 10,
+  free: 30,
+  pro: 120,
+  premium: 300,
+};
+
+/**
+ * Safely fetch JSON. Returns { ok, data } or { ok:false, error }.
+ */
+async function getJSON(url, opts = {}) {
+  try {
+    const res = await fetch(url, {
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      ...opts,
+    });
+    const ct = res.headers.get("content-type") || "";
+    const data = ct.includes("application/json") ? await res.json() : null;
+    if (!res.ok) return { ok: false, error: data?.detail || res.statusText || "Request failed" };
+    return { ok: true, data };
+  } catch (e) {
+    return { ok: false, error: e?.message || "Network error" };
+  }
+}
+
+/**
+ * Derive a normalized user record with plan + limits from /api/auth/me
+ * If unauthenticated or the endpoint isn't present, return a guest profile.
+ */
+async function resolveViewer() {
+  if (!API) return { isGuest: true, name: "Guest", email: "guest", planKey: "guest", limit: PLAN_LIMITS.guest };
+  const r = await getJSON(`${API}/api/auth/me`);
+  if (!r.ok) return { isGuest: true, name: "Guest", email: "guest", planKey: "guest", limit: PLAN_LIMITS.guest };
+
+  // Map your backend's fields → local shape
+  const me = r.data || {};
+  // Expect something like me.plan or me.subscription.plan
+  const rawPlan = (me.plan || me.subscription?.plan || "free").toString().toLowerCase();
+  const planKey = ["guest", "free", "pro", "premium"].includes(rawPlan) ? rawPlan : "free";
+  return {
+    isGuest: false,
+    name: me.name || me.email?.split("@")[0] || "Member",
+    email: me.email || "",
+    planKey,
+    limit: PLAN_LIMITS[planKey],
+  };
+}
+
+/**
+ * Fetch usage summary. Expected backend response shape:
+ * { minutesUsed: number, sessions: number }
+ * Falls back to zeros if the endpoint is missing.
+ */
+async function resolveUsage() {
+  if (!API) return { minutesUsed: 0, sessions: 0 };
+  // Try your primary endpoint
+  let r = await getJSON(`${API}/api/usage/summary`);
+  if (r.ok && r.data) return { minutesUsed: Number(r.data.minutesUsed || 0), sessions: Number(r.data.sessions || 0) };
+
+  // Fallback attempt (if you named it differently)
+  r = await getJSON(`${API}/api/users/usage`);
+  if (r.ok && r.data) return { minutesUsed: Number(r.data.minutesUsed || 0), sessions: Number(r.data.sessions || 0) };
+
+  // Final fallback: zero usage so the UI still renders
+  return { minutesUsed: 0, sessions: 0 };
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [viewer, setViewer] = useState({
+    isGuest: true,
+    name: "Guest",
+    email: "",
+    planKey: "guest",
+    limit: PLAN_LIMITS.guest,
+  });
+  const [usage, setUsage] = useState({ minutesUsed: 0, sessions: 0 });
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
 
-  const user = {
-    name: "Echo Pro",
-    email: "pro@echoscript.ai",
-    plan: "Pro Plan",
-    minutesUsed: 19,
-    sessions: 7,
-    limit: 120,
-    isGuest: false,
-  };
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      setErr("");
+      const v = await resolveViewer();
+      const u = v.isGuest ? { minutesUsed: 0, sessions: 0 } : await resolveUsage();
+      if (!mounted) return;
+      setViewer(v);
+      setUsage(u);
+      setLoading(false);
+    })();
+    return () => { mounted = false; };
+  }, []);
 
-  const percentUsed = Math.min((user.minutesUsed / user.limit) * 100, 100);
+  const planLabel = useMemo(() => {
+    const map = { guest: "Guest", free: "Free Plan", pro: "Pro Plan", premium: "Premium Plan" };
+    return map[viewer.planKey] || "Free Plan";
+  }, [viewer.planKey]);
+
+  const percentUsed = useMemo(() => {
+    const pct = (usage.minutesUsed / Math.max(1, viewer.limit)) * 100;
+    return Math.min(100, Math.max(0, pct));
+  }, [usage.minutesUsed, viewer.limit]);
 
   const sections = [
     { icon: <Mic />, label: "Upload Audio", desc: "Transcribe audio files instantly.", route: "/upload", color: "from-teal-500 to-teal-700" },
@@ -37,6 +144,7 @@ export default function Dashboard() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
+      {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -45,18 +153,20 @@ export default function Dashboard() {
       >
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight drop-shadow">
-            👋 Welcome back, <span className="text-teal-400">{user.name}</span>
+            👋 {viewer.isGuest ? "Welcome!" : "Welcome back,"}{" "}
+            {!viewer.isGuest && <span className="text-teal-400">{viewer.name}</span>}
           </h1>
           <p className="text-base text-zinc-400 mt-2">
-            Here’s your command center for EchoScript.AI. Ready to transcribe, summarize, and manage content with AI!
+            Your EchoScript dashboard. Upload, transcribe, and manage content with AI.
           </p>
         </div>
+
         <button
           onClick={() => navigate("/account")}
           className="inline-flex items-center gap-2 py-2 px-4 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-500 text-white font-semibold shadow hover:from-teal-500 hover:to-cyan-400 focus-visible:ring-2 focus-visible:ring-teal-400 transition"
         >
           <User className="w-5 h-5" />
-          {user.email}
+          {viewer.isGuest ? "Sign In" : viewer.email || "Account"}
         </button>
       </motion.header>
 
@@ -79,7 +189,7 @@ export default function Dashboard() {
         ))}
       </motion.div>
 
-      {/* Usage, Profile, & Plan */}
+      {/* Usage / Profile / Plan */}
       <div className="grid md:grid-cols-3 gap-6 mb-10">
         {/* Usage */}
         <motion.div
@@ -93,29 +203,52 @@ export default function Dashboard() {
               <Clock className="w-5 h-5 text-yellow-400" />
               Usage Summary
             </h2>
-            <ul className="space-y-2 text-sm text-zinc-300">
-              <li><strong className="text-white">Plan:</strong> {user.plan}</li>
-              <li><strong className="text-white">Minutes Used:</strong> {user.minutesUsed} / {user.limit}</li>
-              <li><strong className="text-white">Sessions:</strong> {user.sessions}</li>
-            </ul>
-            <div className="mt-5 h-3 bg-zinc-800 rounded-full overflow-hidden shadow-inner">
-              <motion.div
-                className="h-full bg-gradient-to-r from-teal-400 to-blue-500 rounded-full"
-                style={{ width: `${percentUsed}%` }}
-                initial={{ width: 0 }}
-                animate={{ width: `${percentUsed}%` }}
-                transition={{ duration: 0.7 }}
-              />
-            </div>
-            <p className="text-right text-xs text-zinc-500 mt-2 italic">
-              {percentUsed.toFixed(1)}% used
-            </p>
+
+            {loading ? (
+              <p className="text-sm text-zinc-400">Loading your usage…</p>
+            ) : (
+              <>
+                {err && (
+                  <p className="text-sm text-amber-400 flex items-center gap-2 mb-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    {err}
+                  </p>
+                )}
+                <ul className="space-y-2 text-sm text-zinc-300">
+                  <li>
+                    <strong className="text-white">Plan:</strong>{" "}
+                    {planLabel}
+                  </li>
+                  <li>
+                    <strong className="text-white">Minutes Used:</strong>{" "}
+                    {usage.minutesUsed} / {viewer.limit}
+                  </li>
+                  <li>
+                    <strong className="text-white">Sessions:</strong>{" "}
+                    {usage.sessions}
+                  </li>
+                </ul>
+                <div className="mt-5 h-3 bg-zinc-800 rounded-full overflow-hidden shadow-inner">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-teal-400 to-blue-500 rounded-full"
+                    style={{ width: `${percentUsed}%` }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${percentUsed}%` }}
+                    transition={{ duration: 0.7 }}
+                  />
+                </div>
+                <p className="text-right text-xs text-zinc-500 mt-2 italic">
+                  {percentUsed.toFixed(1)}% used
+                </p>
+              </>
+            )}
           </div>
+
           <button
             onClick={() => navigate("/purchase/minutes")}
             className="mt-6 w-full py-2 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 text-white font-semibold shadow hover:from-amber-500 hover:to-orange-400 focus-visible:ring-2 focus-visible:ring-amber-400 transition"
           >
-            Buy More Minutes
+            {viewer.isGuest ? "Create Account" : "Buy More Minutes"}
           </button>
         </motion.div>
 
@@ -132,9 +265,9 @@ export default function Dashboard() {
             </div>
             <div>
               <p className="text-lg font-semibold text-white">
-                {user.name} {user.isGuest && `(Guest User)`}
+                {viewer.isGuest ? "Guest User" : viewer.name}
               </p>
-              <p className="text-sm text-zinc-400">{user.email}</p>
+              <p className="text-sm text-zinc-400">{viewer.isGuest ? "—" : viewer.email}</p>
             </div>
           </div>
           <button
@@ -154,7 +287,7 @@ export default function Dashboard() {
         >
           <div className="flex items-center gap-3 mb-3">
             <ShieldCheck className="w-7 h-7 text-teal-300" />
-            <span className="text-xl font-bold text-teal-200">{user.plan}</span>
+            <span className="text-xl font-bold text-teal-200">{planLabel}</span>
           </div>
           <p className="text-zinc-200 mb-2">
             Unlock advanced features, faster transcription, and premium support.
@@ -163,16 +296,16 @@ export default function Dashboard() {
             onClick={() => navigate("/purchase")}
             className="mt-2 w-full py-2 rounded-lg bg-gradient-to-r from-teal-500 to-blue-600 text-white font-semibold shadow hover:from-teal-400 hover:to-blue-400 focus-visible:ring-2 focus-visible:ring-teal-400 transition"
           >
-            Upgrade Plan
+            {viewer.planKey === "premium" ? "Manage Plan" : "Upgrade Plan"}
           </button>
         </motion.div>
       </div>
 
-      {/* Footer with Privacy Policy + Terms links */}
+      {/* Footer */}
       <div className="mt-12 pt-6 border-t border-zinc-800 text-sm text-zinc-400 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
         <span>© {new Date().getFullYear()} EchoScript.AI</span>
         <div className="flex items-center gap-4">
-          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-teal-300 hover:text-teal-200 underline underline-offset-4">
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-teal-300 hover:text-teal-2 00 underline underline-offset-4">
             Privacy Policy
           </a>
           <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-teal-300 hover:text-teal-200 underline underline-offset-4">
@@ -201,7 +334,9 @@ function DashboardActionCard({ icon, label, desc, color, onClick }) {
         <span className="text-lg font-bold">{label}</span>
       </div>
       <p className="text-zinc-200 text-[15px] mb-2 flex-1">{desc}</p>
-      <span className="text-xs text-white/80 mt-auto group-hover:translate-x-1 transition-transform">Go &rarr;</span>
+      <span className="text-xs text-white/80 mt-auto group-hover:translate-x-1 transition-transform">
+        Go &rarr;
+      </span>
     </motion.button>
   );
 }

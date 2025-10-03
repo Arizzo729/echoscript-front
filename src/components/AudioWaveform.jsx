@@ -1,66 +1,94 @@
+// src/components/AudioWaveform.jsx
 import React, { useEffect, useRef } from "react";
 
 export default function AudioWaveform({ audioStream }) {
   const canvasRef = useRef(null);
-  const animationRef = useRef(null);
-  const audioContextRef = useRef(null);
+  const rafRef = useRef(null);
+  const audioCtxRef = useRef(null);
   const analyserRef = useRef(null);
-  const dataArrayRef = useRef(null);
+  const sourceRef = useRef(null);
+  const dataRef = useRef(null);
+  const roRef = useRef(null);
+
+  // Size the canvas crisply for the current DPR
+  const sizeCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const cssWidth = canvas.clientWidth || 600;
+    const cssHeight = 100;
+    canvas.width = Math.floor(cssWidth * dpr);
+    canvas.height = Math.floor(cssHeight * dpr);
+    canvas.style.width = `${cssWidth}px`;
+    canvas.style.height = `${cssHeight}px`;
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // scale drawing space
+  };
 
   useEffect(() => {
     if (!audioStream) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    const dpr = window.devicePixelRatio || 1;
-    const width = canvas.offsetWidth * dpr;
-    const height = 100 * dpr;
 
-    canvas.width = width;
-    canvas.height = height;
-    ctx.scale(dpr, dpr);
+    sizeCanvas();
+    roRef.current = new ResizeObserver(sizeCanvas);
+    roRef.current.observe(canvas);
 
-    audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioContextRef.current.createMediaStreamSource(audioStream);
-    analyserRef.current = audioContextRef.current.createAnalyser();
+    audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    analyserRef.current = audioCtxRef.current.createAnalyser();
     analyserRef.current.fftSize = 2048;
 
-    const bufferLength = analyserRef.current.fftSize;
-    dataArrayRef.current = new Uint8Array(bufferLength);
+    // Connect stream -> analyser
+    sourceRef.current = audioCtxRef.current.createMediaStreamSource(audioStream);
+    sourceRef.current.connect(analyserRef.current);
 
-    source.connect(analyserRef.current);
+    const bufferLength = analyserRef.current.fftSize;
+    dataRef.current = new Uint8Array(bufferLength);
 
     const draw = () => {
-      analyserRef.current.getByteTimeDomainData(dataArrayRef.current);
+      analyserRef.current.getByteTimeDomainData(dataRef.current);
 
+      // clear
       ctx.fillStyle = "#0f172a"; // zinc-900
-      ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // draw line in CSS pixels (we scaled CTX)
+      const cssW = canvas.width / (window.devicePixelRatio || 1);
+      const cssH = canvas.height / (window.devicePixelRatio || 1);
 
       ctx.lineWidth = 2;
       ctx.strokeStyle = "#14b8a6"; // teal-500
       ctx.beginPath();
 
-      const sliceWidth = (canvas.width / dpr) / bufferLength;
+      const sliceWidth = cssW / bufferLength;
       let x = 0;
 
       for (let i = 0; i < bufferLength; i++) {
-        const v = dataArrayRef.current[i] / 128.0;
-        const y = (v * height) / (2 * dpr);
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        const v = dataRef.current[i] / 128.0;
+        const y = (v * cssH) / 2;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
         x += sliceWidth;
       }
 
-      ctx.lineTo(canvas.width / dpr, height / (2 * dpr));
+      ctx.lineTo(cssW, cssH / 2);
       ctx.stroke();
 
-      animationRef.current = requestAnimationFrame(draw);
+      rafRef.current = requestAnimationFrame(draw);
     };
 
-    draw();
+    rafRef.current = requestAnimationFrame(draw);
 
     return () => {
-      cancelAnimationFrame(animationRef.current);
-      if (audioContextRef.current) audioContextRef.current.close();
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      try { sourceRef.current?.disconnect(); } catch {}
+      try { analyserRef.current?.disconnect(); } catch {}
+      try { audioCtxRef.current?.close(); } catch {}
+      roRef.current?.disconnect();
+      sourceRef.current = null;
+      analyserRef.current = null;
+      audioCtxRef.current = null;
     };
   }, [audioStream]);
 
@@ -73,4 +101,5 @@ export default function AudioWaveform({ audioStream }) {
     </div>
   );
 }
+
 

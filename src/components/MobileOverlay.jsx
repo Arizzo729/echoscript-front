@@ -1,112 +1,136 @@
-// src/components/MobileLayout.jsx
-import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Music } from "lucide-react";
+// src/components/MobileOverlay.jsx
+import React, { useRef, useEffect, useState } from "react";
+import { X, Play, Pause, ChevronLeft, ChevronRight } from "lucide-react";
 
-import MobileHeader from "./MobileHeader";
-import MobileBottomNav from "./MobileBottomNav";
-import MobileOverlay from "./MobileOverlay";
+export default function MobileOverlay({ onClose }) {
+  const overlayRef = useRef(null);
+  const [dragging, setDragging] = useState(false);
+  const dragOffset = useRef({ x: 0, y: 0 });
+  const [pos, setPos] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("audio-overlay-pos")) || { x: 16, y: window.innerHeight - 180 };
+    } catch {
+      return { x: 16, y: window.innerHeight - 180 };
+    }
+  });
+  const [playing, setPlaying] = useState(false);
+  const [label, setLabel] = useState("Ambient");
 
-/**
- * Minimal inline modal to avoid external dependencies.
- * If you already have an AudioModal component, you can remove this and use yours.
- * Props: open:boolean, onClose:fn
- */
-function AudioModal({ open, onClose, children }) {
-  if (!open) return null;
+  // sync DOM position when state changes
+  useEffect(() => {
+    const node = overlayRef.current;
+    if (!node) return;
+    node.style.left = `${pos.x}px`;
+    node.style.top = `${pos.y}px`;
+  }, [pos]);
+
+  // touch drag handlers
+  useEffect(() => {
+    const node = overlayRef.current;
+    if (!node) return;
+
+    function onTouchStart(e) {
+      setDragging(true);
+      const touch = e.touches[0];
+      const rect = node.getBoundingClientRect();
+      dragOffset.current = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+      node.style.transition = "none";
+    }
+
+    function onTouchMove(e) {
+      if (!dragging) return;
+      const touch = e.touches[0];
+      let x = touch.clientX - dragOffset.current.x;
+      let y = touch.clientY - dragOffset.current.y;
+      x = Math.max(0, Math.min(window.innerWidth - node.offsetWidth, x));
+      y = Math.max(0, Math.min(window.innerHeight - node.offsetHeight - 80, y));
+      node.style.left = `${x}px`;
+      node.style.top = `${y}px`;
+    }
+
+    function onTouchEnd() {
+      setDragging(false);
+      node.style.transition = "left 0.13s, top 0.13s";
+      const rect = node.getBoundingClientRect();
+      const next = { x: Math.round(rect.left), y: Math.round(rect.top) };
+      setPos(next);
+      localStorage.setItem("audio-overlay-pos", JSON.stringify(next));
+    }
+
+    node.addEventListener("touchstart", onTouchStart, { passive: false });
+    node.addEventListener("touchmove", onTouchMove, { passive: false });
+    node.addEventListener("touchend", onTouchEnd, { passive: false });
+    return () => {
+      node.removeEventListener("touchstart", onTouchStart);
+      node.removeEventListener("touchmove", onTouchMove);
+      node.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [dragging]);
+
   return (
     <div
+      ref={overlayRef}
+      style={{
+        position: "fixed",
+        left: `${pos.x}px`,
+        top: `${pos.y}px`,
+        zIndex: 9999,
+        width: 260,
+        height: 60,
+        background: "rgba(24,24,30,0.95)",
+        borderRadius: 16,
+        boxShadow: "0 4px 24px 0 rgba(0,0,0,0.13)",
+        border: "1.5px solid #14b8a6a6",
+        backdropFilter: "blur(7px)",
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "0 10px 0 8px",
+        touchAction: "none",
+        userSelect: "none",
+      }}
+      aria-label="Ambient audio overlay"
       role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-[60] flex items-center justify-center"
+      tabIndex={-1}
     >
-      <div
-        className="absolute inset-0 bg-black/60"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <motion.div
-        initial={{ opacity: 0, y: 30, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 20, scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 260, damping: 22 }}
-        className="relative z-[61] w-[95vw] max-w-xl rounded-2xl border border-zinc-700 bg-zinc-900 p-4 shadow-2xl"
-      >
-        {children}
-      </motion.div>
-    </div>
-  );
-}
-
-const BOTTOM_NAV_HEIGHT = 72;
-
-function MobileLayout({ children }) {
-  const [audioOpen, setAudioOpen] = useState(false);
-  const [showHeaderShadow, setShowHeaderShadow] = useState(false);
-  const scrollRef = useRef(null);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => setShowHeaderShadow(el.scrollTop > 2);
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <div className="relative flex h-dvh w-full flex-col bg-zinc-950 text-white">
-      {/* Top: Header */}
-      <div
-        className={`sticky top-0 z-40 transition-shadow ${
-          showHeaderShadow ? "shadow-lg shadow-black/20" : ""
-        }`}
-      >
-        <MobileHeader
-          onOpenAudio={() => setAudioOpen(true)}
-          className="backdrop-blur bg-zinc-950/70 border-b border-zinc-800"
-        />
-      </div>
-
-      {/* Scrollable content area (keeps bottom nav visible) */}
-      <main
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto"
-        style={{ paddingBottom: BOTTOM_NAV_HEIGHT + 16 }}
-      >
-        {children}
-      </main>
-
-      {/* Floating Audio button (optional) */}
       <button
-        onClick={() => setAudioOpen(true)}
-        aria-label="Open audio overlay"
-        className="fixed right-4 bottom-[calc(72px+1rem)] z-50 inline-flex h-12 w-12 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900/90 backdrop-blur hover:bg-zinc-800 transition-colors"
+        type="button"
+        aria-label="Previous"
+        onClick={() => setLabel("Ambient ◀")}
+        className="w-8 h-8 rounded-full flex items-center justify-center hover:scale-110 transition"
       >
-        <Music className="h-5 w-5 text-teal-300" />
+        <ChevronLeft className="w-5 h-5 text-teal-400" />
       </button>
 
-      {/* Audio Overlay Modal (always last so nothing covers it) */}
-      <AnimatePresence>
-        <AudioModal open={audioOpen} onClose={() => setAudioOpen(false)}>
-          <MobileOverlay onClose={() => setAudioOpen(false)} />
-        </AudioModal>
-      </AnimatePresence>
+      <button
+        type="button"
+        aria-label={playing ? "Pause" : "Play"}
+        onClick={() => setPlaying((v) => !v)}
+        className="w-8 h-8 rounded-full flex items-center justify-center hover:scale-110 transition"
+      >
+        {playing ? <Pause className="w-5 h-5 text-teal-400" /> : <Play className="w-5 h-5 text-teal-400" />}
+      </button>
 
-      {/* Mobile Bottom Navigation */}
-      <AnimatePresence>
-        <motion.div
-          initial={{ y: 80 }}
-          animate={{ y: 0 }}
-          exit={{ y: 80 }}
-          transition={{ type: "spring", stiffness: 240, damping: 28 }}
-          className="fixed bottom-0 left-0 right-0 z-50 pointer-events-auto"
-          style={{ height: BOTTOM_NAV_HEIGHT, background: "transparent" }}
-        >
-          <MobileBottomNav />
-        </motion.div>
-      </AnimatePresence>
+      <button
+        type="button"
+        aria-label="Next"
+        onClick={() => setLabel("Ambient ▶")}
+        className="w-8 h-8 rounded-full flex items-center justify-center hover:scale-110 transition"
+      >
+        <ChevronRight className="w-5 h-5 text-teal-400" />
+      </button>
+
+      <span className="ml-1 mr-1 font-mono text-[0.83rem] text-teal-200 tracking-wider select-none">{label}</span>
+
+      <button
+        onClick={onClose}
+        className="ml-auto flex items-center justify-center p-0 w-8 h-8 rounded-full hover:scale-110 transition"
+        aria-label="Close"
+      >
+        <X className="w-4 h-4 text-teal-400" />
+      </button>
     </div>
   );
 }
 
-export default MobileLayout;
+

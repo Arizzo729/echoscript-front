@@ -1,6 +1,6 @@
 // src/App.jsx
-import React, { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import React, { useState, useEffect, Suspense } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/useTheme";
@@ -49,7 +49,7 @@ import Status from "./pages/Status";
 const Studio = () => <NotFound />;
 const LiveCaptions = () => <NotFound />;
 
-// Handles first-run splash + onboarding once per browser
+/** Handles first-run splash + onboarding once per browser */
 function OverlayManager() {
   const onboarded =
     typeof window !== "undefined" &&
@@ -64,6 +64,7 @@ function OverlayManager() {
   const { enableSound } = useSound();
   const isMobile = useIsMobile();
 
+  // Start intro after splash, only once
   useEffect(() => {
     if (splashDone && !onboarded) {
       const t = setTimeout(() => setShowIntro(true), 300);
@@ -79,6 +80,15 @@ function OverlayManager() {
       localStorage.setItem("onboardingComplete", "true");
     }
   };
+
+  // Mount overlays a tick after route content, avoids mobile layout flashing
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <>
@@ -99,6 +109,12 @@ function OverlayManager() {
   );
 }
 
+/** Resets ErrorBoundary on route change for a smoother UX */
+function BoundaryResetter({ children }) {
+  const { pathname } = useLocation();
+  return <div key={pathname}>{children}</div>;
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -108,41 +124,45 @@ export default function App() {
             <FontSizeProvider>
               <SoundProvider>
                 <ErrorBoundary>
-                  <Routes>
-                    <Route element={<Layout />}>
-                      <Route path="/signin" element={<SignIn />} />
-                      <Route path="/signup" element={<SignUp />} />
-                      <Route path="/verify" element={<VerifyEmail />} />
-                      <Route path="/reset" element={<ResetPassword />} />
-                      <Route path="/unsubscribe" element={<Unsubscribe />} />
-                      <Route path="/unsubscribed" element={<Unsubscribed />} />
-                      <Route path="/terms" element={<TermsOfService />} />
-                      <Route path="/privacy" element={<PrivacyPolicy />} />
-                      <Route path="/status" element={<Status />} />
-                      <Route path="/" element={<Home />} />
-                      <Route path="/purchase" element={<Purchase />} />
-                      <Route path="/purchase/minutes" element={<BuyExtraMinutes />} />
-                      <Route path="/apify" element={<ApifyTest />} />
-                      <Route path="/contact" element={<Contact />} />
-                      <Route path="/video" element={<VideoUpload />} />
-                      <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/upload" element={<UploadPage />} />
-                      <Route path="/assistant" element={<AIAssistant />} />
-                      <Route path="/account" element={<Account />} />
-                      <Route path="/transcripts" element={<TranscriptsPage />} />
-                      <Route path="/summary" element={<SummaryPage />} />
-                      <Route path="/history" element={<HistoryPage />} />
-                      <Route path="/studio" element={<Studio />} />
-                      <Route path="/live" element={<LiveCaptions />} />
-                      <Route path="/search" element={<SearchResults />} />
-                      {/* Backend test route */}
-                      <Route path="/transcribe" element={<TranscribeUploader />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Route>
-                  </Routes>
+                  <BoundaryResetter>
+                    <Suspense fallback={<div className="p-8 text-center">Loading…</div>}>
+                      <Routes>
+                        <Route element={<Layout />}>
+                          <Route path="/signin" element={<SignIn />} />
+                          <Route path="/signup" element={<SignUp />} />
+                          <Route path="/verify" element={<VerifyEmail />} />
+                          <Route path="/reset" element={<ResetPassword />} />
+                          <Route path="/unsubscribe" element={<Unsubscribe />} />
+                          <Route path="/unsubscribed" element={<Unsubscribed />} />
+                          <Route path="/terms" element={<TermsOfService />} />
+                          <Route path="/privacy" element={<PrivacyPolicy />} />
+                          <Route path="/status" element={<Status />} />
+                          <Route path="/" element={<Home />} />
+                          <Route path="/purchase" element={<Purchase />} />
+                          <Route path="/purchase/minutes" element={<BuyExtraMinutes />} />
+                          <Route path="/apify" element={<ApifyTest />} />
+                          <Route path="/contact" element={<Contact />} />
+                          <Route path="/video" element={<VideoUpload />} />
+                          <Route path="/dashboard" element={<Dashboard />} />
+                          <Route path="/upload" element={<UploadPage />} />
+                          <Route path="/assistant" element={<AIAssistant />} />
+                          <Route path="/account" element={<Account />} />
+                          <Route path="/transcripts" element={<TranscriptsPage />} />
+                          <Route path="/summary" element={<SummaryPage />} />
+                          <Route path="/history" element={<HistoryPage />} />
+                          <Route path="/studio" element={<Studio />} />
+                          <Route path="/live" element={<LiveCaptions />} />
+                          <Route path="/search" element={<SearchResults />} />
+                          {/* Backend test route */}
+                          <Route path="/transcribe" element={<TranscribeUploader />} />
+                          <Route path="*" element={<NotFound />} />
+                        </Route>
+                      </Routes>
+                    </Suspense>
 
-                  {/* Mount overlays after routes so they sit above any page */}
-                  <OverlayManager />
+                    {/* Mount overlays after routes so they sit above any page */}
+                    <OverlayManager />
+                  </BoundaryResetter>
                 </ErrorBoundary>
               </SoundProvider>
             </FontSizeProvider>
@@ -152,5 +172,4 @@ export default function App() {
     </AuthProvider>
   );
 }
-
 
