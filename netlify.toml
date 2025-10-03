@@ -1,22 +1,57 @@
+# ─────────────────────────────────────────────────────────
+# Build
+# ─────────────────────────────────────────────────────────
 [build]
   command = "npm ci --no-audit --no-fund && npm run build"
   publish = "dist"
 
-# (keep secrets scan disabled while we iterate)
+# Optional: respect your .nvmrc, but set a fallback too
 [build.environment]
+  NODE_VERSION = "20"
+
+  # Disable Netlify secret scanning (you already intended this)
   SECRETS_SCAN_ENABLED = "false"
+  # If you later re-enable scanning, these omissions help avoid false positives
   SECRETS_SCAN_OMIT_KEYS = "VITE_API_URL,VITE_PAYPAL_CLIENT_ID,STRIPE_MODE,PAYPAL_ENV,WHISPER_MODEL_SIZE,API_HOST,API_PORT,ENV,ACCESS_TOKEN_EXPIRE_MINUTES"
   SECRETS_SCAN_OMIT_PATHS = "public/**,dist/**"
 
-# ✅ Correctly forward to /api on the backend
+# ─────────────────────────────────────────────────────────
+# Redirects / Proxies
+# ─────────────────────────────────────────────────────────
+
+# Proxy ALL API calls to your backend (Railway) without changing paths.
+# Example: /api/auth/login → https://api.echoscript.ai/api/auth/login
 [[redirects]]
   from = "/api/*"
-  to = "https://api.echoscript.ai/api/:splat"
+  to = "https://api.echoscript.ai/:splat"
   status = 200
   force = true
 
-# SPA fallback
+# Single Page App fallback (keeps client-side routing working)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+# ─────────────────────────────────────────────────────────
+# Headers (sensible caching)
+# ─────────────────────────────────────────────────────────
+
+# Never cache the SPA shell
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-store, must-revalidate"
+
+# Cache static assets aggressively
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Optional tiny security hardening
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
