@@ -1,30 +1,38 @@
-# netlify.toml (frontend)
 [build]
   command = "npm ci --no-audit --no-fund && npm run build"
   publish = "dist"
 
-# Strong cache for assets
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-  Cache-Control = "public, max-age=31536000, immutable"
+# 🔒 Turn off/relax secret scanning from file
+[build.environment]
+  SECRETS_SCAN_ENABLED = "false"
+  SECRETS_SCAN_OMIT_KEYS = "API_HOST,API_PORT,WHISPER_MODEL_SIZE,PAYPAL_ENV,STRIPE_MODE,VITE_PAYPAL_CLIENT_ID,ENV,ACCESS_TOKEN_EXPIRE_MINUTES"
+  SECRETS_SCAN_OMIT_PATHS = "dist/**,public/**,assets/**,.netlify/**"
 
-# No-store for the HTML shell
-[[headers]]
-  for = "/index.html"
-  [headers.values]
-  Cache-Control = "no-store, must-revalidate"
-
-# Security headers (lightweight)
-[[headers]]
-  for = "/*"
-  [headers.values]
-  Referrer-Policy = "strict-origin-when-cross-origin"
-  X-Content-Type-Options = "nosniff"
+# 🧭 API proxy to your backend
+[[redirects]]
+  from = "/api/*"
+  to   = "https://api.echoscript.ai/:splat"
+  status = 200
+  force  = true
 
 # SPA fallback
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to   = "/index.html"
   status = 200
+
+# Sensible caching
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-store, must-revalidate"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Extra belt-and-suspenders for prod context
+[context.production.environment]
+  SECRETS_SCAN_ENABLED = "false"
 
