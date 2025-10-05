@@ -1,8 +1,5 @@
 // src/lib/api.ts
-// EchoScript.AI — minimal API client with sane defaults.
-
-const BASE =
-  (import.meta.env.VITE_API_BASE as string | undefined)?.trim() || "/api";
+// EchoScript.AI – API client (works with Vite + Netlify proxy or api subdomain)
 
 type JSONValue =
   | string
@@ -18,60 +15,92 @@ type FetchOpts = Omit<RequestInit, "headers" | "body" | "method"> & {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 };
 
-function url(path: string) {
+const BASE =
+  (import.meta.env.VITE_API_BASE as string | undefined)?.trim() || "/api";
+
+function buildUrl(path: string) {
   if (!path.startsWith("/")) path = `/${path}`;
-  // Avoid double slashes when BASE already ends with /
   return `${BASE.replace(/\/$/, "")}${path}`;
 }
 
-async function handle(res: Response) {
+async function parse(res: Response) {
   const ct = res.headers.get("content-type") || "";
-  const data = ct.includes("application/json") ? await res.json().catch(() => ({})) : await res.text();
-  if (!res.ok) {
-    const message = (data && (data.message || data.error || data.detail)) || res.statusText;
-    throw Object.assign(new Error(message), { status: res.status, data });
+  if (ct.includes("application/json")) {
+    try {
+      return await res.json();
+    } catch {
+      return {};
+    }
   }
-  return data;
+  return await res.text();
 }
 
-export async function apiGet<T = any>(path: string, opts: FetchOpts = {}): Promise<T> {
-  const res = await fetch(url(path), {
-    method: "GET",
+async function request<T = any>(
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
+  path: string,
+  opts: FetchOpts = {}
+): Promise<T> {
+  const res = await fetch(buildUrl(path), {
+    method,
     credentials: "include",
     ...opts,
     headers: {
       Accept: "application/json",
-      ...(opts.headers || {}),
-    },
-  });
-  return handle(res);
-}
-
-export async function apiPost<T = any>(path: string, opts: FetchOpts = {}): Promise<T> {
-  const res = await fetch(url(path), {
-    method: "POST",
-    credentials: "include",
-    ...opts,
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
+      ...(opts.json !== undefined ? { "Content-Type": "application/json" } : {}),
       ...(opts.headers || {}),
     },
     body: opts.json !== undefined ? JSON.stringify(opts.json) : (opts as any).body,
   });
-  return handle(res);
+
+  const data = await parse(res);
+  if (!res.ok) {
+    const message =
+      (data && (data.message || data.error || data.detail)) || res.statusText;
+    throw Object.assign(new Error(String(message)), { status: res.status, data });
+  }
+  return data as T;
 }
 
-export async function apiDelete<T = any>(path: string, opts: FetchOpts = {}): Promise<T> {
-  const res = await fetch(url(path), {
-    method: "DELETE",
-    credentials: "include",
-    ...opts,
-    headers: {
-      Accept: "application/json",
-      ...(opts.headers || {}),
-    },
+/** Generic helpers */
+export const apiGet = <T = any>(path: string, opts?: FetchOpts) =>
+  request<T>("GET", path, opts);
+export const apiPost = <T = any>(path: string, opts?: FetchOpts) =>
+  request<T>("POST", path, opts);
+export const apiDelete = <T = any>(path: string, opts?: FetchOpts) =>
+  request<T>("DELETE", path, opts);
+
+/** Health */
+export const health = () => apiGet<{ ok: boolean }>("/healthz");
+
+/** Auth — adjust paths if your backend differs */
+type Creds = { email: string; password: string; remember?: boolean };
+
+export const signup = (payload: Creds) =>
+  apiPost("/auth/signup", { json: payload });
+
+export const login = (payload: Creds) =>
+  apiPost("/auth/login", { json: payload });
+
+export const logout = () =>
+  // if your backend uses GET /auth/logout, change this accordingly
+  apiPost("/auth/logout", { json: {} });
+
+/** Stripe (example) */
+export const createCheckoutSession = (plan: string) =>
+  apiPost<{ url: string }>("/stripe/create-checkout-session", {
+    json: { plan },
   });
-  return handle(res);
-}
 
+/** Default object (what AuthContext imports) */
+const api = {
+  get: apiGet,
+  post: apiPost,
+  delete: apiDelete,
+  health,
+  signup,
+  login,
+  logout,
+  createCheckoutSession,
+};
+
+export default api;
