@@ -1,18 +1,14 @@
-// ✅ EchoScript.AI – Upgraded Checkout Page with Stripe Integration & Secure Paywall
 import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { loadStripe } from "@stripe/stripe-js";
 import { Loader2, CreditCard, ShieldCheck, ArrowLeftCircle } from "lucide-react";
-
-const PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-const stripePromise = PUBLISHABLE_KEY ? loadStripe(PUBLISHABLE_KEY) : null;
+import api from "../lib/api"; // ⬅️ use the same API client
 
 const planDetails = {
   pro: {
     nameKey: "purchase.plans.pro.name",
-    price: "$14.00",
+    price: "$9.99",
     featuresKey: "purchase.plans.pro.features",
     color: "teal",
   },
@@ -49,27 +45,10 @@ export default function Checkout() {
     setError(null);
 
     try {
-      if (!PUBLISHABLE_KEY) {
-        throw new Error("Missing VITE_STRIPE_PUBLISHABLE_KEY in .env");
-      }
-      if (!stripePromise) {
-        throw new Error("Stripe failed to initialize.");
-      }
-      const stripe = await stripePromise;
-
-      // Your backend maps plan -> price id and returns { url }
-      const res = await fetch("/api/stripe/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ plan_id: plan }),
-      });
-
-      const out = await res.json();
-      if (!res.ok || !out?.url) {
-        throw new Error(out?.error || "No Stripe session URL returned");
-      }
-      window.location.href = out.url;
+      // ✅ backend expects { plan: "pro" } and returns { url }
+      const { url } = await api.createCheckoutSession(plan);
+      if (!url) throw new Error("No Stripe session URL returned");
+      window.location.href = url;
     } catch (err) {
       setError(
         t("checkout.error") ||
@@ -147,4 +126,3 @@ export default function Checkout() {
     </motion.div>
   );
 }
-

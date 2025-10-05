@@ -5,19 +5,21 @@ import { BadgeCheck, Sparkles, GraduationCap, Users, Zap, TriangleAlert } from "
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import api from "../lib/api"; // ⬅️ use the API client you already added
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || ""; // used only for PayPal block
 const HAS_PAYPAL = Boolean(import.meta.env.VITE_PAYPAL_CLIENT_ID);
 
 // ===== DEV/TEST AUTH BYPASS =====
 const DEV_BYPASS_FLAG = import.meta.env.VITE_BYPASS_AUTH_FOR_PAY === "1";
-const hasDemoParam = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("demo");
-const isLocalHost = typeof window !== "undefined" && (
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1" ||
-  window.location.hostname === "::1" ||
-  window.location.hostname.endsWith(".ngrok-free.app")
-);
+const hasDemoParam =
+  typeof window !== "undefined" && new URLSearchParams(window.location.search).has("demo");
+const isLocalHost =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "::1" ||
+    window.location.hostname.endsWith(".ngrok-free.app"));
 const ALLOW_BYPASS = import.meta.env.DEV || isLocalHost;
 const DEV_BYPASS_ACTIVE = ALLOW_BYPASS && (DEV_BYPASS_FLAG || hasDemoParam);
 
@@ -127,25 +129,10 @@ export default function PurchasePage() {
 
   const handleCheckout = async (planId) => {
     try {
-      const res = await fetch(`${API_BASE}/api/stripe/create-checkout-session`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan_id: planId }) // ⬅ unified with Checkout.jsx
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`HTTP ${res.status}: ${text.slice(0, 300)}`);
-      }
-
-      const data = await res.json();
-      if (data?.url) {
-        window.location.href = data.url;
-      } else if (data?.id) {
-        window.location.href = `https://checkout.stripe.com/c/pay/${data.id}`;
-      } else {
-        throw new Error("No checkout URL or session id in response");
-      }
+      // ✅ uses backend mapping: { plan: "pro" | "premium" | ... } → returns { url }
+      const { url } = await api.createCheckoutSession(planId);
+      if (!url) throw new Error("No Stripe session URL returned");
+      window.location.href = url;
     } catch (err) {
       console.error("Stripe checkout error →", err);
       alert(`Payment error. Please try again.\n\nDetails: ${err?.message || err}`);
@@ -170,7 +157,8 @@ export default function PurchasePage() {
           <div className="max-w-3xl mx-auto flex items-center gap-3 rounded-lg border border-yellow-400/40 bg-yellow-500/10 text-yellow-200 p-3">
             <TriangleAlert className="w-5 h-5" />
             <p className="text-sm">
-              Dev payment test mode is <strong>ON</strong>: sign-in requirement bypassed. Remove <code>VITE_BYPASS_AUTH_FOR_PAY</code> or <code>?demo=1</code> before production.
+              Dev payment test mode is <strong>ON</strong>: sign-in requirement bypassed. Remove{" "}
+              <code>VITE_BYPASS_AUTH_FOR_PAY</code> or <code>?demo=1</code> before production.
             </p>
           </div>
         )}
@@ -189,7 +177,9 @@ export default function PurchasePage() {
                     <h2 className="text-xl font-semibold">{plan.name}</h2>
                   </div>
                   <p
-                    className={`${plan.id === "enterprise" ? "text-base font-medium text-blue-300" : "text-3xl font-bold text-white"} mb-1`}
+                    className={`${
+                      plan.id === "enterprise" ? "text-base font-medium text-blue-300" : "text-3xl font-bold text-white"
+                    } mb-1`}
                   >
                     {plan.price}
                   </p>
@@ -242,7 +232,9 @@ export default function PurchasePage() {
                               return data.id;
                             }}
                             onApprove={async (data) => {
-                              const r = await fetch(`${API_BASE}/paypal/capture-order/${data.orderID}`, { method: "POST" });
+                              const r = await fetch(`${API_BASE}/paypal/capture-order/${data.orderID}`, {
+                                method: "POST",
+                              });
                               if (!r.ok) throw new Error("capture failed");
                               alert("PayPal payment captured ✅");
                             }}
