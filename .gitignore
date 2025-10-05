@@ -1,20 +1,36 @@
-﻿# Node/Vite
+﻿# --- deps ---
 node_modules/
+.pnp/
+.pnp.cjs
+
+# --- build output ---
 dist/
+build/
 .vite/
+*.tsbuildinfo
 
-# Env & secrets
-.env
-.env.*
-# (keep VITE_API_BASE out of Git; set in Netlify instead)
-
-# Logs
+# --- logs ---
 npm-debug.log*
 yarn-debug.log*
+yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
+vite-debug.log*
+vite-error.log*
 
-# OS/Editor
+# --- env ---
+.env
+.env.*
+!.env.example
+
+# --- editors/OS ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
 .DS_Store
 Thumbs.db
-.vscode/
-.idea/
+
+# --- deploy tools ---
+.netlify/
+.vercel/
+
