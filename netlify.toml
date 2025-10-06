@@ -9,31 +9,30 @@
   SECRETS_SCAN_OMIT_PATHS = "public/**,dist/**"
 
 ########################################
-# 1) Canonical host: force WWW
-########################################
-# Redirect apex -> www so your browser Origin is always https://www.echoscript.ai
-[[redirects]]
-  from = "/*"
-  to = "https://www.echoscript.ai/:splat"
-  status = 301
-  force = true
-  conditions = { Host = "echoscript.ai" }
-
-########################################
-# 2) API proxy — KEEP the /api prefix
+# 1) API proxy — MUST be first
 ########################################
 [[redirects]]
   from = "/api/*"
-  to = "https://api.echoscript.ai/api/:splat"
+  to   = "https://api.echoscript.ai/api/:splat"
   status = 200
   force = true
 
 ########################################
-# 3) SPA fallback
+# 2) Canonical host: apex -> www (second)
 ########################################
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to   = "https://www.echoscript.ai/:splat"
+  status = 301
+  force = true
+  conditions = { Host = ["echoscript.ai"] }
+
+########################################
+# 3) SPA fallback (last)
+########################################
+[[redirects]]
+  from = "/*"
+  to   = "/index.html"
   status = 200
 
 ########################################
@@ -54,4 +53,3 @@
   [headers.values]
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Content-Type-Options = "nosniff"
-
