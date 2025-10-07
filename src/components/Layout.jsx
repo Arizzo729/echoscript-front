@@ -1,4 +1,3 @@
-// src/components/Layout.jsx
 import React, {
   useState,
   useEffect,
@@ -8,7 +7,7 @@ import React, {
   lazy,
   useTransition
 } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
@@ -17,9 +16,8 @@ import { ToastProvider } from './toast/ToastProvider';
 import ToastContainer from './ToastContainer';
 import useIsMobile from '../hooks/useIsMobile';
 import MobileLayout from './MobileLayout';
-import AudioOverlay from './AudioOverlay'; // <-- mount desktop overlay
+import AudioOverlay from './AudioOverlay'; // desktop overlay
 
-// Desktop-only components (lazy to keep bundle light)
 const Header = lazy(() => import('./Header'));
 const Sidebar = lazy(() => import('./Sidebar'));
 
@@ -40,15 +38,27 @@ export default function Layout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [isPending] = useTransition();
 
-  // render immediately
+  // Router navigation state for NProgress
+  const navigation = useNavigation();
+
+  // Ensure no scroll lock at layout mount
   useEffect(() => {
     document.body.style.overflow = '';
   }, []);
 
   useEffect(() => {
-    NProgress.configure({ showSpinner: false, easing: 'ease', speed: 400 });
-    return () => NProgress.done();
+    NProgress.configure({ showSpinner: false, easing: 'ease', speed: 400, trickleSpeed: 150 });
   }, []);
+
+  // Drive NProgress from router + transitions
+  useEffect(() => {
+    const busy =
+      navigation.state === 'loading' ||
+      navigation.state === 'submitting' ||
+      isPending;
+    if (busy) NProgress.start();
+    else NProgress.done();
+  }, [navigation.state, isPending]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -58,10 +68,17 @@ export default function Layout() {
   const toggleTheme = () => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   const themeValue = useMemo(() => ({ theme, toggleTheme }), [theme]);
 
+  // Mobile layout delegates everything
   if (isMobile) {
     return (
       <ToastProvider>
         <ThemeContext.Provider value={themeValue}>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-zinc-900 focus:text-white focus:px-3 focus:py-2 focus:rounded-md"
+          >
+            Skip to main content
+          </a>
           <MobileLayout>
             <ErrorBoundary>
               <Outlet />
@@ -73,10 +90,17 @@ export default function Layout() {
     );
   }
 
-  // Desktop layout (now includes AudioOverlay)
+  // Desktop layout
   return (
     <ToastProvider>
       <ThemeContext.Provider value={themeValue}>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-zinc-900 focus:text-white focus:px-3 focus:py-2 focus:rounded-md"
+        >
+          Skip to main content
+        </a>
+
         <div className="flex flex-col h-screen w-screen overflow-hidden bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white">
           <Suspense fallback={<div className="h-16 w-full bg-zinc-900" />}>
             <Header
@@ -102,24 +126,25 @@ export default function Layout() {
               role="main"
               aria-label="Main content"
             >
-              {isPending && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-40">
+              {navigation.state !== 'idle' && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-40" aria-live="polite">
                   <motion.div
+                    aria-label="Loading"
+                    role="status"
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 1 }}
                     className="w-10 h-10 border-4 border-teal-400 border-t-transparent rounded-full"
-                    aria-label="Loading"
-                    role="status"
                   />
                 </div>
               )}
+
               <ErrorBoundary>
                 <Outlet />
               </ErrorBoundary>
             </main>
           </div>
 
-          {/* floating, draggable, collapsible audio overlay */}
+          {/* floating, draggable, collapsible audio overlay for desktop */}
           <AudioOverlay />
 
           <ToastContainer position="top-right" />
