@@ -1,46 +1,64 @@
-# netlify.toml — EchoScript Frontend
+# netlify.toml — SPA build + proxy to your Railway API, with secret-scan fix
 
 [build]
   command = "npm ci --no-audit --no-fund && npm run build"
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20"
+  # Use the Node version you’re already building with
+  NODE_VERSION = "20.19.0"
 
-# --- API proxy (Frontend -> Backend) ---
-# If your custom API domain is live, this will proxy /api/* from the frontend
-# to your backend. Keep the path segment (:splat) intact.
-[[redirects]]
-  from = "/api/*"
-  to   = "https://api.echoscript.ai/api/:splat"
-  status = 200
-  force = true
+  # Public runtime values that will be inlined by Vite (not secrets)
+  VITE_API_BASE = "/api"
 
-# --- SPA fallback (React Router) ---
-[[redirects]]
-  from = "/*"
-  to   = "/index.html"
-  status = 200
+  # Netlify Secret Scanning: these are PUBLIC keys and safe to ship to the client.
+  # This prevents false positives from failing the build.
+  SECRETS_SCAN_OMIT_KEYS = "VITE_PAYPAL_CLIENT_ID,VITE_STRIPE_PUBLIC_KEY"
 
-# --- Caching: never cache HTML entrypoint ---
+# Long-cache static assets, don’t cache the HTML shell
 [[headers]]
   for = "/index.html"
   [headers.values]
     Cache-Control = "no-store, must-revalidate"
 
-# --- Caching: long cache for build assets ---
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# --- Security headers (safe defaults) ---
+# Security headers
 [[headers]]
   for = "/*"
   [headers.values]
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-    X-Content-Type-Options    = "nosniff"
-    X-Frame-Options           = "SAMEORIGIN"
-    Referrer-Policy           = "strict-origin-when-cross-origin"
-    Permissions-Policy        = "camera=(), microphone=(), geolocation=()"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
+# ---- API proxy to Railway (single source of truth) ----
+# Frontend calls like `/api/stripe/create-checkout-session` will land on your backend.
+[[redirects]]
+  from = "/api/*"
+  to   = "https://api.echoscript.ai/api/:splat"
+  status = 200
+  force  = true
+
+# Optional direct mounts (if your frontend calls `/stripe/*` or `/paypal/*` anywhere)
+[[redirects]]
+  from = "/stripe/*"
+  to   = "https://api.echoscript.ai/api/stripe/:splat"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from = "/paypal/*"
+  to   = "https://api.echoscript.ai/api/paypal/:splat"
+  status = 200
+  force  = true
+
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to   = "/index.html"
+  status = 200
