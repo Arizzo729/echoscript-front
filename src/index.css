@@ -1,0 +1,103 @@
+/* Inter font (nice, readable, professional) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Tailwind v4 core */
+@import "tailwindcss";
+
+/* Tell Tailwind where to scan (v4) */
+@source "./index.html";
+@source "./src/**/*.{js,jsx,ts,tsx}";
+
+/* Dark mode driven by .dark on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ===== Design tokens ===== */
+@theme {
+  --font-sans: "Inter", "Inter var", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+               Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+               "Segoe UI Emoji", "Segoe UI Symbol";
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+
+  /* Brand (teal→blue) */
+  --color-brand-50:  0.96 0.02 190;
+  --color-brand-300: 0.85 0.08 190;
+  --color-brand-500: 0.78 0.14 190;
+  --color-brand-600: 0.70 0.16 200;
+  --color-brand-700: 0.62 0.17 210;
+
+  /* Surfaces */
+  --color-surface:       0.20 0.02 250;   /* slate-900ish */
+  --color-surface-2:     0.24 0.02 250;   /* slate-800ish */
+  --color-border:        0.38 0.01 250;   /* slate-700ish */
+  --color-text:          0.88 0.02 250;   /* zinc-100ish */
+  --color-text-muted:    0.74 0.02 250;   /* zinc-400ish */
+}
+
+/* ===== Base ===== */
+@layer base {
+  :root { color-scheme: dark light; }
+  html { font-family: var(--font-sans); }
+
+  body {
+    @apply min-h-screen antialiased;
+    /* Subtle nebula gradient */
+    background:
+      radial-gradient(1200px 800px at 10% -10%, oklch(0.24 0.04 210 / .55), transparent 60%),
+      radial-gradient(900px 600px at 90% 0%, oklch(0.22 0.05 200 / .45), transparent 55%),
+      linear-gradient(to bottom right, oklch(0.14 0.02 250), oklch(0.10 0.02 250));
+    color: oklch(var(--color-text));
+  }
+
+  .dark body {
+    background:
+      radial-gradient(1200px 800px at 10% -10%, oklch(0.24 0.04 210 / .55), transparent 60%),
+      radial-gradient(900px 600px at 90% 0%, oklch(0.22 0.05 200 / .45), transparent 55%),
+      linear-gradient(to bottom right, oklch(0.13 0.02 250), oklch(0.09 0.02 250));
+  }
+}
+
+/* ===== Components ===== */
+@layer components {
+  .surface {
+    @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-lg shadow-black/30;
+  }
+  .card { @apply surface p-5 md:p-6; }
+  .muted { @apply text-zinc-400; }
+
+  .heading {
+    @apply text-2xl md:text-3xl font-semibold tracking-tight;
+    background: linear-gradient(135deg, oklch(var(--color-brand-600)) 0%, oklch(var(--color-brand-300)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Buttons (generic helpers; your Button.jsx can still be used) */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl
+           border border-white/10 bg-white/10 hover:bg-white/15 active:bg-white/20
+           text-white transition-colors;
+  }
+  .btn-primary {
+    @apply bg-gradient-to-br from-teal-500 to-sky-600 hover:from-teal-400 hover:to-sky-500
+           text-white border-0 shadow-md shadow-black/30;
+  }
+  .btn-ghost { @apply bg-transparent border-white/10 hover:bg-white/5; }
+}
+
+/* ===== Utilities ===== */
+@layer utilities {
+  .container-prose { @apply max-w-6xl mx-auto px-4 sm:px-6; }
+  .glass { @apply surface; }
+}
+
+/* ===== NProgress polish ===== */
+#nprogress .bar {
+  background: linear-gradient(90deg, oklch(var(--color-brand-700)), oklch(var(--color-brand-300)));
+  height: 3px !important;
+}
+#nprogress .peg {
+  box-shadow: 0 0 10px oklch(var(--color-brand-300)), 0 0 5px oklch(var(--color-brand-300));
+}
+

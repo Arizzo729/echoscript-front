@@ -45,8 +45,7 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Status from "./pages/Status";
-
-// ✅ ADDED:
+/* ✅ added earlier by you */
 import Checkout from "./pages/Checkout";
 
 const Studio = () => <NotFound />;
@@ -67,7 +66,6 @@ function OverlayManager() {
   const { enableSound } = useSound();
   const isMobile = useIsMobile();
 
-  // Start intro after splash, only once
   useEffect(() => {
     if (splashDone && !onboarded) {
       const t = setTimeout(() => setShowIntro(true), 300);
@@ -84,7 +82,6 @@ function OverlayManager() {
     }
   };
 
-  // Mount overlays a tick after route content, avoids mobile layout flashing
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     const id = requestAnimationFrame(() => setMounted(true));
@@ -128,7 +125,13 @@ export default function App() {
               <SoundProvider>
                 <ErrorBoundary>
                   <BoundaryResetter>
-                    <Suspense fallback={<div className="p-8 text-center">Loading…</div>}>
+                    <Suspense
+                      fallback={
+                        <div className="container-prose py-10 text-center text-zinc-300">
+                          Loading…
+                        </div>
+                      }
+                    >
                       <Routes>
                         <Route element={<Layout />}>
                           <Route path="/signin" element={<SignIn />} />
@@ -142,7 +145,6 @@ export default function App() {
                           <Route path="/status" element={<Status />} />
                           <Route path="/" element={<Home />} />
                           <Route path="/purchase" element={<Purchase />} />
-                          {/* ✅ ADDED: Stripe/PayPal return page */}
                           <Route path="/checkout" element={<Checkout />} />
                           <Route path="/purchase/minutes" element={<BuyExtraMinutes />} />
                           <Route path="/apify" element={<ApifyTest />} />
@@ -158,14 +160,13 @@ export default function App() {
                           <Route path="/studio" element={<Studio />} />
                           <Route path="/live" element={<LiveCaptions />} />
                           <Route path="/search" element={<SearchResults />} />
-                          {/* Backend test route */}
                           <Route path="/transcribe" element={<TranscribeUploader />} />
                           <Route path="*" element={<NotFound />} />
                         </Route>
                       </Routes>
                     </Suspense>
 
-                    {/* Mount overlays after routes so they sit above any page */}
+                    {/* Overlays above any page */}
                     <OverlayManager />
                   </BoundaryResetter>
                 </ErrorBoundary>
@@ -177,4 +178,3 @@ export default function App() {
     </AuthProvider>
   );
 }
-
