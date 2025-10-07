@@ -1,15 +1,18 @@
+# netlify.toml (FINAL)
+
 [build]
   command = "npm ci --no-audit --no-fund && npm run build"
   publish = "dist"
 
-# (Optional) you can keep Netlify UI env vars instead of setting them here.
 [build.environment]
-  # VITE_API_URL = "https://api.echoscript.ai"
+  # Tell Netlify secret scanner that PayPal client id is expected in client bundle
+  SECRETS_SCAN_ENABLED = "true"
+  SECRETS_SCAN_OMIT_KEYS = "VITE_PAYPAL_CLIENT_ID"
 
 [[plugins]]
   package = "@netlify/plugin-lighthouse"
 
-# Caching / security headers you already had
+# ---------------- Headers ----------------
 [[headers]]
   for = "/index.html"
   [headers.values]
@@ -28,7 +31,9 @@
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
 
-# ---- Backend proxies (NEW for PayPal & Stripe; API already existed) ----
+# --------------- Backend proxies ---------------
+# If your public API is api.echoscript.ai, keep these. If you use Railway, swap base domains accordingly.
+
 [[redirects]]
   from = "/api/*"
   to = "https://api.echoscript.ai/api/:splat"
@@ -47,15 +52,15 @@
   status = 200
   force = true
 
-# Canonical redirect (keep)
+# Canonical host redirect
 [[redirects]]
+  conditions = { Host = ["echoscript.ai"] }
   from = "/*"
   to = "https://www.echoscript.ai/:splat"
   status = 301
   force = true
-  conditions = { Host = ["echoscript.ai"] }
 
-# SPA fallback (keep and LAST)
+# SPA fallback (last)
 [[redirects]]
   from = "/*"
   to = "/index.html"
