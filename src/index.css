@@ -1,44 +1,16 @@
-/* Inter font (nice, readable, professional) */
+/* Inter font for a professional look */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Tailwind v4 core */
-@import "tailwindcss";
-
-/* Tell Tailwind where to scan (v4) */
-@source "./index.html";
-@source "./src/**/*.{js,jsx,ts,tsx}";
-
-/* Dark mode driven by .dark on <html> */
-@custom-variant dark (&:where(.dark, .dark *));
-
-/* ===== Design tokens ===== */
-@theme {
-  --font-sans: "Inter", "Inter var", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
-               Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
-               "Segoe UI Emoji", "Segoe UI Symbol";
-  --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
-  --radius-2xl: 1.5rem;
-
-  /* Brand (teal→blue) */
-  --color-brand-50:  0.96 0.02 190;
-  --color-brand-300: 0.85 0.08 190;
-  --color-brand-500: 0.78 0.14 190;
-  --color-brand-600: 0.70 0.16 200;
-  --color-brand-700: 0.62 0.17 210;
-
-  /* Surfaces */
-  --color-surface:       0.20 0.02 250;   /* slate-900ish */
-  --color-surface-2:     0.24 0.02 250;   /* slate-800ish */
-  --color-border:        0.38 0.01 250;   /* slate-700ish */
-  --color-text:          0.88 0.02 250;   /* zinc-100ish */
-  --color-text-muted:    0.74 0.02 250;   /* zinc-400ish */
-}
+/* Tailwind v3 directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ===== Base ===== */
 @layer base {
-  :root { color-scheme: dark light; }
-  html { font-family: var(--font-sans); }
+  html { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+         Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+         "Segoe UI Emoji", "Segoe UI Symbol"; }
 
   body {
     @apply min-h-screen antialiased;
@@ -47,14 +19,7 @@
       radial-gradient(1200px 800px at 10% -10%, oklch(0.24 0.04 210 / .55), transparent 60%),
       radial-gradient(900px 600px at 90% 0%, oklch(0.22 0.05 200 / .45), transparent 55%),
       linear-gradient(to bottom right, oklch(0.14 0.02 250), oklch(0.10 0.02 250));
-    color: oklch(var(--color-text));
-  }
-
-  .dark body {
-    background:
-      radial-gradient(1200px 800px at 10% -10%, oklch(0.24 0.04 210 / .55), transparent 60%),
-      radial-gradient(900px 600px at 90% 0%, oklch(0.22 0.05 200 / .45), transparent 55%),
-      linear-gradient(to bottom right, oklch(0.13 0.02 250), oklch(0.09 0.02 250));
+    color: #e7e7ea; /* light zinc */
   }
 }
 
@@ -68,12 +33,11 @@
 
   .heading {
     @apply text-2xl md:text-3xl font-semibold tracking-tight;
-    background: linear-gradient(135deg, oklch(var(--color-brand-600)) 0%, oklch(var(--color-brand-300)) 100%);
+    background: linear-gradient(135deg, #0ea5a2 0%, #38bdf8 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
-  /* Buttons (generic helpers; your Button.jsx can still be used) */
   .btn {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl
            border border-white/10 bg-white/10 hover:bg-white/15 active:bg-white/20
@@ -94,10 +58,9 @@
 
 /* ===== NProgress polish ===== */
 #nprogress .bar {
-  background: linear-gradient(90deg, oklch(var(--color-brand-700)), oklch(var(--color-brand-300)));
+  background: linear-gradient(90deg, #155e75, #38bdf8);
   height: 3px !important;
 }
 #nprogress .peg {
-  box-shadow: 0 0 10px oklch(var(--color-brand-300)), 0 0 5px oklch(var(--color-brand-300));
+  box-shadow: 0 0 10px #38bdf8, 0 0 5px #38bdf8;
 }
-
