@@ -13,10 +13,16 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import api from "../lib/api"; // uses your existing API client
 
-// Used only for PayPal block (server-created orders). Keep your env name.
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "";
+// ---- API base (absolute) ----
+const RAW_API_BASE =
+  import.meta.env.VITE_API_BASE ||
+  import.meta.env.VITE_API_BASE_URL ||
+  "";
+const API_BASE = (
+  RAW_API_BASE || (typeof window !== "undefined" ? window.location.origin : "")
+).replace(/\/+$/, "");
+
 const HAS_PAYPAL = Boolean(import.meta.env.VITE_PAYPAL_CLIENT_ID);
 
 // ===== DEV/TEST AUTH BYPASS =====
@@ -139,15 +145,19 @@ export default function PurchasePage() {
 
   const handleCheckout = async (planId) => {
     try {
-      // Backend maps { plan: "pro" | "premium" | "edu" } → { url }
-      const { url } = await api.createCheckoutSession(planId);
+      const r = await fetch(`${API_BASE}/api/stripe/create-checkout-session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ plan: planId }),
+      });
+      if (!r.ok) throw new Error(await r.text().catch(() => `${r.status} ${r.statusText}`));
+      const { url } = await r.json();
       if (!url) throw new Error("No Stripe session URL returned");
       window.location.href = url;
     } catch (err) {
       console.error("Stripe checkout error →", err);
-      alert(
-        `Payment error. Please try again.\n\nDetails: ${err?.message || err}`
-      );
+      alert(`Payment error. Please try again.\n\nDetails: ${err?.message || err}`);
     }
   };
 
@@ -159,12 +169,9 @@ export default function PurchasePage() {
     >
       <div className="max-w-6xl mx-auto space-y-10">
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-extrabold">
-            🛒 Choose the Perfect EchoScript Plan
-          </h1>
+          <h1 className="text-4xl font-extrabold">🛒 Choose the Perfect EchoScript Plan</h1>
           <p className="text-zinc-400 text-sm">
-            {t("secure_checkout", "Secure checkout")} ·{" "}
-            {t("privacy_respect", "We respect your privacy")}
+            {t("secure_checkout", "Secure checkout")} · {t("privacy_respect", "We respect your privacy")}
           </p>
         </div>
 
@@ -172,9 +179,8 @@ export default function PurchasePage() {
           <div className="max-w-3xl mx-auto flex items-center gap-3 rounded-lg border border-yellow-400/40 bg-yellow-500/10 text-yellow-200 p-3">
             <TriangleAlert className="w-5 h-5" />
             <p className="text-sm">
-              Dev payment test mode is <strong>ON</strong>: sign-in requirement
-              bypassed. Remove <code>VITE_BYPASS_AUTH_FOR_PAY</code> or{" "}
-              <code>?demo=1</code> before production.
+              Dev payment test mode is <strong>ON</strong>: sign-in requirement bypassed. Remove{" "}
+              <code>VITE_BYPASS_AUTH_FOR_PAY</code> or <code>?demo=1</code> before production.
             </p>
           </div>
         )}
@@ -194,16 +200,12 @@ export default function PurchasePage() {
                   </div>
                   <p
                     className={`${
-                      plan.id === "enterprise"
-                        ? "text-base font-medium text-blue-300"
-                        : "text-3xl font-bold text-white"
+                      plan.id === "enterprise" ? "text-base font-medium text-blue-300" : "text-3xl font-bold text-white"
                     } mb-1`}
                   >
                     {plan.price}
                   </p>
-                  <p className="text-sm text-zinc-400 italic mb-4">
-                    {plan.suggested}
-                  </p>
+                  <p className="text-sm text-zinc-400 italic mb-4">{plan.suggested}</p>
                   <ul className="space-y-2 text-sm text-zinc-300">
                     {plan.features.map((f, i) => (
                       <li key={i}>• {f}</li>
@@ -213,9 +215,7 @@ export default function PurchasePage() {
 
                 {!plan.checkout ? (
                   <button
-                    onClick={() =>
-                      plan.id === "guest" ? navigate("/upload") : navigate(plan.link)
-                    }
+                    onClick={() => (plan.id === "guest" ? navigate("/upload") : navigate(plan.link))}
                     className="mt-6 inline-flex items-center justify-center text-sm font-medium bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg transition"
                   >
                     {t("get_started", "Get Started")}
@@ -239,35 +239,26 @@ export default function PurchasePage() {
                     {HAS_PAYPAL ? (
                       <div className="w-full rounded-lg border border-white/10 bg-white/5 p-2">
                         <PayPalScriptProvider
-                          options={{
-                            clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
-                            currency: "USD",
-                          }}
+                          options={{ clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID, currency: "USD" }}
                         >
                           <PayPalButtons
                             style={{ layout: "horizontal", height: 42 }}
                             createOrder={async () => {
-                              const r = await fetch(
-                                `${API_BASE}/paypal/create-order`,
-                                {
-                                  method: "POST",
-                                  headers: { "Content-Type": "application/json" },
-                                  body: JSON.stringify({
-                                    amount: amount || "9.99",
-                                    currency: "USD",
-                                    plan: plan.id,
-                                  }),
-                                }
-                              );
+                              const r = await fetch(`${API_BASE}/api/paypal/create-order`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                credentials: "include",
+                                body: JSON.stringify({ amount: amount || "9.99", currency: "USD", plan: plan.id }),
+                              });
                               if (!r.ok) throw new Error("create-order failed");
                               const data = await r.json();
                               return data.id;
                             }}
                             onApprove={async (data) => {
-                              const r = await fetch(
-                                `${API_BASE}/paypal/capture-order/${data.orderID}`,
-                                { method: "POST" }
-                              );
+                              const r = await fetch(`${API_BASE}/api/paypal/capture-order/${data.orderID}`, {
+                                method: "POST",
+                                credentials: "include",
+                              });
                               if (!r.ok) throw new Error("capture failed");
                               alert("PayPal payment captured ✅");
                             }}
@@ -308,4 +299,3 @@ export default function PurchasePage() {
     </motion.div>
   );
 }
-

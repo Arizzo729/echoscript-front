@@ -1,4 +1,4 @@
-# netlify.toml  (Frontend)
+# netlify.toml — EchoScript Frontend
 
 [build]
   command = "npm ci --no-audit --no-fund && npm run build"
@@ -6,42 +6,41 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  # Optional: if secret scanning keeps false-flagging Vite envs
-  SECRETS_SCAN_ENABLED = "false"
 
-########################################
-# API proxy → your Railway API
-########################################
+# --- API proxy (Frontend -> Backend) ---
+# If your custom API domain is live, this will proxy /api/* from the frontend
+# to your backend. Keep the path segment (:splat) intact.
 [[redirects]]
   from = "/api/*"
-  to = "https://api.echoscript.ai/:splat"
+  to   = "https://api.echoscript.ai/api/:splat"
   status = 200
   force = true
 
-########################################
-# SPA fallback (React Router)
-########################################
+# --- SPA fallback (React Router) ---
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to   = "/index.html"
   status = 200
 
-########################################
-# Caching for built assets (optional)
-########################################
+# --- Caching: never cache HTML entrypoint ---
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-store, must-revalidate"
+
+# --- Caching: long cache for build assets ---
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-########################################
-# Security headers (optional)
-########################################
+# --- Security headers (safe defaults) ---
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    X-Content-Type-Options    = "nosniff"
+    X-Frame-Options           = "SAMEORIGIN"
+    Referrer-Policy           = "strict-origin-when-cross-origin"
+    Permissions-Policy        = "camera=(), microphone=(), geolocation=()"
 
