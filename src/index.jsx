@@ -3,8 +3,13 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
-import "./global.css";
+
+/* ✅ Make sure we load the new theme */
+import "./index.css";
+
+/* keep your i18n if you use it */
 import "./i18n";
+
 import { Auth0Provider } from "@auth0/auth0-react";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
