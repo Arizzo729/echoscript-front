@@ -1,2 +1,4 @@
-/api/*   https://api.echoscript.ai/api/:splat  200
-/*       /index.html                            200
+/api/*      https://<YOUR-RAILWAY>.up.railway.app/api/:splat      200
+/paypal/*   https://<YOUR-RAILWAY>.up.railway.app/paypal/:splat   200
+/stripe/*   https://<YOUR-RAILWAY>.up.railway.app/stripe/:splat   200
+/*          /index.html                                           200
