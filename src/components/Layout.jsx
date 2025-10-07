@@ -1,3 +1,4 @@
+// src/components/Layout.jsx
 import React, {
   useState,
   useEffect,
@@ -7,7 +8,7 @@ import React, {
   lazy,
   useTransition
 } from 'react';
-import { Outlet, useNavigation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
@@ -25,6 +26,7 @@ export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {
 
 export default function Layout() {
   const isMobile = useIsMobile();
+  const location = useLocation();                // <<— replaces useNavigation()
   const [theme, setTheme] = useState(() => {
     const stored = typeof window !== 'undefined' && localStorage.getItem('theme');
     if (stored) return stored;
@@ -38,27 +40,33 @@ export default function Layout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [isPending] = useTransition();
 
-  // Router navigation state for NProgress
-  const navigation = useNavigation();
-
-  // Ensure no scroll lock at layout mount
-  useEffect(() => {
-    document.body.style.overflow = '';
-  }, []);
+  // simple route-change flag for loading overlay (paired with NProgress)
+  const [routeChanging, setRouteChanging] = useState(false);
 
   useEffect(() => {
     NProgress.configure({ showSpinner: false, easing: 'ease', speed: 400, trickleSpeed: 150 });
   }, []);
 
-  // Drive NProgress from router + transitions
+  // Kick off NProgress & a brief overlay any time the URL changes
   useEffect(() => {
-    const busy =
-      navigation.state === 'loading' ||
-      navigation.state === 'submitting' ||
-      isPending;
-    if (busy) NProgress.start();
-    else NProgress.done();
-  }, [navigation.state, isPending]);
+    setRouteChanging(true);
+    NProgress.start();
+    const t = setTimeout(() => {
+      setRouteChanging(false);
+      NProgress.done();
+    }, 400); // small delay to avoid flicker on fast routes
+    return () => clearTimeout(t);
+  }, [location.pathname, location.search, location.hash]);
+
+  // Also finish NProgress if a React transition finishes (rarely needed, harmless)
+  useEffect(() => {
+    if (!isPending) NProgress.done();
+  }, [isPending]);
+
+  // Ensure no scroll lock at layout mount
+  useEffect(() => {
+    document.body.style.overflow = '';
+  }, []);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -126,7 +134,7 @@ export default function Layout() {
               role="main"
               aria-label="Main content"
             >
-              {navigation.state !== 'idle' && (
+              {(routeChanging || isPending) && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-40" aria-live="polite">
                   <motion.div
                     aria-label="Loading"
