@@ -1,21 +1,16 @@
-# netlify.toml — SPA build + proxy to your Railway API, with secret-scan fix
+# netlify.toml — fix: single API redirect, no placeholders, allow public keys
 
 [build]
   command = "npm ci --no-audit --no-fund && npm run build"
   publish = "dist"
 
 [build.environment]
-  # Use the Node version you’re already building with
   NODE_VERSION = "20.19.0"
-
-  # Public runtime values that will be inlined by Vite (not secrets)
   VITE_API_BASE = "/api"
-
-  # Netlify Secret Scanning: these are PUBLIC keys and safe to ship to the client.
-  # This prevents false positives from failing the build.
+  # These are public client keys; tell Netlify's scanner to ignore them.
   SECRETS_SCAN_OMIT_KEYS = "VITE_PAYPAL_CLIENT_ID,VITE_STRIPE_PUBLIC_KEY"
 
-# Long-cache static assets, don’t cache the HTML shell
+# Cache rules
 [[headers]]
   for = "/index.html"
   [headers.values]
@@ -36,24 +31,11 @@
     X-Frame-Options = "SAMEORIGIN"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
-# ---- API proxy to Railway (single source of truth) ----
-# Frontend calls like `/api/stripe/create-checkout-session` will land on your backend.
+# ---- SINGLE source of truth for the API ----
+# If your custom subdomain is live, keep this:
 [[redirects]]
   from = "/api/*"
   to   = "https://api.echoscript.ai/api/:splat"
-  status = 200
-  force  = true
-
-# Optional direct mounts (if your frontend calls `/stripe/*` or `/paypal/*` anywhere)
-[[redirects]]
-  from = "/stripe/*"
-  to   = "https://api.echoscript.ai/api/stripe/:splat"
-  status = 200
-  force  = true
-
-[[redirects]]
-  from = "/paypal/*"
-  to   = "https://api.echoscript.ai/api/paypal/:splat"
   status = 200
   force  = true
 
