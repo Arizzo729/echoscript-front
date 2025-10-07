@@ -1,4 +1,4 @@
-# netlify.toml — fix: single API redirect, no placeholders, allow public keys
+# netlify.toml — final
 
 [build]
   command = "npm ci --no-audit --no-fund && npm run build"
@@ -7,7 +7,7 @@
 [build.environment]
   NODE_VERSION = "20.19.0"
   VITE_API_BASE = "/api"
-  # These are public client keys; tell Netlify's scanner to ignore them.
+  # Public client keys are expected in frontend bundles; silence scanner:
   SECRETS_SCAN_OMIT_KEYS = "VITE_PAYPAL_CLIENT_ID,VITE_STRIPE_PUBLIC_KEY"
 
 # Cache rules
@@ -31,8 +31,7 @@
     X-Frame-Options = "SAMEORIGIN"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
-# ---- SINGLE source of truth for the API ----
-# If your custom subdomain is live, keep this:
+# Single API proxy — points your frontend /api/* to Railway
 [[redirects]]
   from = "/api/*"
   to   = "https://api.echoscript.ai/api/:splat"
