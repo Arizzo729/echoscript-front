@@ -46,6 +46,9 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Status from "./pages/Status";
 
+// ✅ ADDED:
+import Checkout from "./pages/Checkout";
+
 const Studio = () => <NotFound />;
 const LiveCaptions = () => <NotFound />;
 
@@ -139,6 +142,8 @@ export default function App() {
                           <Route path="/status" element={<Status />} />
                           <Route path="/" element={<Home />} />
                           <Route path="/purchase" element={<Purchase />} />
+                          {/* ✅ ADDED: Stripe/PayPal return page */}
+                          <Route path="/checkout" element={<Checkout />} />
                           <Route path="/purchase/minutes" element={<BuyExtraMinutes />} />
                           <Route path="/apify" element={<ApifyTest />} />
                           <Route path="/contact" element={<Contact />} />
