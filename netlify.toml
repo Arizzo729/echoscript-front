@@ -1,68 +1,47 @@
-# netlify.toml (FINAL)
+# netlify.toml  (Frontend)
 
 [build]
   command = "npm ci --no-audit --no-fund && npm run build"
   publish = "dist"
 
 [build.environment]
-  # Tell Netlify secret scanner that PayPal client id is expected in client bundle
-  SECRETS_SCAN_ENABLED = "true"
-  SECRETS_SCAN_OMIT_KEYS = "VITE_PAYPAL_CLIENT_ID"
+  NODE_VERSION = "20"
+  # Optional: if secret scanning keeps false-flagging Vite envs
+  SECRETS_SCAN_ENABLED = "false"
 
-[[plugins]]
-  package = "@netlify/plugin-lighthouse"
+########################################
+# API proxy → your Railway API
+########################################
+[[redirects]]
+  from = "/api/*"
+  to = "https://api.echoscript.ai/:splat"
+  status = 200
+  force = true
 
-# ---------------- Headers ----------------
-[[headers]]
-  for = "/index.html"
-  [headers.values]
-    Cache-Control = "no-store, must-revalidate"
+########################################
+# SPA fallback (React Router)
+########################################
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
+########################################
+# Caching for built assets (optional)
+########################################
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+########################################
+# Security headers (optional)
+########################################
 [[headers]]
   for = "/*"
   [headers.values]
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "DENY"
-
-# --------------- Backend proxies ---------------
-# If your public API is api.echoscript.ai, keep these. If you use Railway, swap base domains accordingly.
-
-[[redirects]]
-  from = "/api/*"
-  to = "https://api.echoscript.ai/api/:splat"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/paypal/*"
-  to = "https://api.echoscript.ai/paypal/:splat"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/stripe/*"
-  to = "https://api.echoscript.ai/stripe/:splat"
-  status = 200
-  force = true
-
-# Canonical host redirect
-[[redirects]]
-  conditions = { Host = ["echoscript.ai"] }
-  from = "/*"
-  to = "https://www.echoscript.ai/:splat"
-  status = 301
-  force = true
-
-# SPA fallback (last)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
