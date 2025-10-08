@@ -1,35 +1,25 @@
-// src/pages/Purchase.jsx
 import React from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import {
-  BadgeCheck,
-  Sparkles,
-  GraduationCap,
-  Users,
-  Zap,
-  TriangleAlert,
-} from "lucide-react";
+import { BadgeCheck, Sparkles, GraduationCap, Users, Zap, TriangleAlert } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
-// ---- API base (absolute) ----
-const RAW_API_BASE =
-  import.meta.env.VITE_API_BASE ||
-  import.meta.env.VITE_API_BASE_URL ||
-  "";
-const API_BASE = (
-  RAW_API_BASE || (typeof window !== "undefined" ? window.location.origin : "")
-).replace(/\/+$/, "");
+// ---- Compute API base (no Netlify proxy required) ----
+const API_BASE =
+  (import.meta.env.VITE_API_BASE && import.meta.env.VITE_API_BASE.trim()) ||
+  (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.trim()) ||
+  (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.trim()) ||
+  (import.meta.env.PROD ? "https://api.echoscript.ai/api" : "/api");
 
+// PayPal public key is OK in client bundle
 const HAS_PAYPAL = Boolean(import.meta.env.VITE_PAYPAL_CLIENT_ID);
 
 // ===== DEV/TEST AUTH BYPASS =====
 const DEV_BYPASS_FLAG = import.meta.env.VITE_BYPASS_AUTH_FOR_PAY === "1";
 const hasDemoParam =
-  typeof window !== "undefined" &&
-  new URLSearchParams(window.location.search).has("demo");
+  typeof window !== "undefined" && new URLSearchParams(window.location.search).has("demo");
 const isLocalHost =
   typeof window !== "undefined" &&
   (window.location.hostname === "localhost" ||
@@ -143,18 +133,19 @@ export default function PurchasePage() {
 
   const SHOW_SIGNIN = (!user || !user.email) && !DEV_BYPASS_ACTIVE;
 
+  // --- Stripe (absolute call; no Netlify proxy) ---
   const handleCheckout = async (planId) => {
     try {
-      const r = await fetch(`${API_BASE}/api/stripe/create-checkout-session`, {
+      const res = await fetch(`${API_BASE}/stripe/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ plan: planId }),
       });
-      if (!r.ok) throw new Error(await r.text().catch(() => `${r.status} ${r.statusText}`));
-      const { url } = await r.json();
-      if (!url) throw new Error("No Stripe session URL returned");
-      window.location.href = url;
+      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      const data = await res.json();
+      if (!data?.url) throw new Error("No Stripe session URL returned");
+      window.location.href = data.url;
     } catch (err) {
       console.error("Stripe checkout error →", err);
       alert(`Payment error. Please try again.\n\nDetails: ${err?.message || err}`);
@@ -244,10 +235,9 @@ export default function PurchasePage() {
                           <PayPalButtons
                             style={{ layout: "horizontal", height: 42 }}
                             createOrder={async () => {
-                              const r = await fetch(`${API_BASE}/api/paypal/create-order`, {
+                              const r = await fetch(`${API_BASE}/paypal/create-order`, {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
-                                credentials: "include",
                                 body: JSON.stringify({ amount: amount || "9.99", currency: "USD", plan: plan.id }),
                               });
                               if (!r.ok) throw new Error("create-order failed");
@@ -255,9 +245,8 @@ export default function PurchasePage() {
                               return data.id;
                             }}
                             onApprove={async (data) => {
-                              const r = await fetch(`${API_BASE}/api/paypal/capture-order/${data.orderID}`, {
+                              const r = await fetch(`${API_BASE}/paypal/capture-order/${data.orderID}`, {
                                 method: "POST",
-                                credentials: "include",
                               });
                               if (!r.ok) throw new Error("capture failed");
                               alert("PayPal payment captured ✅");
