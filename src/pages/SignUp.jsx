@@ -1,5 +1,5 @@
-// src/components/SignUp.jsx
-import React, { useState } from "react";
+// src/pages/SignUp.jsx
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 export default function SignUp() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { signUp, user } = useAuth(); // <-- Grab user from context
+  const { signUp, user } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,27 +18,21 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => { if (user?.email) navigate("/dashboard"); }, [user, navigate]);
+
   const handleSignUp = async (e) => {
     e.preventDefault();
     setError("");
-    if (!email.includes("@")) {
-      setError(t("signup_error_invalid_email"));
-      return;
-    }
-    if (password.length < 6) {
-      setError(t("signup_error_short_password"));
-      return;
-    }
-    if (password !== confirm) {
-      setError(t("signup_error_password_mismatch"));
-      return;
-    }
+    if (!email.includes("@")) return setError(t("signup_error_invalid_email") || "Enter a valid email.");
+    if (password.length < 6) return setError(t("signup_error_short_password") || "Password must be at least 6 chars.");
+    if (password !== confirm) return setError(t("signup_error_password_mismatch") || "Passwords do not match.");
+
     setLoading(true);
     try {
       await signUp({ email, password });
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (err) {
-      setError(err.message || t("signup_error_general"));
+      setError(err?.message || t("signup_error_general") || "Sign up failed.");
     } finally {
       setLoading(false);
     }
@@ -57,7 +51,6 @@ export default function SignUp() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1, duration: 0.35, type: "spring" }}
       >
-        {/* Back Link: Dynamic */}
         <Link
           to={user ? "/dashboard" : "/"}
           className="flex items-center text-sm font-semibold text-teal-400 hover:underline focus-visible:ring-2 focus-visible:ring-teal-400 w-max"
@@ -66,7 +59,6 @@ export default function SignUp() {
           {user ? t("dashboard", "Dashboard") : t("home", "Home")}
         </Link>
 
-        {/* Header */}
         <div className="space-y-1 text-center">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-lg">
             {t("signup_title") || "Create Account"}
@@ -78,17 +70,13 @@ export default function SignUp() {
         </div>
 
         {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="px-4 py-2 text-sm text-red-300 bg-red-700/15 rounded-lg text-center border border-red-500/30 shadow"
-          >
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+            className="px-4 py-2 text-sm text-red-300 bg-red-700/15 rounded-lg text-center border border-red-500/30 shadow">
             {error}
           </motion.div>
         )}
 
         <form onSubmit={handleSignUp} className="space-y-4">
-          {/* Email */}
           <div className="space-y-1">
             <label htmlFor="email" className="block text-xs font-medium text-zinc-400 tracking-wide">
               {t("email")}
@@ -108,7 +96,7 @@ export default function SignUp() {
               />
             </div>
           </div>
-          {/* Password */}
+
           <div className="space-y-1">
             <label htmlFor="password" className="block text-xs font-medium text-zinc-400 tracking-wide">
               {t("password_label")}
@@ -130,15 +118,12 @@ export default function SignUp() {
                 onClick={() => setShowPassword((v) => !v)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full focus-visible:ring-2 focus-visible:ring-teal-400"
                 aria-label={showPassword ? "Hide password" : "Show password"}
-                tabIndex={0}
               >
-                {showPassword
-                  ? <EyeOff className="w-5 h-5 text-zinc-400 hover:text-white" />
-                  : <Eye className="w-5 h-5 text-zinc-400 hover:text-white" />}
+                {showPassword ? <EyeOff className="w-5 h-5 text-zinc-400 hover:text-white" /> : <Eye className="w-5 h-5 text-zinc-400 hover:text-white" />}
               </button>
             </div>
           </div>
-          {/* Confirm Password */}
+
           <div className="space-y-1">
             <label htmlFor="confirm" className="block text-xs font-medium text-zinc-400 tracking-wide">
               {t("confirm_password")}
@@ -157,27 +142,22 @@ export default function SignUp() {
               />
             </div>
           </div>
-          {/* Submit */}
+
           <motion.button
             type="submit"
             whileTap={{ scale: 0.96 }}
             disabled={loading}
             className={`w-full py-3 text-base font-semibold rounded-xl shadow-xl transition
               ${loading ? "bg-teal-700 cursor-not-allowed opacity-80" : "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400"}
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400
-            `}
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400`}
           >
             {loading ? t("creating_account") : t("create_account_button")}
           </motion.button>
         </form>
 
-        {/* Footer Link */}
         <div className="text-center text-xs text-zinc-500 mt-3">
           {t("already_have_account", "Already have an account?")}&nbsp;
-          <Link
-            to="/signin"
-            className="font-semibold text-teal-400 hover:underline focus-visible:ring-2 focus-visible:ring-teal-400 rounded"
-          >
+          <Link to="/signin" className="font-semibold text-teal-400 hover:underline focus-visible:ring-2 focus-visible:ring-teal-400 rounded">
             {t("sign_in_here", "Sign in here.")}
           </Link>
         </div>
@@ -185,5 +165,3 @@ export default function SignUp() {
     </motion.div>
   );
 }
-
-

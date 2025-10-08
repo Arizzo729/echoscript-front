@@ -1,5 +1,5 @@
-// src/components/SignIn.jsx
-import React, { useState } from "react";
+// src/pages/SignIn.jsx
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 export default function SignIn() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { signIn, user } = useAuth(); // <-- Grab user from context
+  const { signIn, user } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,19 +18,21 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => { if (user?.email) navigate("/dashboard"); }, [user, navigate]);
+
   const handleSignIn = async (e) => {
     e.preventDefault();
     setError("");
     if (!email.includes("@") || password.length < 6) {
-      setError(t("signin_error"));
+      setError(t("signin_error") || "Please enter a valid email and password (6+ chars).");
       return;
     }
     setLoading(true);
     try {
       await signIn({ email, password, remember: rememberMe });
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (err) {
-      setError(err.message || t("signin_error"));
+      setError(err?.message || t("signin_error") || "Sign in failed.");
     } finally {
       setLoading(false);
     }
@@ -49,7 +51,6 @@ export default function SignIn() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1, duration: 0.35, type: "spring" }}
       >
-        {/* Back Link: Dynamic */}
         <Link
           to={user ? "/dashboard" : "/"}
           className="flex items-center text-sm font-semibold text-teal-400 hover:underline focus-visible:ring-2 focus-visible:ring-teal-400 w-max"
@@ -58,7 +59,6 @@ export default function SignIn() {
           {user ? t("dashboard", "Dashboard") : t("home", "Home")}
         </Link>
 
-        {/* Header */}
         <div className="space-y-1 text-center">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-lg">
             {t("signin_title", "Welcome Back")}
@@ -70,17 +70,13 @@ export default function SignIn() {
         </div>
 
         {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="px-4 py-2 text-sm text-red-300 bg-red-700/15 rounded-lg text-center border border-red-500/30 shadow"
-          >
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+            className="px-4 py-2 text-sm text-red-300 bg-red-700/15 rounded-lg text-center border border-red-500/30 shadow">
             {error}
           </motion.div>
         )}
 
         <form onSubmit={handleSignIn} className="space-y-4">
-          {/* Email */}
           <div className="space-y-1">
             <label htmlFor="email" className="block text-xs font-medium text-zinc-400 tracking-wide">
               {t("email")}
@@ -99,7 +95,7 @@ export default function SignIn() {
               />
             </div>
           </div>
-          {/* Password */}
+
           <div className="space-y-1">
             <label htmlFor="password" className="block text-xs font-medium text-zinc-400 tracking-wide">
               {t("password")}
@@ -121,15 +117,12 @@ export default function SignIn() {
                 onClick={() => setShowPassword((v) => !v)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full focus-visible:ring-2 focus-visible:ring-teal-400"
                 aria-label={showPassword ? "Hide password" : "Show password"}
-                tabIndex={0}
               >
-                {showPassword
-                  ? <EyeOff className="w-5 h-5 text-zinc-400 hover:text-white" />
-                  : <Eye className="w-5 h-5 text-zinc-400 hover:text-white" />}
+                {showPassword ? <EyeOff className="w-5 h-5 text-zinc-400 hover:text-white" /> : <Eye className="w-5 h-5 text-zinc-400 hover:text-white" />}
               </button>
             </div>
           </div>
-          {/* Remember & Forgot */}
+
           <div className="flex items-center justify-between text-xs text-zinc-400 gap-2">
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
@@ -140,34 +133,26 @@ export default function SignIn() {
               />
               {t("remember_me")}
             </label>
-            <Link
-              to="/reset"
-              className="text-teal-400 hover:underline focus-visible:ring-2 focus-visible:ring-teal-400 rounded"
-            >
+            <Link to="/reset" className="text-teal-400 hover:underline focus-visible:ring-2 focus-visible:ring-teal-400 rounded">
               {t("forgot_password")}
             </Link>
           </div>
-          {/* Submit */}
+
           <motion.button
             type="submit"
             whileTap={{ scale: 0.96 }}
             disabled={loading}
             className={`w-full py-3 text-base font-semibold rounded-xl shadow-xl transition
               ${loading ? "bg-teal-700 cursor-not-allowed opacity-80" : "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400"}
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400
-            `}
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400`}
           >
             {loading ? t("signing_in") : t("sign_in_button")}
           </motion.button>
         </form>
 
-        {/* Footer Link */}
         <div className="text-center text-xs text-zinc-500 mt-3">
           {t("no_account", "Don't have an account yet?")}&nbsp;
-          <Link
-            to="/signup"
-            className="font-semibold text-teal-400 hover:underline focus-visible:ring-2 focus-visible:ring-teal-400 rounded"
-          >
+          <Link to="/signup" className="font-semibold text-teal-400 hover:underline focus-visible:ring-2 focus-visible:ring-teal-400 rounded">
             {t("sign_up_here", "Sign up here.")}
           </Link>
         </div>
@@ -175,4 +160,3 @@ export default function SignIn() {
     </motion.div>
   );
 }
-
