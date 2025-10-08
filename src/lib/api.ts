@@ -1,65 +1,112 @@
 // src/lib/api.ts
-// Centralized API client with BOTH default and named exports.
-// Works with:  import api from "../lib/api";
-//          and: import { api } from "../lib/api";
+// Default export with the exact methods AuthContext expects.
+// Also exports named helpers if you want to import them elsewhere.
 
-export type ApiResponse<T = any> = {
-  ok: boolean;
-  status: number;
-  body: T;
-  res: Response;
-};
+export type Json =
+  | null
+  | string
+  | number
+  | boolean
+  | Json[]
+  | { [k: string]: Json | undefined };
 
-const API_BASE = String(
-  (import.meta.env.VITE_API_BASE ?? import.meta.env.VITE_API_URL ?? "")
-);
+const API_BASE =
+  (import.meta as any).env?.VITE_API_BASE?.toString().trim() || "https://api.echoscript.ai";
 
-async function core(path: string, init: RequestInit = {}): Promise<ApiResponse> {
-  if (!API_BASE) {
-    throw new Error("VITE_API_BASE or VITE_API_URL is not set");
-  }
-  const res = await fetch(`${API_BASE}${path}`, {
+async function request<T = Json>(
+  path: string,
+  init: RequestInit = {}
+): Promise<T> {
+  const url = path.startsWith("http") ? path : `${API_BASE}${path}`;
+  const res = await fetch(url, {
     credentials: "include",
     ...init,
   });
-  const ct = res.headers.get("content-type") || "";
-  const body = ct.includes("application/json")
-    ? await res.json().catch(() => null)
-    : await res.text().catch(() => null);
-  return { ok: res.ok, status: res.status, body, res };
+
+  const contentType = res.headers.get("content-type") || "";
+  const hasBody =
+    res.status !== 204 &&
+    res.status !== 205 &&
+    res.headers.get("content-length") !== "0";
+
+  if (!res.ok) {
+    const txt = hasBody ? await res.text().catch(() => "") : "";
+    throw new Error(`${res.status} ${res.statusText}${txt ? ` — ${txt}` : ""}`);
+  }
+
+  if (!hasBody) return null as unknown as T;
+  if (contentType.includes("application/json")) {
+    return (await res.json()) as T;
+  }
+  // fallback if server returned text
+  const text = await res.text();
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return text as unknown as T;
+  }
 }
 
-type ApiFn = {
-  (path: string, init?: RequestInit): Promise<ApiResponse>;
-  get(path: string, init?: RequestInit): Promise<ApiResponse>;
-  post(path: string, body?: any, init?: RequestInit): Promise<ApiResponse>;
-  put(path: string, body?: any, init?: RequestInit): Promise<ApiResponse>;
-  patch(path: string, body?: any, init?: RequestInit): Promise<ApiResponse>;
-  delete(path: string, init?: RequestInit): Promise<ApiResponse>;
-  base: string;
+/* ------------------------------ Auth ------------------------------ */
+
+export function me() {
+  return request<{ id: number; email: string; mode?: string }>("/api/auth/me");
+}
+
+export function signup(payload: { email: string; password: string }) {
+  return request<{ id: number; email: string }>("/api/auth/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function login(payload: { email: string; password: string }) {
+  return request<{ ok: boolean; access_token: string; token_type: string }>(
+    "/api/auth/login",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export function logout() {
+  return request<{ ok: true }>("/api/auth/logout", { method: "POST" });
+}
+
+/* ------------------------------ Stripe ------------------------------ */
+
+export function createCheckoutSession(plan: "pro" | "premium" | "edu" = "pro") {
+  // This path matches the working endpoint you tested
+  return request<{ url: string }>("/api/stripe/create-checkout-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plan }),
+  });
+}
+
+/* ------------------------------ Health ------------------------------ */
+
+export function health() {
+  return request<{ ok: boolean }>("/api/healthz");
+}
+
+/* --------------------------- Default export ------------------------- */
+
+const api = {
+  base: API_BASE,
+  // auth
+  me,
+  signup,
+  login,
+  logout,
+  // stripe
+  createCheckoutSession,
+  // misc
+  health,
 };
 
-const api = (async function api(path: string, init: RequestInit = {}) {
-  return core(path, init);
-}) as ApiFn;
-
-api.get = (path, init) => core(path, { method: "GET", ...(init || {}) });
-
-function jsonInit(method: string, body?: any, init?: RequestInit): RequestInit {
-  return {
-    method,
-    headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-    ...(init || {}),
-  };
-}
-
-api.post = (path, body, init) => core(path, jsonInit("POST", body, init));
-api.put = (path, body, init) => core(path, jsonInit("PUT", body, init));
-api.patch = (path, body, init) => core(path, jsonInit("PATCH", body, init));
-api.delete = (path, init) => core(path, { method: "DELETE", ...(init || {}) });
-api.base = API_BASE;
-
-export { api, API_BASE };
 export default api;
 
