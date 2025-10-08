@@ -4,17 +4,7 @@ import { useTranslation } from "react-i18next";
 import { BadgeCheck, Sparkles, GraduationCap, Users, Zap, TriangleAlert } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-
-// ---- Compute API base (no Netlify proxy required) ----
-const API_BASE =
-  (import.meta.env.VITE_API_BASE && import.meta.env.VITE_API_BASE.trim()) ||
-  (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.trim()) ||
-  (import.meta.env.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.trim()) ||
-  (import.meta.env.PROD ? "https://api.echoscript.ai/api" : "/api");
-
-// PayPal public key is OK in client bundle
-const HAS_PAYPAL = Boolean(import.meta.env.VITE_PAYPAL_CLIENT_ID);
+import api from "../lib/api"; // ✅ default export
 
 // ===== DEV/TEST AUTH BYPASS =====
 const DEV_BYPASS_FLAG = import.meta.env.VITE_BYPASS_AUTH_FOR_PAY === "1";
@@ -29,12 +19,17 @@ const isLocalHost =
 const ALLOW_BYPASS = import.meta.env.DEV || isLocalHost;
 const DEV_BYPASS_ACTIVE = ALLOW_BYPASS && (DEV_BYPASS_FLAG || hasDemoParam);
 
-// Map plan -> PayPal amount (USD)
+// Map plan -> PayPal/Stripe nominal amount (we only use Stripe right now)
 const PLAN_AMOUNTS = {
   pro: "9.99",
   premium: "19.99",
   edu: "4.99",
 };
+
+// ⚠️ Netlify secret scanning was failing because the PayPal client ID
+// ended up in the JS bundle. To pass the build, we disable PayPal UI
+// completely until we wire a server-provided public config.
+const HAS_PAYPAL = false;
 
 const plans = [
   {
@@ -133,19 +128,11 @@ export default function PurchasePage() {
 
   const SHOW_SIGNIN = (!user || !user.email) && !DEV_BYPASS_ACTIVE;
 
-  // --- Stripe (absolute call; no Netlify proxy) ---
   const handleCheckout = async (planId) => {
     try {
-      const res = await fetch(`${API_BASE}/stripe/create-checkout-session`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ plan: planId }),
-      });
-      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-      const data = await res.json();
-      if (!data?.url) throw new Error("No Stripe session URL returned");
-      window.location.href = data.url;
+      const { url } = await api.stripeCreateCheckout(planId);
+      if (!url) throw new Error("No Stripe session URL returned");
+      window.location.href = url;
     } catch (err) {
       console.error("Stripe checkout error →", err);
       alert(`Payment error. Please try again.\n\nDetails: ${err?.message || err}`);
@@ -178,7 +165,6 @@ export default function PurchasePage() {
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => {
-            const amount = PLAN_AMOUNTS[plan.id];
             return (
               <div
                 key={plan.id}
@@ -227,40 +213,9 @@ export default function PurchasePage() {
                       {t("pay_with_card_stripe", "Pay with card (Stripe)")}
                     </button>
 
-                    {HAS_PAYPAL ? (
-                      <div className="w-full rounded-lg border border-white/10 bg-white/5 p-2">
-                        <PayPalScriptProvider
-                          options={{ clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID, currency: "USD" }}
-                        >
-                          <PayPalButtons
-                            style={{ layout: "horizontal", height: 42 }}
-                            createOrder={async () => {
-                              const r = await fetch(`${API_BASE}/paypal/create-order`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ amount: amount || "9.99", currency: "USD", plan: plan.id }),
-                              });
-                              if (!r.ok) throw new Error("create-order failed");
-                              const data = await r.json();
-                              return data.id;
-                            }}
-                            onApprove={async (data) => {
-                              const r = await fetch(`${API_BASE}/paypal/capture-order/${data.orderID}`, {
-                                method: "POST",
-                              });
-                              if (!r.ok) throw new Error("capture failed");
-                              alert("PayPal payment captured ✅");
-                            }}
-                            onError={(err) => {
-                              console.error("PayPal error", err);
-                              alert("PayPal error — check console.");
-                            }}
-                          />
-                        </PayPalScriptProvider>
-                      </div>
-                    ) : (
+                    {!HAS_PAYPAL && (
                       <p className="text-xs text-zinc-400 text-center">
-                        Set <code>VITE_PAYPAL_CLIENT_ID</code> to enable PayPal.
+                        PayPal is temporarily unavailable while we harden the build. Stripe is available now.
                       </p>
                     )}
                   </div>
@@ -288,3 +243,4 @@ export default function PurchasePage() {
     </motion.div>
   );
 }
+

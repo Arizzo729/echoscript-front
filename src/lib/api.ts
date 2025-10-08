@@ -1,98 +1,46 @@
 // src/lib/api.ts
+// Minimal, safe API client. Uses absolute URL so Netlify proxy issues don't matter.
 
-// Prefer relative '/api' so Netlify proxy forwards to your backend.
-// Falls back to any provided envs if you override.
-export const API_BASE = (
+const raw =
   import.meta.env.VITE_API_BASE ??
   import.meta.env.VITE_API_URL ??
-  '/api'
-).replace(/\/$/, '');
+  "https://api.echoscript.ai";
 
-type FetchOptions = RequestInit & { json?: unknown };
+const API_BASE = String(raw).replace(/\/+$/, ""); // trim trailing slash
 
-// Core request helper
-async function request<T>(path: string, opts: FetchOptions = {}): Promise<T> {
-  const headers: Record<string, string> = { ...(opts.headers as any) };
-
-  if (opts.json !== undefined && !headers['Content-Type']) {
-    headers['Content-Type'] = 'application/json';
-  }
-
-  const res = await fetch(
-    `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`,
-    {
-      credentials: 'include',
-      ...opts,
-      headers,
-      body: opts.json !== undefined ? JSON.stringify(opts.json) : opts.body,
-    }
-  );
-
-  const ct = res.headers.get('content-type') || '';
-  const parser = ct.includes('application/json') ? res.json() : res.text();
-  const data: any = await parser.catch(() => ({}));
-
+async function asJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
-    const message =
-      (data && (data.detail || data.message)) ||
-      res.statusText ||
-      'Request failed';
-    throw new Error(`${res.status} ${message}`);
+    const text = await res.text().catch(() => "");
+    throw new Error(`${res.status} ${res.statusText}${text ? ` - ${text}` : ""}`);
   }
-
-  return data as T;
+  return (await res.json()) as T;
 }
 
-// Convenience verbs
-export const get = <T>(path: string, opts: FetchOptions = {}) =>
-  request<T>(path, { ...opts, method: 'GET' });
-
-export const post = <T>(path: string, json?: unknown, opts: FetchOptions = {}) =>
-  request<T>(path, { ...opts, method: 'POST', json });
-
-export const del = <T>(path: string, opts: FetchOptions = {}) =>
-  request<T>(path, { ...opts, method: 'DELETE' });
-
-// ---- API surface used across the app ----
-export type CheckoutResponse = { url: string };
-
-export function createCheckoutSession(
-  plan: 'pro' | 'premium' | 'edu'
-): Promise<CheckoutResponse> {
-  return post<CheckoutResponse>('/stripe/create-checkout-session', { plan });
+function get<T>(path: string) {
+  return fetch(`${API_BASE}${path}`).then(asJson<T>);
 }
 
-// PayPal helpers (optional)
-export type PaypalCreateOrderReq = { amount: string; currency?: string; plan?: string };
-export type PaypalCreateOrderResp = { id: string };
-
-export function paypalCreateOrder(
-  body: PaypalCreateOrderReq
-): Promise<PaypalCreateOrderResp> {
-  return post<PaypalCreateOrderResp>('/paypal/create-order', body);
+function post<T>(path: string, body?: unknown) {
+  return fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  }).then(asJson<T>);
 }
 
-export function paypalCaptureOrder(orderId: string): Promise<{ status: string }> {
-  return post<{ status: string }>(`/paypal/capture-order/${orderId}`);
-}
+export type StripeCheckoutRes = { url: string };
 
-// Auth helper (if your backend supports it)
-export type Me = { id: string; email: string } | null;
-export function me(): Promise<Me> {
-  return get<Me>('/auth/me');
-}
+export const api = {
+  health: () => get<{ status: "ok" }>("/api/healthz"),
+  stripeDebugPrices: () => get<Record<string, string>>("/api/stripe/_debug-prices"),
+  stripeCreateCheckout: (plan: string) =>
+    post<StripeCheckoutRes>("/api/stripe/create-checkout-session", { plan }),
 
-// ---- Default export (required by AuthContext.jsx) ----
-const api = {
-  API_BASE,
-  request,
-  get,
-  post,
-  del,
-  createCheckoutSession,
-  paypalCreateOrder,
-  paypalCaptureOrder,
-  me,
+  // Keep PayPal server endpoints available for future, but **do not** use on the client
+  // until we re-introduce them without leaking the client ID to the bundle.
+  // paypalCreateOrder: (payload: { amount: string; currency: string; plan: string }) =>
+  //   post<{ id: string }>("/api/paypal/create-order", payload),
+  // paypalCapture: (orderID: string) => post<{ status: string }>(`/api/paypal/capture-order/${orderID}`),
 };
 
 export default api;
