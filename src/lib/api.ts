@@ -1,46 +1,121 @@
 // src/lib/api.ts
-// Minimal, safe API client. Uses absolute URL so Netlify proxy issues don't matter.
+// Frontend API client (Vite)
+// - Proxies through Netlify to your Railway API when using relative "/api/*"
+// - Keeps a default export for existing imports (AuthContext, pages, etc.)
 
-const raw =
-  import.meta.env.VITE_API_BASE ??
-  import.meta.env.VITE_API_URL ??
-  "https://api.echoscript.ai";
+type PlanId = "pro" | "premium" | "edu";
 
-const API_BASE = String(raw).replace(/\/+$/, ""); // trim trailing slash
+type Json =
+  | null
+  | string
+  | number
+  | boolean
+  | Json[]
+  | { [k: string]: Json | undefined };
 
-async function asJson<T>(res: Response): Promise<T> {
+const API_BASE =
+  (import.meta as any).env?.VITE_API_BASE?.toString().trim() || "/api";
+
+async function http<T = Json>(
+  path: string,
+  init?: RequestInit & { expectText?: boolean }
+): Promise<T> {
+  const url = path.startsWith("http") ? path : `${API_BASE}${path}`;
+  const res = await fetch(url, init);
+
+  // Handle empty body / 204
+  const hasBody =
+    res.headers.get("content-length") !== "0" &&
+    res.status !== 204 &&
+    res.status !== 205;
+
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`${res.status} ${res.statusText}${text ? ` - ${text}` : ""}`);
+    const txt = hasBody ? await res.text().catch(() => "") : "";
+    throw new Error(`${res.status} ${res.statusText}${txt ? ` — ${txt}` : ""}`);
   }
-  return (await res.json()) as T;
+
+  if (!hasBody) return null as unknown as T;
+  if (init?.expectText) return (await res.text()) as unknown as T;
+
+  const text = await res.text();
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    // If the server returned plain text but caller expected JSON
+    return text as unknown as T;
+  }
 }
 
-function get<T>(path: string) {
-  return fetch(`${API_BASE}${path}`).then(asJson<T>);
+/* ----------------------- Health & Debug helpers ----------------------- */
+
+async function health(): Promise<{ ok: boolean } | number> {
+  // Some deployments just return 200 with no body
+  try {
+    const status = await fetch(`${API_BASE}/healthz`).then((r) => r.status);
+    return status === 200 ? { ok: true } : status;
+  } catch {
+    return { ok: false };
+  }
 }
 
-function post<T>(path: string, body?: unknown) {
-  return fetch(`${API_BASE}${path}`, {
+async function getStripePriceMap(): Promise<Record<string, string>> {
+  // e.g. { pro: 'price_...', premium: 'price_...', edu: 'price_...' }
+  return http<Record<string, string>>("/stripe/_debug-prices");
+}
+
+/* ---------------------------- Stripe flows ---------------------------- */
+
+async function createCheckoutSession(
+  plan: PlanId
+): Promise<{ url: string }> {
+  // Matches backend router: prefix `/api/stripe/checkout` + POST `/create`
+  // (Your previous 502s were from calling `/api/stripe/create-checkout-session`)
+  return http<{ url: string }>("/stripe/checkout/create", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  }).then(asJson<T>);
+    body: JSON.stringify({ plan }),
+  });
 }
 
-export type StripeCheckoutRes = { url: string };
+/* ---------------------------- PayPal flows ---------------------------- */
 
-export const api = {
-  health: () => get<{ status: "ok" }>("/api/healthz"),
-  stripeDebugPrices: () => get<Record<string, string>>("/api/stripe/_debug-prices"),
-  stripeCreateCheckout: (plan: string) =>
-    post<StripeCheckoutRes>("/api/stripe/create-checkout-session", { plan }),
+async function createPayPalOrder(args: {
+  amount?: string; // optional if server derives from plan
+  currency?: string; // default "USD" on server
+  plan?: PlanId;
+}): Promise<{ id: string }> {
+  return http<{ id: string }>("/paypal/create-order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(args),
+  });
+}
 
-  // Keep PayPal server endpoints available for future, but **do not** use on the client
-  // until we re-introduce them without leaking the client ID to the bundle.
-  // paypalCreateOrder: (payload: { amount: string; currency: string; plan: string }) =>
-  //   post<{ id: string }>("/api/paypal/create-order", payload),
-  // paypalCapture: (orderID: string) => post<{ status: string }>(`/api/paypal/capture-order/${orderID}`),
+async function capturePayPalOrder(orderID: string): Promise<Json> {
+  return http<Json>(`/paypal/capture-order/${orderID}`, {
+    method: "POST",
+  });
+}
+
+/* ------------------------------ Exports ------------------------------ */
+
+export {
+  API_BASE,
+  health,
+  getStripePriceMap,
+  createCheckoutSession,
+  createPayPalOrder,
+  capturePayPalOrder,
+};
+
+// Keep default export for existing imports across the app
+const api = {
+  API_BASE,
+  health,
+  getStripePriceMap,
+  createCheckoutSession,
+  createPayPalOrder,
+  capturePayPalOrder,
 };
 
 export default api;
