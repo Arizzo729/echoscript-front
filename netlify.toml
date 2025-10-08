@@ -1,13 +1,11 @@
-# netlify.toml — final
-
 [build]
   command = "npm ci --no-audit --no-fund && npm run build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20.19.0"
-  VITE_API_BASE = "/api"
-  # Public client keys are expected in frontend bundles; silence scanner:
+  # Do NOT set VITE_API_BASE here. Leave it unset so the /api proxy below works.
+  # Silence the secrets scanner for public client keys that must be in the bundle:
   SECRETS_SCAN_OMIT_KEYS = "VITE_PAYPAL_CLIENT_ID,VITE_STRIPE_PUBLIC_KEY"
 
 # Cache rules
@@ -31,7 +29,7 @@
     X-Frame-Options = "SAMEORIGIN"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
-# Single API proxy — points your frontend /api/* to Railway
+# Proxy all frontend /api/* calls to Railway
 [[redirects]]
   from = "/api/*"
   to   = "https://api.echoscript.ai/api/:splat"
