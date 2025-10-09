@@ -1,36 +1,37 @@
 // src/lib/api.ts
+// Robust, cookie-including API client that ALWAYS uses the relative /api prefix.
+// Netlify will proxy /api/* → https://api.echoscript.ai/api/* per your redirects.
+// This prevents malformed URLs like "/https://api.echoscript.ai/...".
+
 type Json = Record<string, any>;
 
-function ensureLeadingSlash(s: string) {
-  return s.startsWith("/") ? s : `/${s}`;
-}
-function stripTrailingSlash(s: string) {
-  return s.replace(/\/+$/, "");
-}
-function ensureApiBase(u?: string) {
-  const base = stripTrailingSlash(String(u || "").trim());
-  if (!base) return "https://api.echoscript.ai/api";
-  // if it already ends with /api, keep it; otherwise append /api
-  return base.endsWith("/api") ? base : `${base}/api`;
+// Normalize a relative prefix (never allow absolute here)
+function normalizeRelPrefix(v: unknown): string {
+  let s = String(v || "").trim();
+  if (!s) return "/api";
+  // If someone sets an absolute URL here by mistake, ignore it and use /api.
+  if (/^https?:\/\//i.test(s)) return "/api";
+  if (!s.startsWith("/")) s = `/${s}`;
+  // Remove trailing slashes
+  s = s.replace(/\/+$/, "");
+  return s || "/api";
 }
 
-const REL_BASE = ensureLeadingSlash(
-  (import.meta as any)?.env?.VITE_API_BASE || "/api"
-);
-const ABS_BASE = ensureApiBase(
-  (import.meta as any)?.env?.VITE_API_URL || "https://api.echoscript.ai"
-);
+// Use env if present, otherwise /api.
+const REL_PREFIX = normalizeRelPrefix((import.meta as any)?.env?.VITE_API_BASE || "/api");
 
+// Join helper
 function join(base: string, path: string) {
-  const b = stripTrailingSlash(base);
-  const p = ensureLeadingSlash(path || "/");
+  const b = base.replace(/\/+$/, "");
+  const p = path.startsWith("/") ? path : `/${path}`;
   return `${b}${p}`;
 }
 
-async function call(path: string, opts: RequestInit = {}, useAbsolute = false) {
-  const url = join(useAbsolute ? ABS_BASE : REL_BASE, path);
+// Core caller: always send credentials so your HttpOnly cookie is included.
+async function call(path: string, opts: RequestInit = {}) {
+  const url = join(REL_PREFIX, path);
   const res = await fetch(url, {
-    credentials: "include", // ← always send cookies
+    credentials: "include",
     ...opts,
     headers: {
       Accept: "application/json",
@@ -66,14 +67,15 @@ export async function signup(payload: { email: string; password: string }): Prom
 
 export async function login(payload: { email: string; password: string; remember?: boolean }): Promise<Json> {
   try {
+    // Use real signin if available
     return await call("/auth/signin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...payload, remember: !!payload.remember }),
     });
   } catch (e: any) {
+    // If your backend uses signup-as-login, fall back gracefully
     if (e?.status === 404) {
-      // fall back if backend uses signup-as-login
       return await signup({ email: payload.email, password: payload.password });
     }
     throw e;
@@ -84,5 +86,25 @@ export async function logout(): Promise<void> {
   try { await call("/auth/logout", { method: "POST" }); } catch {}
 }
 
-const api = { call, me, signup, login, logout };
+// ---------- Stripe helpers (if you call them from components) ----------
+export async function createCheckoutSession(plan: string) {
+  return call("/stripe/create-checkout-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plan }),
+  });
+}
+
+export async function createPortalSession() {
+  try {
+    return await call("/stripe/create-portal-session", { method: "POST" });
+  } catch (e: any) {
+    if (e?.status === 404) {
+      return await call("/stripe/create-customer-portal-session", { method: "POST" });
+    }
+    throw e;
+  }
+}
+
+const api = { call, me, signup, login, logout, createCheckoutSession, createPortalSession };
 export default api;

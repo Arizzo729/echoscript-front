@@ -1,90 +1,67 @@
+// src/context/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import api from "../lib/api"; // adjust to "../lib/api" if this file lives in src/context
+import api from "../lib/api";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("es_user") || "null");
-    } catch {
-      return null;
-    }
-  });
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [ready, setReady] = useState(false);
 
-  // keep localStorage in sync
-  useEffect(() => {
-    if (user) localStorage.setItem("es_user", JSON.stringify(user));
-    else localStorage.removeItem("es_user");
-  }, [user]);
-
-  // on mount, check session
+  // Load session once on mount
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const u = await api.me(); // 200 if logged in, 401 otherwise
-        if (!cancelled && u?.email) setUser({ id: u.id, email: u.email });
-      } catch (e) {
-        // treat 401 as "logged out"
+        const me = await api.me();
+        if (!cancelled) setUser(me);
+      } catch {
         if (!cancelled) setUser(null);
+      } finally {
+        if (!cancelled) setReady(true);
       }
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
-  const svc = useMemo(
-    () => ({
-      signUp: (payload) => api.signup(payload),
-      signIn: (payload) => api.login(payload),
-      signOut: () => api.logout(),
-    }),
-    []
+  async function signIn({ email, password, remember }) {
+    const res = await api.login({ email, password, remember });
+    // immediately refresh me so context has {id,email,...}
+    try {
+      const me = await api.me();
+      setUser(me);
+    } catch {
+      // fallback: synthesize from payload if /me not present
+      setUser({ email: res?.email || email, id: res?.id, mode: "jwt" });
+    }
+  }
+
+  async function signOut() {
+    try { await api.logout(); } finally { setUser(null); }
+  }
+
+  async function refresh() {
+    const me = await api.me();
+    setUser(me);
+  }
+
+  const value = useMemo(() => ({
+    user,
+    ready,
+    signIn,
+    signOut,
+    refresh,
+    isAuthenticated: !!user?.email,
+  }), [user, ready]);
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
   );
-
-  const signUp = async ({ email, password }) => {
-    setLoading(true);
-    try {
-      const data = await svc.signUp({ email, password });
-      // backend returns { id, email }
-      setUser({ id: data.id, email: data.email });
-      return data;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const signIn = async ({ email, password, remember }) => {
-    setLoading(true);
-    try {
-      const data = await svc.signIn({ email, password, remember: !!remember });
-      // after login, verify with /me so UI is consistent
-      const u = await api.me().catch(() => null);
-      if (u?.email) setUser({ id: u.id, email: u.email });
-      else setUser({ email }); // fallback
-      return data;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      await svc.signOut();
-    } catch {}
-    setUser(null);
-  };
-
-  const value = { user, loading, signUp, signIn, signOut };
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within <AuthProvider>");
-  return ctx;
+  return useContext(AuthContext);
 }
 

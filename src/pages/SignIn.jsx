@@ -1,5 +1,5 @@
 // src/pages/SignIn.jsx
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 export default function SignIn() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { signIn, user } = useAuth();
+  const { user, signIn } = useAuth() || {};
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,19 +18,15 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => { if (user?.email) navigate("/dashboard"); }, [user, navigate]);
+  useEffect(() => { if (user?.email) navigate("/account"); }, [user, navigate]);
 
-  const handleSignIn = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (!email.includes("@") || password.length < 6) {
-      setError(t("signin_error") || "Please enter a valid email and password (6+ chars).");
-      return;
-    }
     setLoading(true);
     try {
       await signIn({ email, password, remember: rememberMe });
-      navigate("/dashboard");
+      navigate("/account");
     } catch (err) {
       setError(err?.message || t("signin_error") || "Sign in failed.");
     } finally {
@@ -51,21 +47,17 @@ export default function SignIn() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.1, duration: 0.35, type: "spring" }}
       >
-        <Link
-          to={user ? "/dashboard" : "/"}
-          className="flex items-center text-sm font-semibold text-teal-400 hover:underline focus-visible:ring-2 focus-visible:ring-teal-400 w-max"
-        >
+        <Link to={user ? "/account" : "/"} className="flex items-center text-sm font-semibold text-teal-400 hover:underline">
           <ArrowLeft className="w-4 h-4 mr-1" />
-          {user ? t("dashboard", "Dashboard") : t("home", "Home")}
+          {user ? t("account", "Account") : t("home", "Home")}
         </Link>
 
         <div className="space-y-1 text-center">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-lg">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             {t("signin_title", "Welcome Back")}
           </h1>
           <p className="text-base text-zinc-400 font-medium">
-            {t("signin_subtitle")}&nbsp;
-            <span className="text-teal-400 font-bold">EchoScript.AI</span>
+            {t("signin_subtitle", "Sign in to")} <span className="text-teal-400 font-bold">EchoScript.AI</span>
           </p>
         </div>
 
@@ -76,86 +68,54 @@ export default function SignIn() {
           </motion.div>
         )}
 
-        <form onSubmit={handleSignIn} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label htmlFor="email" className="block text-xs font-medium text-zinc-400 tracking-wide">
-              {t("email")}
-            </label>
+            <label htmlFor="email" className="block text-xs font-medium text-zinc-400">{t("email", "Email")}</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
               <input
-                id="email"
-                autoComplete="username"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t("email")}
-                required
-                className="w-full pl-11 pr-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-white text-base placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-500 transition focus:bg-zinc-900/60 shadow-sm"
+                id="email" type="email" autoComplete="username"
+                value={email} onChange={(e) => setEmail(e.target.value)}
+                placeholder={t("email", "Email")} required
+                className="w-full pl-11 pr-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="password" className="block text-xs font-medium text-zinc-400 tracking-wide">
-              {t("password")}
-            </label>
+            <label htmlFor="password" className="block text-xs font-medium text-zinc-400">{t("password", "Password")}</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
               <input
-                id="password"
-                autoComplete="current-password"
+                id="password" autoComplete="current-password"
                 type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t("password")}
-                required
-                className="w-full pl-11 pr-11 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-white text-base placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-zinc-900/60 transition shadow-sm"
+                value={password} onChange={(e) => setPassword(e.target.value)}
+                placeholder={t("password", "Password")} required
+                className="w-full pl-11 pr-11 py-3 rounded-xl bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full focus-visible:ring-2 focus-visible:ring-teal-400"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff className="w-5 h-5 text-zinc-400 hover:text-white" /> : <Eye className="w-5 h-5 text-zinc-400 hover:text-white" />}
+              <button type="button" onClick={() => setShowPassword(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full"
+                aria-label={showPassword ? "Hide password" : "Show password"}>
+                {showPassword ? <EyeOff className="w-5 h-5 text-zinc-400" /> : <Eye className="w-5 h-5 text-zinc-400" />}
               </button>
             </div>
           </div>
 
           <div className="flex items-center justify-between text-xs text-zinc-400 gap-2">
             <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={() => setRememberMe((v) => !v)}
-                className="h-4 w-4 accent-teal-500 rounded focus-visible:ring-2 focus-visible:ring-teal-400"
-              />
-              {t("remember_me")}
+              <input type="checkbox" checked={rememberMe} onChange={() => setRememberMe(v => !v)} className="h-4 w-4 accent-teal-500 rounded" />
+              {t("remember_me", "Remember me")}
             </label>
-            <Link to="/reset" className="text-teal-400 hover:underline focus-visible:ring-2 focus-visible:ring-teal-400 rounded">
-              {t("forgot_password")}
+            <Link to="/reset" className="text-teal-400 hover:underline">
+              {t("forgot_password", "Forgot password?")}
             </Link>
           </div>
 
-          <motion.button
-            type="submit"
-            whileTap={{ scale: 0.96 }}
-            disabled={loading}
-            className={`w-full py-3 text-base font-semibold rounded-xl shadow-xl transition
-              ${loading ? "bg-teal-700 cursor-not-allowed opacity-80" : "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400"}
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400`}
-          >
-            {loading ? t("signing_in") : t("sign_in_button")}
+          <motion.button type="submit" whileTap={{ scale: 0.96 }} disabled={loading}
+            className={`w-full py-3 text-base font-semibold rounded-xl shadow-xl transition ${loading ? "bg-teal-700 opacity-80" : "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400"}`}>
+            {loading ? t("signing_in", "Signing in…") : t("sign_in_button", "Sign in")}
           </motion.button>
         </form>
-
-        <div className="text-center text-xs text-zinc-500 mt-3">
-          {t("no_account", "Don't have an account yet?")}&nbsp;
-          <Link to="/signup" className="font-semibold text-teal-400 hover:underline focus-visible:ring-2 focus-visible:ring-teal-400 rounded">
-            {t("sign_up_here", "Sign up here.")}
-          </Link>
-        </div>
       </motion.div>
     </motion.div>
   );
