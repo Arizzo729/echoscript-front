@@ -1,7 +1,8 @@
 // src/components/VideoWithSubs.tsx
 import { useRef, useState } from "react";
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
+// Default to the Netlify proxy /api; allow override via VITE_API_BASE_URL
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/+$/, "");
 
 export default function VideoWithSubs() {
   const [videoUrl, setVideoUrl] = useState<string>("");
@@ -21,7 +22,8 @@ export default function VideoWithSubs() {
     const fd = new FormData();
     fd.append("file", file);
 
-    const res = await fetch(`${API_BASE}/api/v1/subtitles`, { method: "POST", body: fd, credentials: "include" });
+    // Hit the /api/subtitles route (backend mounts under /api/* and /v1/* separately)
+    const res = await fetch(`${API_BASE}/subtitles`, { method: "POST", body: fd, credentials: "include" });
     if (!res.ok) { alert("Failed to make subtitles"); return; }
 
     const blob = await res.blob();
