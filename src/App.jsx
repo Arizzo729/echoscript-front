@@ -16,7 +16,7 @@ import AnimatedSplash from "./components/AnimatedSplash";
 import OnboardingModal from "./components/OnboardingModal";
 import Layout from "./components/Layout";
 import ErrorBoundary from "./components/ErrorBoundary";
-import TranscriptAudioPlayer from "./components/TranscriptAudioPlayer";
+// ⛔️ Removed: TranscriptAudioPlayer
 import useIsMobile from "./hooks/useIsMobile";
 import MobileBottomNav from "./components/MobileBottomNav";
 import FloatingHome from "./components/FloatingHome";
@@ -98,9 +98,7 @@ function OverlayManager() {
       )}
       {introComplete && (
         <>
-          <div className="fixed bottom-24 left-4 right-4 z-50 max-w-3xl mx-auto">
-            <TranscriptAudioPlayer audioUrl="/audio/sample-audio.mp3" />
-          </div>
+          {/* ⛔️ Removed the fixed bottom TranscriptAudioPlayer */}
           {isMobile && <MobileBottomNav />}
           {isMobile && <FloatingHome />}
         </>
@@ -178,3 +176,4 @@ export default function App() {
     </AuthProvider>
   );
 }
+
