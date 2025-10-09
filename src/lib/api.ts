@@ -1,17 +1,36 @@
 // src/lib/api.ts
 type Json = Record<string, any>;
 
-const REL_BASE = (import.meta as any)?.env?.VITE_API_BASE || "/api";
-const ABS_BASE = (import.meta as any)?.env?.VITE_API_URL  || "https://api.echoscript.ai/api";
+function ensureLeadingSlash(s: string) {
+  return s.startsWith("/") ? s : `/${s}`;
+}
+function stripTrailingSlash(s: string) {
+  return s.replace(/\/+$/, "");
+}
+function ensureApiBase(u?: string) {
+  const base = stripTrailingSlash(String(u || "").trim());
+  if (!base) return "https://api.echoscript.ai/api";
+  // if it already ends with /api, keep it; otherwise append /api
+  return base.endsWith("/api") ? base : `${base}/api`;
+}
+
+const REL_BASE = ensureLeadingSlash(
+  (import.meta as any)?.env?.VITE_API_BASE || "/api"
+);
+const ABS_BASE = ensureApiBase(
+  (import.meta as any)?.env?.VITE_API_URL || "https://api.echoscript.ai"
+);
 
 function join(base: string, path: string) {
-  return `${base}${path.startsWith("/") ? path : `/${path}`}`;
+  const b = stripTrailingSlash(base);
+  const p = ensureLeadingSlash(path || "/");
+  return `${b}${p}`;
 }
 
 async function call(path: string, opts: RequestInit = {}, useAbsolute = false) {
   const url = join(useAbsolute ? ABS_BASE : REL_BASE, path);
   const res = await fetch(url, {
-    credentials: "include",            // ← always send cookies
+    credentials: "include", // ← always send cookies
     ...opts,
     headers: {
       Accept: "application/json",
@@ -47,15 +66,14 @@ export async function signup(payload: { email: string; password: string }): Prom
 
 export async function login(payload: { email: string; password: string; remember?: boolean }): Promise<Json> {
   try {
-    // Prefer dedicated signin if available
     return await call("/auth/signin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...payload, remember: !!payload.remember }),
     });
   } catch (e: any) {
-    // If your backend uses signup-as-login, fall back gracefully
     if (e?.status === 404) {
+      // fall back if backend uses signup-as-login
       return await signup({ email: payload.email, password: payload.password });
     }
     throw e;
@@ -66,7 +84,5 @@ export async function logout(): Promise<void> {
   try { await call("/auth/logout", { method: "POST" }); } catch {}
 }
 
-// ---------- Export a single API object ----------
 const api = { call, me, signup, login, logout };
 export default api;
-
