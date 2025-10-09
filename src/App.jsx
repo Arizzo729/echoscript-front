@@ -16,10 +16,10 @@ import AnimatedSplash from "./components/AnimatedSplash";
 import OnboardingModal from "./components/OnboardingModal";
 import Layout from "./components/Layout";
 import ErrorBoundary from "./components/ErrorBoundary";
-// ⛔️ Removed: TranscriptAudioPlayer
 import useIsMobile from "./hooks/useIsMobile";
 import MobileBottomNav from "./components/MobileBottomNav";
 import FloatingHome from "./components/FloatingHome";
+import AudioOverlay from "./components/AudioOverlay"; // ✅ desktop overlay
 
 import Home from "./pages/HomePage";
 import Dashboard from "./pages/Dashboard";
@@ -45,14 +45,19 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Status from "./pages/Status";
-/* ✅ added earlier by you */
 import Checkout from "./pages/Checkout";
 
-const Studio = () => <NotFound />;
+// If you want the real component, you can swap these:
+// import LiveCaptions from "./components/LiveCaptions.tsx";
 const LiveCaptions = () => <NotFound />;
+const Studio = () => <NotFound />;
 
 /** Handles first-run splash + onboarding once per browser */
 function OverlayManager() {
+  const { pathname } = useLocation();
+  const skipOverlays = ["/terms", "/privacy", "/status", "/checkout"];
+  if (skipOverlays.some((p) => pathname.startsWith(p))) return null;
+
   const onboarded =
     typeof window !== "undefined" &&
     localStorage.getItem("onboardingComplete") === "true";
@@ -98,7 +103,7 @@ function OverlayManager() {
       )}
       {introComplete && (
         <>
-          {/* ⛔️ Removed the fixed bottom TranscriptAudioPlayer */}
+          {/* Mobile-only floating UI */}
           {isMobile && <MobileBottomNav />}
           {isMobile && <FloatingHome />}
         </>
@@ -114,6 +119,7 @@ function BoundaryResetter({ children }) {
 }
 
 export default function App() {
+  const isMobile = useIsMobile();
   return (
     <AuthProvider>
       <LanguageProvider>
@@ -164,7 +170,10 @@ export default function App() {
                       </Routes>
                     </Suspense>
 
-                    {/* Overlays above any page */}
+                    {/* Desktop-only global audio overlay (single mount) */}
+                    {!isMobile && <AudioOverlay />}
+
+                    {/* Global “intro/onboarding” overlays */}
                     <OverlayManager />
                   </BoundaryResetter>
                 </ErrorBoundary>
@@ -176,4 +185,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
 

@@ -1,9 +1,7 @@
 // src/components/Header.jsx
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Command, Search, Loader2, Cog, VolumeX, Volume2, User, Home
-} from "lucide-react";
+import { Command, Search, Loader2, Cog, VolumeX, Volume2, User, Home } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import IconButton from "./IconButton";
 import { useSound } from "../context/SoundContext";
@@ -155,132 +153,99 @@ export default function Header() {
   }, [open]);
 
   return (
-    <header className="w-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800">
-      <div className="max-w-screen-2xl mx-auto px-4 py-3 flex items-center gap-3">
-        {/* Home icon button (always visible) */}
-        <IconButton
-          label="Home"
-          tooltip="Home"
-          icon={<Home className="w-5 h-5" />}
-          onClick={() => navigate("/")}
-        />
+    <>
+      <header className="w-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800">
+        <div className="max-w-screen-2xl mx-auto px-4 py-3 flex items-center gap-3">
+          {/* Home icon button (always visible) */}
+          <IconButton label="Home" tooltip="Home" icon={<Home className="w-5 h-5" />} onClick={() => navigate("/")} />
 
-        {/* Brand (also clickable) */}
-        <Link to="/" className="flex items-center gap-2">
-          <Command className="w-5 h-5 text-teal-500" />
-          <span className="font-semibold text-zinc-900 dark:text-white">EchoScript.AI</span>
-        </Link>
+          {/* Brand (also clickable) */}
+          <Link to="/" className="flex items-center gap-2">
+            <Command className="w-5 h-5 text-teal-500" />
+            <span className="font-semibold text-zinc-900 dark:text-white">EchoScript.AI</span>
+          </Link>
 
-        {/* Search */}
-        <div className="relative flex-1 max-w-xl ml-auto">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
-            <input
-              ref={inputRef}
-              type="search"
-              value={q}
-              onChange={(e) => { setQ(e.target.value); if (!open) setOpen(true); }}
-              onFocus={openMenu}
-              onKeyDown={onKeyDown}
-              placeholder="Search tools, pages, actions…"
-              className="w-full pl-9 pr-28 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-400 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
-              role="combobox"
-              aria-expanded={open}
-              aria-controls="header-search-listbox"
-              aria-autocomplete="list"
-            />
-            {loadingRemote && (
-              <Loader2 className="absolute right-24 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-zinc-400" />
-            )}
+          {/* Search */}
+          <div className="relative flex-1 max-w-xl ml-auto">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+              <input
+                ref={inputRef}
+                type="search"
+                value={q}
+                onChange={(e) => { setQ(e.target.value); if (!open) setOpen(true); }}
+                onFocus={openMenu}
+                onKeyDown={onKeyDown}
+                placeholder="Search tools, pages, actions…"
+                className="w-full pl-9 pr-28 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-400 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                role="combobox"
+                aria-expanded={open}
+                aria-controls="header-search-listbox"
+                aria-autocomplete="list"
+              />
+              {loadingRemote && (
+                <Loader2 className="absolute right-24 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-zinc-400" />
+              )}
+            </div>
+
+            <AnimatePresence>
+              {open && (q.trim().length > 0 || suggestions.length > 0) && (
+                <motion.ul
+                  id="header-search-listbox"
+                  ref={listRef}
+                  role="listbox"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  className="absolute z-50 mt-2 w-full max-h-72 overflow-auto rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-xl"
+                >
+                  {suggestions.length === 0 && (
+                    <li className="px-3 py-2 text-sm text-zinc-500">No suggestions. Press Enter to search.</li>
+                  )}
+                  {suggestions.map((sug, i) => {
+                    const isActive = i === activeIdx;
+                    return (
+                      <li
+                        key={(sug.path || sug.action || sug.label) + i}
+                        role="option"
+                        aria-selected={isActive}
+                        onMouseEnter={() => setActiveIdx(i)}
+                        onMouseDown={(e) => { e.preventDefault(); submitSearch(sug); }}
+                        className={`px-3 py-2 cursor-pointer text-sm flex items-center justify-between ${
+                          isActive
+                            ? "bg-teal-600 text-white"
+                            : "text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        }`}
+                      >
+                        <span className="truncate">
+                          {sug.label}
+                          {sug.type === "action" && <span className="opacity-80"> · action</span>}
+                          {sug.type === "remote" && <span className="opacity-80"> · from server</span>}
+                        </span>
+                        {sug.path && (
+                          <span className={`text-xs ${isActive ? "opacity-90" : "text-zinc-400"}`}>{sug.path}</span>
+                        )}
+                      </li>
+                    );
+                  })}
+                </motion.ul>
+              )}
+            </AnimatePresence>
           </div>
 
-          <AnimatePresence>
-            {open && (q.trim().length > 0 || suggestions.length > 0) && (
-              <motion.ul
-                id="header-search-listbox"
-                ref={listRef}
-                role="listbox"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 6 }}
-                className="absolute z-50 mt-2 w-full max-h-72 overflow-auto rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-xl"
-              >
-                {suggestions.length === 0 && (
-                  <li className="px-3 py-2 text-sm text-zinc-500">No suggestions. Press Enter to search.</li>
-                )}
-                {suggestions.map((sug, i) => {
-                  const isActive = i === activeIdx;
-                  return (
-                    <li
-                      key={(sug.path || sug.action || sug.label) + i}
-                      role="option"
-                      aria-selected={isActive}
-                      onMouseEnter={() => setActiveIdx(i)}
-                      onMouseDown={(e) => { e.preventDefault(); submitSearch(sug); }}
-                      className={`px-3 py-2 cursor-pointer text-sm flex items-center justify-between ${
-                        isActive
-                          ? "bg-teal-600 text-white"
-                          : "text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                      }`}
-                    >
-                      <span className="truncate">
-                        {sug.label}
-                        {sug.type === "action" && <span className="opacity-80"> · action</span>}
-                        {sug.type === "remote" && <span className="opacity-80"> · from server</span>}
-                      </span>
-                      {sug.path && (
-                        <span className={`text-xs ${isActive ? "opacity-90" : "text-zinc-400"}`}>{sug.path}</span>
-                      )}
-                    </li>
-                  );
-                })}
-              </motion.ul>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Controls: Mute / Settings / Auth */}
-        <div className="flex items-center gap-2">
-          <IconButton
-            label={isMuted ? "Unmute" : "Mute"}
-            tooltip={isMuted ? "Unmute" : "Mute"}
-            icon={isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-            onClick={toggleMute}
-          />
-          <IconButton
-            label="Settings"
-            tooltip="Settings"
-            icon={<Cog className="w-5 h-5" />}
-            onClick={() => navigate("/settings")}
-          />
-          {isAuthed ? (
-            <button
-              onClick={() => navigate("/account")}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-600 text-white font-semibold hover:bg-teal-500 transition"
-            >
+          {/* Controls: Mute / Settings / Auth */}
+          <div className="flex items-center gap-2">
+            <IconButton label={isMuted ? "Unmute" : "Mute"} tooltip={isMuted ? "Unmute" : "Mute"} icon={isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />} onClick={toggleMute} />
+            <IconButton label="Settings" tooltip="Settings" icon={<Cog className="w-5 h-5" />} onClick={() => navigate("/settings")} />
+            <button onClick={() => navigate("/account")} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-600 text-white font-semibold hover:bg-teal-500 transition">
               <User className="w-4 h-4" />
               Account
             </button>
-          ) : (
-            <>
-              <button
-                onClick={() => (window.location.href = "/signin")}
-                className="px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition"
-              >
-                Sign in
-              </button>
-              <button
-                onClick={() => (window.location.href = "/signup")}
-                className="px-3 py-2 rounded-lg bg-teal-600 text-white font-semibold hover:bg-teal-500 transition"
-              >
-                Sign up
-              </button>
-            </>
-          )}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+      {/* Removed: <AudioOverlay /> — mount once at top-level for desktop only */}
+    </>
   );
 }
-
 
