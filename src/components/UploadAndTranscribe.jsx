@@ -1,131 +1,111 @@
 // src/components/UploadAndTranscribe.jsx
 import React, { useEffect, useRef, useState } from "react";
-import { UploadCloud, CheckCircle, AlertCircle, XCircle, Clipboard } from "lucide-react";
-import { motion } from "framer-motion";
+import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
-// ✅ Build once: "/api" by default, no trailing slash
 const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
-// ⛏️ Was `${API_BASE}/v1/transcribe` which becomes /api/v1/transcribe → 404
 const TRANSCRIBE_URL = `${API_BASE}/transcribe`;
 
 export default function UploadAndTranscribe({
-  fileInput,
-  language = "en",
-  onTranscriptComplete,
+  fileInput,            // File | null
+  countdown = 0,        // seconds before auto-start
+  translate = false,    // (UI flag only — backend stub ignores for now)
+  onRecordingStart,     // () => void
+  onRecordingEnd,       // () => void
+  onTranscriptComplete, // (json) => void
 }) {
-  const [items, setItems] = useState([]);
-  const inflight = useRef(new Set());
-  const mounted = useRef(false);
+  const [step, setStep] = useState("idle"); // idle | waiting | uploading | done | error
+  const [error, setError] = useState("");
+  const timerRef = useRef(null);
+  const abortRef = useRef(null);
 
-  const upsert = (name, patch) =>
-    setItems((list) => {
-      const i = list.findIndex((x) => x.name === name);
-      const next = [...list];
-      if (i === -1) next.push({ name, loading: false, result: null, error: "", ...patch });
-      else next[i] = { ...next[i], ...patch };
-      return next;
-    });
-
+  // kick off after countdown whenever file changes
   useEffect(() => {
-    if (!fileInput || !(fileInput instanceof File)) return;
-    if (inflight.current.has(fileInput.name)) return;
+    clearTimer();
+    if (!fileInput) { setStep("idle"); return; }
 
-    inflight.current.add(fileInput.name);
-    upsert(fileInput.name, { loading: true, error: "" });
+    setStep(countdown > 0 ? "waiting" : "uploading");
+    if (countdown > 0) {
+      let remaining = countdown;
+      timerRef.current = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearTimer();
+          doUpload();
+        }
+      }, 1000);
+    } else {
+      doUpload();
+    }
 
-    const fd = new FormData();
-    fd.append("file", fileInput);
+    return () => {
+      clearTimer();
+      if (abortRef.current) abortRef.current.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fileInput, countdown]);
 
-    console.log("[transcribe] POST", `${TRANSCRIBE_URL}?language=${language}`, fileInput.name);
+  const clearTimer = () => {
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+  };
 
-    fetch(`${TRANSCRIBE_URL}?language=${encodeURIComponent(language)}`, {
-      method: "POST",
-      body: fd,
-    })
-      .then(async (r) => {
-        const ct = r.headers.get("content-type") || "";
-        const data = ct.includes("application/json") ? await r.json() : { detail: await r.text() };
-        if (!r.ok) throw new Error(data?.detail || `HTTP ${r.status}`);
-        upsert(fileInput.name, { loading: false, result: data, error: "" });
-        onTranscriptComplete?.(data);
-      })
-      .catch((e) => {
-        console.error("[transcribe] error", e);
-        upsert(fileInput.name, {
-          loading: false,
-          error: e?.message || "Transcription failed",
-        });
-      })
-      .finally(() => {
-        setTimeout(() => inflight.current.delete(fileInput.name), 0);
-      });
-  }, [fileInput, language]);
+  async function doUpload() {
+    try {
+      setError("");
+      setStep("uploading");
+      onRecordingStart?.();
 
-  useEffect(() => {
-    mounted.current = true;
-    return () => { mounted.current = false; };
-  }, []);
+      const fd = new FormData();
+      fd.append("file", fileInput);
+      // pass language; you can wire a selector later
+      const url = `${TRANSCRIBE_URL}?language=en${translate ? "&translate=true" : ""}`;
 
-  const removeItem = (name) => setItems((list) => list.filter((x) => x.name !== name));
-  const copyText = (txt) => navigator.clipboard.writeText(txt || "");
+      abortRef.current = new AbortController();
+      const res = await fetch(url, { method: "POST", body: fd, signal: abortRef.current.signal });
+      const ct = res.headers.get("content-type") || "";
+      const payload = ct.includes("application/json")
+        ? await res.json()
+        : { detail: await res.text() };
+
+      if (!res.ok) throw new Error(payload?.detail || `HTTP ${res.status}`);
+
+      // Hand result back to the page
+      onTranscriptComplete?.(payload);
+      setStep("done");
+    } catch (e) {
+      if (e?.name === "AbortError") return;
+      setError(e?.message || "Upload failed");
+      setStep("error");
+      onTranscriptComplete?.(null);
+    } finally {
+      onRecordingEnd?.();
+    }
+  }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-      {items.map(({ name, loading, result, error }) => (
-        <div key={name} className="p-4 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-100 relative">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <UploadCloud className="w-4 h-4 text-teal-400" />
-              <span className="text-sm font-medium">{name}</span>
-            </div>
-            <button onClick={() => removeItem(name)} className="text-zinc-400 hover:text-red-400" title="Remove">
-              <XCircle className="w-4 h-4" />
-            </button>
-          </div>
-
-          {loading && (
-            <div className="mt-3 text-sm text-blue-300">
-              <span className="inline-block h-3 w-3 mr-2 animate-spin rounded-full border-2 border-blue-300 border-t-transparent" />
-              Uploading & transcribing…
-            </div>
-          )}
-
-          {!loading && error && (
-            <div className="mt-3 text-sm text-red-300 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" />
-              {error}
-            </div>
-          )}
-
-          {!loading && !error && result && (
-            <div className="mt-3 space-y-2">
-              <div className="text-sm text-emerald-300 flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" />
-                Transcript ready
-              </div>
-              <div className="bg-zinc-800 rounded-lg p-3">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-zinc-300">Transcript</span>
-                  <button onClick={() => copyText(result.text || result.transcript || "")} className="text-xs text-teal-300 hover:underline">
-                    <Clipboard className="inline w-3 h-3 mr-1" />
-                    Copy
-                  </button>
-                </div>
-                <pre className="whitespace-pre-wrap text-sm text-zinc-100">
-                  {result.text || result.transcript || "(empty)"}
-                </pre>
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
-
-      {!items.length && (
-        <div className="text-sm text-zinc-400">
-          Choose or record a file above to start transcription.
+    <div className="mt-6">
+      {step === "waiting" && (
+        <div className="text-sm text-zinc-300">Starting in {countdown}s…</div>
+      )}
+      {step === "uploading" && (
+        <div className="flex items-center gap-2 text-zinc-300">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Uploading & transcribing…
         </div>
       )}
-    </motion.div>
+      {step === "done" && (
+        <div className="flex items-center gap-2 text-emerald-400">
+          <CheckCircle2 className="w-4 h-4" />
+          Done
+        </div>
+      )}
+      {step === "error" && (
+        <div className="flex items-center gap-2 text-red-400">
+          <AlertCircle className="w-4 h-4" />
+          {error}
+        </div>
+      )}
+    </div>
   );
 }
+
 
