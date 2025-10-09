@@ -1,112 +1,72 @@
 // src/lib/api.ts
-// Default export with the exact methods AuthContext expects.
-// Also exports named helpers if you want to import them elsewhere.
+type Json = Record<string, any>;
 
-export type Json =
-  | null
-  | string
-  | number
-  | boolean
-  | Json[]
-  | { [k: string]: Json | undefined };
+const REL_BASE = (import.meta as any)?.env?.VITE_API_BASE || "/api";
+const ABS_BASE = (import.meta as any)?.env?.VITE_API_URL  || "https://api.echoscript.ai/api";
 
-const API_BASE =
-  (import.meta as any).env?.VITE_API_BASE?.toString().trim() || "https://api.echoscript.ai";
+function join(base: string, path: string) {
+  return `${base}${path.startsWith("/") ? path : `/${path}`}`;
+}
 
-async function request<T = Json>(
-  path: string,
-  init: RequestInit = {}
-): Promise<T> {
-  const url = path.startsWith("http") ? path : `${API_BASE}${path}`;
+async function call(path: string, opts: RequestInit = {}, useAbsolute = false) {
+  const url = join(useAbsolute ? ABS_BASE : REL_BASE, path);
   const res = await fetch(url, {
-    credentials: "include",
-    ...init,
+    credentials: "include",            // ← always send cookies
+    ...opts,
+    headers: {
+      Accept: "application/json",
+      ...(opts.headers || {}),
+    },
   });
 
-  const contentType = res.headers.get("content-type") || "";
-  const hasBody =
-    res.status !== 204 &&
-    res.status !== 205 &&
-    res.headers.get("content-length") !== "0";
+  const text = await res.text();
+  let body: any = null;
+  try { body = text ? JSON.parse(text) : null; } catch { body = text; }
 
   if (!res.ok) {
-    const txt = hasBody ? await res.text().catch(() => "") : "";
-    throw new Error(`${res.status} ${res.statusText}${txt ? ` — ${txt}` : ""}`);
+    const err: any = new Error(body?.detail || body?.error || `HTTP ${res.status}`);
+    err.status = res.status;
+    err.body = body;
+    throw err;
   }
-
-  if (!hasBody) return null as unknown as T;
-  if (contentType.includes("application/json")) {
-    return (await res.json()) as T;
-  }
-  // fallback if server returned text
-  const text = await res.text();
-  try {
-    return JSON.parse(text) as T;
-  } catch {
-    return text as unknown as T;
-  }
+  return body;
 }
 
-/* ------------------------------ Auth ------------------------------ */
-
-export function me() {
-  return request<{ id: number; email: string; mode?: string }>("/api/auth/me");
+// ---------- Auth ----------
+export async function me(): Promise<Json> {
+  return call("/auth/me");
 }
 
-export function signup(payload: { email: string; password: string }) {
-  return request<{ id: number; email: string }>("/api/auth/signup", {
+export async function signup(payload: { email: string; password: string }): Promise<Json> {
+  return call("/auth/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 }
 
-export function login(payload: { email: string; password: string }) {
-  return request<{ ok: boolean; access_token: string; token_type: string }>(
-    "/api/auth/login",
-    {
+export async function login(payload: { email: string; password: string; remember?: boolean }): Promise<Json> {
+  try {
+    // Prefer dedicated signin if available
+    return await call("/auth/signin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ ...payload, remember: !!payload.remember }),
+    });
+  } catch (e: any) {
+    // If your backend uses signup-as-login, fall back gracefully
+    if (e?.status === 404) {
+      return await signup({ email: payload.email, password: payload.password });
     }
-  );
+    throw e;
+  }
 }
 
-export function logout() {
-  return request<{ ok: true }>("/api/auth/logout", { method: "POST" });
+export async function logout(): Promise<void> {
+  try { await call("/auth/logout", { method: "POST" }); } catch {}
 }
 
-/* ------------------------------ Stripe ------------------------------ */
-
-export function createCheckoutSession(plan: "pro" | "premium" | "edu" = "pro") {
-  // This path matches the working endpoint you tested
-  return request<{ url: string }>("/api/stripe/create-checkout-session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ plan }),
-  });
-}
-
-/* ------------------------------ Health ------------------------------ */
-
-export function health() {
-  return request<{ ok: boolean }>("/api/healthz");
-}
-
-/* --------------------------- Default export ------------------------- */
-
-const api = {
-  base: API_BASE,
-  // auth
-  me,
-  signup,
-  login,
-  logout,
-  // stripe
-  createCheckoutSession,
-  // misc
-  health,
-};
-
+// ---------- Export a single API object ----------
+const api = { call, me, signup, login, logout };
 export default api;
 
