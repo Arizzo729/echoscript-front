@@ -14,6 +14,7 @@ import TranscribeUploader from "./components/TranscribeUploader";
 
 import AnimatedSplash from "./components/AnimatedSplash";
 import OnboardingModal from "./components/OnboardingModal";
+import IntroVideo from "./components/IntroVideo"; // ⬅️ added
 import Layout from "./components/Layout";
 import ErrorBoundary from "./components/ErrorBoundary";
 import useIsMobile from "./hooks/useIsMobile";
@@ -52,7 +53,7 @@ import Checkout from "./pages/Checkout";
 const LiveCaptions = () => <NotFound />;
 const Studio = () => <NotFound />;
 
-/** Handles first-run splash + onboarding once per browser */
+/** Handles first-run splash, then IntroVideo, then Onboarding (once per browser) */
 function OverlayManager() {
   const { pathname } = useLocation();
   const skipOverlays = ["/terms", "/privacy", "/status", "/checkout"];
@@ -61,49 +62,71 @@ function OverlayManager() {
   const onboarded =
     typeof window !== "undefined" &&
     localStorage.getItem("onboardingComplete") === "true";
+  const introSeen =
+    typeof window !== "undefined" &&
+    localStorage.getItem("intro_seen_v1") === "true";
 
   const [splashDone, setSplashDone] = useState(onboarded);
   const [showIntro, setShowIntro] = useState(false);
-  const [introComplete, setIntroComplete] = useState(
-    () => onboarded || (typeof window !== "undefined" && !!window.__introPlayed)
-  );
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [introComplete, setIntroComplete] = useState(onboarded || introSeen);
 
   const { enableSound } = useSound();
   const isMobile = useIsMobile();
 
+  // After splash, if not onboarded and intro not seen yet, play intro once
   useEffect(() => {
-    if (splashDone && !onboarded) {
+    if (!onboarded && !introSeen && splashDone) {
       const t = setTimeout(() => setShowIntro(true), 300);
       return () => clearTimeout(t);
     }
-  }, [splashDone, onboarded]);
+    // If intro already complete (or user onboarded), allow UI overlays
+    if (onboarded || introSeen) {
+      setIntroComplete(true);
+    }
+  }, [splashDone, onboarded, introSeen]);
 
   const handleIntroDone = () => {
     setShowIntro(false);
     setIntroComplete(true);
     if (typeof window !== "undefined") {
-      window.__introPlayed = true;
+      localStorage.setItem("intro_seen_v1", "true");
+    }
+    // If user hasn't onboarded, open the tour modal next
+    if (!onboarded) {
+      setShowOnboarding(true);
+    }
+  };
+
+  const handleOnboardingClose = () => {
+    setShowOnboarding(false);
+    if (typeof window !== "undefined") {
       localStorage.setItem("onboardingComplete", "true");
     }
   };
 
+  // Avoid flashing overlays during first paint
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     const id = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(id);
   }, []);
-
   if (!mounted) return null;
 
   return (
     <>
       {!splashDone && <AnimatedSplash onComplete={() => setSplashDone(true)} />}
-      {showIntro && (
-        <OnboardingModal onClose={handleIntroDone} onEnableAudio={enableSound} />
+
+      {/* Intro video plays once per browser; Onboarding follows if not completed */}
+      {showIntro && <IntroVideo onFinish={handleIntroDone} />}
+
+      {showOnboarding && (
+        <OnboardingModal onClose={handleOnboardingClose} onEnableAudio={enableSound} />
       )}
+
+      {/* After intro or when already onboarded, show mobile UI helpers */}
       {introComplete && (
         <>
-          {/* Mobile-only floating UI */}
           {isMobile && <MobileBottomNav />}
           {isMobile && <FloatingHome />}
         </>
@@ -185,5 +208,4 @@ export default function App() {
     </AuthProvider>
   );
 }
-
 
