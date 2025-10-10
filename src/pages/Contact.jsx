@@ -20,21 +20,45 @@ export default function Contact() {
     e.preventDefault();
     setStatus("sending");
     setErrorMsg("");
+
+    // Try multiple known server routes; succeed on the first that responds OK.
+    const endpoints = ["/api/contact", "/api/v1/contact", "/api/feedback"];
+
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, hp }),
-      });
-      if (response.ok) {
-        setStatus("success");
-        setFormData({ name: "", email: "", subject: "", message: "" });
-        setHp("");
-      } else {
-        const txt = await response.text();
-        setStatus("error");
-        setErrorMsg(txt || "Unknown error");
+      let lastText = "";
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            body: JSON.stringify({ ...formData, hp }),
+          });
+
+          if (res.ok) {
+            setStatus("success");
+            setFormData({ name: "", email: "", subject: "", message: "" });
+            setHp("");
+            return; // done!
+          }
+
+          // If it's a 404, try the next candidate endpoint.
+          const txt = await res.text().catch(() => "");
+          lastText = txt || lastText;
+          if (res.status === 404) continue;
+
+          // Any other error: stop trying and show it.
+          setStatus("error");
+          setErrorMsg(txt || `HTTP ${res.status}`);
+          return;
+        } catch (innerErr) {
+          // Network/other error; try next endpoint
+          lastText = String(innerErr?.message || innerErr) || lastText;
+        }
       }
+
+      // If we get here, all candidates failed (likely 404s)
+      setStatus("error");
+      setErrorMsg(lastText || "Endpoint not found");
     } catch (err) {
       setStatus("error");
       setErrorMsg(String(err?.message || err));
@@ -56,18 +80,46 @@ export default function Contact() {
       </p>
 
       <form onSubmit={handleSubmit} className="grid gap-4">
-        <input id="name" type="text" name="name" placeholder={t("contact.name", "Name")} required
-               className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
-               value={formData.name} onChange={handleChange} />
-        <input id="email" type="email" name="email" placeholder={t("contact.email", "Email")} required
-               className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
-               value={formData.email} onChange={handleChange} />
-        <input id="subject" type="text" name="subject" placeholder={t("contact.subject", "Subject")} required
-               className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
-               value={formData.subject} onChange={handleChange} />
-        <textarea id="message" name="message" rows={5} placeholder={t("contact.message", "Message")} required
-                  className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
-                  value={formData.message} onChange={handleChange} />
+        <input
+          id="name"
+          type="text"
+          name="name"
+          placeholder={t("contact.name", "Name")}
+          required
+          className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
+          value={formData.name}
+          onChange={handleChange}
+        />
+        <input
+          id="email"
+          type="email"
+          name="email"
+          placeholder={t("contact.email", "Email")}
+          required
+          className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
+          value={formData.email}
+          onChange={handleChange}
+        />
+        <input
+          id="subject"
+          type="text"
+          name="subject"
+          placeholder={t("contact.subject", "Subject")}
+          required
+          className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
+          value={formData.subject}
+          onChange={handleChange}
+        />
+        <textarea
+          id="message"
+          name="message"
+          rows={5}
+          placeholder={t("contact.message", "Message")}
+          required
+          className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-white w-full"
+          value={formData.message}
+          onChange={handleChange}
+        />
 
         {/* honeypot (hidden) */}
         <input
@@ -80,13 +132,20 @@ export default function Contact() {
           autoComplete="off"
         />
 
-        <button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white py-2 px-5 rounded-lg flex items-center gap-2 transition"
-                disabled={status === "sending"}>
+        <button
+          type="submit"
+          className="bg-teal-600 hover:bg-teal-700 text-white py-2 px-5 rounded-lg flex items-center gap-2 transition"
+          disabled={status === "sending"}
+        >
           <Send className="w-4 h-4" />
           {status === "sending" ? t("contact.sending", "Sending...") : t("contact.send", "Send")}
         </button>
 
-        {status === "success" && <p className="text-green-400 mt-2">{t("contact.success", "Message sent successfully!")}</p>}
+        {status === "success" && (
+          <p className="text-green-400 mt-2">
+            {t("contact.success", "Message sent successfully!")}
+          </p>
+        )}
         {status === "error" && (
           <p className="text-red-400 mt-2 whitespace-pre-wrap">
             {t("contact.error", "Something went wrong. Please try again later.")}
@@ -151,5 +210,3 @@ export default function Contact() {
     </motion.div>
   );
 }
-
-
