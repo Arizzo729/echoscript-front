@@ -12,6 +12,7 @@ import { API_BASE } from "@/lib/apiBase";
 
 import SearchResults from "./pages/SearchResults.jsx";
 import TranscribeUploader from "./components/TranscribeUploader";
+import CodeReviewChecklist from "./pages/CodeReviewChecklist.jsx";
 
 import AnimatedSplash from "./components/AnimatedSplash";
 import OnboardingModal from "./components/OnboardingModal";
