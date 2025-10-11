@@ -1,4 +1,3 @@
-// src/pages/Upload.jsx
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -27,8 +26,8 @@ const AUDIO = ["mp3", "wav", "flac", "m4a", "aac", "ogg", "webm"];
 const VIDEO = ["mp4", "mkv", "mov"];
 const MAX_MB = 500;
 
-// ✅ Centralized API base
-const API_BASE = import.meta.env.VITE_API_BASE || "";
+// ✅ Centralized API base (normalized so no double /api)
+const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
 
 /**
  * Simple recorder using MediaRecorder.
@@ -200,10 +199,10 @@ export default function UploadPage() {
     setNote(t("Draft saved."));
   };
 
-  // Submit transcript text to your API (unchanged)
+  // Submit transcript text to your API (unchanged logic; fixed base)
   const submit = () => {
     if (!file) return;
-    fetch(`${API_BASE}/api/submitTranscript`, {
+    fetch(`${API_BASE}/submitTranscript`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

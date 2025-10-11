@@ -5,6 +5,8 @@ import Button from "../components/ui/Button";
 import { Sparkles, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
+
 const tones = [
   { id: "default", label: "Smart" },
   { id: "friendly", label: "Friendly" },
@@ -31,14 +33,14 @@ export default function SummaryPage() {
     setCached(false);
 
     try {
-      const res = await fetch("/summary", {
+      const res = await fetch(`${API_BASE}/summary`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcript, tone, length }),
       });
       const data = await res.json();
       setSummary(data.summary);
-      setCached(data.cached);
+      setCached(Boolean(data.cached));
     } catch (err) {
       setSummary(t("Something went wrong. Please try again."));
     } finally {
@@ -79,9 +81,7 @@ export default function SummaryPage() {
                 key={tOption.id}
                 onClick={() => setTone(tOption.id)}
                 className={`px-4 py-1.5 rounded-full text-sm font-semibold transition 
-                  ${tone === tOption.id
-                    ? "bg-teal-600 text-white shadow-md"
-                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"}
+                  ${tone === tOption.id ? "bg-teal-600 text-white shadow-md" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"}
                   focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400`}
                 aria-pressed={tone === tOption.id}
                 disabled={loading}
@@ -96,9 +96,7 @@ export default function SummaryPage() {
                 key={l}
                 onClick={() => setLength(l)}
                 className={`px-4 py-1.5 rounded-full text-sm font-semibold transition 
-                  ${length === l
-                    ? "bg-blue-600 text-white shadow-md"
-                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"}
+                  ${length === l ? "bg-blue-600 text-white shadow-md" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"}
                   focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400`}
                 aria-pressed={length === l}
                 disabled={loading}
@@ -127,11 +125,7 @@ export default function SummaryPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            {cached && (
-              <div className="mb-2 text-xs italic text-yellow-400">
-                ({t("from cache")})
-              </div>
-            )}
+            {cached && <div className="mb-2 text-xs italic text-yellow-400">(from cache)</div>}
             {summary}
           </motion.div>
         )}

@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { FileText, Loader2, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
+
 export default function TranscriptsPage() {
   const { t } = useTranslation();
   const [transcripts, setTranscripts] = useState([]);
@@ -12,7 +14,7 @@ export default function TranscriptsPage() {
   useEffect(() => {
     const fetchTranscripts = async () => {
       try {
-        const response = await fetch("/api/transcripts");
+        const response = await fetch(`${API_BASE}/transcripts`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
@@ -84,4 +86,3 @@ export default function TranscriptsPage() {
     </div>
   );
 }
-

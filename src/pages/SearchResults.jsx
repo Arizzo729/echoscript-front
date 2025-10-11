@@ -1,6 +1,7 @@
-// src/pages/SearchResults.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
+
+const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
 
 export default function SearchResults() {
   const [params, setParams] = useSearchParams();
@@ -9,7 +10,6 @@ export default function SearchResults() {
   const [error, setError] = useState(null);
   const [results, setResults] = useState([]);
 
-  // Keep the input in sync with the URL (?q=...)
   const [input, setInput] = useState(q);
   useEffect(() => setInput(q), [q]);
 
@@ -19,7 +19,7 @@ export default function SearchResults() {
       if (!q) { setResults([]); return; }
       setLoading(true); setError(null);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, { credentials: "include" });
+        const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}`, { credentials: "include" });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setResults(Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : []);
@@ -48,14 +48,17 @@ export default function SearchResults() {
           placeholder="Search transcripts, pages, actions…"
           className="flex-1 px-3 py-2 rounded-xl bg-white/10 border border-white/10 focus:outline-none focus:ring-2 focus:ring-teal-500"
         />
-      <button className="btn btn-primary" type="submit">Search</button>
+        <button className="btn btn-primary" type="submit">Search</button>
       </form>
 
       {loading && <p className="muted">Searching…</p>}
       {error && (
         <div className="card">
           <div className="text-red-300 font-medium">Search isn’t ready yet.</div>
-          <p className="muted mt-1">The endpoint <code>/api/search</code> returned <code>{String(error)}</code>. You can still use the header’s type-ahead for quick navigation.</p>
+          <p className="muted mt-1">
+            The endpoint <code>{`${API_BASE}/search`}</code> returned <code>{String(error)}</code>.
+            You can still use the header’s type-ahead for quick navigation.
+          </p>
         </div>
       )}
 
