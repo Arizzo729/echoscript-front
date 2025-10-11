@@ -8,6 +8,7 @@ import { GPTProvider } from "./context/GPTContext";
 import { FontSizeProvider } from "./context/useFontSize";
 import { LanguageProvider } from "./context/LanguageContext";
 import { SoundProvider, useSound } from "./context/SoundContext";
+import { API_BASE } from "@/lib/apiBase";
 
 import SearchResults from "./pages/SearchResults.jsx";
 import TranscribeUploader from "./components/TranscribeUploader";
@@ -188,6 +189,7 @@ export default function App() {
                           <Route path="/live" element={<LiveCaptions />} />
                           <Route path="/search" element={<SearchResults />} />
                           <Route path="/transcribe" element={<TranscribeUploader />} />
+			  <Route path="/review-checklist" element={<CodeReviewChecklist />} />
                           <Route path="*" element={<NotFound />} />
                         </Route>
                       </Routes>
