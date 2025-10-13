@@ -4,26 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EchoScript.AI – The Best Listener</title>
-<<<<<<< Updated upstream
-
-    <meta name="description" content="EchoScript.AI: Upload, transcribe, and manage audio with AI precision." />
-    <meta name="theme-color" content="#14b8a6" />
-    <meta name="color-scheme" content="light dark" />
-
-    <!-- Hard-kill any stale PWA workers & caches that can blank-screen -->
-    <script>
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.getRegistrations?.().then((regs) => regs.forEach((r) => r.unregister()));
-      }
-      if (window.caches?.keys) {
-        caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
-      }
-    </script>
-
-    <!-- Omit manifest on purpose (no install prompt) -->
-    <link rel="icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-=======
     <meta name="description" content="EchoScript.AI: Upload, transcribe, and manage audio with AI precision." />
     <meta name="theme-color" content="#14b8a6" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -47,15 +27,20 @@
     <meta property="og:image" content="/og-image.png" />
     <meta property="og:url" content="https://echoscriptai.com" />
     <meta name="twitter:card" content="summary_large_image" />
->>>>>>> Stashed changes
+
+    <!-- Hard-kill any stale PWA workers & caches that can blank-screen -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations?.().then((regs) => regs.forEach((r) => r.unregister()));
+      }
+      if (window.caches?.keys) {
+        caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
+      }
+    </script>
   </head>
 
   <body class="bg-white text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100 font-sans antialiased">
     <div id="root"></div>
-<<<<<<< Updated upstream
-    <!-- Correct Vite entry for your app -->
-=======
->>>>>>> Stashed changes
     <script type="module" src="/src/index.jsx"></script>
   </body>
 </html>

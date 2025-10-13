@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import environmentPlugin from 'vite-plugin-environment';
+import path from 'path';
 
 export default defineConfig({
   base: "/", // ✅ root is fine
@@ -15,6 +16,9 @@ export default defineConfig({
     }),
   ],
   resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
   },
   server: {
@@ -28,4 +32,3 @@ export default defineConfig({
     emptyOutDir: true,
   },
 });
-
