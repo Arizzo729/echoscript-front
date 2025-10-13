@@ -1,6 +1,10 @@
 // ✅ EchoScript.AI — Final Advanced LinkButton Component with Audio Sync
 import React from "react";
+<<<<<<< Updated upstream
 import { useNavigate } from "react-router-dom";
+=======
+import { Link, useNavigate } from "react-router-dom";
+>>>>>>> Stashed changes
 import { twMerge } from "tailwind-merge";
 import { useSound } from "../../context/SoundContext";
 
@@ -65,7 +69,10 @@ export default function LinkButton({
 
   return (
     <button
+<<<<<<< Updated upstream
       type="button"
+=======
+>>>>>>> Stashed changes
       onClick={(e) => {
         handleClick(e);
         navigate(to);

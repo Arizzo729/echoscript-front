@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 /* src/input.css */
 
 /* ✅ Import Inter font */
@@ -168,6 +169,8 @@ input[type="reset"]:hover {
   background-color: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
 }
 
+=======
+>>>>>>> Stashed changes
 /* --------------------------------------------- */
 /* ✨ Ambient Background + Shimmer Effect */
 /* --------------------------------------------- */
@@ -206,13 +209,26 @@ input[type="reset"]:hover {
 
 /* Pulse animation */
 @keyframes ambientPulse {
+<<<<<<< Updated upstream
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+=======
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+>>>>>>> Stashed changes
 }
 
 /* Shimmer movement */
 @keyframes shimmerMove {
+<<<<<<< Updated upstream
   0%   { transform: translateX(-50%); }
   100% { transform: translateX(50%); }
 }
@@ -225,4 +241,12 @@ body,
 #root {
   height: 100%;
   min-height: 100vh;
+=======
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(50%);
+  }
+>>>>>>> Stashed changes
 }

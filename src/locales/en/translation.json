@@ -1,4 +1,10 @@
+<<<<<<< Updated upstream
 {
+=======
+import json
+
+translation_data = {
+>>>>>>> Stashed changes
   "about_us": "What is EchoScript.AI?",
   "about_us_paragraph": "EchoScript.AI is your smart transcription assistant — designed to help you capture, organize, and transform spoken ideas into powerful text in real time.",
   "account": "Account",
@@ -80,3 +86,8 @@
   "welcome": "Welcome to EchoScript.AI"
 }
 
+<<<<<<< Updated upstream
+=======
+json_string = json.dumps(translation_data, indent=2)
+print(json_string)
+>>>>>>> Stashed changes

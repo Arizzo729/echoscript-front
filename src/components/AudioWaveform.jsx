@@ -1,8 +1,12 @@
+<<<<<<< Updated upstream
 // src/components/AudioWaveform.jsx
+=======
+>>>>>>> Stashed changes
 import React, { useEffect, useRef } from "react";
 
 export default function AudioWaveform({ audioStream }) {
   const canvasRef = useRef(null);
+<<<<<<< Updated upstream
   const rafRef = useRef(null);
   const audioCtxRef = useRef(null);
   const analyserRef = useRef(null);
@@ -24,12 +28,19 @@ export default function AudioWaveform({ audioStream }) {
     const ctx = canvas.getContext("2d");
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // scale drawing space
   };
+=======
+  const animationRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const dataArrayRef = useRef(null);
+>>>>>>> Stashed changes
 
   useEffect(() => {
     if (!audioStream) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
+<<<<<<< Updated upstream
 
     sizeCanvas();
     roRef.current = new ResizeObserver(sizeCanvas);
@@ -56,11 +67,37 @@ export default function AudioWaveform({ audioStream }) {
       // draw line in CSS pixels (we scaled CTX)
       const cssW = canvas.width / (window.devicePixelRatio || 1);
       const cssH = canvas.height / (window.devicePixelRatio || 1);
+=======
+    const dpr = window.devicePixelRatio || 1;
+    const width = canvas.offsetWidth * dpr;
+    const height = 100 * dpr;
+
+    canvas.width = width;
+    canvas.height = height;
+    ctx.scale(dpr, dpr);
+
+    audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioContextRef.current.createMediaStreamSource(audioStream);
+    analyserRef.current = audioContextRef.current.createAnalyser();
+    analyserRef.current.fftSize = 2048;
+
+    const bufferLength = analyserRef.current.fftSize;
+    dataArrayRef.current = new Uint8Array(bufferLength);
+
+    source.connect(analyserRef.current);
+
+    const draw = () => {
+      analyserRef.current.getByteTimeDomainData(dataArrayRef.current);
+
+      ctx.fillStyle = "#0f172a"; // zinc-900
+      ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+>>>>>>> Stashed changes
 
       ctx.lineWidth = 2;
       ctx.strokeStyle = "#14b8a6"; // teal-500
       ctx.beginPath();
 
+<<<<<<< Updated upstream
       const sliceWidth = cssW / bufferLength;
       let x = 0;
 
@@ -89,6 +126,29 @@ export default function AudioWaveform({ audioStream }) {
       sourceRef.current = null;
       analyserRef.current = null;
       audioCtxRef.current = null;
+=======
+      const sliceWidth = (canvas.width / dpr) / bufferLength;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArrayRef.current[i] / 128.0;
+        const y = (v * height) / (2 * dpr);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        x += sliceWidth;
+      }
+
+      ctx.lineTo(canvas.width / dpr, height / (2 * dpr));
+      ctx.stroke();
+
+      animationRef.current = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animationRef.current);
+      if (audioContextRef.current) audioContextRef.current.close();
+>>>>>>> Stashed changes
     };
   }, [audioStream]);
 
@@ -102,4 +162,7 @@ export default function AudioWaveform({ audioStream }) {
   );
 }
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes

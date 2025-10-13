@@ -1,2 +1,6 @@
+<<<<<<< Updated upstream
 /api/*  https://api.echoscript.ai/api/:splat  200
 /*      /index.html                            200
+=======
+/*    /index.html   200
+>>>>>>> Stashed changes
