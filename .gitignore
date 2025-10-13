@@ -45,3 +45,7 @@ echoscript-front-backup/
 *.zip
 echoscript-front-backup/
 
+node_modules/
+dist/
+.vite/
+*.log
