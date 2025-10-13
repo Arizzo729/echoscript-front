@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -12,108 +11,26 @@ import TranscriptExportPanel from "../components/TranscriptExportPanel";
 
 import {
   Mic,
-=======
-// Updated UploadPage.jsx with integrated LiveWaveform for recording
-import React, { useState, useCallback } from "react";
-import { motion } from "framer-motion";
-import { useTranslation } from "react-i18next";
-import UploadAndTranscribe from "../components/UploadAndTranscribe";
-import PaywallModal from "../components/PaywallModal";
-import CountdownSelector from "../components/CountdownSelector";
-import CountdownTimer from "../components/CountdownTimer";
-import LiveWaveform from "../components/LiveWaveform";
-import {
-  Mic,
   MicOff,
->>>>>>> Stashed changes
   Timer,
   Download,
   Globe,
   FileText,
   Subtitles,
   Info,
-<<<<<<< Updated upstream
   Upload as UploadIcon,
   StopCircle,
   Play,
-} from "lucide-react";
-
-const AUDIO = ["mp3", "wav", "flac", "m4a", "aac", "ogg", "webm"];
-const VIDEO = ["mp4", "mkv", "mov"];
-const MAX_MB = 500;
-
-// ✅ Centralized API base (normalized so no double /api)
-const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
-
-/**
- * Simple recorder using MediaRecorder.
- * - start(): asks for mic, starts recording, updates state
- * - stop(): stops, returns a File (webm) we can pass to handleFile
- */
-function useSimpleRecorder() {
-  const [recording, setRecording] = useState(false);
-  const [permissionError, setPermissionError] = useState("");
-  const mediaStreamRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const chunksRef = useRef([]);
-
-  const start = async () => {
-    setPermissionError("");
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaStreamRef.current = stream;
-      chunksRef.current = [];
-      const rec = new MediaRecorder(stream, { mimeType: "audio/webm" });
-      rec.ondataavailable = (e) => e.data && chunksRef.current.push(e.data);
-      rec.start();
-      mediaRecorderRef.current = rec;
-      setRecording(true);
-    } catch (e) {
-      setPermissionError(
-        e?.name === "NotAllowedError"
-          ? "Microphone permission denied."
-          : e?.message || "Unable to access microphone."
-      );
-    }
-  };
-
-  const stop = async () => {
-    const rec = mediaRecorderRef.current;
-    if (!rec) return null;
-    return new Promise((resolve) => {
-      rec.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        chunksRef.current = [];
-        // stop tracks
-        mediaStreamRef.current?.getTracks()?.forEach((t) => t.stop());
-        mediaStreamRef.current = null;
-        mediaRecorderRef.current = null;
-        setRecording(false);
-        // Wrap in a File so downstream UI still shows a name/size
-        const file = new File([blob], `recording-${Date.now()}.webm`, {
-          type: "audio/webm",
-        });
-        resolve(file);
-      };
-      rec.stop();
-    });
-  };
-
-  return { recording, permissionError, start, stop };
-}
-=======
   XCircle,
 } from "lucide-react";
 
 const ACCEPTED_AUDIO_FORMATS = ["mp3", "wav", "flac", "m4a", "aac", "ogg"];
 const ACCEPTED_VIDEO_FORMATS = ["mp4", "mkv", "mov"];
 const MAX_FILE_SIZE_MB = 500;
->>>>>>> Stashed changes
 
 export default function UploadPage() {
   const { t } = useTranslation();
 
-<<<<<<< Updated upstream
   // UI state
   const [countdown, setCountdown] = useState(3);
   const [file, setFile] = useState(null);
@@ -185,7 +102,6 @@ export default function UploadPage() {
       if (!res) return;
       if (res?.status === 403 && res.detail) {
         setPaywall(res.detail);
-=======
   const [isRecording, setIsRecording] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
   const [countdown, setCountdown] = useState(3);
@@ -200,12 +116,10 @@ export default function UploadPage() {
     (response) => {
       if (response?.status === 403 && response?.detail) {
         setPaywallInfo(response.detail);
->>>>>>> Stashed changes
         setTranscript("");
         setTranslated("");
         return;
       }
-<<<<<<< Updated upstream
       setPaywall(null);
 
       if (res?.detail && typeof res.detail === "string") {
@@ -270,7 +184,6 @@ export default function UploadPage() {
     if (f) handleFile(f);
   };
 
-=======
       setPaywallInfo(null);
       if (response?.transcript) {
         setTranscript(response.transcript);
@@ -325,14 +238,12 @@ export default function UploadPage() {
   const clearFile = () => setFile(null);
   const closePaywallModal = () => setPaywallInfo(null);
 
->>>>>>> Stashed changes
   return (
     <>
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-<<<<<<< Updated upstream
         className="min-h-screen px-2 sm:px-5 py-7 sm:py-14 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white"
         onDrop={onDrop}
         onDragOver={(e) => e.preventDefault()}
@@ -508,7 +419,6 @@ export default function UploadPage() {
             </p>
             <p className="flex items-center gap-2">
               <Info className="w-4 h-4 text-zinc-400" /> {t(`Files up to ${MAX_MB}MB are supported.`)}
-=======
         className="min-h-screen px-4 py-10 md:px-10 md:py-16 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white"
       >
         <div className="max-w-5xl mx-auto space-y-10">
@@ -660,20 +570,16 @@ export default function UploadPage() {
             <p className="flex items-center gap-2">
               <Info className="w-4 h-4 text-zinc-400" />
               {t(`Files up to ${MAX_FILE_SIZE_MB}MB are supported.`)}
->>>>>>> Stashed changes
             </p>
           </div>
         </div>
       </motion.div>
 
-<<<<<<< Updated upstream
       {paywall && <PaywallModal info={paywall} onClose={() => setPaywall(null)} />}
     </>
   );
 }
-=======
       {paywallInfo && <PaywallModal info={paywallInfo} onClose={closePaywallModal} />}
     </>
   );
 }
->>>>>>> Stashed changes

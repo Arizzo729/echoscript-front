@@ -1,6 +1,6 @@
 # Netlify proxy for API calls to avoid CORS and keep secrets on the backend.
 # All requests to /api/* on the frontend will be proxied to your backend API.
-/api/*  https://api.echoscript.ai/:splat  200
+/api/*  https://api.echoscript.ai/api/:splat  200
 
 # SPA fallback: all other routes are handled by the React app.
 /*    /index.html   200

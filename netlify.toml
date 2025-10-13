@@ -1,86 +1,39 @@
-<<<<<<< Updated upstream
 # netlify.toml
-=======
->>>>>>> Stashed changes
 [build]
   command = "npm run build"
   publish = "dist"
 
-<<<<<<< Updated upstream
-# Proxy /api/* and /v1/* to your API host
-[[redirects]]
-  from = "/api/*"
-  to = "https://api.echoscript.ai/api/:splat"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/v1/*"
-  to = "https://api.echoscript.ai/v1/:splat"
-  status = 200
-  force = true
-
-# SPA routes (prevents Netlify 404 on deep links)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-# Allow microphone (fixes: “Permissions policy violation: microphone is not allowed”)
-[[headers]]
-  for = "/*"
-  [headers.values]
-  Permissions-Policy = "microphone=(self)"
-  Referrer-Policy = "strict-origin-when-cross-origin"
-  X-Content-Type-Options = "nosniff"
-  X-Frame-Options = "SAMEORIGIN"
-=======
 [build.environment]
   NODE_VERSION = "18"
   NPM_FLAGS = "--legacy-peer-deps"
 
 # --- HTTPS & Domain Enforcement ---
+# Note: API proxy and SPA fallback are handled in `public/_redirects`
+
 [[redirects]]
-  from = "http://echoscript.ai/*"
+  from = "http://:subdomain.echoscript.ai/*" # http -> https
+  to   = "https://:subdomain.echoscript.ai/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://:subdomain.echoscriptai.com/*" # http -> https
+  to   = "https://:subdomain.echoscriptai.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://echoscript.ai/*" # apex -> www
   to   = "https://www.echoscript.ai/:splat"
   status = 301
   force = true
 
-[[redirects]]
-  from = "http://www.echoscript.ai/*"
-  to   = "https://www.echoscript.ai/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://echoscriptai.com/*"
-  to   = "https://www.echoscriptai.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://www.echoscriptai.com/*"
-  to   = "https://www.echoscriptai.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "https://echoscript.ai/*"
-  to   = "https://www.echoscript.ai/:splat"
-  status = 301
-  force = true
-
-# --- SPA fallback (must go last) ---
-[[redirects]]
-  from = "/*"
-  to   = "/index.html"
-  status = 200
-
-# --- SSL Headers (HSTS to force HTTPS long-term) ---
+# --- Security & Permissions Headers ---
 [[headers]]
   for = "/*"
   [headers.values]
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    Cache-Control = "no-store"
-
->>>>>>> Stashed changes
+    Permissions-Policy = "microphone=(self)"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
