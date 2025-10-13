@@ -7,7 +7,6 @@ import { ThemeProvider } from "./context/useTheme";
 import { GPTProvider } from "./context/GPTContext";
 import { FontSizeProvider } from "./context/useFontSize";
 import { SoundProvider, useSound } from "./context/SoundContext";
-import { API_BASE } from "@/lib/apiBase";
 
 import SearchResults from "./pages/SearchResults.jsx";
 import TranscribeUploader from "./components/TranscribeUploader";

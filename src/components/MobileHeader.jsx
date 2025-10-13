@@ -3,8 +3,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { Search, Bell, MoreVertical } from "lucide-react";
 import { Volume2, VolumeX } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useSound } from "../context/SoundContext"; // <-- fixed
 import { motion, AnimatePresence } from "framer-motion";
-
+import Button from "./ui/Button";
 export default function MobileHeader({ onSearch, hasNewNotifications = false }) {
   const { t } = useTranslation();
   const { isMuted, toggleMute } = useSound();
@@ -143,15 +144,4 @@ function MenuItem({ label, onClick }) {
       {label}
     </button>
   );
-}
-
-function Button({ variant, size, className, icon, ...props }) {
-  // A minimal Button component to satisfy the dependency
-  return (
-    <button
-      className={`p-2 rounded-full ${className || ''}`}
-      {...props}>
-      {icon}
-    </button>
-  )
 }

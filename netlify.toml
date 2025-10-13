@@ -11,18 +11,6 @@
 # Note: API proxy and SPA fallback are handled in `public/_redirects`
 
 [[redirects]]
-  from = "http://:subdomain.echoscript.ai/*" # http -> https
-  to   = "https://:subdomain.echoscript.ai/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "http://:subdomain.echoscriptai.com/*" # http -> https
-  to   = "https://:subdomain.echoscriptai.com/:splat"
-  status = 301
-  force = true
-
-[[redirects]]
   from = "https://echoscript.ai/*" # apex -> www
   to   = "https://www.echoscript.ai/:splat"
   status = 301

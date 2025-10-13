@@ -9,7 +9,6 @@ import "./index.css";
 
 /* keep your i18n if you use it */
 import "./i18n";
-import "./global.css";
 import { Auth0Provider } from "@auth0/auth0-react";
 import { SoundProvider } from "./context/SoundContext"; // ✅ Add this
 
