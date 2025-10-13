@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 // components/PaywallModal.jsx
 import React from "react";
 import { X } from "lucide-react";
@@ -11,12 +12,25 @@ export default function PaywallModal({ usageInfo, info, onClose }) {
   const limit = src.limit ?? src.limitMinutes ?? 0;
   const upgradeUrl =
     src.upgrade_url || src.upgradeUrl || "/purchase";
+=======
+import React from "react";
+import { X } from "lucide-react";
+
+export default function PaywallModal({ usageInfo, onClose }) {
+  if (!usageInfo) return null;
+
+  const { used, limit, upgrade_url } = usageInfo;
+>>>>>>> Stashed changes
 
   return (
     <div
       role="dialog"
       aria-modal="true"
+<<<<<<< Updated upstream
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+=======
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
+>>>>>>> Stashed changes
     >
       <div className="relative w-full max-w-md rounded-lg bg-white dark:bg-gray-900 p-6 shadow-xl">
         <button
@@ -37,7 +51,11 @@ export default function PaywallModal({ usageInfo, info, onClose }) {
           To continue transcribing, please upgrade your plan.
         </p>
         <a
+<<<<<<< Updated upstream
           href={upgradeUrl}
+=======
+          href={upgrade_url}
+>>>>>>> Stashed changes
           target="_blank"
           rel="noopener noreferrer"
           className="inline-block w-full rounded-md bg-teal-600 px-5 py-3 text-center font-medium text-white hover:bg-teal-700 transition"
@@ -48,4 +66,7 @@ export default function PaywallModal({ usageInfo, info, onClose }) {
     </div>
   );
 }
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes

@@ -1,16 +1,24 @@
+<<<<<<< Updated upstream
 // components/NewsletterSignup.jsx
+=======
+// ✅ components/NewsletterSignup.jsx — Enhanced & Polished
+>>>>>>> Stashed changes
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "./ui/Button";
 import { CheckCircle, XCircle } from "lucide-react";
 
+<<<<<<< Updated upstream
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 
+=======
+>>>>>>> Stashed changes
 export default function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle | loading | success | error
   const [message, setMessage] = useState("");
 
+<<<<<<< Updated upstream
   const valid = /^\S+@\S+\.\S+$/.test(email);
 
   const handleSubmit = async (e) => {
@@ -20,10 +28,15 @@ export default function NewsletterSignup() {
       setMessage("Please enter a valid email.");
       return;
     }
+=======
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+>>>>>>> Stashed changes
     setStatus("loading");
     setMessage("");
 
     try {
+<<<<<<< Updated upstream
       const res = await fetch(`${API_BASE}/api/newsletter/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -33,6 +46,19 @@ export default function NewsletterSignup() {
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.detail || "Something went wrong.");
+=======
+      const res = await fetch("/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || "Something went wrong.");
+      }
+>>>>>>> Stashed changes
 
       setStatus("success");
       setMessage("✅ You're subscribed!");
@@ -65,7 +91,11 @@ export default function NewsletterSignup() {
         className="w-full px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
       />
 
+<<<<<<< Updated upstream
       <Button type="submit" variant="primary" size="sm" className="w-full" disabled={!valid || status === "loading"}>
+=======
+      <Button type="submit" variant="primary" size="sm" className="w-full">
+>>>>>>> Stashed changes
         {status === "loading" ? "Subscribing..." : "Subscribe"}
       </Button>
 
@@ -89,3 +119,7 @@ export default function NewsletterSignup() {
   );
 }
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes

@@ -5,8 +5,11 @@ import Button from "../components/ui/Button";
 import { Sparkles, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+<<<<<<< Updated upstream
 const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
 
+=======
+>>>>>>> Stashed changes
 const tones = [
   { id: "default", label: "Smart" },
   { id: "friendly", label: "Friendly" },
@@ -33,14 +36,22 @@ export default function SummaryPage() {
     setCached(false);
 
     try {
+<<<<<<< Updated upstream
       const res = await fetch(`${API_BASE}/summary`, {
+=======
+      const res = await fetch("/summary", {
+>>>>>>> Stashed changes
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcript, tone, length }),
       });
       const data = await res.json();
       setSummary(data.summary);
+<<<<<<< Updated upstream
       setCached(Boolean(data.cached));
+=======
+      setCached(data.cached);
+>>>>>>> Stashed changes
     } catch (err) {
       setSummary(t("Something went wrong. Please try again."));
     } finally {
@@ -50,12 +61,17 @@ export default function SummaryPage() {
 
   return (
     <motion.div
+<<<<<<< Updated upstream
       className="min-h-screen flex flex-col items-center justify-center px-2 sm:px-6 py-8 sm:py-12 bg-gradient-to-br from-zinc-950 to-zinc-900"
+=======
+      className="max-w-4xl mx-auto px-6 py-12 text-white"
+>>>>>>> Stashed changes
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.4 }}
     >
+<<<<<<< Updated upstream
       <div className="w-full max-w-2xl bg-zinc-900/95 border border-zinc-800 rounded-3xl shadow-2xl px-3 xs:px-7 py-7 xs:py-10 space-y-7">
         <h1 className="text-2xl xs:text-4xl font-extrabold text-center bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent tracking-tight">
           🧠 AI-Powered Summarizer
@@ -130,6 +146,83 @@ export default function SummaryPage() {
           </motion.div>
         )}
       </div>
+=======
+      <h1 className="text-4xl font-extrabold mb-6 text-center text-teal-500 tracking-tight">
+        🧠 AI-Powered Summarizer
+      </h1>
+
+      <p className="text-center mb-8 text-zinc-400">
+        {t("Paste your transcript below and generate a clear, structured summary with advanced GPT AI.")}
+      </p>
+
+      <Textarea
+        rows={10}
+        value={transcript}
+        onChange={(e) => setTranscript(e.target.value)}
+        placeholder={t("Paste your transcript here...")}
+        className="w-full mb-6 resize-y text-sm bg-zinc-900 text-white border border-zinc-700 rounded-lg p-3"
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div className="flex gap-2 flex-wrap">
+          {tones.map((tOption) => (
+            <button
+              key={tOption.id}
+              onClick={() => setTone(tOption.id)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${
+                tone === tOption.id
+                  ? "bg-teal-600 text-white shadow"
+                  : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+              }`}
+            >
+              {tOption.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          {lengths.map((l) => (
+            <button
+              key={l}
+              onClick={() => setLength(l)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition ${
+                length === l
+                  ? "bg-blue-600 text-white shadow"
+                  : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+              }`}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="text-center">
+        <Button
+          onClick={generateSummary}
+          disabled={loading}
+          icon={loading ? <Loader2 className="animate-spin" /> : <Sparkles />}
+          className="w-full max-w-sm mx-auto"
+        >
+          {loading ? t("Summarizing...") : t("Generate Summary")}
+        </Button>
+      </div>
+
+      {summary && (
+        <motion.div
+          className="mt-10 p-6 bg-zinc-900 border border-zinc-700 rounded-xl shadow-lg whitespace-pre-wrap text-sm leading-relaxed font-mono text-zinc-200"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          {cached && (
+            <div className="mb-3 text-xs italic text-yellow-400">
+              ({t("from cache")})
+            </div>
+          )}
+          {summary}
+        </motion.div>
+      )}
+>>>>>>> Stashed changes
     </motion.div>
   );
 }

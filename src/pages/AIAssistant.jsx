@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 
+<<<<<<< Updated upstream
 const API_BASE = import.meta.env.VITE_API_URL; // e.g. https://api.echoscript.ai
 
+=======
+>>>>>>> Stashed changes
 export default function AIAssistant() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
@@ -28,6 +31,7 @@ export default function AIAssistant() {
     setInput("");
     setLoading(true);
 
+<<<<<<< Updated upstream
     try {
       if (!API_BASE) {
         // Fallback to your current simulated reply
@@ -69,21 +73,34 @@ export default function AIAssistant() {
         );
       }
     } catch (err) {
+=======
+    // Simulated GPT reply — replace this block with real GPT fetch later
+    setTimeout(() => {
+>>>>>>> Stashed changes
       setMessages((prev) =>
         prev.map((m, i) =>
           i === prev.length - 1
             ? {
                 ...m,
+<<<<<<< Updated upstream
                 text:
                   "⚠️ There was a problem contacting the assistant. Please try again.\n\n" +
                   String(err?.message || err),
+=======
+                text: `✅ EchoScript understands. Here's a helpful response to: "${trimmed}"\n\n[Future GPT output goes here]`,
+>>>>>>> Stashed changes
               }
             : m
         )
       );
+<<<<<<< Updated upstream
     } finally {
       setLoading(false);
     }
+=======
+      setLoading(false);
+    }, 1500);
+>>>>>>> Stashed changes
   };
 
   const handleKeyDown = (e) => {
@@ -109,7 +126,13 @@ export default function AIAssistant() {
         Ask EchoScript anything — transcription, AI tips, language questions, or feature walkthroughs.
       </p>
 
+<<<<<<< Updated upstream
       <div className="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl overflow-hidden shadow-md">
+=======
+      {/* Chat UI */}
+      <div className="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl overflow-hidden shadow-md">
+        {/* Messages */}
+>>>>>>> Stashed changes
         <div className="p-4 space-y-4 h-[420px] overflow-y-auto">
           {messages.map((msg, i) => (
             <div key={i} className={`text-sm flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
@@ -127,6 +150,10 @@ export default function AIAssistant() {
           <div ref={bottomRef} />
         </div>
 
+<<<<<<< Updated upstream
+=======
+        {/* Input */}
+>>>>>>> Stashed changes
         <div className="flex items-center gap-2 border-t border-zinc-300 dark:border-zinc-700 p-3 bg-white dark:bg-zinc-950">
           <textarea
             rows={1}
@@ -134,7 +161,11 @@ export default function AIAssistant() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask something…"
+<<<<<<< Updated upstream
             className="flex-grow resize-none bg-transparent focus:outline-none px-3 py-2 text-sm rounded-md text-zinc-9 00 dark:text-white"
+=======
+            className="flex-grow resize-none bg-transparent focus:outline-none px-3 py-2 text-sm rounded-md text-zinc-900 dark:text-white"
+>>>>>>> Stashed changes
           />
           <button
             onClick={handleSend}
@@ -150,13 +181,20 @@ export default function AIAssistant() {
           </button>
         </div>
       </div>
+<<<<<<< Updated upstream
 
       {!API_BASE && (
         <p className="mt-3 text-xs text-zinc-500">
           Tip: set <code>VITE_API_URL</code> in your <code>.env</code> (e.g. https://api.echoscript.ai) to enable real replies.
         </p>
       )}
+=======
+>>>>>>> Stashed changes
     </motion.div>
   );
 }
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes

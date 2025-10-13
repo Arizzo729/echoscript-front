@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 // ✅ EchoScript.AI — Emotion/Tone heuristic detector (lightweight client-side)
 export default function detectTone(text) {
   if (!text) return "neutral";
@@ -9,6 +10,13 @@ export default function detectTone(text) {
 
   const negativeRegex =
     /\b(sad|tired|bad|confused|lost|sorry|angry|upset|hate|frustrated|annoyed|depressed|stressed|miserable|lonely|terrible|ugh|nope|awful|horrible|disappointed|worried|anxious|mad|furious|irritated|bummed)\b/i;
+=======
+export default function detectTone(text) {
+  const lower = text.toLowerCase();
+
+  const positiveRegex = /\b(amazing|awesome|great|excited|cool|yay|yes|love|fantastic|wonderful|incredible|happy|satisfied|blessed|joyful|thrilled|grateful)\b/;
+  const negativeRegex = /\b(sad|tired|bad|confused|lost|sorry|angry|upset|hate|frustrated|annoyed|depressed|stressed|miserable|lonely|terrible|ugh|nope)\b/;
+>>>>>>> Stashed changes
 
   if (positiveRegex.test(lower)) return "positive";
   if (negativeRegex.test(lower)) return "negative";
