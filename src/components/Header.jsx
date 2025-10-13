@@ -229,17 +229,6 @@ export default function Header() {
               )}
             </AnimatePresence>
           </div>
-<<<<<<< Updated upstream
-
-          {/* Controls: Mute / Settings / Auth */}
-          <div className="flex items-center gap-2">
-            <IconButton label={isMuted ? "Unmute" : "Mute"} tooltip={isMuted ? "Unmute" : "Mute"} icon={isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />} onClick={toggleMute} />
-            <IconButton label="Settings" tooltip="Settings" icon={<Cog className="w-5 h-5" />} onClick={() => navigate("/settings")} />
-            <button onClick={() => navigate("/account")} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-600 text-white font-semibold hover:bg-teal-500 transition">
-              <User className="w-4 h-4" />
-              Account
-            </button>
-          </div>
         </div>
       </header>
     </>

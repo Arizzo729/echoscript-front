@@ -21,7 +21,6 @@ export default function SignIn() {
   useEffect(() => { if (user?.email) navigate("/account"); }, [user, navigate]);
 
   const onSubmit = async (e) => {
-  const handleSignIn = async (e) => {
     e.preventDefault();
     setError("");
     if (!email.includes("@") || password.length < 6) {
@@ -34,7 +33,7 @@ export default function SignIn() {
       await signIn({ email, password, remember: rememberMe });
       navigate("/dashboard");
     } catch (err) {
-      setError(err.message || t("signin_error"));
+      setError(err?.message || t("signin_error") || "Sign in failed.");
     } finally {
       setLoading(false);
     }
@@ -42,7 +41,6 @@ export default function SignIn() {
 
   return (
     <motion.div
-      className="flex items-center justify-center min-h-screen bg-gradient-to-br from-zinc-950 to-zinc-900 px-2 sm:px-0"
       className="flex items-center justify-center min-h-screen bg-gradient-to-br from-zinc-950 to-zinc-900 px-2 sm:px-0"
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}

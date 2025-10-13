@@ -46,7 +46,7 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Status from "./pages/Status";
-import CodeReviewChecklist from "./pages/CodeReviewChecklist";
+import CodeReviewChecklist from "./pages/CodeReviewChecklist.jsx";
 import Checkout from "./pages/Checkout";
 
 // If you want the real component, you can swap these:

@@ -1,11 +1,9 @@
 // src/components/MobileHeader.jsx
 import React, { useState, useRef, useEffect } from "react";
-import { MagnifyingGlassIcon, BellIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { Search, Bell, MoreVertical } from "lucide-react";
 import { Volume2, VolumeX } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useSound } from "../context/SoundContext"; // <-- fixed
 import { motion, AnimatePresence } from "framer-motion";
-import Button from "./ui/Button";
 
 export default function MobileHeader({ onSearch, hasNewNotifications = false }) {
   const { t } = useTranslation();
@@ -59,7 +57,7 @@ export default function MobileHeader({ onSearch, hasNewNotifications = false }) 
             spellCheck="false"
             autoComplete="off"
           />
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" aria-hidden="true" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" aria-hidden="true" />
         </div>
 
         <motion.div whileTap={{ scale: 0.9 }}>
@@ -82,7 +80,7 @@ export default function MobileHeader({ onSearch, hasNewNotifications = false }) 
             onClick={() => setShowNotifDropdown((v) => !v)}
             icon={
               <span className="relative">
-                <BellIcon className="w-5 h-5 text-zinc-900 dark:text-white" />
+                <Bell className="w-5 h-5 text-zinc-900 dark:text-white" />
                 {hasNewNotifications && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-teal-400 rounded-full border-2 border-white dark:border-zinc-900" />}
               </span>
             }
@@ -108,8 +106,8 @@ export default function MobileHeader({ onSearch, hasNewNotifications = false }) 
             variant="ghost"
             size="icon"
             aria-label={t("More")}
-            onClick={() => setShowMenu((v) => !v)}
-            icon={<EllipsisVerticalIcon className="w-6 h-6 text-zinc-900 dark:text-white" />}
+            onClick={() => setShowMenu(v => !v)}
+            icon={<MoreVertical className="w-6 h-6 text-zinc-900 dark:text-white" />}
             tabIndex={0}
           />
           <AnimatePresence>
@@ -147,3 +145,13 @@ function MenuItem({ label, onClick }) {
   );
 }
 
+function Button({ variant, size, className, icon, ...props }) {
+  // A minimal Button component to satisfy the dependency
+  return (
+    <button
+      className={`p-2 rounded-full ${className || ''}`}
+      {...props}>
+      {icon}
+    </button>
+  )
+}
