@@ -35,7 +35,10 @@ async function call(path: string, opts: RequestInit = {}) {
     ...opts,
     headers: {
       Accept: "application/json",
-      ...(opts.headers || {}),
+      // The `call` function is now smart enough to not set Content-Type
+      // for FormData, allowing the browser to set it with the correct boundary.
+      ...(!(opts.body instanceof FormData) && { "Content-Type": "application/json" }),
+      ...opts.headers,
     },
   });
 
@@ -60,7 +63,6 @@ export async function me(): Promise<Json> {
 export async function signup(payload: { email: string; password: string }): Promise<Json> {
   return call("/auth/signup", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 }
@@ -70,7 +72,6 @@ export async function login(payload: { email: string; password: string; remember
     // Use real signin if available
     return await call("/auth/signin", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...payload, remember: !!payload.remember }),
     });
   } catch (e: any) {
@@ -90,7 +91,6 @@ export async function logout(): Promise<void> {
 export async function createCheckoutSession(plan: string) {
   return call("/stripe/create-checkout-session", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ plan }),
   });
 }

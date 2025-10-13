@@ -1,10 +1,6 @@
 import React, { useRef, useState } from "react";
 import { UploadCloud, CheckCircle, AlertCircle, Clipboard } from "lucide-react";
-
-// Use Netlify proxy by default; allow override via VITE_API_BASE
-const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
-const TRANSCRIBE_URL = `${API_BASE}/transcribe`;
-const VIDEO_TASK_URL = `${API_BASE}/video-task`;
+import api from "../lib/api";
 
 export default function TranscribeUploader() {
   const [file, setFile] = useState(null);
@@ -43,16 +39,11 @@ export default function TranscribeUploader() {
       const fd = new FormData();
       fd.append("file", file);
 
-      const res = await fetch(`${TRANSCRIBE_URL}?language=en`, {
+      // Using the robust `api.call` helper
+      const data = await api.call("/transcribe?language=en", {
         method: "POST",
         body: fd,
-      });
-
-      const ct = res.headers.get("content-type") || "";
-      const data = ct.includes("application/json") ? await res.json() : { detail: await res.text() };
-
-      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
-      setResult(data);
+      });      setResult(data);
       setStatus("done");
     } catch (e) {
       setError(e?.message || "Transcription failed");
@@ -63,9 +54,7 @@ export default function TranscribeUploader() {
   async function startVideoTask() {
     setTaskStatus("sending");
     try {
-      const res = await fetch(VIDEO_TASK_URL, { method: "POST" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
+      const data = await api.call("/video-task", { method: "POST" });
       setTaskStatus(`queued: ${data?.task_id || "ok"}`);
     } catch (e) {
       setTaskStatus(`error: ${e?.message || "failed"}`);
@@ -149,5 +138,3 @@ export default function TranscribeUploader() {
     </div>
   );
 }
-
-

@@ -118,7 +118,7 @@ const categories = [
     id: "echoscript-specific",
     title: "EchoScript Patterns",
     icon: AlertTriangle,
-    items: [
+    items: [ // This seems to be a new file, but the icon for this category is wrong.
       { id: "api-base", text: 'API_BASE uses import.meta.env.VITE_API_BASE ?? "/api"', severity: "high" },
       { id: "sound-context", text: "useSound() used correctly for audio feedback", severity: "low" },
       { id: "toast", text: "Toast notifications for user feedback (avoid alert())", severity: "medium" },

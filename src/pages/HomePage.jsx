@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
-
-=======
 // ✅ EchoScript.AI — Final Homepage with SoundContext Integration
->>>>>>> Stashed changes
 import React, { useEffect, useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
@@ -58,15 +54,9 @@ export default function HomePage() {
   });
 
   const communityLinks = [
-<<<<<<< Updated upstream
-    { name: "Discord", href: "https://discord.gg/HmebRHKBGc", icon: FaDiscord, color: "bg-indigo-600" },
-    { name: "Instagram", href: "https://instagram.com/echoscriptai", icon: FaInstagram, color: "bg-pink-500" },
-    { name: "LinkedIn", href: "https://www.linkedin.com/in/echoscript-ai-913426385/", icon: FaLinkedin, color: "bg-blue-700" },
-=======
     { name: "Discord", href: "https://discord.com/invite/echoscriptai", icon: FaDiscord, color: "bg-indigo-600" },
     { name: "Instagram", href: "https://instagram.com/echoscriptai", icon: FaInstagram, color: "bg-pink-500" },
     { name: "LinkedIn", href: "https://linkedin.com/company/echoscriptai", icon: FaLinkedin, color: "bg-blue-700" },
->>>>>>> Stashed changes
     { name: "TikTok", href: "https://tiktok.com/@echoscriptai", icon: FaTiktok, color: "bg-black" }
   ];
 
@@ -212,12 +202,6 @@ export default function HomePage() {
         </p>
         <NewsletterSignup />
       </section>
-<<<<<<< Updated upstream
-    </div>
-  );
-}
-
-=======
 
       {/* 🔊 Audio & Language Controls */}
       <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
@@ -237,4 +221,3 @@ export default function HomePage() {
     </div>
   );
 }
->>>>>>> Stashed changes

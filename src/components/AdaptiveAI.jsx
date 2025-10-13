@@ -1,7 +1,4 @@
-<<<<<<< Updated upstream
 // src/components/AdaptiveAI.jsx
-=======
->>>>>>> Stashed changes
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { AutomationService, PROVIDERS } from "../services/AutomationService";
 
@@ -23,12 +20,8 @@ export default function AdaptiveAI({
     setLog((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
 
   const chooseProviderAdaptive = useCallback(() => {
-<<<<<<< Updated upstream
     // Previously: PROVIDERS.OCTOPARSE (undefined). Use APIFY instead.
     if (typeof inputData === "string" && inputData.length > 1000) return PROVIDERS.APIFY;
-=======
-    if (typeof inputData === "string" && inputData.length > 1000) return PROVIDERS.OCTOPARSE;
->>>>>>> Stashed changes
     return initialProvider;
   }, [inputData, initialProvider]);
 
@@ -36,11 +29,7 @@ export default function AdaptiveAI({
     setStatus("running");
     setError(null);
     setResult(null);
-<<<<<<< Updated upstream
     abortRef.current?.abort();
-=======
-    abortRef.current?.abort(); // cancel any ongoing request
->>>>>>> Stashed changes
     abortRef.current = new AbortController();
 
     appendLog(`🔁 Starting automation with provider: ${provider}`);
@@ -70,11 +59,7 @@ export default function AdaptiveAI({
       appendLog(`🤖 Adaptive AI switched provider → ${newProvider}`);
       setProvider(newProvider);
     }
-<<<<<<< Updated upstream
   }, [chooseProviderAdaptive, provider]);
-=======
-  }, [chooseProviderAdaptive]);
->>>>>>> Stashed changes
 
   useEffect(() => {
     if (automationId && inputData) runAutomation();
@@ -83,13 +68,9 @@ export default function AdaptiveAI({
   return (
     <div className="adaptive-ai-widget p-6 bg-gradient-to-br from-white via-zinc-50 to-zinc-100 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-900 rounded-2xl shadow-xl max-w-3xl mx-auto font-inter space-y-6">
       <header>
-<<<<<<< Updated upstream
         <h2 className="text-2xl font-bold text-teal-600 dark:text-teal-400 mb-1">
           Adaptive AI Automation
         </h2>
-=======
-        <h2 className="text-2xl font-bold text-teal-600 dark:text-teal-400 mb-1">Adaptive AI Automation</h2>
->>>>>>> Stashed changes
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Our system auto-selects the best provider based on your input context.
         </p>
@@ -135,13 +116,7 @@ export default function AdaptiveAI({
             </button>
           </div>
         )}
-<<<<<<< Updated upstream
         {status === "error" && <p className="text-red-600 dark:text-red-400 font-medium">❌ Error: {error}</p>}
-=======
-        {status === "error" && (
-          <p className="text-red-600 dark:text-red-400 font-medium">❌ Error: {error}</p>
-        )}
->>>>>>> Stashed changes
       </div>
 
       <div>
@@ -167,27 +142,8 @@ export default function AdaptiveAI({
 }
 
 const LoadingSpinner = () => (
-<<<<<<< Updated upstream
   <svg className="inline animate-spin h-5 w-5 ml-2 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
   </svg>
 );
-=======
-  <svg
-    className="inline animate-spin h-5 w-5 ml-2 text-blue-600 dark:text-blue-400"
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-  >
-    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-    <path
-      className="opacity-75"
-      fill="currentColor"
-      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-    />
-  </svg>
-);
-
-
->>>>>>> Stashed changes
