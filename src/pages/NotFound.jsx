@@ -8,11 +8,16 @@ export default function NotFound() {
 
   return (
     <motion.div
+<<<<<<< Updated upstream
       className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-zinc-950 to-zinc-900 px-2 sm:px-0"
+=======
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 text-center"
+>>>>>>> Stashed changes
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
+<<<<<<< Updated upstream
       <div className="w-full max-w-md">
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl px-7 py-10 text-center">
           <motion.h1
@@ -35,6 +40,26 @@ export default function NotFound() {
             ⬅ {t("not_found.back_home")}
           </Link>
         </div>
+=======
+      <div className="space-y-6 max-w-lg">
+        <motion.h1
+          className="text-7xl font-extrabold bg-gradient-to-r from-teal-400 to-blue-500 text-transparent bg-clip-text"
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          404
+        </motion.h1>
+
+        <p className="text-lg text-zinc-400">{t("not_found.description")}</p>
+
+        <Link
+          to="/"
+          className="inline-block px-6 py-3 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-semibold shadow-lg transition duration-300"
+        >
+          ⬅ {t("not_found.back_home")}
+        </Link>
+>>>>>>> Stashed changes
       </div>
     </motion.div>
   );

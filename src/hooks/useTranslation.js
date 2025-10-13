@@ -1,4 +1,5 @@
 // src/hooks/useTranslation.js
+<<<<<<< Updated upstream
 import { useContext, useEffect, useCallback } from "react";
 import i18n from "../i18n"; // single source of truth (re-export from i18n.js or i18n/index.js)
 import { LanguageContext } from "../context/LanguageContext";
@@ -31,4 +32,13 @@ export default function useTranslation() {
   );
 
   return t;
+=======
+import { useContext } from "react";
+import translations from "../i18n";
+import { LanguageContext } from "../context/LanguageContext";
+
+export default function useTranslation() {
+  const { lang } = useContext(LanguageContext);
+  return (key) => translations[lang]?.[key] || translations["en"][key] || key;
+>>>>>>> Stashed changes
 }

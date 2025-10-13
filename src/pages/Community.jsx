@@ -1,18 +1,55 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+<<<<<<< Updated upstream
 import { FaDiscord, FaInstagram, FaLinkedin, FaTiktok } from "react-icons/fa";
+=======
+import {
+  FaDiscord,
+  FaInstagram,
+  FaLinkedin,
+  FaTiktok,
+} from "react-icons/fa";
+>>>>>>> Stashed changes
 import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const communityLinks = [
+<<<<<<< Updated upstream
   { name: "Discord", href: "https://discord.com/invite/echoscriptai", icon: FaDiscord, color: "bg-indigo-600" },
   { name: "Instagram", href: "https://instagram.com/echoscriptai", icon: FaInstagram, color: "bg-pink-500" },
   { name: "LinkedIn", href: "https://linkedin.com/company/echoscriptai", icon: FaLinkedin, color: "bg-blue-700" },
   { name: "TikTok", href: "https://tiktok.com/@echoscriptai", icon: FaTiktok, color: "bg-black" },
+=======
+  {
+    name: "Discord",
+    href: "https://discord.com/invite/echoscriptai",
+    icon: FaDiscord,
+    color: "bg-indigo-600",
+  },
+  {
+    name: "Instagram",
+    href: "https://instagram.com/echoscriptai",
+    icon: FaInstagram,
+    color: "bg-pink-500",
+  },
+  {
+    name: "LinkedIn",
+    href: "https://linkedin.com/company/echoscriptai",
+    icon: FaLinkedin,
+    color: "bg-blue-700",
+  },
+  {
+    name: "TikTok",
+    href: "https://tiktok.com/@echoscriptai",
+    icon: FaTiktok,
+    color: "bg-black",
+  },
+>>>>>>> Stashed changes
 ];
 
 export default function Community() {
   const [email, setEmail] = useState("");
+<<<<<<< Updated upstream
   const [status, setStatus] = useState("idle"); // idle | sending | success | error
   const [errorMsg, setErrorMsg] = useState("");
   const { t } = useTranslation();
@@ -38,6 +75,14 @@ export default function Community() {
       setStatus("error");
       setErrorMsg(String(err?.message || err));
     }
+=======
+  const { t } = useTranslation();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert(`${t("community.subscribed")} ${email}`);
+    setEmail("");
+>>>>>>> Stashed changes
   };
 
   return (
@@ -90,7 +135,14 @@ export default function Community() {
         <p className="text-zinc-400 text-sm mb-5">
           {t("community.subscribeDescription")}
         </p>
+<<<<<<< Updated upstream
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+=======
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row gap-3"
+        >
+>>>>>>> Stashed changes
           <input
             type="email"
             value={email}
@@ -101,6 +153,7 @@ export default function Community() {
           />
           <button
             type="submit"
+<<<<<<< Updated upstream
             disabled={status === "sending"}
             className="bg-teal-600 hover:bg-teal-500 disabled:opacity-60 text-white font-semibold px-6 py-3 rounded-lg text-sm transition"
           >
@@ -115,6 +168,13 @@ export default function Community() {
         {status === "error" && (
           <p className="mt-3 text-red-400 text-sm whitespace-pre-wrap">{errorMsg}</p>
         )}
+=======
+            className="bg-teal-600 hover:bg-teal-500 text-white font-semibold px-6 py-3 rounded-lg text-sm transition"
+          >
+            {t("community.subscribe")}
+          </button>
+        </form>
+>>>>>>> Stashed changes
       </motion.div>
     </motion.div>
   );

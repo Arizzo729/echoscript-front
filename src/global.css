@@ -1,47 +1,12 @@
-<<<<<<< Updated upstream
-/* src/input.css */
-
-/* ✅ Import Inter font */
+/* ✅ Always FIRST */
 @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
 
-/* ✅ Tailwind Directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* --------------------------------------------- */
-/* Mobile Touch-Target & Scroll Preservation Fix */
-/* --------------------------------------------- */
-@layer base {
-  /* 1. Ensure all tappable elements meet a 48×48px minimum */
-  button,
-  a,
-  input,
-  .btn,
-  .nav-item,
-  .icon-button {
-    @apply min-w-[3rem] min-h-[3rem] p-2 touch-manipulation;
-  }
-
-  /* 2. Prevent fixed bars from intercepting vertical scrolls */
-  header,
-  nav,
-  .bottom-nav,
-  .mobile-nav,
-  .overlay {
-    overscroll-behavior: contain;
-  }
-
-  /* 3. Reserve bottom padding so fixed navs never cover content */
-  main,
-  .content-container,
-  .app-content {
-    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
-  }
-}
-
-/* --------------------------------------------- */
-/* Global Reset + Font + Base Styling */
+/* Modern CSS Reset + Logical Properties */
 /* --------------------------------------------- */
 *,
 *::before,
@@ -59,15 +24,18 @@
 }
 
 html {
+  block-size: 100%;
+  inline-size: 100%;
   scroll-behavior: smooth;
   color-scheme: light dark;
   background-color: rgb(var(--color-bg-light, 255 255 255));
   color: rgb(var(--color-text-light, 17 24 39));
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  font-size: 100%;
   line-height: 1.5;
   transition:
-    background-color 400ms cubic-bezier(0.4, 0, 0.2, 1),
-    color 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    background-color var(--transition-duration, 400ms) var(--transition-ease, cubic-bezier(0.4,0,0.2,1)),
+    color var(--transition-duration, 400ms) var(--transition-ease, cubic-bezier(0.4,0,0.2,1));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -95,10 +63,13 @@ html {
 
   --color-border-light: 229 231 235;
   --color-border-dark: 55 65 81;
+
+  --transition-duration: 400ms;
+  --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* --------------------------------------------- */
-/* Scrollbars */
+/* Scrollbar Styling */
 /* --------------------------------------------- */
 ::-webkit-scrollbar {
   width: 8px;
@@ -116,22 +87,26 @@ html {
 }
 
 /* --------------------------------------------- */
-/* Button & Input Reset */
+/* Button & Input Styling */
 /* --------------------------------------------- */
 button,
 input[type="button"],
 input[type="submit"],
 input[type="reset"] {
   cursor: pointer;
-  font-weight: 600;
-  user-select: none;
   border-radius: 0.375rem;
-  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+  padding-block: 0.625rem;
+  padding-inline: 1.25rem;
   background-color: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
   color: white;
-  transition: background-color 400ms, box-shadow 400ms, transform 0.25s;
   box-shadow: 0 4px 6px hsla(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l), 0.4);
+  transition: background-color var(--transition-duration), box-shadow var(--transition-duration), transform 0.25s;
+  will-change: transform, background-color;
+  user-select: none;
+  outline-offset: 3px;
 }
+
 button:hover,
 input[type="button"]:hover,
 input[type="submit"]:hover,
@@ -142,22 +117,28 @@ input[type="reset"]:hover {
 }
 
 /* --------------------------------------------- */
-/* Utility Classes */
+/* Utility Styles */
 /* --------------------------------------------- */
 .container {
   max-width: 1280px;
   margin: 0 auto;
   padding: 1rem;
 }
+
 .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
+  padding: 0;
   margin: -1px;
   overflow: hidden;
-  white-space: nowrap;
   clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
   border: 0;
+}
+
+.bg-primary {
+  background-color: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
 }
 .text-light {
   color: rgb(var(--color-text-light));
@@ -165,88 +146,55 @@ input[type="reset"]:hover {
 .text-dark {
   color: rgb(var(--color-text-dark));
 }
-.bg-primary {
-  background-color: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
-}
 
-=======
->>>>>>> Stashed changes
 /* --------------------------------------------- */
-/* ✨ Ambient Background + Shimmer Effect */
+/* Ambient Background & Shimmer */
 /* --------------------------------------------- */
-
-/* Soft teal-to-cyan gradient background */
 .bg-ambient {
-  background: linear-gradient(
-    135deg,
-    hsla(180, 66%, 60%, 0.2),
-    hsla(200, 100%, 70%, 0.25),
-    hsla(160, 80%, 70%, 0.15)
-  );
+  background: linear-gradient(135deg, hsla(180, 66%, 60%, 0.2), hsla(200, 100%, 70%, 0.25), hsla(160, 80%, 70%, 0.15));
   background-size: 400% 400%;
   animation: ambientPulse 30s ease infinite;
   position: relative;
   z-index: 0;
 }
 
-/* Subtle shimmer overlay */
 .shimmer::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(
-    120deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.05) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
   animation: shimmerMove 12s linear infinite;
   pointer-events: none;
   backdrop-filter: blur(4px);
-  mask-image: radial-gradient(circle, rgba(255,255,255,0.2) 20%, transparent 80%);
+  mask-image: radial-gradient(circle, rgba(255, 255, 255, 0.2) 20%, transparent 80%);
 }
 
-/* Pulse animation */
 @keyframes ambientPulse {
-<<<<<<< Updated upstream
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
-=======
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
->>>>>>> Stashed changes
 }
 
-/* Shimmer movement */
 @keyframes shimmerMove {
-<<<<<<< Updated upstream
-  0%   { transform: translateX(-50%); }
+  0% { transform: translateX(-50%); }
   100% { transform: translateX(50%); }
 }
 
 /* --------------------------------------------- */
-/* Root Height Fix */
+/* Root Fix for Dark Mode */
 /* --------------------------------------------- */
 html,
 body,
 #root {
   height: 100%;
   min-height: 100vh;
-=======
-  0% {
-    transform: translateX(-50%);
-  }
-  100% {
-    transform: translateX(50%);
-  }
->>>>>>> Stashed changes
+  background-color: rgb(var(--color-bg-light));
+  color: rgb(var(--color-text-light));
+}
+html.dark,
+html.dark body,
+html.dark #root {
+  background-color: rgb(var(--color-bg-dark)) !important;
+  color: rgb(var(--color-text-dark));
 }
