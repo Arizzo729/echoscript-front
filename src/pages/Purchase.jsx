@@ -1,7 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-<<<<<<< Updated upstream
 import { BadgeCheck, Sparkles, GraduationCap, Users, Zap, TriangleAlert } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -13,10 +12,12 @@ const hasDemoParam =
   typeof window !== "undefined" && new URLSearchParams(window.location.search).has("demo");
 const isLocalHost =
   typeof window !== "undefined" &&
-  (window.location.hostname === "localhost" ||
+  (
+    window.location.hostname === "localhost" ||
     window.location.hostname === "127.0.0.1" ||
     window.location.hostname === "::1" ||
-    window.location.hostname.endsWith(".ngrok-free.app"));
+    window.location.hostname.endsWith(".ngrok-free.app")
+  );
 const ALLOW_BYPASS = import.meta.env.DEV || isLocalHost;
 const DEV_BYPASS_ACTIVE = ALLOW_BYPASS && (DEV_BYPASS_FLAG || hasDemoParam);
 
@@ -31,11 +32,6 @@ const PLAN_AMOUNTS = {
 // ended up in the JS bundle. To pass the build, we disable PayPal UI
 // completely until we wire a server-provided public config.
 const HAS_PAYPAL = false;
-=======
-import { BadgeCheck, Sparkles, GraduationCap, Users, Zap } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
->>>>>>> Stashed changes
 
 const plans = [
   {
@@ -131,7 +127,6 @@ export default function PurchasePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
-<<<<<<< Updated upstream
 
   const SHOW_SIGNIN = (!user || !user.email) && !DEV_BYPASS_ACTIVE;
 
@@ -143,26 +138,6 @@ export default function PurchasePage() {
     } catch (err) {
       console.error("Stripe checkout error →", err);
       alert(`Payment error. Please try again.\n\nDetails: ${err?.message || err}`);
-=======
-  const isGuest = !user || !user.email;
-
-  const handleCheckout = async (planId) => {
-    try {
-      const res = await fetch(`/api/stripe/create-checkout-session`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planId }),
-      });
-      const data = await res.json();
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Something went wrong.");
-      }
-    } catch (err) {
-      console.error("Checkout error:", err);
-      alert("Payment error. Please try again.");
->>>>>>> Stashed changes
     }
   };
 
@@ -180,133 +155,8 @@ export default function PurchasePage() {
           </p>
         </div>
 
-<<<<<<< Updated upstream
         {DEV_BYPASS_ACTIVE && (
           <div className="max-w-3xl mx-auto flex items-center gap-3 rounded-lg border border-yellow-400/40 bg-yellow-500/10 text-yellow-200 p-3">
             <TriangleAlert className="w-5 h-5" />
             <p className="text-sm">
-              Dev payment test mode is <strong>ON</strong>: sign-in requirement bypassed. Remove{" "}
-              <code>VITE_BYPASS_AUTH_FOR_PAY</code> or <code>?demo=1</code> before production.
-            </p>
-          </div>
-        )}
-
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {plans.map((plan) => {
-            return (
-              <div
-                key={plan.id}
-                className={`bg-gradient-to-br ${plan.bg} border-l-4 ${plan.border} rounded-xl shadow-lg p-6 flex flex-col justify-between`}
-              >
-                <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    {plan.icon}
-                    <h2 className="text-xl font-semibold">{plan.name}</h2>
-                  </div>
-                  <p
-                    className={`${
-                      plan.id === "enterprise" ? "text-base font-medium text-blue-300" : "text-3xl font-bold text-white"
-                    } mb-1`}
-                  >
-                    {plan.price}
-                  </p>
-                  <p className="text-sm text-zinc-400 italic mb-4">{plan.suggested}</p>
-                  <ul className="space-y-2 text-sm text-zinc-300">
-                    {plan.features.map((f, i) => (
-                      <li key={i}>• {f}</li>
-                    ))}
-                  </ul>
-                </div>
-
-                {!plan.checkout ? (
-                  <button
-                    onClick={() => (plan.id === "guest" ? navigate("/upload") : navigate(plan.link))}
-                    className="mt-6 inline-flex items-center justify-center text-sm font-medium bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg transition"
-                  >
-                    {t("get_started", "Get Started")}
-                  </button>
-                ) : SHOW_SIGNIN ? (
-                  <button
-                    onClick={() => navigate("/signin")}
-                    className="mt-6 inline-flex items-center justify-center text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg transition"
-                  >
-                    {t("sign_in_to_continue", "Sign in to continue")}
-                  </button>
-                ) : (
-                  <div className="mt-6 space-y-3">
-                    <button
-                      onClick={() => handleCheckout(plan.id)}
-                      className="w-full inline-flex items-center justify-center text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg transition"
-                    >
-                      {t("pay_with_card_stripe", "Pay with card (Stripe)")}
-                    </button>
-
-                    {!HAS_PAYPAL && (
-                      <p className="text-xs text-zinc-400 text-center">
-                        PayPal is temporarily unavailable while we harden the build. Stripe is available now.
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-=======
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {plans.map((plan) => (
-            <div
-              key={plan.id}
-              className={`bg-gradient-to-br ${plan.bg} border-l-4 ${plan.border} rounded-xl shadow-lg p-6 flex flex-col justify-between`}
-            >
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  {plan.icon}
-                  <h2 className="text-xl font-semibold">{plan.name}</h2>
-                </div>
-                <p className={`${plan.id === "enterprise" ? "text-base font-medium text-blue-300" : "text-3xl font-bold text-white"} mb-1`}>
-                  {plan.price}
-                </p>
-                <p className="text-sm text-zinc-400 italic mb-4">{plan.suggested}</p>
-                <ul className="space-y-2 text-sm text-zinc-300">
-                  {plan.features.map((f, i) => (
-                    <li key={i}>• {f}</li>
-                  ))}
-                </ul>
-              </div>
-              <button
-                onClick={() => {
-                  if (plan.id === "guest") return navigate("/upload");
-                  if (isGuest) return navigate("/signin");
-                  return plan.checkout ? handleCheckout(plan.id) : navigate(plan.link);
-                }}
-                className="mt-6 inline-flex items-center justify-center text-sm font-medium bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg transition"
-              >
-                {t("get_started", "Get Started")}
-              </button>
-            </div>
-          ))}
->>>>>>> Stashed changes
-        </div>
-
-        <div className="w-full bg-zinc-800/70 border border-zinc-700 rounded-xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 mt-12 shadow-inner">
-          <button
-            onClick={() => navigate("/purchase/minutes")}
-            className="bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold px-6 py-3 rounded-lg"
-          >
-            {t("buy_extra_minutes", "Need More Minutes?")}
-          </button>
-          <p className="text-sm text-zinc-400 text-center md:text-left">
-            {t("need_help_choosing", "Need help choosing the right plan?")}{" "}
-            <a href="/assistant" className="text-teal-400 underline">
-              {t("help_choose_plan", "Ask our AI assistant →")}
-            </a>
-          </p>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
+              Dev payment test mode is <strong>ON</strong>: sign-in requirement bypassed. Remove{

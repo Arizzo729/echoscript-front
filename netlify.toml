@@ -1,4 +1,4 @@
-<<<<<<< Updated upstream
+
 # netlify.toml
 =======
 >>>>>>> Stashed changes
@@ -6,7 +6,7 @@
   command = "npm run build"
   publish = "dist"
 
-<<<<<<< Updated upstream
+
 # Proxy /api/* and /v1/* to your API host
 [[redirects]]
   from = "/api/*"
@@ -83,4 +83,4 @@
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Cache-Control = "no-store"
 
->>>>>>> Stashed changes
+
