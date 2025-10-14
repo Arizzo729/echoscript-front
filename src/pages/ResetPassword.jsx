@@ -80,7 +80,6 @@ export default function ResetPassword() {
     >
       <div className="w-full max-w-md p-8 space-y-6 rounded-2xl shadow-xl bg-zinc-900 border border-zinc-700">
         <h1 className="text-3xl font-bold text-center text-white">
-<<<<<<< Updated upstream
           {t("reset.title") || "Reset Password"}
         </h1>
         <p className="text-sm text-center text-zinc-400">
