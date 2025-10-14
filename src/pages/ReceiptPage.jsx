@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { CheckCircle, Home } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-export default function Success() {
+export default function ReceiptPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 

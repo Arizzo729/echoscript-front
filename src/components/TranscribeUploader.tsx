@@ -2,15 +2,18 @@ import React, { useRef, useState } from "react";
 import { UploadCloud, CheckCircle, AlertCircle, Clipboard } from "lucide-react";
 import api from "../lib/api";
 
-export default function TranscribeUploader() {
-  const [file, setFile] = useState(null);
-  const [status, setStatus] = useState("idle"); // idle | uploading | done | error
-  const [error, setError] = useState("");
-  const [result, setResult] = useState(null);
-  const [taskStatus, setTaskStatus] = useState(null);
-  const inputRef = useRef(null);
+type Status = "idle" | "uploading" | "done" | "error";
+type Result = { text?: string; transcript?: string } | null;
 
-  const onPick = (e) => {
+export default function TranscribeUploader() {
+  const [file, setFile] = useState<File | null>(null);
+  const [status, setStatus] = useState<Status>("idle");
+  const [error, setError] = useState("");
+  const [result, setResult] = useState<Result>(null);
+  const [taskStatus, setTaskStatus] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
     setFile(f);
@@ -19,7 +22,7 @@ export default function TranscribeUploader() {
     setTaskStatus(null);
   };
 
-  const onDrop = (e) => {
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const f = e.dataTransfer.files?.[0];
     if (!f) return;
@@ -29,7 +32,7 @@ export default function TranscribeUploader() {
     setTaskStatus(null);
   };
 
-  const onDragOver = (e) => e.preventDefault();
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
 
   async function transcribe() {
     if (!file) return;
@@ -43,10 +46,11 @@ export default function TranscribeUploader() {
       const data = await api.call("/transcribe?language=en", {
         method: "POST",
         body: fd,
-      });      setResult(data);
+      });
+      setResult(data);
       setStatus("done");
-    } catch (e) {
-      setError(e?.message || "Transcription failed");
+    } catch (e: any) {
+      setError(e?.message ?? "Transcription failed");
       setStatus("error");
     }
   }
@@ -56,8 +60,8 @@ export default function TranscribeUploader() {
     try {
       const data = await api.call("/video-task", { method: "POST" });
       setTaskStatus(`queued: ${data?.task_id || "ok"}`);
-    } catch (e) {
-      setTaskStatus(`error: ${e?.message || "failed"}`);
+    } catch (e: any) {
+      setTaskStatus(`error: ${e?.message ?? "failed"}`);
     }
   }
 
@@ -124,8 +128,8 @@ export default function TranscribeUploader() {
           <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-3">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-zinc-400">Transcript</span>
-              <button onClick={copyText} className="text-xs text-teal-300 hover:underline">
-                <Clipboard className="inline w-3 h-3 mr-1" />
+              <button onClick={copyText} className="text-xs text-teal-300 hover:underline flex items-center gap-1">
+                <Clipboard className="w-3 h-3" />
                 Copy
               </button>
             </div>

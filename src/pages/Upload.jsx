@@ -11,7 +11,6 @@ import TranscriptExportPanel from "../components/TranscriptExportPanel";
 
 import {
   Mic,
-  MicOff,
   Timer,
   Download,
   Globe,
@@ -21,15 +20,6 @@ import {
   Upload as UploadIcon,
   StopCircle,
   Play,
-} from "lucide-react";
-
-const AUDIO = ["mp3", "wav", "flac", "m4a", "aac", "ogg", "webm"];
-const VIDEO = ["mp4", "mkv", "mov"];
-const MAX_MB = 500;
-
-// ✅ Centralized API base (normalized so no double /api)
-const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
-
 /**
  * Simple recorder using MediaRecorder.
  * - start(): asks for mic, starts recording, updates state
@@ -37,7 +27,6 @@ const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
  */
 function useSimpleRecorder() {
   // Recorder hook
-  const [recording, setRecording] = useState(false);
   const [permissionError, setPermissionError] = useState("");
   const mediaStreamRef = useRef(null);
   const mediaRecorderRef = useRef(null);

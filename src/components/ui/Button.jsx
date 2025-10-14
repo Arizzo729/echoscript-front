@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
 // ✅ EchoScript.AI — Enhanced Button (No Prop Interference, Clean Drag, Glow, Sound)
-=======
-// ✅ EchoScript.AI — Final Enhanced Button with Sound + Glow Integration
->>>>>>> Stashed changes
 import React from "react";
 import { twMerge } from "tailwind-merge";
 import { motion } from "framer-motion";
@@ -21,25 +17,13 @@ function Button({
   className = "",
   ...props
 }) {
-<<<<<<< Updated upstream
   const { playClick, isMuted } = useSound();
 
   const handleClick = (e) => {
     if (!disableSound && !isMuted) {
       playClick();
     }
-    if (typeof props.onClick === "function") {
-      props.onClick(e);
-    }
-=======
-  const { playClickSound, isMuted } = useSound();
-
-  const handleClick = (e) => {
-    if (!disableSound && !isMuted) {
-      playClickSound();
-    }
     if (props.onClick) props.onClick(e);
->>>>>>> Stashed changes
   };
 
   const base =
@@ -111,11 +95,6 @@ function Button({
   );
 }
 
-<<<<<<< Updated upstream
-=======
 // ✅ Export both default and named for flexibility
->>>>>>> Stashed changes
 export { Button };
 export default Button;
-
-

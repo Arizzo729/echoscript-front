@@ -5,7 +5,7 @@ import {
   ChevronLeft, ChevronRight, Pause, Play, X, ChevronUp, ChevronDown, Volume2, VolumeX, Music
 } from 'lucide-react';
 import { useSound } from '../context/SoundContext';
-import useIsMobile from '../hooks/useIsMobile';
+import useIsMobile from '../hooks/useIsMobile.jsx';
 
 const TRACKS = [{ label: 'OFF' }, { label: 'BG 1' }, { label: 'BG 2' }, { label: 'BG 3' }];
 

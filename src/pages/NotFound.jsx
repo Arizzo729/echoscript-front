@@ -9,7 +9,6 @@ export default function NotFound() {
   return (
     <motion.div
       className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-zinc-950 to-zinc-900 px-2 sm:px-0"
-      className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-zinc-950 to-zinc-900 px-2 sm:px-0"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}

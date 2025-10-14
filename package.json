@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "EchoScript.AI frontend application - advanced transcription UI with React, TailwindCSS, and Framer Motion",
+  "type": "module",
   "author": "EchoScript Team",
   "license": "ISC",
   "scripts": {

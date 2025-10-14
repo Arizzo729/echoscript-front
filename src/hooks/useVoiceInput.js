@@ -31,14 +31,12 @@ export default function useVoiceInput({ onTranscript = () => {} } = {}) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       console.warn("🛑 SpeechRecognition not supported in this browser.");
->>>>>>> Stashed changes
       return;
     }
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
-<<<<<<< Updated upstream
     recognition.lang = lang;
     recognitionRef.current = recognition;
 
@@ -57,26 +55,6 @@ export default function useVoiceInput({ onTranscript = () => {} } = {}) {
     recognition.onerror = (evt) => {
       // most common: "not-allowed", "no-speech", "audio-capture"
       setError(evt?.error || "speech_error");
-=======
-    recognition.lang = "en-US";
-    recognitionRef.current = recognition;
-
-    recognition.onresult = (event) => {
-      let finalTranscript = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript + " ";
-        }
-      }
-      if (finalTranscript.trim()) {
-        onTranscript(finalTranscript.trim());
-      }
-    };
-
-    recognition.onerror = (event) => {
-      console.error("🎤 Speech recognition error:", event.error);
->>>>>>> Stashed changes
       setListening(false);
     };
 
@@ -93,7 +71,7 @@ export default function useVoiceInput({ onTranscript = () => {} } = {}) {
     };
     // intentionally omit onTranscript/onInterim from deps to avoid reinit
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lang]);
+  }, [lang]); // Re-initialize if language changes
 
   const startListening = useCallback(() => {
     setError(null);
@@ -121,28 +99,3 @@ export default function useVoiceInput({ onTranscript = () => {} } = {}) {
 
   return { listening, startListening, stopListening, error };
 }
-
-=======
-  }, [onTranscript]);
-
-  const startListening = () => {
-    if (recognitionRef.current && !listening) {
-      try {
-        recognitionRef.current.start();
-        setListening(true);
-      } catch (err) {
-        console.error("❌ Failed to start recognition:", err);
-      }
-    }
-  };
-
-  const stopListening = () => {
-    if (recognitionRef.current && listening) {
-      recognitionRef.current.stop();
-      setListening(false);
-    }
-  };
-
-  return { listening, startListening, stopListening };
-}
->>>>>>> Stashed changes

@@ -15,8 +15,8 @@ import AnimatedSplash from "./components/AnimatedSplash";
 import OnboardingModal from "./components/OnboardingModal";
 import IntroVideo from "./components/IntroVideo"; // ⬅️ added
 import Layout from "./components/Layout";
-import ErrorBoundary from "./components/ErrorBoundary";
-import useIsMobile from "./hooks/useIsMobile";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
+import useIsMobile from "./hooks/useIsMobile.jsx";
 import MobileBottomNav from "./components/MobileBottomNav";
 import FloatingHome from "./components/FloatingHome";
 import AudioOverlay from "./components/AudioOverlay"; // ✅ desktop overlay
