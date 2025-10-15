@@ -20,8 +20,8 @@ export default function AdaptiveAI({
     setLog((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
 
   const chooseProviderAdaptive = useCallback(() => {
-    // Previously: PROVIDERS.OCTOPARSE (undefined). Use APIFY instead.
-    if (typeof inputData === "string" && inputData.length > 1000) return PROVIDERS.APIFY;
+    // Corrected: PROVIDERS.OCTOPARSE was not defined. Fallback to a defined provider.
+    if (typeof inputData === "string" && inputData.length > 1000) return PROVIDERS.APIFY; // Example logic
     return initialProvider;
   }, [inputData, initialProvider]);
 
