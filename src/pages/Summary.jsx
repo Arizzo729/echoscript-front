@@ -5,11 +5,6 @@ import Button from "../components/ui/Button";
 import { Sparkles, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-<<<<<<< Updated upstream
-const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
-
-=======
->>>>>>> Stashed changes
 const tones = [
   { id: "default", label: "Smart" },
   { id: "friendly", label: "Friendly" },
