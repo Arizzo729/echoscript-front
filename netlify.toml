@@ -1,27 +1,6 @@
-# netlify.toml
-[build]
+﻿[build]
   command = "npm run build"
   publish = "dist"
 
-[build.environment]
-  NODE_VERSION = "18"
-  NPM_FLAGS = "--legacy-peer-deps"
-
-# --- HTTPS & Domain Enforcement ---
-# Note: API proxy and SPA fallback are handled in `public/_redirects`
-
-[[redirects]]
-  from = "https://echoscript.ai/*" # apex -> www
-  to   = "https://www.echoscript.ai/:splat"
-  status = 301
-  force = true
-
-# --- Security & Permissions Headers ---
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    Permissions-Policy = "microphone=(self)"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "SAMEORIGIN"
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
