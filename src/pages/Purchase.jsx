@@ -18,13 +18,6 @@ const isLocalHost =
 const ALLOW_BYPASS = import.meta.env.DEV || isLocalHost;
 const DEV_BYPASS_ACTIVE = ALLOW_BYPASS && (DEV_BYPASS_FLAG || hasDemoParam);
 
-// Map plan -> PayPal/Stripe nominal amount (we only use Stripe right now)
-const PLAN_AMOUNTS = {
-  pro: "9.99",
-  premium: "19.99",
-  edu: "4.99",
-};
-
 // ⚠️ Netlify secret scanning was failing because the PayPal client ID
 // ended up in the JS bundle. To pass the build, we disable PayPal UI
 // completely until we wire a server-provided public config.
