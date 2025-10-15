@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 /**
  * AnimatedSplash (Stub)
  *␊
@@ -21,8 +20,6 @@ export default function AnimatedSplash({ onComplete }) {
 
 
 /*
-=======
->>>>>>> Stashed changes
 import React, {
   useState,
   useEffect,
@@ -155,8 +152,4 @@ export default function AnimatedSplash({
     </AnimatePresence>
   );
 }
-<<<<<<< Updated upstream
-*/
-=======
 
->>>>>>> Stashed changes
