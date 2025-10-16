@@ -1,24 +1,24 @@
-<<<<<<< Updated upstream
-// ✅ EchoScript.AI — Emotion/Tone heuristic detector (lightweight client-side)
-export default function detectTone(text) {
-  if (!text) return "neutral";
-  const lower = String(text).toLowerCase();
+// src/utils/EmotionToneDetector.js
 
-  // Expanded dictionaries, case-insensitive
-  const positiveRegex =
-    /\b(amazing|awesome|great|excited|cool|yay|yes|love|fantastic|wonderful|incredible|happy|satisfied|blessed|joyful|thrilled|grateful|excellent|brilliant|nice|good|perfect|stoked|pumped|win|winning)\b/i;
+/**
+ * Build-safe placeholder. No JSX here.
+ * Replace with your real model/heuristics later.
+ */
 
-  const negativeRegex =
-    /\b(sad|tired|bad|confused|lost|sorry|angry|upset|hate|frustrated|annoyed|depressed|stressed|miserable|lonely|terrible|ugh|nope|awful|horrible|disappointed|worried|anxious|mad|furious|irritated|bummed)\b/i;
-=======
-export default function detectTone(text) {
+export function analyzeTone(text = "") {
+  // TODO: implement real tone detection
+  if (!text || typeof text !== "string") {
+    return { emotion: "neutral", score: 0 };
+  }
+
   const lower = text.toLowerCase();
+  if (/\b(angry|furious|mad|rage)\b/.test(lower)) return { emotion: "anger", score: 0.9 };
+  if (/\b(happy|glad|joy|excited)\b/.test(lower)) return { emotion: "joy", score: 0.8 };
+  if (/\b(sad|down|unhappy|depress)\b/.test(lower)) return { emotion: "sadness", score: 0.8 };
+  if (/\b(fear|afraid|scared|anxious)\b/.test(lower)) return { emotion: "fear", score: 0.8 };
+  if (/\b(surpris|wow|shocked)\b/.test(lower)) return { emotion: "surprise", score: 0.7 };
 
-  const positiveRegex = /\b(amazing|awesome|great|excited|cool|yay|yes|love|fantastic|wonderful|incredible|happy|satisfied|blessed|joyful|thrilled|grateful)\b/;
-  const negativeRegex = /\b(sad|tired|bad|confused|lost|sorry|angry|upset|hate|frustrated|annoyed|depressed|stressed|miserable|lonely|terrible|ugh|nope)\b/;
->>>>>>> Stashed changes
-
-  if (positiveRegex.test(lower)) return "positive";
-  if (negativeRegex.test(lower)) return "negative";
-  return "neutral";
+  return { emotion: "neutral", score: 0.2 };
 }
+
+export default analyzeTone;
