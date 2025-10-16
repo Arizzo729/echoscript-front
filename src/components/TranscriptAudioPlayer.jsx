@@ -1,133 +1,241 @@
 // src/components/TranscriptAudioPlayer.jsx
-import { ChevronDown, ChevronUp, Pause, Play } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from "react";
+import { ChevronDown, ChevronUp, Pause, Play } from "lucide-react";
 
 const SPEED_OPTIONS = [0.25, 0.5, 1, 1.25, 1.5, 1.75, 2];
 
-export default function TranscriptAudioPlayer({ audioUrl }) {
+/**
+ * TranscriptAudioPlayer
+ *
+ * Props:
+ * - audioUrl: string (required) — URL/path to audio file
+ * - segments: Array<{ id?: string|number, start: number, end: number, text: string }>
+ * - initialTime?: number (seconds)
+ * - onTimeUpdate?: (timeSeconds: number) => void
+ * - onSeek?: (timeSeconds: number) => void
+ */
+export default function TranscriptAudioPlayer({
+  audioUrl,
+  segments = [],
+  initialTime = 0,
+  onTimeUpdate,
+  onSeek,
+}) {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
+  const [currentTime, setCurrentTime] = useState(initialTime);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
 
+  // Stable keys for segment list (no index param, so no-unused-vars is happy)
+  const normalizedSegments = useMemo(
+    () =>
+      (Array.isArray(segments) ? segments : []).map((seg) => ({
+        ...seg,
+        __key:
+          seg?.id != null
+            ? String(seg.id)
+            : `${safeNum(seg?.start)}-${safeNum(seg?.end)}-${hashText(
+                seg?.text
+              )}`,
+      })),
+    [segments]
+  );
+
+  // Attach time + metadata listeners
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+    const el = audioRef.current;
+    if (!el) return;
 
-    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const handleLoadedMetadata = () => setDuration(audio.duration);
+    const handleTimeUpdate = () => {
+      const t = el.currentTime || 0;
+      setCurrentTime(t);
+      if (typeof onTimeUpdate === "function") onTimeUpdate(t);
+    };
 
-    audio.addEventListener("timeupdate", handleTimeUpdate);
-    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    const handleLoadedMetadata = () => {
+      setDuration(el.duration || 0);
+    };
+
+    el.addEventListener("timeupdate", handleTimeUpdate);
+    el.addEventListener("loadedmetadata", handleLoadedMetadata);
 
     return () => {
-      audio.removeEventListener("timeupdate", handleTimeUpdate);
-      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      el.removeEventListener("timeupdate", handleTimeUpdate);
+      el.removeEventListener("loadedmetadata", handleLoadedMetadata);
     };
+  }, [onTimeUpdate]);
+
+  // Seek to initialTime on mount (once)
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (initialTime > 0) el.currentTime = initialTime;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // reset when source changes
+  // Keep playback rate in sync with state
   useEffect(() => {
-    setIsPlaying(false);
-    setCurrentTime(0);
-    setDuration(0);
-  }, [audioUrl]);
+    const el = audioRef.current;
+    if (!el) return;
+    el.playbackRate = playbackRate;
+  }, [playbackRate]);
 
-  const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) audio.pause();
-    else audio.play();
-
-    setIsPlaying(!isPlaying);
+  const togglePlay = async () => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (isPlaying) {
+      el.pause();
+      setIsPlaying(false);
+    } else {
+      try {
+        await el.play();
+        setIsPlaying(true);
+      } catch {
+        setIsPlaying(false);
+      }
+    }
   };
 
-  const handleSeek = (e) => {
-    const newTime = parseFloat(e.target.value);
-    audioRef.current.currentTime = newTime;
-    setCurrentTime(newTime);
+  const seekTo = (t) => {
+    const el = audioRef.current;
+    if (!el) return;
+    el.currentTime = Math.max(0, Number(t) || 0);
+    if (typeof onSeek === "function") onSeek(el.currentTime);
   };
 
-  const handleSpeedChange = (rate) => {
-    audioRef.current.playbackRate = rate;
-    setPlaybackRate(rate);
-    setShowSpeedMenu(false);
+  const formatTime = (sec) => {
+    const t = Math.max(0, Math.floor(Number(sec) || 0));
+    const m = Math.floor(t / 60);
+    const s = t % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  const formatTime = (time) =>
-    isNaN(time)
-      ? "0:00"
-      : `${Math.floor(time / 60)}:${String(Math.floor(time % 60)).padStart(2, "0")}`;
+  const activeIdx = findActiveIndex(normalizedSegments, currentTime);
 
   return (
-    <div className="w-full p-4 rounded-xl bg-zinc-800 text-white shadow-lg flex flex-col gap-4">
-      <audio ref={audioRef} src={audioUrl} preload="metadata">
-        <track kind="captions" />
-      </audio>
+    <div className="w-full max-w-3xl mx-auto space-y-4">
+      <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
-      <div className="flex items-center gap-4">
+      {/* Controls */}
+      <div className="flex flex-wrap items-center gap-3">
         <button
+          type="button"
           onClick={togglePlay}
+          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border shadow-sm hover:bg-gray-50"
           aria-label={isPlaying ? "Pause" : "Play"}
-          className="p-2 rounded-full bg-zinc-700 hover:bg-teal-600 transition"
+          title={isPlaying ? "Pause" : "Play"}
         >
-          {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+          {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+          <span className="text-sm">{isPlaying ? "Pause" : "Play"}</span>
         </button>
 
-        <div className="flex-1">
-          <input
-            type="range"
-            min={0}
-            max={duration || 0}
-            step="0.1"
-            value={currentTime}
-            onChange={handleSeek}
-            className="w-full accent-teal-400"
-            aria-label="Seek"
-          />
-          <div className="flex justify-between text-xs text-zinc-300 mt-1">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
+        <div className="text-sm tabular-nums">
+          {formatTime(currentTime)} / {formatTime(duration)}
         </div>
 
+        {/* Speed */}
         <div className="relative">
           <button
+            type="button"
             onClick={() => setShowSpeedMenu((s) => !s)}
-            className="px-3 py-1 rounded-md bg-zinc-700 hover:bg-teal-600 text-sm transition flex items-center gap-1"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border shadow-sm hover:bg-gray-50"
             aria-haspopup="menu"
             aria-expanded={showSpeedMenu}
+            title="Playback speed"
           >
-            {playbackRate}x {showSpeedMenu ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            <span className="text-sm">Speed: {playbackRate}×</span>
+            {showSpeedMenu ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
 
           {showSpeedMenu && (
-            <ul
-              className="absolute right-0 mt-2 w-24 bg-zinc-900 border border-zinc-700 rounded-lg shadow-md z-50 text-sm"
+            <div
               role="menu"
+              className="absolute z-10 mt-2 w-40 rounded-lg border bg-white shadow-md p-2"
             >
-                {SPEED_OPTIONS.map((rate) => (
-                  <li key={rate} role="presentation">
-                    <button
-                      role="menuitem"
-                      tabIndex={0}
-                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSpeedChange(rate)}
-                      onClick={() => handleSpeedChange(rate)}
-                      className={`w-full text-left px-3 py-1 cursor-pointer hover:bg-teal-600 rounded ${
-                        playbackRate === rate ? "bg-zinc-700" : ""
-                      }`}
-                    >
-                      {rate}x
-                    </button>
-                  </li>
-                ))}
-            </ul>
+              {SPEED_OPTIONS.map((s) => (
+                <button
+                  key={String(s)}
+                  type="button"
+                  className={[
+                    "block w-full text-left px-3 py-1.5 rounded-md hover:bg-gray-50",
+                    s === playbackRate ? "bg-blue-50 ring-1 ring-blue-300" : "",
+                  ].join(" ")}
+                  onClick={() => {
+                    setPlaybackRate(s);
+                    setShowSpeedMenu(false);
+                  }}
+                >
+                  {s}×
+                </button>
+              ))}
+            </div>
           )}
         </div>
       </div>
+
+      {/* Transcript list */}
+      <div className="space-y-1 max-h-80 overflow-auto border rounded-lg p-3">
+        {normalizedSegments.length === 0 ? (
+          <div className="text-sm text-gray-500">No transcript available.</div>
+        ) : (
+          normalizedSegments.map((seg) => {
+            const isActive =
+              typeof seg.start === "number" &&
+              typeof seg.end === "number" &&
+              currentTime >= seg.start &&
+              currentTime < seg.end;
+
+            return (
+              <button
+                key={seg.__key}
+                type="button"
+                onClick={() => seekTo(seg.start)}
+                className={[
+                  "block w-full text-left rounded-md px-2 py-1",
+                  "hover:bg-gray-50",
+                  isActive ? "bg-blue-50 ring-1 ring-blue-300" : "",
+                ].join(" ")}
+                title={`Jump to ${formatTime(seg.start ?? 0)}`}
+              >
+                <div className="text-xs text-gray-500 tabular-nums">
+                  {formatTime(seg.start ?? 0)} – {formatTime(seg.end ?? 0)}
+                </div>
+                <div className="text-sm">{seg.text || ""}</div>
+              </button>
+            );
+          })
+        )}
+      </div>
     </div>
   );
+}
+
+/* ------------ helpers ------------ */
+
+function safeNum(n) {
+  const v = Number(n);
+  return Number.isFinite(v) ? v : 0;
+}
+
+function hashText(text) {
+  const s = String(text || "");
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (h * 31 + s.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+function findActiveIndex(segments, t) {
+  if (!Array.isArray(segments) || segments.length === 0) return -1;
+  const time = Number(t) || 0;
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i] || {};
+    const start = safeNum(seg.start);
+    const end = safeNum(seg.end);
+    if (time >= start && time < end) return i;
+  }
+  return -1;
 }
