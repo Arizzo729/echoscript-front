@@ -1,5 +1,5 @@
-// ✅ GPTContext.jsx — Persistent memory + identity + context sharing
-import React, { createContext, useState, useEffect } from "react";
+// âœ… GPTContext.jsx â€” Persistent memory + identity + context sharing
+import React, {createContext, useState, useEffect, useEffect} from "react";
 
 export const GPTContext = createContext();
 

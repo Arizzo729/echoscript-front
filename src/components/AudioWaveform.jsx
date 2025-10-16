@@ -1,5 +1,5 @@
 // src/components/AudioWaveform.jsx
-import React, { useEffect, useRef } from "react";
+import React, {useEffect, useRef, useEffect} from "react";
 
 export default function AudioWaveform({ audioStream }) {
   const canvasRef = useRef(null);

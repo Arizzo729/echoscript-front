@@ -1,5 +1,5 @@
 // src/components/LiveCaptions.tsx
-import { useEffect, useRef, useState } from "react";
+import {useEffect, useRef, useState, useState} from "react";
 import { openTranscribeSocket } from "../lib/liveCaptionClient";
 
 type Caption = { id: string; text: string; start: number; end?: number; final?: boolean; };

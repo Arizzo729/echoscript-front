@@ -1,5 +1,5 @@
-// ✅ EchoScript.AI — Final useAmbientAudio Hook with Fade, Autoplay, and Proper Cycling
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+// âœ… EchoScript.AI â€” Final useAmbientAudio Hook with Fade, Autoplay, and Proper Cycling
+import {useState, useEffect, useRef, useCallback, useMemo, useState} from "react";
 
 const trackLabels = ["Music 1", "Music 2", "Music 3", "Off"];
 

@@ -1,5 +1,5 @@
 // src/hooks/useSimpleRecorder.jsx
-import { useRef, useState } from "react";
+import {useRef, useState, useState} from "react";
 
 /**
  * Minimal audio recorder hook (browser only).

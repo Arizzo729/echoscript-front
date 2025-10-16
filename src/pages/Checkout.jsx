@@ -1,6 +1,6 @@
 // src/pages/Checkout.jsx
 import api from "../lib/api";
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState, useState} from "react";
 
 function useQuery() {
   const params = new URLSearchParams(window.location.search);
@@ -13,14 +13,14 @@ function useQuery() {
 }
 
 export default function Checkout() {
-  const [status, setStatus] = useState("Checking…");
+  const [status, setStatus] = useState("Checkingâ€¦");
   const [details, setDetails] = useState(null);
   const q = useQuery();
 
   useEffect(() => {
     const run = async () => {
       if (q.paypal === "success") {
-        setStatus("PayPal payment captured ✅");
+        setStatus("PayPal payment captured âœ…");
         return;
       }
       if (q.success === "1" && q.session_id) {
@@ -28,7 +28,7 @@ export default function Checkout() {
           // Use the centralized API client for consistency and error handling
           const data = await api.call(`/stripe/checkout/session?session_id=${encodeURIComponent(q.session_id)}`);
           setDetails(data);
-          setStatus("Stripe checkout complete ✅");
+          setStatus("Stripe checkout complete âœ…");
         } catch {
           setStatus("Completed (unable to verify session)");
         }
@@ -61,7 +61,7 @@ export default function Checkout() {
         </pre>
       ) : null}
       <a href="/purchase" style={{ display: "inline-block", marginTop: 16 }}>
-        ← Back to purchase
+        â† Back to purchase
       </a>
     </div>
   );

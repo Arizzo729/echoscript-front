@@ -1,5 +1,5 @@
-// src/pages/HistoryPage.jsx — Enhanced History with Search, Pagination, and Toasts
-import React, { useState, useEffect } from "react";
+// src/pages/HistoryPage.jsx â€” Enhanced History with Search, Pagination, and Toasts
+import React, {useState, useEffect, useState} from "react";
 import { motion } from "framer-motion";
 import { Download, Trash2, RotateCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";

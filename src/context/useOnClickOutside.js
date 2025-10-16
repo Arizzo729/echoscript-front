@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import {useEffect, useEffect} from "react";
 
 /**
- * useOnClickOutside — detects clicks outside a referenced element
+ * useOnClickOutside â€” detects clicks outside a referenced element
  * @param {React.RefObject} ref - element to monitor
  * @param {Function} handler - callback for outside click
  */

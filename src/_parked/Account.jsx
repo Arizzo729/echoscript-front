@@ -1,13 +1,13 @@
 // src/pages/Account.jsx
-import React, { useState, useEffect, useMemo } from "react";
+import React, {useState, useEffect, useMemo, useState} from "react";
 import { motion } from "framer-motion";
 import {
   Download, LogOut, Moon, Sun, BadgeCheck, FileText, Crown, UserPlus, Settings, Save, Undo2, Image as ImageIcon, Trash2,
 } from "lucide-react";
 import Button from "../components/ui/Button";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "../context/useTheme";       // ✅ use global theme
-import { useAuth } from "../context/AuthContext";     // ✅ use global auth
+import { useTheme } from "../context/useTheme";       // âœ… use global theme
+import { useAuth } from "../context/AuthContext";     // âœ… use global auth
 
 const ownerEmail = "andrew@echoscript.ai";
 const availablePlans = ["Guest", "Pro", "Enterprise"];
@@ -26,10 +26,10 @@ export default function Account() {
   const { t } = useTranslation();
   const tf = (k, f) => t(k, { defaultValue: f });
 
-  const { theme, toggleTheme } = useTheme();          // 🔁 global theme (persists & toggles <html>.dark)
+  const { theme, toggleTheme } = useTheme();          // ðŸ” global theme (persists & toggles <html>.dark)
   const isDark = theme === "dark";
 
-  const { signOut } = useAuth();                      // 🚪 global sign-out (hits /api/auth/logout)
+  const { signOut } = useAuth();                      // ðŸšª global sign-out (hits /api/auth/logout)
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -225,7 +225,7 @@ export default function Account() {
       {/* Header */}
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
         <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent tracking-tight">
-          👤 {user.isGuest ? tf("account.guestName", "Guest") : user.name}
+          ðŸ‘¤ {user.isGuest ? tf("account.guestName", "Guest") : user.name}
         </h1>
 
         <div className="flex items-center gap-2">
@@ -256,7 +256,7 @@ export default function Account() {
         </div>
       </header>
 
-      {loading && <div className="text-zinc-300">{tf("common.loading", "Loading account…")}</div>}
+      {loading && <div className="text-zinc-300">{tf("common.loading", "Loading accountâ€¦")}</div>}
       {error && <div className="text-red-400">{error}</div>}
 
       {!loading && (
@@ -274,7 +274,7 @@ export default function Account() {
                 {!user.isGuest && (
                   <label className="absolute -bottom-2 -right-2 cursor-pointer inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-zinc-800 border border-zinc-700 hover:bg-zinc-700">
                     <ImageIcon className="w-3.5 h-3.5" />
-                    {savingAvatar ? tf("common.saving", "Saving…") : tf("account.changeAvatar", "Change")}
+                    {savingAvatar ? tf("common.saving", "Savingâ€¦") : tf("account.changeAvatar", "Change")}
                     <input type="file" accept="image/*" className="hidden" onChange={onAvatarPick} />
                   </label>
                 )}
@@ -331,11 +331,11 @@ export default function Account() {
               )}
             </div>
 
-            {/* Owner-only “View as” */}
+            {/* Owner-only â€œView asâ€ */}
             {!user.isGuest && user.email === ownerEmail && (
               <div className="mt-5 flex flex-col gap-1 w-full max-w-xs">
                 <label htmlFor="planSelect" className="block text-sm font-medium text-white mb-1">
-                  👑 {tf("account.ownerModeLabel", "Owner Mode")}
+                  ðŸ‘‘ {tf("account.ownerModeLabel", "Owner Mode")}
                 </label>
                 <select
                   id="planSelect"
@@ -358,13 +358,13 @@ export default function Account() {
           <AccountCard title={tf("account.subscription", "Subscription")}>
             {user.isGuest ? (
               <p className="text-zinc-300 mb-3">
-                {tf("account.guestCta", "Create a free account to save transcripts, track usage, and upgrade when you’re ready.")}
+                {tf("account.guestCta", "Create a free account to save transcripts, track usage, and upgrade when youâ€™re ready.")}
               </p>
             ) : (
               <p className="text-zinc-300 mb-3">
                 {isSubscribed
                   ? tf("account.activePlan", "Your subscription is active.")
-                  : tf("account.freePlan", "You’re on the free plan. Upgrade to unlock more features.")}
+                  : tf("account.freePlan", "Youâ€™re on the free plan. Upgrade to unlock more features.")}
               </p>
             )}
 
@@ -414,7 +414,7 @@ export default function Account() {
           {!user.isGuest && (
             <AccountCard title={tf("account.dataTitle", "Your data")}>
               <p className="text-zinc-300 mb-3">
-                {tf("account.dataText", "Export your data anytime. We’ll prepare a downloadable archive.")}
+                {tf("account.dataText", "Export your data anytime. Weâ€™ll prepare a downloadable archive.")}
               </p>
               <Button onClick={handleExport} variant="outline" className="flex items-center gap-2">
                 <Download className="w-4 h-4" />

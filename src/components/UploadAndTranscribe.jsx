@@ -1,12 +1,12 @@
 // src/components/UploadAndTranscribe.jsx
-import React, { useEffect, useRef, useState } from "react";
+import React, {useEffect, useRef, useState, useState} from "react";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import api from "../lib/api";
 
 export default function UploadAndTranscribe({
   fileInput,            // File | null
   countdown = 0,        // seconds before auto-start
-  translate = false,    // (UI flag only — backend stub ignores for now)
+  translate = false,    // (UI flag only â€” backend stub ignores for now)
   onRecordingStart,     // () => void
   onRecordingEnd,       // () => void
   onTranscriptComplete, // (json) => void
@@ -80,12 +80,12 @@ export default function UploadAndTranscribe({
   return (
     <div className="mt-6">
       {step === "waiting" && (
-        <div className="text-sm text-zinc-300">Starting in {countdown}s…</div>
+        <div className="text-sm text-zinc-300">Starting in {countdown}sâ€¦</div>
       )}
       {step === "uploading" && (
         <div className="flex items-center gap-2 text-zinc-300">
           <Loader2 className="w-4 h-4 animate-spin" />
-          Uploading & transcribing…
+          Uploading & transcribingâ€¦
         </div>
       )}
       {step === "done" && (

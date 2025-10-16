@@ -1,5 +1,5 @@
 // src/components/AudioOverlay.jsx
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState, useState} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft, ChevronRight, Pause, Play, X, ChevronUp, ChevronDown, Volume2, VolumeX, Music

@@ -1,5 +1,5 @@
 // components/NewsletterSignup.jsx
-import React, { useState } from "react";
+import React, {useState, useState} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "./ui/Button";
 import { CheckCircle, XCircle } from "lucide-react";
@@ -29,11 +29,11 @@ export default function NewsletterSignup() {
       if (!res.ok) throw new Error(data.detail || "Something went wrong.");
 
       setStatus("success");
-      setMessage("✅ You're subscribed!");
+      setMessage("âœ… You're subscribed!");
       setEmail("");
     } catch (err) {
       setStatus("error");
-      setMessage(err.message || "⚠️ Something went wrong. Try again.");
+      setMessage(err.message || "âš ï¸ Something went wrong. Try again.");
     }
   };
 
@@ -46,7 +46,7 @@ export default function NewsletterSignup() {
       transition={{ duration: 0.4 }}
     >
       <label htmlFor="email" className="block text-sm font-medium text-zinc-300">
-        🌟 Join our newsletter for updates
+        ðŸŒŸ Join our newsletter for updates
       </label>
 
       <input

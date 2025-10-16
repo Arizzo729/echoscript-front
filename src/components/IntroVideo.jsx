@@ -1,5 +1,5 @@
 // src/components/IntroVideo.jsx
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState, useState} from 'react';
 import { AnimatePresence, motion, useAnimation } from 'framer-motion';
 import { Volume2, VolumeX } from 'lucide-react';
 import PropTypes from 'prop-types';

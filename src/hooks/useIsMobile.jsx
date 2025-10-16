@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState, useState} from "react";
 
 /** Returns true if window.innerWidth < breakpoint (default 768). */
 export default function useIsMobile(breakpoint = 768) {

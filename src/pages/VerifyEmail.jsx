@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState, useState} from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Key, CheckCircle2, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -20,10 +20,10 @@ export default function VerifyEmail() {
     try {
       // Trigger verify endpoint
       await verifyEmail({ email, code, remember: true });
-      setSuccess('✅ Email verified! Redirecting...');
+      setSuccess('âœ… Email verified! Redirecting...');
       setTimeout(() => navigate('/dashboard'), 1500);
     } catch (err) {
-      setError(err.message || '⚠️ Verification failed. Please try again.');
+      setError(err.message || 'âš ï¸ Verification failed. Please try again.');
     }
   };
 
@@ -104,7 +104,7 @@ export default function VerifyEmail() {
         </form>
 
         <p className="text-xs text-center text-zinc-500">
-          Didn’t get a code?{' '}
+          Didnâ€™t get a code?{' '}
           <button
             onClick={() => window.location.reload()}
             className="text-teal-400 hover:underline"

@@ -1,5 +1,5 @@
 // src/components/MicCheck.tsx
-import { useEffect, useRef, useState } from "react";
+import {useEffect, useRef, useState, useState} from "react";
 
 export default function MicCheck() {
   const [status, setStatus] = useState<"idle"|"ready"|"recording"|"error">("idle");

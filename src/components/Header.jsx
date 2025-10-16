@@ -1,5 +1,5 @@
 // src/components/Header.jsx
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, {useEffect, useMemo, useRef, useState, useCallback, useEffect} from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Command, Search, Loader2, Cog, VolumeX, Volume2, User, Home } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -173,7 +173,7 @@ export default function Header() {
                 onChange={(e) => { setQ(e.target.value); if (!open) setOpen(true); }}
                 onFocus={openMenu}
                 onKeyDown={onKeyDown}
-                placeholder="Search tools, pages, actions…"
+                placeholder="Search tools, pages, actionsâ€¦"
                 className="w-full pl-9 pr-28 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-400 border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 role="combobox"
                 aria-expanded={open}
@@ -216,8 +216,8 @@ export default function Header() {
                       >
                         <span className="truncate">
                           {sug.label}
-                          {sug.type === "action" && <span className="opacity-80"> · action</span>}
-                          {sug.type === "remote" && <span className="opacity-80"> · from server</span>}
+                          {sug.type === "action" && <span className="opacity-80"> Â· action</span>}
+                          {sug.type === "remote" && <span className="opacity-80"> Â· from server</span>}
                         </span>
                         {sug.path && (
                           <span className={`text-xs ${isActive ? "opacity-90" : "text-zinc-400"}`}>{sug.path}</span>

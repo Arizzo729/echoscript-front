@@ -1,5 +1,5 @@
 // src/hooks/useVoiceInput.jsx
-import { useState } from "react";
+import {useState, useState} from "react";
 
 /**
  * Build-safe placeholder hook (no JSX).

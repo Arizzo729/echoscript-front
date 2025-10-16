@@ -1,5 +1,5 @@
 // src/pages/Settings.jsx
-import React, { useState, useContext, useEffect } from "react";
+import React, {useState, useContext, useEffect, useState} from "react";
 import { motion } from "framer-motion";
 import { Switch } from "@headlessui/react";
 import {
@@ -23,7 +23,7 @@ import Button from "../components/ui/Button";
 import { FontSizeContext } from "../context/useFontSize";
 import { useTranslation } from "react-i18next";
 import { useSound } from "../context/SoundContext";
-import i18n from "i18next"; // âœ… Fixed: import i18nimport { useAuth } from "../context/AuthContext";
+import i18n from "i18next"; // Ã¢Å“â€¦ Fixed: import i18nimport { useAuth } from "../context/AuthContext";
 
 const tabs = [
   { id: "preferences", label: "Preferences", icon: Settings2 },
@@ -142,7 +142,7 @@ export default function Settings() {
                 <span>{t("Language")}</span>
               </div>
               <Button size="sm" variant="outline" onClick={switchLanguage}>
-                {i18n.language === "en" ? "EspaÃ±ol" : "English"}
+                {i18n.language === "en" ? "EspaÃƒÂ±ol" : "English"}
               </Button>
             </div>
           </Section>
@@ -159,7 +159,7 @@ export default function Settings() {
 
                 {user?.email === "andrew@echoscript.ai" && (
                   <div className="mt-4">
-                    <label className="block text-sm text-white font-medium mb-1">ðŸ‘‘ Owner Mode</label>
+                    <label className="block text-sm text-white font-medium mb-1">Ã°Å¸â€˜â€˜ Owner Mode</label>
                     <select
                       value={localStorage.getItem("fakePlan") || ""}
                       onChange={(e) => {
@@ -186,7 +186,7 @@ export default function Settings() {
             </div>
           ) : (
             <div className="grid gap-3">
-              <p className="text-zinc-300">Youâ€™re using EchoScript as a guest.</p>
+              <p className="text-zinc-300">YouÃ¢â‚¬â„¢re using EchoScript as a guest.</p>
               <Button variant="primary" icon={<LogIn />} fullWidth>
                 Create Account
               </Button>

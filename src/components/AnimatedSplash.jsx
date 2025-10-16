@@ -1,5 +1,5 @@
 // src/components/AnimatedSplash.jsx
-import { useEffect } from 'react';
+import {useEffect, useEffect} from 'react';
 
 /**
  * AnimatedSplash (Stub)

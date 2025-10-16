@@ -1,5 +1,5 @@
 // src/components/FloatingHome.jsx
-import React, { useState, useCallback } from 'react';
+import React, {useState, useCallback, useState} from 'react';
 import { motion, useMotionValue, animate } from 'framer-motion';
 import HomeIcon from '../assets/icons/home.svg';
 

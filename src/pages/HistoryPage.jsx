@@ -1,5 +1,5 @@
 // src/pages/HistoryPage.jsx
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect, useState} from "react";
 import { motion } from "framer-motion";
 import { RotateCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";

@@ -1,5 +1,5 @@
-// ✅ EchoScript.AI — Final Homepage with SoundContext Integration
-import React, { useEffect, useState, useContext } from "react";
+// âœ… EchoScript.AI â€” Final Homepage with SoundContext Integration
+import React, {useEffect, useState, useContext, useEffect} from "react";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
 import Particles from "react-tsparticles";
@@ -116,7 +116,7 @@ export default function HomePage() {
                 2000,
                 "From voice to insight in seconds.",
                 2000,
-                "Edit, summarize, translate — effortlessly.",
+                "Edit, summarize, translate â€” effortlessly.",
                 2000
               ]}
               wrapper="span"
@@ -153,7 +153,7 @@ export default function HomePage() {
               transition={{ delay: 2 }}
               className="bg-gradient-to-r from-teal-400 to-blue-400 bg-clip-text text-transparent"
             >
-              Built for creators, thinkers, and storytellers —
+              Built for creators, thinkers, and storytellers â€”
             </motion.span>{" "}
             EchoScript.AI turns your voice into beautifully clear, accurate, and editable text in seconds.
           </p>
@@ -165,7 +165,7 @@ export default function HomePage() {
       <section className="relative z-10 py-20 px-6 text-center">
         <h2 className="text-3xl font-bold mb-4 text-white">What is EchoScript.AI?</h2>
         <p className="max-w-3xl mx-auto text-zinc-400 text-lg">
-          EchoScript.AI is your smart transcription companion — built for creators, students, and professionals. Instantly convert voice to clear, editable text with AI-powered enhancements.
+          EchoScript.AI is your smart transcription companion â€” built for creators, students, and professionals. Instantly convert voice to clear, editable text with AI-powered enhancements.
         </p>
       </section>
 
@@ -198,12 +198,12 @@ export default function HomePage() {
       <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800">
         <h2 className="text-3xl font-bold text-white mb-4">Stay in the Loop</h2>
         <p className="text-zinc-400 mb-6 max-w-xl mx-auto">
-          Sign up for occasional updates, helpful AI tips, and product improvements. No spam — just smart content delivered right to you.
+          Sign up for occasional updates, helpful AI tips, and product improvements. No spam â€” just smart content delivered right to you.
         </p>
         <NewsletterSignup />
       </section>
 
-      {/* 🔊 Audio & Language Controls */}
+      {/* ðŸ”Š Audio & Language Controls */}
       <div className="absolute top-6 right-6 flex flex-col gap-3 z-20">
         <LanguageToggle />
         <motion.button
@@ -215,7 +215,7 @@ export default function HomePage() {
           }`}
           whileTap={{ scale: 0.95 }}
         >
-          🎵 {ambientEnabled ? `Now playing: ${nowPlaying}` : "Background Audio Off"}
+          ðŸŽµ {ambientEnabled ? `Now playing: ${nowPlaying}` : "Background Audio Off"}
         </motion.button>
       </div>
     </div>

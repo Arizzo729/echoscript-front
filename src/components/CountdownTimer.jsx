@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, {useEffect, useState, useRef, useEffect} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function CountdownTimer({ seconds = 3, onComplete }) {

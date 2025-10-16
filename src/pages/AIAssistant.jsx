@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, {useState, useRef, useEffect, useState} from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
@@ -20,7 +20,7 @@ export default function AIAssistant() {
     if (!trimmed) return;
 
     const userMsg = { role: "user", text: trimmed };
-    const placeholder = { role: "assistant", text: "⏳ Thinking..." };
+    const placeholder = { role: "assistant", text: "â³ Thinking..." };
 
     setMessages((prev) => [...prev, userMsg, placeholder]);
     setInput("");
@@ -46,7 +46,7 @@ export default function AIAssistant() {
       const data = await res.json();
       const assistantText =
         data?.reply ??
-        "I’m here and listening, but I didn’t receive any content. Try again?";
+        "Iâ€™m here and listening, but I didnâ€™t receive any content. Try again?";
 
       setMessages((prev) =>
         prev.map((m, i) => (i === prev.length - 1 ? { ...m, text: assistantText } : m))
@@ -58,7 +58,7 @@ export default function AIAssistant() {
             ? {
                 ...m,
                 text:
-                  "⚠️ There was a problem contacting the assistant. Please try again.\n\n" +
+                  "âš ï¸ There was a problem contacting the assistant. Please try again.\n\n" +
                   String(err?.message || err),
               }
             : m
@@ -84,12 +84,12 @@ export default function AIAssistant() {
       transition={{ duration: 0.4 }}
     >
       <Link to="/dashboard" className="text-sm text-teal-500 hover:underline mb-6 inline-block">
-        ← Back to Dashboard
+        â† Back to Dashboard
       </Link>
 
       <h1 className="text-3xl font-bold mb-2 text-zinc-900 dark:text-white">AI Assistant</h1>
       <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-        Ask EchoScript anything — transcription, AI tips, language questions, or feature walkthroughs.
+        Ask EchoScript anything â€” transcription, AI tips, language questions, or feature walkthroughs.
       </p>
       <div className="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl overflow-hidden shadow-md">
         {/* ... content identical, removed for brevity ... */}

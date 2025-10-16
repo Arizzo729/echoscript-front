@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState, useState} from "react";
 import { AutomationService, PROVIDERS } from "../services/AutomationService";
 
 export default function ApifyTest() {
@@ -27,7 +27,7 @@ export default function ApifyTest() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto mt-10 bg-white dark:bg-zinc-800 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4">🔍 Apify Task Output</h2>
+      <h2 className="text-2xl font-bold mb-4">ðŸ” Apify Task Output</h2>
       {error && <p className="text-red-400 whitespace-pre-wrap">Error: {error}</p>}
       {data ? (
         <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded text-sm overflow-x-auto">

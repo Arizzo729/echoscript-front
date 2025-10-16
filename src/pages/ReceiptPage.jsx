@@ -1,5 +1,5 @@
-// ✅ EchoScript.AI — Payment Success Page
-import React, { useEffect } from "react";
+// âœ… EchoScript.AI â€” Payment Success Page
+import React, {useEffect, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle, Home } from "lucide-react";
@@ -38,7 +38,7 @@ export default function ReceiptPage() {
       </button>
 
       <p className="text-xs text-zinc-600 mt-6">
-        {t("success.redirect_note", "You’ll be redirected shortly...")}
+        {t("success.redirect_note", "Youâ€™ll be redirected shortly...")}
       </p>
     </motion.div>
   );

@@ -1,5 +1,5 @@
 // src/components/TranscriptAudioPlayer.jsx
-import React, { useRef, useState, useEffect } from "react";
+import React, {useRef, useState, useEffect, useEffect} from "react";
 import { Play, Pause, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 

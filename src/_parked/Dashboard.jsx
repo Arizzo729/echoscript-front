@@ -1,5 +1,5 @@
 // src/pages/Dashboard.jsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, {useEffect, useMemo, useState, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -20,7 +20,7 @@ import {
 const API = import.meta.env.VITE_API_URL?.replace(/\/+$/, "") || "";
 
 /**
- * Plan limits – adjust easily here (minutes per billing period).
+ * Plan limits â€“ adjust easily here (minutes per billing period).
  */
 const PLAN_LIMITS = {
   guest: 10,
@@ -57,7 +57,7 @@ async function resolveViewer() {
   const r = await getJSON(`${API}/api/auth/me`);
   if (!r.ok) return { isGuest: true, name: "Guest", email: "guest", planKey: "guest", limit: PLAN_LIMITS.guest };
 
-  // Map your backend's fields → local shape
+  // Map your backend's fields â†’ local shape
   const me = r.data || {};
   // Expect something like me.plan or me.subscription.plan
   const rawPlan = (me.plan || me.subscription?.plan || "free").toString().toLowerCase();
@@ -154,7 +154,7 @@ export default function Dashboard() {
       >
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight drop-shadow">
-            👋 {viewer.isGuest ? "Welcome!" : "Welcome back,"}{" "}
+            ðŸ‘‹ {viewer.isGuest ? "Welcome!" : "Welcome back,"}{" "}
             {!viewer.isGuest && <span className="text-teal-400">{viewer.name}</span>}
           </h1>
           <p className="text-base text-zinc-400 mt-2">
@@ -205,7 +205,7 @@ export default function Dashboard() {
             </h2>
 
             {loading ? (
-              <p className="text-sm text-zinc-400">Loading your usage…</p>
+              <p className="text-sm text-zinc-400">Loading your usageâ€¦</p>
             ) : (
               <>
                 {err && (
@@ -267,7 +267,7 @@ export default function Dashboard() {
               <p className="text-lg font-semibold text-white">
                 {viewer.isGuest ? "Guest User" : viewer.name}
               </p>
-              <p className="text-sm text-zinc-400">{viewer.isGuest ? "—" : viewer.email}</p>
+              <p className="text-sm text-zinc-400">{viewer.isGuest ? "â€”" : viewer.email}</p>
             </div>
           </div>
           <button
@@ -283,7 +283,7 @@ export default function Dashboard() {
           className="rounded-2xl border border-teal-700 bg-gradient-to-br from-teal-900 to-blue-900 shadow-xl p-6 flex flex-col items-start"
 =======
           <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-            📈 Usage Summary
+            ðŸ“ˆ Usage Summary
           </h2>
           <ul className="space-y-2 text-sm text-zinc-300">
             <li><strong className="text-white">Plan:</strong> {user.plan}</li>
@@ -330,7 +330,7 @@ export default function Dashboard() {
 
       {/* Footer */}
       <div className="mt-12 pt-6 border-t border-zinc-800 text-sm text-zinc-400 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
-        <span>© {new Date().getFullYear()} EchoScript.AI</span>
+        <span>Â© {new Date().getFullYear()} EchoScript.AI</span>
         <div className="flex items-center gap-4">
           <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-teal-300 hover:text-teal-2 00 underline underline-offset-4">
             Privacy Policy

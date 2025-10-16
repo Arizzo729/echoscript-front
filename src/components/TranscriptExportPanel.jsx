@@ -1,5 +1,5 @@
 // src/components/TranscriptExportPanel.jsx
-import React, { useState } from "react";
+import React, {useState, useState} from "react";
 import { FileDown, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 

@@ -1,23 +1,23 @@
 // src/components/OnboardingModal.jsx
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {useState, useEffect, useRef, useCallback, useState} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import Lottie from "lottie-react";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
-import { useSound } from "../context/SoundContext"; // ✅ integrate sound context
+import { useSound } from "../context/SoundContext"; // âœ… integrate sound context
 
 const STEPS = [
-  { id: "upload", title: "Welcome to EchoScript.AI", description: "Upload or record audio—Echo gives you perfect transcripts in seconds.", filename: "upload.json" },
+  { id: "upload", title: "Welcome to EchoScript.AI", description: "Upload or record audioâ€”Echo gives you perfect transcripts in seconds.", filename: "upload.json" },
   { id: "cleanup", title: "Smart Cleanup", description: "Remove filler words, summarize, detect tone, and organize your content.", filename: "cleanup.json" },
-  { id: "global", title: "Global Support", description: "Echo understands all voices—English, Spanish, Arabic, and more.", filename: "global.json" },
-  { id: "security", title: "Privacy First", description: "End-to-end encryption, CAPTCHA, and 2FA—your data stays yours.", filename: "security.json" },
-  { id: "integrations", title: "Seamless Uploads", description: "Use drag-and-drop, Google Drive, or Dropbox—it's all built in.", filename: "integrations.json" },
+  { id: "global", title: "Global Support", description: "Echo understands all voicesâ€”English, Spanish, Arabic, and more.", filename: "global.json" },
+  { id: "security", title: "Privacy First", description: "End-to-end encryption, CAPTCHA, and 2FAâ€”your data stays yours.", filename: "security.json" },
+  { id: "integrations", title: "Seamless Uploads", description: "Use drag-and-drop, Google Drive, or Dropboxâ€”it's all built in.", filename: "integrations.json" },
   { id: "audio", title: "Enable Audio", description: "Turn on microphone support for live recording and voice features.", filename: "start.json" },
   { id: "start", title: "Let's Transcribe", description: "You're ready. Pick a plan and explore EchoScript.AI.", filename: "start.json" },
 ];
 
 export default function OnboardingModal({ onClose }) {
-  const { enableSound } = useSound(); // ✅ use SoundContext directly
+  const { enableSound } = useSound(); // âœ… use SoundContext directly
   const [step, setStep] = useState(0);
   const [typedDesc, setTypedDesc] = useState("");
   const [animData, setAnimData] = useState(null);
@@ -154,7 +154,7 @@ export default function OnboardingModal({ onClose }) {
               <button
                 onClick={() => {
                   try {
-                    enableSound(); // ✅ call actual context function
+                    enableSound(); // âœ… call actual context function
                   } catch (err) {
                     console.warn("Audio enable error:", err);
                   }

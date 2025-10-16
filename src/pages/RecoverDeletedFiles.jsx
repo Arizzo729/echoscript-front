@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState, useState} from "react";
 import { motion } from "framer-motion";
 import { Download, RotateCcw, ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";

@@ -1,6 +1,6 @@
 // src/components/Layout.jsx
-// ✅ EchoScript.AI: Final Unified Layout — Assistant Visible on Mobile
-import React, { useState, useEffect, createContext } from "react";
+// âœ… EchoScript.AI: Final Unified Layout â€” Assistant Visible on Mobile
+import React, {useState, useEffect, createContext, useState} from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
@@ -10,7 +10,7 @@ import MobileBottomNav from "./MobileBottomNav";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
-// 🌗 Theme Context (Global)
+// ðŸŒ— Theme Context (Global)
 export const ThemeContext = createContext();
 
 export default function Layout() {
@@ -35,14 +35,14 @@ export default function Layout() {
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <div className="relative flex flex-col h-screen w-screen overflow-hidden bg-gradient-to-br from-[#0a0f1f] via-[#040711] to-[#050a15] text-white">
 
-        {/* 📌 Header */}
+        {/* ðŸ“Œ Header */}
         <Header
           toggleDrawer={toggleDrawer}
           onToggleTheme={toggleTheme}
           isDarkMode={theme === "dark"}
         />
 
-        {/* 🧭 Sidebar + Main Content */}
+        {/* ðŸ§­ Sidebar + Main Content */}
         <div className="flex flex-1 overflow-hidden">
           <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
           <main
@@ -54,18 +54,18 @@ export default function Layout() {
           </main>
         </div>
 
-        {/* 🤖 Echo Assistant */}
+        {/* ðŸ¤– Echo Assistant */}
         <EchoAssistantUltra />
 
-        {/* 📱 Mobile Bottom Navigation */}
+        {/* ðŸ“± Mobile Bottom Navigation */}
         <div className="md:hidden">
           <MobileBottomNav />
         </div>
 
-        {/* 🔔 Toast Notifications */}
+        {/* ðŸ”” Toast Notifications */}
         <ToastContainer />
 
-        {/* ⚙️ Settings Drawer */}
+        {/* âš™ï¸ Settings Drawer */}
         <AnimatePresence>
           {isDrawerOpen && (
             <motion.div

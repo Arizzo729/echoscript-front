@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from "react";
+import React, {useState, useContext, useRef, useState} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GPTContext } from "../context/GPTContext";
 import { BsRobot, BsMicFill, BsX } from "react-icons/bs";

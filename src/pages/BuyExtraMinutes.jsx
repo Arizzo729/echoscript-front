@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, {useState, useMemo, useState} from "react";
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Trash2, Plus, Minus, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -259,7 +259,7 @@ export default function BuyExtraMinutes() {
               onClick={handleCheckout}
               disabled={Object.keys(cart).length === 0 || busy || (gifting && !isValidEmail(recipient))}
             >
-              {busy ? 'Processing…' : 'Checkout'}
+              {busy ? 'Processingâ€¦' : 'Checkout'}
             </Button>
             {Object.keys(cart).length > 0 && (
               <button

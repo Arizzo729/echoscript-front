@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState, useState} from "react";
 import { useTranslation } from "react-i18next";
 import ToggleButton from "./ToggleButton";
 import { Globe } from "lucide-react";
@@ -26,13 +26,13 @@ export default function LanguageToggle({ className = "" }) {
     <ToggleButton
       onToggle={handleToggle}
       initial={toggled}
-      labelOn="Español"
+      labelOn="EspaÃ±ol"
       labelOff="English"
       iconOn={<Globe className="w-4 h-4" />}
       iconOff={<Globe className="w-4 h-4" />}
       size="sm"
       className={className}
-      ariaLabelOn="Cambiar a Español"
+      ariaLabelOn="Cambiar a EspaÃ±ol"
       ariaLabelOff="Switch to English"
     />
   );

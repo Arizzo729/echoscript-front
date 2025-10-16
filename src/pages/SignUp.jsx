@@ -1,5 +1,5 @@
 // src/pages/SignUp.jsx
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect, useState} from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";

@@ -1,4 +1,5 @@
-// âœ… components/NewsletterUnsubscribe.jsx â€” Clean Unsubscribe Form w/ Redirectimport React, { useState } from "react";
+import React, { useState } from "react";
+// Ã¢Å“â€¦ components/NewsletterUnsubscribe.jsx Ã¢â‚¬â€ Clean Unsubscribe Form w/ Redirectimport React, { useState } from "react";
 import { motion } from "framer-motion";
 import Button from "./ui/Button";
 
@@ -36,10 +37,10 @@ export default function NewsletterUnsubscribe() {
         throw new Error(data.detail || "Something went wrong.");
       }
 
-      // âœ… Redirect to confirmation page      window.location.href = "/unsubscribed";
+      // Ã¢Å“â€¦ Redirect to confirmation page      window.location.href = "/unsubscribed";
     } catch (err) {
       setStatus("error");
-      setMessage(err.message || "âš ï¸ Something went wrong. Try again.");
+      setMessage(err.message || "Ã¢Å¡Â Ã¯Â¸Â Something went wrong. Try again.");
     }
   };
 
@@ -52,7 +53,7 @@ export default function NewsletterUnsubscribe() {
       transition={{ duration: 0.4 }}
     >
       <label htmlFor="email" className="block text-sm font-medium text-zinc-300">
-        ðŸ’” Unsubscribe from our newsletter
+        Ã°Å¸â€™â€ Unsubscribe from our newsletter
       </label>
 
       <input

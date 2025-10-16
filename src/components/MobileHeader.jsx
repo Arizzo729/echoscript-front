@@ -1,5 +1,5 @@
 // src/components/MobileHeader.jsx
-import React, { useState, useRef, useEffect } from "react";
+import React, {useState, useRef, useEffect, useState} from "react";
 import { Search, Bell, MoreVertical } from "lucide-react";
 import { Volume2, VolumeX } from "lucide-react";
 import { useTranslation } from "react-i18next";

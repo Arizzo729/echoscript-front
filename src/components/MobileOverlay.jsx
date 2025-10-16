@@ -1,5 +1,5 @@
 // src/components/MobileOverlay.jsx
-import React, { useRef, useEffect, useState } from "react";
+import React, {useRef, useEffect, useState, useState} from "react";
 import { X, Play, Pause, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function MobileOverlay({ onClose }) {
@@ -96,7 +96,7 @@ export default function MobileOverlay({ onClose }) {
       <button
         type="button"
         aria-label="Previous"
-        onClick={() => setLabel("Ambient ◀")}
+        onClick={() => setLabel("Ambient â—€")}
         className="w-8 h-8 rounded-full flex items-center justify-center hover:scale-110 transition"
       >
         <ChevronLeft className="w-5 h-5 text-teal-400" />
@@ -114,7 +114,7 @@ export default function MobileOverlay({ onClose }) {
       <button
         type="button"
         aria-label="Next"
-        onClick={() => setLabel("Ambient ▶")}
+        onClick={() => setLabel("Ambient â–¶")}
         className="w-8 h-8 rounded-full flex items-center justify-center hover:scale-110 transition"
       >
         <ChevronRight className="w-5 h-5 text-teal-400" />

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState, useState} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function LogoLoader({ duration = 2500, onComplete }) {
@@ -27,7 +27,7 @@ export default function LogoLoader({ duration = 2500, onComplete }) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.6 }}
         >
-          {/* 🔄 Logo animation */}
+          {/* ðŸ”„ Logo animation */}
           <motion.img
             src="/EchoScriptAI_Animated.svg"
             alt="EchoScript.AI Logo Animation"
@@ -37,7 +37,7 @@ export default function LogoLoader({ duration = 2500, onComplete }) {
             transition={{ duration: 1, ease: "easeOut" }}
           />
 
-          {/* 🧠 Brand title */}
+          {/* ðŸ§  Brand title */}
           <motion.h1
             className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-800 dark:text-white"
             initial={{ opacity: 0, y: 10 }}
@@ -47,7 +47,7 @@ export default function LogoLoader({ duration = 2500, onComplete }) {
             EchoScript<span className="text-teal-500">.AI</span>
           </motion.h1>
 
-          {/* 🎧 Slogan */}
+          {/* ðŸŽ§ Slogan */}
           <motion.p
             className="text-sm sm:text-base mt-2 text-zinc-500 dark:text-zinc-400 whitespace-pre-line"
             initial={{ opacity: 0, y: 10 }}
@@ -57,7 +57,7 @@ export default function LogoLoader({ duration = 2500, onComplete }) {
             The Best Listener{"\n"}Understanding Everyone
           </motion.p>
 
-          {/* ⏳ Progress bar */}
+          {/* â³ Progress bar */}
           <motion.div
             className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-teal-400 to-blue-400"
             initial={{ width: 0 }}
@@ -65,7 +65,7 @@ export default function LogoLoader({ duration = 2500, onComplete }) {
             transition={{ duration: duration / 1000 }}
           />
 
-          {/* 🔘 Skip button */}
+          {/* ðŸ”˜ Skip button */}
           <button
             onClick={close}
             className="absolute bottom-5 right-5 text-sm px-4 py-2 rounded-md bg-white/20 dark:bg-zinc-700/30 text-zinc-800 dark:text-white backdrop-blur hover:bg-white/30 hover:dark:bg-zinc-600/40 transition-all shadow-lg"

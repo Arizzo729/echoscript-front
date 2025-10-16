@@ -1,5 +1,5 @@
 // src/components/TranscriptEditor.jsx
-import React, { useRef, useEffect } from 'react';
+import React, {useRef, useEffect, useEffect} from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 
@@ -7,8 +7,8 @@ import PropTypes from 'prop-types';
  * Editable transcript component using a contentEditable div.
  *
  * @param {Object} props
- * @param {string} props.value        – The transcript text to display and edit.
- * @param {(newText: string) => void} props.onChange – Callback invoked when text changes.
+ * @param {string} props.value        â€“ The transcript text to display and edit.
+ * @param {(newText: string) => void} props.onChange â€“ Callback invoked when text changes.
  */
 export default function TranscriptEditor({ value, onChange }) {
   const editorRef = useRef(null);

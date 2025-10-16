@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState, useState} from "react";
 
 const API_BASE = (import.meta.env.VITE_API_BASE || "/api").replace(/\/+$/, "");
 
@@ -30,7 +30,7 @@ export default function Status() {
         }
         let debug = await tryDebug(`/stripe/_debug-env`);
         if (debug?.error && debug.error !== "debug_failed") {
-          // fall back to /billing/_debug-env if Stripe debug isn’t present
+          // fall back to /billing/_debug-env if Stripe debug isnâ€™t present
           debug = await tryDebug(`/billing/_debug-env`);
         }
 
@@ -64,7 +64,7 @@ export default function Status() {
       <section className="mt-6 max-w-2xl">
         <h2 className="text-lg font-semibold">Backend Health</h2>
         {!health ? (
-          <p className="opacity-70">Loading…</p>
+          <p className="opacity-70">Loadingâ€¦</p>
         ) : (
           <div className="mt-3 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4">
             <Item k="status" v={health.status ?? "ok"} />
@@ -78,7 +78,7 @@ export default function Status() {
       <section className="mt-8 max-w-2xl">
         <h2 className="text-lg font-semibold">Billing/Stripe Debug</h2>
         {!billingEnv ? (
-          <p className="opacity-70">Loading…</p>
+          <p className="opacity-70">Loadingâ€¦</p>
         ) : (
           <div className="mt-3 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4">
             {Object.entries(billingEnv).map(([k, v]) => (

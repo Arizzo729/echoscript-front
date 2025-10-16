@@ -1,13 +1,13 @@
 // src/components/HintCarousel.jsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, {useEffect, useMemo, useState, useState} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
 
 const DEFAULT_HINTS = [
-  { emoji: "🎙️", message: "Tap the mic to start live recording — we'll transcribe everything clearly in real time." },
-  { emoji: "📂", message: "Upload audio or video files and let EchoScript generate clean, timestamped transcripts." },
-  { emoji: "✨", message: "Turn long conversations into summaries with one click — powered by our smart AI assistant." },
-  { emoji: "🌐", message: "Switch between languages easily. We support English, Spanish, and more coming soon!" },
+  { emoji: "ðŸŽ™ï¸", message: "Tap the mic to start live recording â€” we'll transcribe everything clearly in real time." },
+  { emoji: "ðŸ“‚", message: "Upload audio or video files and let EchoScript generate clean, timestamped transcripts." },
+  { emoji: "âœ¨", message: "Turn long conversations into summaries with one click â€” powered by our smart AI assistant." },
+  { emoji: "ðŸŒ", message: "Switch between languages easily. We support English, Spanish, and more coming soon!" },
 ];
 
 export default function HintCarousel({ hints }) {

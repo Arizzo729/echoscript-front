@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState, useState} from "react";
 import { motion } from "framer-motion";
 import Textarea from "../components/ui/Textarea";
 import Button from "../components/ui/Button";
@@ -55,7 +55,7 @@ export default function SummaryPage() {
       transition={{ duration: 0.4 }}
     >
       <h1 className="text-4xl font-extrabold mb-6 text-center text-teal-500 tracking-tight">
-        🧠 AI-Powered Summarizer
+        ðŸ§  AI-Powered Summarizer
       </h1>
 
       <p className="text-center mb-8 text-zinc-400">

@@ -1,24 +1,24 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {useState, useEffect, useRef, useState} from "react";
 import { Listbox } from "@headlessui/react";
 import { ChevronsUpDown } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 const groupedLanguages = {
   Popular: [
-    { code: "en", label: "English 🇺🇸" },
-    { code: "es", label: "Spanish 🇪🇸" },
-    { code: "fr", label: "French 🇫🇷" },
-    { code: "de", label: "German 🇩🇪" },
-    { code: "zh", label: "Chinese 🇨🇳" },
+    { code: "en", label: "English ðŸ‡ºðŸ‡¸" },
+    { code: "es", label: "Spanish ðŸ‡ªðŸ‡¸" },
+    { code: "fr", label: "French ðŸ‡«ðŸ‡·" },
+    { code: "de", label: "German ðŸ‡©ðŸ‡ª" },
+    { code: "zh", label: "Chinese ðŸ‡¨ðŸ‡³" },
   ],
   More: [
-    { code: "ja", label: "Japanese 🇯🇵" },
-    { code: "pt", label: "Portuguese 🇧🇷" },
-    { code: "hi", label: "Hindi 🇮🇳" },
-    { code: "ar", label: "Arabic 🇸🇦" },
-    { code: "ko", label: "Korean 🇰🇷" },
-    { code: "ru", label: "Russian 🇷🇺" },
-    { code: "it", label: "Italian 🇮🇹" },
-    { code: "tr", label: "Turkish 🇹🇷" },
+    { code: "ja", label: "Japanese ðŸ‡¯ðŸ‡µ" },
+    { code: "pt", label: "Portuguese ðŸ‡§ðŸ‡·" },
+    { code: "hi", label: "Hindi ðŸ‡®ðŸ‡³" },
+    { code: "ar", label: "Arabic ðŸ‡¸ðŸ‡¦" },
+    { code: "ko", label: "Korean ðŸ‡°ðŸ‡·" },
+    { code: "ru", label: "Russian ðŸ‡·ðŸ‡º" },
+    { code: "it", label: "Italian ðŸ‡®ðŸ‡¹" },
+    { code: "tr", label: "Turkish ðŸ‡¹ðŸ‡·" },
   ],
 };
 

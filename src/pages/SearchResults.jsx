@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, {useEffect, useMemo, useState, useState} from "react";
 import { useSearchParams, Link } from "react-router-dom";
 
 const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
@@ -45,25 +45,25 @@ export default function SearchResults() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Search transcripts, pages, actions…"
+          placeholder="Search transcripts, pages, actionsâ€¦"
           className="flex-1 px-3 py-2 rounded-xl bg-white/10 border border-white/10 focus:outline-none focus:ring-2 focus:ring-teal-500"
         />
         <button className="btn btn-primary" type="submit">Search</button>
       </form>
 
-      {loading && <p className="muted">Searching…</p>}
+      {loading && <p className="muted">Searchingâ€¦</p>}
       {error && (
         <div className="card">
-          <div className="text-red-300 font-medium">Search isn’t ready yet.</div>
+          <div className="text-red-300 font-medium">Search isnâ€™t ready yet.</div>
           <p className="muted mt-1">
             The endpoint <code>{`${API_BASE}/search`}</code> returned <code>{String(error)}</code>.
-            You can still use the header’s type-ahead for quick navigation.
+            You can still use the headerâ€™s type-ahead for quick navigation.
           </p>
         </div>
       )}
 
       {!loading && !error && q && results.length === 0 && (
-        <p className="muted">No results for “{q}”.</p>
+        <p className="muted">No results for â€œ{q}â€.</p>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

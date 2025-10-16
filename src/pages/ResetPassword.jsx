@@ -1,5 +1,5 @@
 >>>>>>> Stashed changes
-import React, { useState } from "react";
+import React, {useState, useState} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -78,7 +78,7 @@ const API = (import.meta?.env?.VITE_API_BASE || "https://api.echoscript.ai").rep
           {t("reset.title") || "Reset Password"}
         </h1>
         <p className="text-sm text-center text-zinc-400">
-          {t("reset.subtitle") || "Weâ€™ll email you a code to reset your password."}
+          {t("reset.subtitle") || "WeÃ¢â‚¬â„¢ll email you a code to reset your password."}
         </p>
 
         {error && <div className="bg-red-500/10 text-red-300 px-4 py-2 rounded-md text-sm text-center">{error}</div>}
@@ -103,7 +103,7 @@ const API = (import.meta?.env?.VITE_API_BASE || "https://api.echoscript.ai").rep
                 onClick={sendCode} disabled={busy || !email}
                 className={`w-full text-white font-semibold py-2 rounded-lg transition-all duration-300 shadow-md ${busy ? "bg-teal-700 cursor-not-allowed opacity-80" : "bg-teal-500 hover:bg-teal-400"}`}
               >
-                {busy ? (t("reset.sending") || "Sendingâ€¦") : (t("reset.send_code") || "Send code")}
+                {busy ? (t("reset.sending") || "SendingÃ¢â‚¬Â¦") : (t("reset.send_code") || "Send code")}
               </button>
             </motion.div>
           )}
@@ -124,7 +124,7 @@ const API = (import.meta?.env?.VITE_API_BASE || "https://api.echoscript.ai").rep
                 <label htmlFor="newPass" className="text-sm font-medium text-zinc-300">{t("reset.new_password") || "New password"}</label>
                 <input
                   id="newPass" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder={t("reset.new_password_placeholder") || "â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"}
+                  placeholder={t("reset.new_password_placeholder") || "Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢Ã¢â‚¬Â¢"}
                   className="w-full px-4 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={busy}
                 />
@@ -134,7 +134,7 @@ const API = (import.meta?.env?.VITE_API_BASE || "https://api.echoscript.ai").rep
                 onClick={verifyCode} disabled={busy || !code || !newPassword}
                 className={`w-full text-white font-semibold py-2 rounded-lg transition-all duration-300 shadow-md ${busy ? "bg-blue-700 cursor-not-allowed opacity-80" : "bg-blue-600 hover:bg-blue-500"}`}
               >
-                {busy ? (t("reset.processing") || "Processingâ€¦") : (t("reset.reset_button") || "Reset password")}
+                {busy ? (t("reset.processing") || "ProcessingÃ¢â‚¬Â¦") : (t("reset.reset_button") || "Reset password")}
               </button>
             </motion.div>
           )}

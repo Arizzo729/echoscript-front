@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect, useState} from "react";
 
 /**
- * useLocalStorage — hook to persist state in localStorage
+ * useLocalStorage â€” hook to persist state in localStorage
  * @param {string} key - localStorage key
  * @param {*} initialValue - fallback value
  */
@@ -12,7 +12,7 @@ export function useLocalStorage(key, initialValue) {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
-      console.warn(`❌ Failed to parse localStorage key "${key}":`, error);
+      console.warn(`âŒ Failed to parse localStorage key "${key}":`, error);
       return initialValue;
     }
   };
@@ -28,7 +28,7 @@ export function useLocalStorage(key, initialValue) {
         window.dispatchEvent(new Event("local-storage"));
       }
     } catch (error) {
-      console.warn(`❌ Failed to set localStorage key "${key}":`, error);
+      console.warn(`âŒ Failed to set localStorage key "${key}":`, error);
     }
   };
 

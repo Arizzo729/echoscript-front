@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, {useRef, useState, useState} from "react";
 import { UploadCloud, CheckCircle, AlertCircle, Clipboard } from "lucide-react";
 import api from "../lib/api";
 
@@ -83,7 +83,7 @@ export default function TranscribeUploader() {
       >
         <UploadCloud className="w-10 h-10 mx-auto mb-3 text-teal-400" />
         <p className="mb-2">{file ? <strong>{file.name}</strong> : "Click or drag a file here"}</p>
-        <p className="text-xs text-zinc-400">MP3, WAV, MP4, MOV, MKV… up to 500MB</p>
+        <p className="text-xs text-zinc-400">MP3, WAV, MP4, MOV, MKVâ€¦ up to 500MB</p>
         <input
           ref={inputRef}
           type="file"
@@ -99,7 +99,7 @@ export default function TranscribeUploader() {
           disabled={!file || status === "uploading"}
           className="px-4 py-2 rounded-lg bg-teal-600 text-white disabled:opacity-50"
         >
-          {status === "uploading" ? "Transcribing…" : "Transcribe"}
+          {status === "uploading" ? "Transcribingâ€¦" : "Transcribe"}
         </button>
 
         <button

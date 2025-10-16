@@ -1,5 +1,5 @@
-// ✅ EchoScript.AI — useIsMobile Responsive Hook (Final Polished Version)
-import { useEffect, useState } from "react";
+// âœ… EchoScript.AI â€” useIsMobile Responsive Hook (Final Polished Version)
+import {useEffect, useState, useState} from "react";
 
 export default function useIsMobile(breakpoint = 768) {
   const getMatch = () =>

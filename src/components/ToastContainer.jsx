@@ -1,5 +1,5 @@
 // src/components/ToastContainer.jsx
-import React, { useContext } from 'react';
+import React, {useContext, useState, useEffect, useRef} from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle, AlertCircle, Info, XCircle } from 'lucide-react';

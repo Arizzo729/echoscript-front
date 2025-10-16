@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, {useEffect, useRef, useEffect} from "react";
 
 export default function WaveformVisualizer({ isRecording }) {
   const canvasRef = useRef(null);

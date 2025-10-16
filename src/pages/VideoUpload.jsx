@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState, useState} from "react";
 import { motion } from "framer-motion";
 import {
   Upload,
@@ -113,7 +113,7 @@ export default function VideoUpload() {
       transition={{ duration: 0.6 }}
     >      <div className="space-y-8">
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-extrabold">ðŸŽ¬ Upload & Transcribe Video</h1>
+          <h1 className="text-4xl font-extrabold">Ã°Å¸Å½Â¬ Upload & Transcribe Video</h1>
           <p className="text-zinc-400 text-sm">
             Supports MP4, MKV, AVI, MOV and more. Choose transcription or subtitle generation.
           </p>
@@ -188,7 +188,7 @@ export default function VideoUpload() {
 
           {status === "success" && (
             <div className="space-y-3">
-              <p className="text-green-400">âœ… {t("Video processed successfully.")}</p>
+              <p className="text-green-400">Ã¢Å“â€¦ {t("Video processed successfully.")}</p>
               {resultText && (
                 <div className="bg-zinc-800 p-4 rounded border border-zinc-700">
                   <pre className="text-sm text-zinc-200 whitespace-pre-wrap">{resultText}</pre>
@@ -203,18 +203,18 @@ export default function VideoUpload() {
           )}
 
           {status === "error" && (
-            <p className="text-red-400">âŒ {t("There was an error. Please try again.")}</p>
+            <p className="text-red-400">Ã¢ÂÅ’ {t("There was an error. Please try again.")}</p>
           )}
 
           {status === "file_too_large" && (
             <p className="text-red-400">
-              âš ï¸ {t("File is too large. Max size is")} {MAX_FILE_SIZE_MB}MB.
+              Ã¢Å¡Â Ã¯Â¸Â {t("File is too large. Max size is")} {MAX_FILE_SIZE_MB}MB.
             </p>
           )}
 
           {status === "invalid_format" && (
             <p className="text-red-400">
-              âš ï¸ {t("Unsupported file format. Accepted formats:")}{" "}
+              Ã¢Å¡Â Ã¯Â¸Â {t("Unsupported file format. Accepted formats:")}{" "}
               {ACCEPTED_FORMATS.join(", ").toUpperCase()}
             </p>
           )}
@@ -230,7 +230,7 @@ export default function VideoUpload() {
             Language will be auto-detected. Translation and subtitle output is supported.
           </p>
           <p className="text-xs italic text-zinc-500">
-            ðŸŒ {t("More language support coming soon!")}
+            Ã°Å¸Å’Â {t("More language support coming soon!")}
           </p>        </div>
       </div>
     </motion.div>

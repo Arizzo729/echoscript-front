@@ -1,5 +1,5 @@
-// ✅ EchoAssistantUltra.jsx — Enhanced, Optimized, and Advanced
-import React, { useState, useEffect, useRef } from "react";
+// âœ… EchoAssistantUltra.jsx â€” Enhanced, Optimized, and Advanced
+import React, {useState, useEffect, useRef, useState} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Send, X, Loader2, Wand2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -7,7 +7,7 @@ import ReactMarkdown from "react-markdown";
 const persona = {
   name: "Echo",
   greeting:
-    "Hi, I'm Echo — your smart assistant. Try commands like `/summarize`, `/clarify`, `/lookup`, `/export`, or `/feedback`.",
+    "Hi, I'm Echo â€” your smart assistant. Try commands like `/summarize`, `/clarify`, `/lookup`, `/export`, or `/feedback`.",
 };
 
 const suggestions = [
@@ -76,12 +76,12 @@ export default function EchoAssistantUltra({
 
       setHistory((prev) => [
         ...prev,
-        { role: "assistant", content: reply || "🤔 I'm not sure I understood that—could you rephrase?" },
+        { role: "assistant", content: reply || "ðŸ¤” I'm not sure I understood thatâ€”could you rephrase?" },
       ]);
     } catch {
       setHistory((prev) => [
         ...prev,
-        { role: "assistant", content: "⚠️ An error occurred. Please try again." },
+        { role: "assistant", content: "âš ï¸ An error occurred. Please try again." },
       ]);
     } finally {
       setLoading(false);
@@ -99,11 +99,11 @@ export default function EchoAssistantUltra({
     const cmd = fuzzyMatch(msg);
 
     if (cmd?.command === "lookup") {
-      setHistory((prev) => [...prev, { role: "assistant", content: `🔍 Looking up **${cmd.arg}**...` }]);
+      setHistory((prev) => [...prev, { role: "assistant", content: `ðŸ” Looking up **${cmd.arg}**...` }]);
       setTimeout(() => {
         setHistory((prev) => [
           ...prev,
-          { role: "assistant", content: "📘 Real-time lookup is coming soon!" },
+          { role: "assistant", content: "ðŸ“˜ Real-time lookup is coming soon!" },
         ]);
         setLoading(false);
       }, 1200);

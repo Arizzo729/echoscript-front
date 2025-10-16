@@ -1,5 +1,5 @@
 // src/components/AdaptiveAI.jsx
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {useState, useEffect, useCallback, useRef, useState} from "react";
 import { AutomationService, PROVIDERS } from "../services/AutomationService";
 
 export default function AdaptiveAI({
@@ -32,21 +32,21 @@ export default function AdaptiveAI({
     abortRef.current?.abort();
     abortRef.current = new AbortController();
 
-    appendLog(`🔁 Starting automation with provider: ${provider}`);
+    appendLog(`ðŸ” Starting automation with provider: ${provider}`);
 
     try {
       const res = await service.runAutomation(provider, automationId, inputData, {
         signal: abortRef.current.signal,
         context: adaptiveContext,
       });
-      appendLog(`✅ Automation completed successfully.`);
+      appendLog(`âœ… Automation completed successfully.`);
       setResult(res);
       setStatus("success");
     } catch (err) {
       if (err.name === "AbortError") {
-        appendLog(`⏹️ Automation aborted.`);
+        appendLog(`â¹ï¸ Automation aborted.`);
       } else {
-        appendLog(`❌ Automation failed: ${err.message}`);
+        appendLog(`âŒ Automation failed: ${err.message}`);
         setError(err.message);
         setStatus("error");
       }
@@ -56,7 +56,7 @@ export default function AdaptiveAI({
   useEffect(() => {
     const newProvider = chooseProviderAdaptive();
     if (newProvider !== provider) {
-      appendLog(`🤖 Adaptive AI switched provider → ${newProvider}`);
+      appendLog(`ðŸ¤– Adaptive AI switched provider â†’ ${newProvider}`);
       setProvider(newProvider);
     }
   }, [chooseProviderAdaptive, provider]);
@@ -116,7 +116,7 @@ export default function AdaptiveAI({
             </button>
           </div>
         )}
-        {status === "error" && <p className="text-red-600 dark:text-red-400 font-medium">❌ Error: {error}</p>}
+        {status === "error" && <p className="text-red-600 dark:text-red-400 font-medium">âŒ Error: {error}</p>}
       </div>
 
       <div>

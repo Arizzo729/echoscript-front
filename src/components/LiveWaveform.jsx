@@ -1,5 +1,5 @@
 // === LiveWaveform.jsx ===
-import React, { useEffect, useRef, useState } from "react";
+import React, {useEffect, useRef, useState, useState} from "react";
 
 /**
  * LiveWaveform - High-fidelity real-time waveform visualizer.

@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState, useEffect, Suspense } from "react";
+import React, {useState, useEffect, Suspense, useState} from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 
 import { AuthProvider } from "./context/AuthContext";
@@ -66,7 +66,7 @@ export default function App() {
                   <Suspense
                     fallback={
                       <div className="container-prose py-10 text-center text-zinc-300">
-                        Loading…
+                        Loadingâ€¦
                       </div>
                     }
                   >
@@ -80,7 +80,7 @@ export default function App() {
                     </Routes>
                   </Suspense>
 
-                  {/* Global “intro/onboarding” overlays */}
+                  {/* Global â€œintro/onboardingâ€ overlays */}
                   <OverlayManager />
                 </BoundaryResetter>
               </ErrorBoundary>

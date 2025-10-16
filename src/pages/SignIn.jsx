@@ -1,5 +1,5 @@
 // src/pages/SignIn.jsx
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState, useState} from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -118,7 +118,7 @@ export default function SignIn() {
 
           <motion.button type="submit" whileTap={{ scale: 0.96 }} disabled={loading}
             className={`w-full py-3 text-base font-semibold rounded-xl shadow-xl transition ${loading ? "bg-teal-700 opacity-80" : "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400"}`}>
-            {loading ? t("signing_in", "Signing in…") : t("sign_in_button", "Sign in")}
+            {loading ? t("signing_in", "Signing inâ€¦") : t("sign_in_button", "Sign in")}
           </motion.button>
         </form>
       </motion.div>

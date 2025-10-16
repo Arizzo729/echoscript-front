@@ -1,5 +1,5 @@
 // src/pages/Contact.jsx
-import React, { useState } from "react";
+import React, {useState, useState} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Send, Info, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -166,7 +166,7 @@ export default function Contact() {
               >
                 {t(
                   "contact.hours_description",
-                  "We are available to contact 24/7! However, our team is small right now, so we’ll respond as soon as possible. Thank you for choosing EchoScript.AI!"
+                  "We are available to contact 24/7! However, our team is small right now, so weâ€™ll respond as soon as possible. Thank you for choosing EchoScript.AI!"
                 )}
               </motion.div>
             )}
@@ -180,7 +180,7 @@ export default function Contact() {
       </div>
 
       <div className="mt-12 pt-6 border-t border-zinc-800 text-sm text-zinc-400 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
-        <span>© {new Date().getFullYear()} EchoScript.AI</span>
+        <span>Â© {new Date().getFullYear()} EchoScript.AI</span>
         <div className="flex items-center gap-4">
           <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-teal-300 hover:text-teal-200 underline underline-offset-4">
             Privacy Policy

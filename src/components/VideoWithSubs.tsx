@@ -1,5 +1,5 @@
 // src/components/VideoWithSubs.tsx
-import { useRef, useState } from "react";
+import {useRef, useState, useState} from "react";
 
 // Default to the Netlify proxy /api; allow override via VITE_API_BASE_URL
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/+$/, "");

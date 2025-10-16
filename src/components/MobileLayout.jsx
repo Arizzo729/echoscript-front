@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {useState, useEffect, useRef, useState} from "react";
 import ReactDOM from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import MobileHeader from "./MobileHeader";
@@ -78,7 +78,7 @@ function AudioModal({ open, onClose, children }) {
           className="absolute top-2 right-2 rounded-md border border-zinc-700/60 bg-zinc-800/60 px-2 py-1 text-sm text-zinc-200 hover:bg-zinc-700/60 focus:outline-none focus:ring-2 focus:ring-teal-400"
           aria-label="Close audio panel"
         >
-          ✕
+          âœ•
         </button>
         {children}
       </motion.div>

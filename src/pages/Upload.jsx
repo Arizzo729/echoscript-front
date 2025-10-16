@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, {useRef, useState, useState} from "react";
 import useSimpleRecorder from "../hooks/useSimpleRecorder.jsx";
 
 export default function UploadPage() {

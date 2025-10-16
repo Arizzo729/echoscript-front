@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, {useState, useEffect, useRef, useMemo, useState} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, AlertTriangle, Info } from 'lucide-react';
 
