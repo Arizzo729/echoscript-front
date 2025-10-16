@@ -6,16 +6,14 @@ import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/useTheme";
 import { GPTProvider } from "./context/GPTContext";
 import { FontSizeProvider } from "./context/useFontSize"; // Keep for potential use in Home/Upload
-import { SoundProvider, useSound } from "./context/SoundContext"; // Keep for potential use in Home/Upload
+import { SoundProvider } from "./context/SoundContext"; // Keep for potential use in Home/Upload
 
 import AnimatedSplash from "./components/AnimatedSplash";
 import Layout from "./components/Layout";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
-import useIsMobile from "./hooks/useIsMobile.jsx";
 
 import Home from "./pages/HomePage";
 import UploadPage from "./pages/Upload";
-import NotFound from "./pages/NotFound";
 
 // If you want the real component, you can swap these:
 // import LiveCaptions from "./components/LiveCaptions.tsx";

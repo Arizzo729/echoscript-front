@@ -3,10 +3,6 @@ import { motion } from "framer-motion";
 import { FileText, Loader2, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-<<<<<<< Updated upstream
-const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
-
-=======
 >>>>>>> Stashed changes
 export default function TranscriptsPage() {
   const { t } = useTranslation();
@@ -20,9 +16,7 @@ export default function TranscriptsPage() {
 <<<<<<< Updated upstream
         const response = await fetch(`${API_BASE}/transcripts`);
 =======
-        const response = await fetch("/api/transcripts");
->>>>>>> Stashed changes
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const response = await fetch("/api/transcripts");        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
           throw new Error("Expected JSON, got something else.");

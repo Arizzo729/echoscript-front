@@ -1,19 +1,14 @@
-<<<<<<< Updated upstream
-// Single source of truth for i18n.
-// Re-export the configured instance from i18n.js to avoid double initialization.
-export { default } from "./i18n";
-=======
 // src/i18n/index.js
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import en from "./en";
 import es from "./es";
-import zh from "./zh"; // ✅ Add Chinese
+import zh from "./zh"; // âœ… Add Chinese
 
 const resources = {
   en: { translation: en },
   es: { translation: es },
-  zh: { translation: zh }, // ✅ Register Chinese
+  zh: { translation: zh }, // âœ… Register Chinese
 };
 
 i18n
@@ -28,4 +23,3 @@ i18n
   });
 
 export default i18n;
->>>>>>> Stashed changes
