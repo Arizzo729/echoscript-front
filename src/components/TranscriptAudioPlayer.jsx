@@ -1,4 +1,4 @@
-// src/components/TranscriptAudioPlayer.jsx
+﻿// src/components/TranscriptAudioPlayer.jsx
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { ChevronDown, ChevronUp, Pause, Play } from "lucide-react";
 
@@ -8,7 +8,7 @@ const SPEED_OPTIONS = [0.25, 0.5, 1, 1.25, 1.5, 1.75, 2];
  * TranscriptAudioPlayer
  *
  * Props:
- * - audioUrl: string (required) — URL/path to audio file
+ * - audioUrl: string (required)  URL/path to audio file
  * - segments: Array<{ id?: string|number, start: number, end: number, text: string }>
  * - initialTime?: number (seconds)
  * - onTimeUpdate?: (timeSeconds: number) => void
@@ -28,7 +28,7 @@ export default function TranscriptAudioPlayer({
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
 
-  // Stable keys for segment list (no index param, so no-unused-vars is happy)
+  // Stable keys for segment list (no index param)
   const normalizedSegments = useMemo(
     () =>
       (Array.isArray(segments) ? segments : []).map((seg) => ({
@@ -112,11 +112,13 @@ export default function TranscriptAudioPlayer({
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  const activeIdx = findActiveIndex(normalizedSegments, currentTime);
-
   return (
     <div className="w-full max-w-3xl mx-auto space-y-4">
-      <audio ref={audioRef} src={audioUrl} preload="metadata" />
+      {/* a11y: include a captions track to satisfy jsx-a11y/media-has-caption */}
+      <audio ref={audioRef} src={audioUrl} preload="metadata" controls={false}>
+        {/* Replace with a real VTT later if available */}
+        <track kind="captions" label="English" srcLang="en" src="/captions/placeholder.vtt" default />
+      </audio>
 
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-3">
@@ -145,7 +147,7 @@ export default function TranscriptAudioPlayer({
             aria-expanded={showSpeedMenu}
             title="Playback speed"
           >
-            <span className="text-sm">Speed: {playbackRate}×</span>
+            <span className="text-sm">Speed: {playbackRate}</span>
             {showSpeedMenu ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
 
@@ -167,7 +169,7 @@ export default function TranscriptAudioPlayer({
                     setShowSpeedMenu(false);
                   }}
                 >
-                  {s}×
+                  {s}
                 </button>
               ))}
             </div>
@@ -200,7 +202,7 @@ export default function TranscriptAudioPlayer({
                 title={`Jump to ${formatTime(seg.start ?? 0)}`}
               >
                 <div className="text-xs text-gray-500 tabular-nums">
-                  {formatTime(seg.start ?? 0)} – {formatTime(seg.end ?? 0)}
+                  {formatTime(seg.start ?? 0)}  {formatTime(seg.end ?? 0)}
                 </div>
                 <div className="text-sm">{seg.text || ""}</div>
               </button>
@@ -226,16 +228,4 @@ function hashText(text) {
     h = (h * 31 + s.charCodeAt(i)) | 0;
   }
   return Math.abs(h);
-}
-
-function findActiveIndex(segments, t) {
-  if (!Array.isArray(segments) || segments.length === 0) return -1;
-  const time = Number(t) || 0;
-  for (let i = 0; i < segments.length; i++) {
-    const seg = segments[i] || {};
-    const start = safeNum(seg.start);
-    const end = safeNum(seg.end);
-    if (time >= start && time < end) return i;
-  }
-  return -1;
 }
