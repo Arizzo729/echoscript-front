@@ -129,13 +129,14 @@ export default function TranscriptExportPanel({ transcriptText, segments }) {
               { key: "srt", label: ".SRT (subtitles)" },
               { key: "json", label: ".JSON (raw)" },
             ].map(({ key, label }) => (
-              <li
+              <button
                 key={key}
                 onClick={() => handleDownload(key)}
                 className="px-4 py-2 hover:bg-teal-600 text-zinc-200 hover:text-white cursor-pointer text-sm transition"
+                role="menuitem"
               >
                 {label}
-              </li>
+              </button>
             ))}
           </motion.ul>
         )}

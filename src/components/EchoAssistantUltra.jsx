@@ -1,9 +1,7 @@
 // ✅ EchoAssistantUltra.jsx — Enhanced, Optimized, and Advanced
-import { Loader2, Send, Wand2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { Send, Wand2, X } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-
-import { AnimatePresence, motion } from '../lib/motion';
 
 const persona = {
   name: "Echo",
@@ -38,21 +36,21 @@ export default function EchoAssistantUltra({
   const [input, setInput] = useState("");
   const [history, setHistory] = useState([{ role: "assistant", content: persona.greeting }]);
   const [loading, setLoading] = useState(false);
-  const scrollRef = useRef();
-
-  const toggle = () => setOpen(!open);
+  const scrollRef = useRef(null);
+  
+  const toggle = useCallback(() => setOpen((o) => !o), []);
 
   useEffect(() => {
     const handler = (e) => e.shiftKey && e.key === "A" && toggle();
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [toggle]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history]);
 
-  const sendRequest = async (msg, cmd) => {
+  const sendRequest = async (msg) => {
     setLoading(true);
 
     const systemPrompt = `You are Echo, a helpful and intuitive assistant. Context: ${context}. Transcript: ${transcript}. Assist clearly and professionally.`;
@@ -98,8 +96,7 @@ export default function EchoAssistantUltra({
     setHistory((prev) => [...prev, { role: "user", content: msg }]);
 
     const cmd = fuzzyMatch(msg);
-
-    if (cmd?.command === "lookup") {
+    if (cmd && cmd.command === "lookup") {
       setHistory((prev) => [...prev, { role: "assistant", content: `🔍 Looking up **${cmd.arg}**...` }]);
       setTimeout(() => {
         setHistory((prev) => [
@@ -111,7 +108,7 @@ export default function EchoAssistantUltra({
       return;
     }
 
-    if (cmd?.command === "suggest") {
+    if (cmd && cmd.command === "suggest") {
       setHistory((prev) => [
         ...prev,
         { role: "assistant", content: suggestions.map((s) => `- \`${s.command}\`: ${s.label}`).join("\n") },
@@ -120,32 +117,41 @@ export default function EchoAssistantUltra({
       return;
     }
 
-    sendRequest(msg, cmd);
+    sendRequest(msg);
   };
 
   return (
     <>
-      <motion.button
+      <button
         onClick={toggle}
         className="fixed bottom-6 right-6 z-50 p-3 bg-gradient-to-tr from-teal-600 to-teal-400 hover:from-teal-700 hover:to-teal-500 text-white rounded-full shadow-xl"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        whileHover={{ scale: 1.1 }}
         aria-label="Toggle Echo Assistant"
       >
         <Wand2 className="w-5 h-5" />
-      </motion.button>
+      </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="fixed bottom-20 right-6 w-80 max-h-[70vh] bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-xl shadow-xl z-50 flex flex-col"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-          >
-            {/* Header and messages UI remains the same, trimmed for brevity */}
-
+      {open && (
+        <div
+          className="fixed bottom-20 right-6 w-80 max-h-[70vh] bg-white dark:bg-zinc-900 border dark:border-zinc-700 rounded-xl shadow-xl z-50 flex flex-col"
+        >
+          <div className="p-3 border-b dark:border-zinc-700 flex justify-between items-center">
+            <h3 className="font-semibold text-sm">Echo Assistant</h3>
+            <button onClick={toggle} className="text-zinc-400 hover:text-white">
+              <X size={18} />
+            </button>
+          </div>
+          <div className="flex-1 p-3 overflow-y-auto text-sm space-y-4">
+            {history.map((item, i) => (
+              <div key={i} className={`flex ${item.role === 'user' ? 'justify-end' : ''}`}>
+                <div
+                  className={`max-w-[85%] p-2 rounded-lg ${item.role === 'user' ? 'bg-teal-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800'}`}
+                >
+                  <ReactMarkdown>{item.content}</ReactMarkdown>
+                </div>
+              </div>
+            ))}
+            <div ref={scrollRef} />
+          </div>
             <form onSubmit={handleSend} className="flex p-2 border-t dark:border-zinc-700">
               <input
                 type="text"
@@ -158,9 +164,8 @@ export default function EchoAssistantUltra({
                 <Send size={16} />
               </button>
             </form>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </>
   );
 }

@@ -9,7 +9,9 @@ export async function startCheckout(plan = 'pro') {
 
   const text = await res.text();
   let data = {};
-  try { data = JSON.parse(text); } catch {}
+  try {
+    data = JSON.parse(text);
+  } catch (e) { /* no-op */ }
 
   if (!res.ok) {
     const msg = data?.detail || data?.error || `Checkout failed (HTTP ${res.status})`;

@@ -2,8 +2,6 @@
 import { ChevronDown, ChevronUp, Pause, Play } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import { AnimatePresence, motion } from '../lib/motion';
-
 const SPEED_OPTIONS = [0.25, 0.5, 1, 1.25, 1.5, 1.75, 2];
 
 export default function TranscriptAudioPlayer({ audioUrl }) {
@@ -65,12 +63,10 @@ export default function TranscriptAudioPlayer({ audioUrl }) {
       : `${Math.floor(time / 60)}:${String(Math.floor(time % 60)).padStart(2, "0")}`;
 
   return (
-    <motion.div
-      className="w-full p-4 rounded-xl bg-zinc-800 text-white shadow-lg flex flex-col gap-4"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <audio ref={audioRef} src={audioUrl} preload="metadata" />
+    <div className="w-full p-4 rounded-xl bg-zinc-800 text-white shadow-lg flex flex-col gap-4">
+      <audio ref={audioRef} src={audioUrl} preload="metadata">
+        <track kind="captions" />
+      </audio>
 
       <div className="flex items-center gap-4">
         <button
@@ -108,32 +104,30 @@ export default function TranscriptAudioPlayer({ audioUrl }) {
             {playbackRate}x {showSpeedMenu ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
 
-          <AnimatePresence>
-            {showSpeedMenu && (
-              <motion.ul
-                className="absolute right-0 mt-2 w-24 bg-zinc-900 border border-zinc-700 rounded-lg shadow-md z-50 text-sm"
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                role="menu"
-              >
+          {showSpeedMenu && (
+            <ul
+              className="absolute right-0 mt-2 w-24 bg-zinc-900 border border-zinc-700 rounded-lg shadow-md z-50 text-sm"
+              role="menu"
+            >
                 {SPEED_OPTIONS.map((rate) => (
-                  <li
-                    key={rate}
-                    className={`px-3 py-1 cursor-pointer hover:bg-teal-600 rounded ${
-                      playbackRate === rate ? "bg-zinc-700" : ""
-                    }`}
-                    onClick={() => handleSpeedChange(rate)}
-                    role="menuitem"
-                  >
-                    {rate}x
+                  <li key={rate} role="presentation">
+                    <button
+                      role="menuitem"
+                      tabIndex={0}
+                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSpeedChange(rate)}
+                      onClick={() => handleSpeedChange(rate)}
+                      className={`w-full text-left px-3 py-1 cursor-pointer hover:bg-teal-600 rounded ${
+                        playbackRate === rate ? "bg-zinc-700" : ""
+                      }`}
+                    >
+                      {rate}x
+                    </button>
                   </li>
                 ))}
-              </motion.ul>
-            )}
-          </AnimatePresence>
+            </ul>
+          )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

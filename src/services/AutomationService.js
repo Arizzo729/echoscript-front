@@ -118,10 +118,7 @@ class AutomationService {
    * BrightData proxy-based example (client-side only as placeholder; real use should be server-side)
    */
   static async _runBrightData(inputData) {
-    const { username, password, proxyEndpoint } = config.brightData;
-    if (!username || !password) {
-      throw new Error("BrightData credentials missing — set VITE_BRIGHTDATA_USERNAME/PASSWORD.");
-    }
+    // This is a placeholder for a server-side implementation.
     // NOTE: Real proxying must be done server-side with an HTTP agent; this is a placeholder.
     const url = "https://target-site.com/api/search";
     const options = {

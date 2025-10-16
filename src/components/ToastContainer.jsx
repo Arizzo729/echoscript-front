@@ -1,9 +1,7 @@
 // src/components/ToastContainer.jsx
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { MdCheckCircle, MdClose, MdErrorOutline, MdInfoOutline } from 'react-icons/md';
-
-import { ToastContext } from './toast/ToastProvider';
 
 const toastVariants = {
   success: {
@@ -22,7 +20,9 @@ const toastVariants = {
 
 export default function ToastContainer({ position = 'top-right' }) {
   const [toasts, setToasts] = useState([]);
+  // const { toasts, dismissToast } = useContext(ToastContext); // This context is not defined.
   const timeouts = useRef({});
+  const timeoutsRef = timeouts.current;
 
   useEffect(() => {
     const handler = (e) => {
@@ -50,9 +50,9 @@ export default function ToastContainer({ position = 'top-right' }) {
     return () => {
       window.removeEventListener("toast", handler);
       window.removeEventListener("keydown", escHandler);
-      Object.values(timeouts.current).forEach(clearTimeout);
+      Object.values(timeoutsRef).forEach(clearTimeout);
     };
-  }, []);
+  }, [timeoutsRef]);
 
   const dismiss = (id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -60,33 +60,30 @@ export default function ToastContainer({ position = 'top-right' }) {
     delete timeouts.current[id];
   };
 
-  return (
-    <div className={`fixed z-[9999] flex flex-col gap-3 max-w-sm ${position.includes('top') ? 'top-4' : 'bottom-4'} ${position.includes('right') ? 'right-4' : 'left-4'}`}>
-      <AnimatePresence>
-        {toasts.map(({ id, message, type = "info" }) => (
-          <motion.div
-            key={id}
-            initial={{ opacity: 0, x: 60, blur: 8 }}
-            animate={{ opacity: 1, x: 0, blur: 0 }}
-            exit={{ opacity: 0, x: 60 }}
-            transition={{ type: "spring", stiffness: 280, damping: 24 }}
-            role="alert"
-            className={`flex items-start gap-3 px-4 py-3 rounded-xl border-l-4 shadow-2xl backdrop-blur-sm ${toastVariants[type].bg}`}
+  return createPortal(
+    <div
+      className={`fixed z-[9999] flex flex-col gap-3 max-w-sm ${
+        position.includes('top') ? 'top-4' : 'bottom-4'
+      } ${position.includes('right') ? 'right-4' : 'left-4'}`}
+    >
+      {toasts.map(({ id, message, type = 'info' }) => (
+        <div
+          key={id}
+          role="alert"
+          className={`flex items-start gap-3 px-4 py-3 rounded-xl border-l-4 shadow-2xl backdrop-blur-sm ${toastVariants[type].bg}`}
+        >
+          {toastVariants[type].icon}
+          <div className="flex-1 text-sm text-white font-medium leading-tight">{message}</div>
+          <button
+            onClick={() => dismiss(id)}
+            className="text-zinc-400 hover:text-white transition"
+            aria-label="Dismiss notification"
           >
-            {toastVariants[type].icon}
-            <div className="flex-1 text-sm text-white font-medium leading-tight">
-              {message}
-            </div>
-            <button
-              onClick={() => dismiss(id)}
-              className="text-zinc-400 hover:text-white transition"
-              aria-label="Dismiss notification"
-            >
-              <MdClose size={18} />
-            </button>
-          </motion.div>
-        ))}
-      </AnimatePresence>
+            <MdClose size={18} />
+          </button>
+        </div>
+      ))}
     </div>,
+    document.body
   );
 }

@@ -4,8 +4,8 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
 import App from './App.jsx';
-import { SoundProvider } from './context/SoundContext'; // ✅ Add this
 import ErrorBoundary from './ErrorBoundary.jsx';
+
 /* ✅ Make sure we load the new theme */
 import './i18n';
 import './index.css';
@@ -14,7 +14,6 @@ import './index.css';
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render( <
-  SoundProvider > { /* ✅ Wrap everything */ } <
   Auth0Provider domain = {
     import.meta.env.VITE_AUTH0_DOMAIN
   }
@@ -27,16 +26,11 @@ root.render( <
       audience: import.meta.env.VITE_AUTH0_API_AUDIENCE,
     }
   } >
-  <
-  BrowserRouter >
-  <
-  ErrorBoundary fallback = { < div / >
+  <BrowserRouter >
+  <ErrorBoundary fallback = { < div / >
   } >
-  <
-  App / >
-  <
-  /ErrorBoundary> <
-  /BrowserRouter> <
-  /Auth0Provider> <
-  /SoundProvider>
+  <App / >
+  </ErrorBoundary> 
+  </BrowserRouter> 
+  </Auth0Provider>
 );

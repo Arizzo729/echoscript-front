@@ -1,12 +1,8 @@
 // src/components/Header.jsx
-import { Command, Home, Loader2, Search } from 'lucide-react';
+import { Command, Home, Search } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useSound } from '../context/SoundContext';
-import api from '../lib/api';
-import { AnimatePresence, motion } from '../lib/motion';
-import IconButton from './IconButton';
 
 // Local quick actions / destinations used for type-ahead
 const LOCAL_INDEX = [
@@ -41,51 +37,11 @@ function score(item, q) {
 
 export default function Header() {
   const navigate = useNavigate();
-  const { isMuted, toggleMute } = useSound();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
-  const [loadingRemote, setLoadingRemote] = useState(false);
-  const [remote, setRemote] = useState([]);
   const inputRef = useRef(null);
   const listRef = useRef(null);
-
-  // simple auth check (swap to your real auth hook when ready)
-  const isAuthed = !!localStorage.getItem("auth_token");
-
-  // remote suggestions (optional)
-  useEffect(() => {
-    const t = setTimeout(async () => {
-      const query = q.trim();
-      if (!query) {
-        setRemote([]);
-        setLoadingRemote(false);
-        return;
-      }
-      setLoadingRemote(true);
-      try {
-        // Using the new api.call method for consistency
-        const data = await api.call(`/search/suggest?q=${encodeURIComponent(query)}`);
-        if (data) {
-          const normalized = (Array.isArray(data) ? data : [])
-            .slice(0, 6)
-            .map((d) => ({
-              label: d.label || d.title || d.name || String(d),
-              path: d.path || d.url || d.href,
-              type: "remote",
-            }));
-          setRemote(normalized);
-        } else {
-          setRemote([]);
-        }
-      } catch {
-        setRemote([]);
-      } finally {
-        setLoadingRemote(false);
-      }
-    }, 180);
-    return () => clearTimeout(t);
-  }, [q]);
 
   const localMatches = useMemo(() => {
     const query = q.trim();
@@ -105,12 +61,8 @@ export default function Header() {
       const key = it.path || it.action || it.label;
       if (!seen.has(key)) { seen.add(key); merged.push(it); }
     }
-    for (const it of remote) {
-      const key = it.path || it.label;
-      if (!seen.has(key)) { seen.add(key); merged.push(it); }
-    }
     return merged;
-  }, [localMatches, remote]);
+  }, [localMatches]);
 
   const openMenu = () => setOpen(true);
   const closeMenu = () => { setOpen(false); setActiveIdx(0); };
@@ -155,7 +107,7 @@ export default function Header() {
       <header className="w-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800">
         <div className="max-w-screen-2xl mx-auto px-4 py-3 flex items-center gap-3">
           {/* Home icon button (always visible) */}
-          <IconButton label="Home" tooltip="Home" icon={<Home className="w-5 h-5" />} onClick={() => navigate("/")} />
+          <button onClick={() => navigate("/")} aria-label="Home"><Home className="w-5 h-5" /></button>
 
           {/* Brand (also clickable) */}
           <Link to="/" className="flex items-center gap-2">
@@ -181,22 +133,15 @@ export default function Header() {
                 aria-controls="header-search-listbox"
                 aria-autocomplete="list"
               />
-              {loadingRemote && (
-                <Loader2 className="absolute right-24 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-zinc-400" />
-              )}
             </div>
 
-            <AnimatePresence>
-              {open && (q.trim().length > 0 || suggestions.length > 0) && (
-                <motion.ul
-                  id="header-search-listbox"
-                  ref={listRef}
-                  role="listbox"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  className="absolute z-50 mt-2 w-full max-h-72 overflow-auto rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-xl"
-                >
+            {open && (q.trim().length > 0 || suggestions.length > 0) && (
+              <ul
+                id="header-search-listbox"
+                ref={listRef}
+                role="listbox"
+                className="absolute z-50 mt-2 w-full max-h-72 overflow-auto rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-xl"
+              >
                   {suggestions.length === 0 && (
                     <li className="px-3 py-2 text-sm text-zinc-500">No suggestions. Press Enter to search.</li>
                   )}
@@ -226,9 +171,8 @@ export default function Header() {
                       </li>
                     );
                   })}
-                </motion.ul>
-              )}
-            </AnimatePresence>
+              </ul>
+            )}
           </div>
         </div>
       </header>
