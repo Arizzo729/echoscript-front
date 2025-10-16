@@ -84,8 +84,4 @@ export default function RecoverDeletedPage() {
       </div>
     </motion.div>
   );
-<<<<<<< Updated upstream
 }
-=======
-}
->>>>>>> Stashed changes

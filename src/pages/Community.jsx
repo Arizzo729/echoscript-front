@@ -1,25 +1,14 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-<<<<<<< Updated upstream
-import { FaDiscord, FaInstagram, FaLinkedin, FaTiktok } from "react-icons/fa";
-=======
 import {
   FaDiscord,
   FaInstagram,
   FaLinkedin,
   FaTiktok,
-} from "react-icons/fa";
->>>>>>> Stashed changes
-import { Sparkles } from "lucide-react";
+} from "react-icons/fa";import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const communityLinks = [
-<<<<<<< Updated upstream
-  { name: "Discord", href: "https://discord.com/invite/echoscriptai", icon: FaDiscord, color: "bg-indigo-600" },
-  { name: "Instagram", href: "https://instagram.com/echoscriptai", icon: FaInstagram, color: "bg-pink-500" },
-  { name: "LinkedIn", href: "https://linkedin.com/company/echoscriptai", icon: FaLinkedin, color: "bg-blue-700" },
-  { name: "TikTok", href: "https://tiktok.com/@echoscriptai", icon: FaTiktok, color: "bg-black" },
-=======
   {
     name: "Discord",
     href: "https://discord.com/invite/echoscriptai",
@@ -43,47 +32,16 @@ const communityLinks = [
     href: "https://tiktok.com/@echoscriptai",
     icon: FaTiktok,
     color: "bg-black",
-  },
->>>>>>> Stashed changes
-];
+  },];
 
 export default function Community() {
   const [email, setEmail] = useState("");
-<<<<<<< Updated upstream
-  const [status, setStatus] = useState("idle"); // idle | sending | success | error
-  const [errorMsg, setErrorMsg] = useState("");
-  const { t } = useTranslation();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setStatus("sending");
-    setErrorMsg("");
-    try {
-      const res = await fetch("/api/newsletter/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email }),
-      });
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || "Subscription failed");
-      }
-      setStatus("success");
-      setEmail("");
-    } catch (err) {
-      setStatus("error");
-      setErrorMsg(String(err?.message || err));
-    }
-=======
   const { t } = useTranslation();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     alert(`${t("community.subscribed")} ${email}`);
-    setEmail("");
->>>>>>> Stashed changes
-  };
+    setEmail("");  };
 
   return (
     <motion.div
@@ -135,15 +93,10 @@ export default function Community() {
         <p className="text-zinc-400 text-sm mb-5">
           {t("community.subscribeDescription")}
         </p>
-<<<<<<< Updated upstream
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
-=======
         <form
           onSubmit={handleSubmit}
           className="flex flex-col sm:flex-row gap-3"
-        >
->>>>>>> Stashed changes
-          <input
+        >          <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -153,29 +106,11 @@ export default function Community() {
           />
           <button
             type="submit"
-<<<<<<< Updated upstream
-            disabled={status === "sending"}
-            className="bg-teal-600 hover:bg-teal-500 disabled:opacity-60 text-white font-semibold px-6 py-3 rounded-lg text-sm transition"
-          >
-            {status === "sending" ? t("community.subscribing", "Subscribing…") : t("community.subscribe")}
-          </button>
-        </form>
-        {status === "success" && (
-          <p className="mt-3 text-teal-300 text-sm">
-            {t("community.subscribedSuccess", "You're subscribed!")}
-          </p>
-        )}
-        {status === "error" && (
-          <p className="mt-3 text-red-400 text-sm whitespace-pre-wrap">{errorMsg}</p>
-        )}
-=======
             className="bg-teal-600 hover:bg-teal-500 text-white font-semibold px-6 py-3 rounded-lg text-sm transition"
           >
             {t("community.subscribe")}
           </button>
-        </form>
->>>>>>> Stashed changes
-      </motion.div>
+        </form>      </motion.div>
     </motion.div>
   );
 }

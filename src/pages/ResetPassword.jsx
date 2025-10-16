@@ -1,6 +1,3 @@
-<<<<<<< Updated upstream
-// src/pages/ResetPassword.jsx
-=======
 >>>>>>> Stashed changes
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,9 +8,7 @@ import { Link } from "react-router-dom";
 <<<<<<< Updated upstream
 const API = (import.meta?.env?.VITE_API_BASE || "https://api.echoscript.ai").replace(/\/+$/,"");
 
-=======
->>>>>>> Stashed changes
-export default function ResetPassword() {
+=======export default function ResetPassword() {
   const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
@@ -83,7 +78,7 @@ export default function ResetPassword() {
           {t("reset.title") || "Reset Password"}
         </h1>
         <p className="text-sm text-center text-zinc-400">
-          {t("reset.subtitle") || "We’ll email you a code to reset your password."}
+          {t("reset.subtitle") || "Weâ€™ll email you a code to reset your password."}
         </p>
 
         {error && <div className="bg-red-500/10 text-red-300 px-4 py-2 rounded-md text-sm text-center">{error}</div>}
@@ -108,7 +103,7 @@ export default function ResetPassword() {
                 onClick={sendCode} disabled={busy || !email}
                 className={`w-full text-white font-semibold py-2 rounded-lg transition-all duration-300 shadow-md ${busy ? "bg-teal-700 cursor-not-allowed opacity-80" : "bg-teal-500 hover:bg-teal-400"}`}
               >
-                {busy ? (t("reset.sending") || "Sending…") : (t("reset.send_code") || "Send code")}
+                {busy ? (t("reset.sending") || "Sendingâ€¦") : (t("reset.send_code") || "Send code")}
               </button>
             </motion.div>
           )}
@@ -129,7 +124,7 @@ export default function ResetPassword() {
                 <label htmlFor="newPass" className="text-sm font-medium text-zinc-300">{t("reset.new_password") || "New password"}</label>
                 <input
                   id="newPass" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder={t("reset.new_password_placeholder") || "••••••••"}
+                  placeholder={t("reset.new_password_placeholder") || "â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"}
                   className="w-full px-4 py-2 rounded-lg border border-zinc-700 bg-zinc-800 text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={busy}
                 />
@@ -139,7 +134,7 @@ export default function ResetPassword() {
                 onClick={verifyCode} disabled={busy || !code || !newPassword}
                 className={`w-full text-white font-semibold py-2 rounded-lg transition-all duration-300 shadow-md ${busy ? "bg-blue-700 cursor-not-allowed opacity-80" : "bg-blue-600 hover:bg-blue-500"}`}
               >
-                {busy ? (t("reset.processing") || "Processing…") : (t("reset.reset_button") || "Reset password")}
+                {busy ? (t("reset.processing") || "Processingâ€¦") : (t("reset.reset_button") || "Reset password")}
               </button>
             </motion.div>
           )}
