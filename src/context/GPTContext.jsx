@@ -1,41 +1,9 @@
-// ✅ GPTContext.jsx — Persistent memory + identity + context sharing
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext } from "react";
 
-export const GPTContext = createContext();
+// TODO: Implement GPT/AI-related state management
+export const GPTContext = createContext(null);
 
 export function GPTProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [contextMessage, setContextMessage] = useState("");
-
-  // Load user from localStorage on mount
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      try {
-        const parsed = JSON.parse(savedUser);
-        if (parsed && typeof parsed === "object") setUser(parsed);
-      } catch {
-        setUser(null);
-      }
-    }
-  }, []);
-
-  // Save to localStorage on update
-  const updateUser = (data) => {
-    setUser(data);
-    localStorage.setItem("user", JSON.stringify(data));
-  };
-
-  return (
-    <GPTContext.Provider
-      value={{
-        user,
-        setUser: updateUser,
-        contextMessage,
-        setContextMessage,
-      }}
-    >
-      {children}
-    </GPTContext.Provider>
-  );
+  // Placeholder value
+  return <GPTContext.Provider value={null}>{children}</GPTContext.Provider>;
 }

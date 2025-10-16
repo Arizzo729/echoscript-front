@@ -2,52 +2,53 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 
-import { AuthProvider } from "./context/AuthContext";
-import { ThemeProvider } from "./context/useTheme";
-import { GPTProvider } from "./context/GPTContext";
-import { FontSizeProvider } from "./context/useFontSize";
-import { LanguageProvider } from "./context/LanguageContext";
-import { SoundProvider, useSound } from "./context/SoundContext";
+import { AuthProvider } from "@/context/AuthContext.jsx";
+import { ThemeProvider } from "@/context/useTheme.jsx";
+import { GPTProvider } from "@/context/GPTContext.jsx";
+import { FontSizeProvider } from "@/context/useFontSize.jsx";
+import { LanguageProvider } from "@/context/LanguageContext.jsx";
+import { SoundProvider, useSound } from "@/context/SoundContext.jsx";
 import { API_BASE } from "@/lib/apiBase";
 
-import SearchResults from "./pages/SearchResults.jsx";
-import TranscribeUploader from "./components/TranscribeUploader";
+import SearchResults from "@/pages/SearchResults.jsx";
+import TranscribeUploader from "@/components/TranscribeUploader.jsx";
 
-import AnimatedSplash from "./components/AnimatedSplash";
-import OnboardingModal from "./components/OnboardingModal";
-import IntroVideo from "./components/IntroVideo"; // ⬅️ added
-import Layout from "./components/Layout";
-import ErrorBoundary from "./components/ErrorBoundary";
-import useIsMobile from "./hooks/useIsMobile";
-import MobileBottomNav from "./components/MobileBottomNav";
-import FloatingHome from "./components/FloatingHome";
-import AudioOverlay from "./components/AudioOverlay"; // ✅ desktop overlay
+import AnimatedSplash from "@/components/AnimatedSplash.jsx";
+import OnboardingModal from "@/components/OnboardingModal.jsx";
+import IntroVideo from "@/components/IntroVideo.jsx";
+import Layout from "@/components/Layout.jsx";
+import ErrorBoundary from "@/components/ErrorBoundary.jsx";
+import useIsMobile from "@/hooks/useIsMobile.js";
+import MobileBottomNav from "@/components/MobileBottomNav.jsx";
+import FloatingHome from "@/components/FloatingHome.jsx";
+import AudioOverlay from "@/components/AudioOverlay.jsx";
 
-import Home from "./pages/HomePage";
-import Dashboard from "./pages/Dashboard";
-import UploadPage from "./pages/Upload";
-import AIAssistant from "./pages/AIAssistant";
-import Settings from "./pages/Settings";
-import Account from "./pages/Account";
-import Purchase from "./pages/Purchase";
-import BuyExtraMinutes from "./pages/BuyExtraMinutes";
-import ApifyTest from "./pages/ApifyTest";
-import Contact from "./pages/Contact";
-import VideoUpload from "./pages/VideoUpload";
-import TranscriptsPage from "./pages/Transcripts";
-import SummaryPage from "./pages/Summary";
-import HistoryPage from "./pages/History";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
-import VerifyEmail from "./pages/VerifyEmail";
-import ResetPassword from "./pages/ResetPassword";
-import Unsubscribe from "./pages/Unsubscribe";
-import Unsubscribed from "./pages/Unsubscribed";
-import NotFound from "./pages/NotFound";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
-import Status from "./pages/Status";
-import Checkout from "./pages/Checkout";
+import Home from "@/pages/HomePage.jsx";
+import Dashboard from "@/pages/Dashboard.jsx";
+import UploadPage from "@/pages/Upload.jsx";
+import AIAssistant from "@/pages/AIAssistant.jsx";
+import Settings from "@/pages/Settings.jsx";
+import Account from "@/pages/Account.jsx";
+import Purchase from "@/pages/Purchase.jsx";
+import BuyExtraMinutes from "@/pages/BuyExtraMinutes.jsx";
+import ApifyTest from "@/pages/ApifyTest.jsx";
+import Contact from "@/pages/Contact.jsx";
+import VideoUpload from "@/pages/VideoUpload.jsx";
+import TranscriptsPage from "@/pages/Transcripts.jsx";
+import SummaryPage from "@/pages/Summary.jsx";
+import HistoryPage from "@/pages/History.jsx";
+import SignIn from "@/pages/SignIn.jsx";
+import SignUp from "@/pages/SignUp.jsx";
+import VerifyEmail from "@/pages/VerifyEmail.jsx";
+import ResetPassword from "@/pages/ResetPassword.jsx";
+import Unsubscribe from "@/pages/Unsubscribe.jsx";
+import Unsubscribed from "@/pages/Unsubscribed.jsx";
+import NotFound from "@/pages/NotFound.jsx";
+import PrivacyPolicy from "@/pages/PrivacyPolicy.jsx";
+import TermsOfService from "@/pages/TermsOfService.jsx";
+import Status from "@/pages/Status.jsx";
+import Checkout from "@/pages/Checkout.jsx";
+import CodeReviewChecklist from "@/components/CodeReviewChecklist.jsx";
 
 // If you want the real component, you can swap these:
 // import LiveCaptions from "./components/LiveCaptions.tsx";
@@ -162,6 +163,7 @@ export default function App() {
                     >
                       <Routes>
                         <Route element={<Layout />}>
+                          <Route path="/login" element={<SignIn />} />
                           <Route path="/signin" element={<SignIn />} />
                           <Route path="/signup" element={<SignUp />} />
                           <Route path="/verify" element={<VerifyEmail />} />
@@ -210,4 +212,3 @@ export default function App() {
     </AuthProvider>
   );
 }
-
