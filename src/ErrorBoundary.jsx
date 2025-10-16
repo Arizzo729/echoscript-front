@@ -1,22 +1,23 @@
-import React from 'react';
+﻿import React from "react";
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
   }
   componentDidCatch(error, info) {
-    // Optional: hook up to Sentry/etc. later
-    if (import.meta.env.DEV) {
-      console.error('ErrorBoundary', error, info);
-    }
+    console.error("ErrorBoundary caught:", error, info);
   }
   render() {
     if (this.state.hasError) {
-      return this.props.fallback ?? null;
+      return (
+        <div style={{ padding: 16, background: "#fee2e2", color: "#991b1b" }}>
+          <strong>UI crash:</strong> {String(this.state.error?.message || this.state.error)}
+        </div>
+      );
     }
     return this.props.children;
   }
