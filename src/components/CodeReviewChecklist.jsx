@@ -1,14 +1,16 @@
+import React from "react";
+
 export default function CodeReviewChecklist() {
   return (
-    <section className="p-6 text-left text-zinc-200">
+    <div className="p-4 rounded-xl shadow-md border">
       <h2 className="text-xl font-semibold mb-2">Code Review Checklist</h2>
-      <ul className="list-disc pl-6 space-y-1">
-        <li>✅ Types and props are correct</li>
-        <li>✅ No unused imports or variables</li>
-        <li>✅ Components remain small and readable</li>
-        <li>✅ Handles loading and error states</li>
-        <li>✅ Meets accessibility and responsiveness</li>
+      <ul className="list-disc pl-5 space-y-1 text-sm">
+        <li>Build passes locally (npm run build)</li>
+        <li>No console errors/warnings in production</li>
+        <li>Routes load; deep links work</li>
+        <li>Large bundles are code-split</li>
+        <li>No secrets in frontend</li>
       </ul>
-    </section>
+    </div>
   );
 }
