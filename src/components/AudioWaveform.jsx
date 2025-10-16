@@ -1,168 +1,106 @@
-<<<<<<< Updated upstream
 // src/components/AudioWaveform.jsx
-=======
->>>>>>> Stashed changes
 import React, { useEffect, useRef } from "react";
 
-export default function AudioWaveform({ audioStream }) {
+/**
+ * Minimal, build-safe waveform renderer.
+ * - Uses getUserMedia when sourceType === "mic"
+ * - Cleans up AudioContext/RAF on unmount
+ * - No duplicate refs, no JSX/syntax traps
+ */
+export default function AudioWaveform({ sourceType = "mic", width = 600, height = 100 }) {
   const canvasRef = useRef(null);
-<<<<<<< Updated upstream
-  const rafRef = useRef(null);
   const audioCtxRef = useRef(null);
   const analyserRef = useRef(null);
-  const sourceRef = useRef(null);
-  const dataRef = useRef(null);
-  const roRef = useRef(null);
-
-  // Size the canvas crisply for the current DPR
-  const sizeCanvas = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const cssWidth = canvas.clientWidth || 600;
-    const cssHeight = 100;
-    canvas.width = Math.floor(cssWidth * dpr);
-    canvas.height = Math.floor(cssHeight * dpr);
-    canvas.style.width = `${cssWidth}px`;
-    canvas.style.height = `${cssHeight}px`;
-    const ctx = canvas.getContext("2d");
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // scale drawing space
-  };
-=======
-  const animationRef = useRef(null);
-  const audioContextRef = useRef(null);
-  const analyserRef = useRef(null);
   const dataArrayRef = useRef(null);
->>>>>>> Stashed changes
+  const sourceNodeRef = useRef(null);
+  const rafRef = useRef(null);
+  const streamRef = useRef(null);
 
   useEffect(() => {
-    if (!audioStream) return;
+    let mounted = true;
 
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-<<<<<<< Updated upstream
+    (async () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx2d = canvas.getContext("2d");
+      if (!ctx2d) return;
 
-    sizeCanvas();
-    roRef.current = new ResizeObserver(sizeCanvas);
-    roRef.current.observe(canvas);
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = new AudioCtx();
+      audioCtxRef.current = audioCtx;
 
-    audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-    analyserRef.current = audioCtxRef.current.createAnalyser();
-    analyserRef.current.fftSize = 2048;
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      analyserRef.current = analyser;
 
-    // Connect stream -> analyser
-    sourceRef.current = audioCtxRef.current.createMediaStreamSource(audioStream);
-    sourceRef.current.connect(analyserRef.current);
+      const bufferLen = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLen);
+      dataArrayRef.current = dataArray;
 
-    const bufferLength = analyserRef.current.fftSize;
-    dataRef.current = new Uint8Array(bufferLength);
-
-    const draw = () => {
-      analyserRef.current.getByteTimeDomainData(dataRef.current);
-
-      // clear
-      ctx.fillStyle = "#0f172a"; // zinc-900
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // draw line in CSS pixels (we scaled CTX)
-      const cssW = canvas.width / (window.devicePixelRatio || 1);
-      const cssH = canvas.height / (window.devicePixelRatio || 1);
-=======
-    const dpr = window.devicePixelRatio || 1;
-    const width = canvas.offsetWidth * dpr;
-    const height = 100 * dpr;
-
-    canvas.width = width;
-    canvas.height = height;
-    ctx.scale(dpr, dpr);
-
-    audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioContextRef.current.createMediaStreamSource(audioStream);
-    analyserRef.current = audioContextRef.current.createAnalyser();
-    analyserRef.current.fftSize = 2048;
-
-    const bufferLength = analyserRef.current.fftSize;
-    dataArrayRef.current = new Uint8Array(bufferLength);
-
-    source.connect(analyserRef.current);
-
-    const draw = () => {
-      analyserRef.current.getByteTimeDomainData(dataArrayRef.current);
-
-      ctx.fillStyle = "#0f172a"; // zinc-900
-      ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
->>>>>>> Stashed changes
-
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "#14b8a6"; // teal-500
-      ctx.beginPath();
-
-<<<<<<< Updated upstream
-      const sliceWidth = cssW / bufferLength;
-      let x = 0;
-
-      for (let i = 0; i < bufferLength; i++) {
-        const v = dataRef.current[i] / 128.0;
-        const y = (v * cssH) / 2;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-        x += sliceWidth;
+      if (sourceType === "mic") {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        streamRef.current = stream;
+        const micSource = audioCtx.createMediaStreamSource(stream);
+        sourceNodeRef.current = micSource;
+        micSource.connect(analyser);
       }
 
-      ctx.lineTo(cssW, cssH / 2);
-      ctx.stroke();
+      const draw = () => {
+        if (!mounted) return;
+        rafRef.current = requestAnimationFrame(draw);
 
-      rafRef.current = requestAnimationFrame(draw);
-    };
+        analyser.getByteTimeDomainData(dataArray);
 
-    rafRef.current = requestAnimationFrame(draw);
+        ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+        ctx2d.lineWidth = 2;
+        ctx2d.strokeStyle = "#22d3ee";
+        ctx2d.beginPath();
+
+        const sliceWidth = canvas.width / bufferLen;
+        let x = 0;
+
+        for (let i = 0; i < bufferLen; i++) {
+          const v = dataArray[i] / 128.0; // 0..255 -> around 1.0 at center (128)
+          const y = (v * canvas.height) / 2;
+          if (i === 0) ctx2d.moveTo(x, y);
+          else ctx2d.lineTo(x, y);
+          x += sliceWidth;
+        }
+
+        ctx2d.lineTo(canvas.width, canvas.height / 2);
+        ctx2d.stroke();
+      };
+
+      draw();
+    })();
 
     return () => {
+      mounted = false;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      try { sourceRef.current?.disconnect(); } catch {}
-      try { analyserRef.current?.disconnect(); } catch {}
-      try { audioCtxRef.current?.close(); } catch {}
-      roRef.current?.disconnect();
-      sourceRef.current = null;
-      analyserRef.current = null;
-      audioCtxRef.current = null;
-=======
-      const sliceWidth = (canvas.width / dpr) / bufferLength;
-      let x = 0;
-
-      for (let i = 0; i < bufferLength; i++) {
-        const v = dataArrayRef.current[i] / 128.0;
-        const y = (v * height) / (2 * dpr);
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        x += sliceWidth;
-      }
-
-      ctx.lineTo(canvas.width / dpr, height / (2 * dpr));
-      ctx.stroke();
-
-      animationRef.current = requestAnimationFrame(draw);
+      try {
+        sourceNodeRef.current?.disconnect();
+      } catch {}
+      try {
+        streamRef.current?.getTracks()?.forEach((t) => t.stop());
+      } catch {}
+      try {
+        audioCtxRef.current?.close();
+      } catch {}
     };
-
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animationRef.current);
-      if (audioContextRef.current) audioContextRef.current.close();
->>>>>>> Stashed changes
-    };
-  }, [audioStream]);
+  }, [sourceType]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto mt-4">
-      <canvas
-        ref={canvasRef}
-        className="w-full h-[100px] rounded-xl border border-zinc-700 shadow-md"
-      />
-    </div>
+    <canvas
+      ref={canvasRef}
+      width={width}
+      height={height}
+      style={{
+        width: "100%",
+        height,
+        background: "#0b0b0f",
+        borderRadius: 8,
+        display: "block",
+      }}
+    />
   );
 }
-
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes

@@ -11,11 +11,13 @@ import { SoundProvider, useSound } from "./context/SoundContext"; // Keep for po
 import AnimatedSplash from "./components/AnimatedSplash";
 import Layout from "./components/Layout";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
-import useIsMobile from "./hooks/useIsMobile.jsx";
 
 import Home from "./pages/HomePage";
 import UploadPage from "./pages/Upload";
 import NotFound from "./pages/NotFound";
+
+// Corrected import path for the hook
+import useTranslation from "./hooks/useTranslation.jsx";
 
 // If you want the real component, you can swap these:
 // import LiveCaptions from "./components/LiveCaptions.tsx";
