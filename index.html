@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" class="light scroll-smooth">
   <head>
     <meta charset="UTF-8" />
@@ -10,15 +10,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
-    <!-- Hard-kill any stale PWA workers & caches that can blank-screen -->
-    <script>
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.getRegistrations?.().then((regs) => regs.forEach((r) => r.unregister()));
-      }
-      // Also clear caches to prevent stale assets from being served.
-      if (window.caches?.keys) { caches.keys().then((keys) => keys.forEach((k) => caches.delete(k))); }
-    </script>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -42,6 +33,7 @@
   <body class="bg-white text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100 font-sans antialiased">
     <div id="root"></div>
     <!-- Correct Vite entry for your app -->
-    <script type="module" src="/src/index.jsx"></script>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
+

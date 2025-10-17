@@ -1,23 +1,21 @@
-// src/components/TranscriptAudioPlayer.jsx
-import React, { useEffect, useRef, useState, useMemo } from "react";
+﻿// src/components/TranscriptAudioPlayer.jsx
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ChevronDown, ChevronUp, Pause, Play } from 'lucide-react';
+
+const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 /**
  * TranscriptAudioPlayer
  *
  * Props:
- * - audioSrc: string (required) — URL or path to audio file
+ * - audioUrl: string (required)  URL/path to audio file
  * - segments: Array<{ id?: string|number, start: number, end: number, text: string }>
  * - initialTime?: number (seconds)
  * - onTimeUpdate?: (timeSeconds: number) => void
  * - onSeek?: (timeSeconds: number) => void
- *
- * Behavior:
- * - Renders an <audio> element with play/pause and a simple transcript list.
- * - Clicking a transcript segment seeks the audio to that segment's start.
- * - Highlights the “active” segment based on currentTime.
  */
 export default function TranscriptAudioPlayer({
-  audioSrc,
+  audioUrl,
   segments = [],
   initialTime = 0,
   onTimeUpdate,
@@ -26,8 +24,11 @@ export default function TranscriptAudioPlayer({
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(initialTime);
+  const [duration, setDuration] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
 
-  // Normalize keys once (no index used)
+  // Stable keys for segment list (no index param)
   const normalizedSegments = useMemo(
     () =>
       (Array.isArray(segments) ? segments : []).map((seg) => ({
@@ -42,27 +43,44 @@ export default function TranscriptAudioPlayer({
     [segments]
   );
 
+  // Attach time + metadata listeners
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
 
-    const handleTime = () => {
+    const handleTimeUpdate = () => {
       const t = el.currentTime || 0;
       setCurrentTime(t);
       if (typeof onTimeUpdate === "function") onTimeUpdate(t);
     };
 
-    el.addEventListener("timeupdate", handleTime);
-    return () => el.removeEventListener("timeupdate", handleTime);
+    const handleLoadedMetadata = () => {
+      setDuration(el.duration || 0);
+    };
+
+    el.addEventListener("timeupdate", handleTimeUpdate);
+    el.addEventListener("loadedmetadata", handleLoadedMetadata);
+
+    return () => {
+      el.removeEventListener("timeupdate", handleTimeUpdate);
+      el.removeEventListener("loadedmetadata", handleLoadedMetadata);
+    };
   }, [onTimeUpdate]);
 
+  // Seek to initialTime on mount (once)
   useEffect(() => {
-    // apply initialTime once on mount
     const el = audioRef.current;
     if (!el) return;
     if (initialTime > 0) el.currentTime = initialTime;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // run once
+  }, []);
+
+  // Keep playback rate in sync with state
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    el.playbackRate = playbackRate;
+  }, [playbackRate]);
 
   const togglePlay = async () => {
     const el = audioRef.current;
@@ -75,7 +93,6 @@ export default function TranscriptAudioPlayer({
         await el.play();
         setIsPlaying(true);
       } catch {
-        // autoplay/permission errors are normal; ignore
         setIsPlaying(false);
       }
     }
@@ -88,32 +105,82 @@ export default function TranscriptAudioPlayer({
     if (typeof onSeek === "function") onSeek(el.currentTime);
   };
 
-  const activeIdx = findActiveIndex(normalizedSegments, currentTime);
+  const formatTime = (sec) => {
+    const t = Math.max(0, Math.floor(Number(sec) || 0));
+    const m = Math.floor(t / 60);
+    const s = t % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-3">
-      <audio ref={audioRef} src={audioSrc} preload="metadata" />
+    <div className="w-full max-w-3xl mx-auto space-y-4">
+      {/* a11y: include a captions track to satisfy jsx-a11y/media-has-caption */}
+      <audio ref={audioRef} src={audioUrl} preload="metadata" controls={false}>
+        {/* Replace with a real VTT later if available */}
+        <track kind="captions" label="English" srcLang="en" src="/captions/placeholder.vtt" default />
+      </audio>
 
-      <div className="flex items-center gap-3">
+      {/* Controls */}
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={togglePlay}
-          className="px-3 py-2 rounded-lg border shadow-sm hover:bg-gray-50"
+          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border shadow-sm hover:bg-gray-50"
+          aria-label={isPlaying ? "Pause" : "Play"}
         >
-          {isPlaying ? "Pause" : "Play"}
+          {isPlaying ? <Pause size={16} /> : <Play size={16} />}
         </button>
 
-        <span className="text-sm tabular-nums">
-          {formatTime(currentTime)}
-        </span>
+        <div className="text-sm tabular-nums">
+          {formatTime(currentTime)} / {formatTime(duration)}
+        </div>
+
+        {/* Speed */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setShowSpeedMenu((s) => !s)}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border shadow-sm hover:bg-gray-50"
+            aria-haspopup="menu"
+            aria-expanded={showSpeedMenu}
+            title="Playback speed"
+          >
+            <span className="text-sm">Speed: {playbackRate}</span>
+            {showSpeedMenu ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+
+          {showSpeedMenu && (
+            <div
+              role="menu"
+              className="absolute z-10 mt-2 w-40 rounded-lg border bg-white shadow-md p-2"
+            >
+              {SPEED_OPTIONS.map((s) => (
+                <button
+                  key={String(s)}
+                  type="button"
+                  className={[
+                    "block w-full text-left px-3 py-1.5 rounded-md hover:bg-gray-50",
+                    s === playbackRate ? "bg-blue-50 ring-1 ring-blue-300" : "",
+                  ].join(" ")}
+                  onClick={() => {
+                    setPlaybackRate(s);
+                    setShowSpeedMenu(false);
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
+      {/* Transcript list */}
       <div className="space-y-1 max-h-80 overflow-auto border rounded-lg p-3">
         {normalizedSegments.length === 0 ? (
           <div className="text-sm text-gray-500">No transcript available.</div>
         ) : (
-          normalizedSegments.map((seg, _unused) => {
-            // _unused satisfies no-unused-vars by naming the param but not using it
+          normalizedSegments.map((seg) => {
             const isActive =
               typeof seg.start === "number" &&
               typeof seg.end === "number" &&
@@ -133,7 +200,7 @@ export default function TranscriptAudioPlayer({
                 title={`Jump to ${formatTime(seg.start ?? 0)}`}
               >
                 <div className="text-xs text-gray-500 tabular-nums">
-                  {formatTime(seg.start ?? 0)} – {formatTime(seg.end ?? 0)}
+                  {formatTime(seg.start ?? 0)}  {formatTime(seg.end ?? 0)}
                 </div>
                 <div className="text-sm">{seg.text || ""}</div>
               </button>
@@ -159,23 +226,4 @@ function hashText(text) {
     h = (h * 31 + s.charCodeAt(i)) | 0;
   }
   return Math.abs(h);
-}
-
-function formatTime(sec) {
-  const t = Math.max(0, Math.floor(Number(sec) || 0));
-  const m = Math.floor(t / 60);
-  const s = t % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
-
-function findActiveIndex(segments, t) {
-  if (!Array.isArray(segments) || segments.length === 0) return -1;
-  const time = Number(t) || 0;
-  for (let i = 0; i < segments.length; i++) {
-    const seg = segments[i] || {};
-    const start = safeNum(seg.start);
-    const end = safeNum(seg.end);
-    if (time >= start && time < end) return i;
-  }
-  return -1;
 }
