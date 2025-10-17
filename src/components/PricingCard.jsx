@@ -1,5 +1,3 @@
-import { CheckIcon } from '@heroicons/react/20/solid';
-
 export default function PricingCard({
   price,
   title,
@@ -20,10 +18,7 @@ export default function PricingCard({
       </button>
       <ul className="mt-6 space-y-3 text-sm">
         {features.map((feature) => (
-          <li key={feature} className="flex gap-x-3">
-            <CheckIcon className="h-6 w-5 flex-none text-teal-400" aria-hidden="true" />
-            {feature}
-          </li>
+          <li key={feature}>{feature}</li>
         ))}
       </ul>
     </div>

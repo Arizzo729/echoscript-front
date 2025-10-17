@@ -1,8 +1,7 @@
 // src/components/Header.jsx
-import { Command, Home, Search } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Command, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-
 
 // Local quick actions / destinations used for type-ahead
 const LOCAL_INDEX = [
@@ -107,7 +106,7 @@ export default function Header() {
       <header className="w-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur border-b border-zinc-200 dark:border-zinc-800">
         <div className="max-w-screen-2xl mx-auto px-4 py-3 flex items-center gap-3">
           {/* Home icon button (always visible) */}
-          <button onClick={() => navigate("/")} aria-label="Home"><Home className="w-5 h-5" /></button>
+          <button onClick={() => navigate("/")} aria-label="Home">🏠</button>
 
           {/* Brand (also clickable) */}
           <Link to="/" className="flex items-center gap-2">

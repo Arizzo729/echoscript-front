@@ -20,11 +20,13 @@ export default function MobileHeader({ onSearch, hasNewNotifications = false }) 
         setShowNotifDropdown(false);
       }
     };
+    const handleEsc = (e) => e.key === "Escape" && close(e);
+
     document.addEventListener("mousedown", close);
-    document.addEventListener("keydown", (e) => e.key === "Escape" && close(e));
+    document.addEventListener("keydown", handleEsc);
     return () => {
       document.removeEventListener("mousedown", close);
-      document.removeEventListener("keydown", (e) => e.key === "Escape" && close(e));
+      document.removeEventListener("keydown", handleEsc);
     };
   }, []);
 
@@ -88,27 +90,13 @@ export default function MobileHeader({ onSearch, hasNewNotifications = false }) 
               className="absolute right-0 top-full mt-2 w-56 rounded-xl shadow-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 z-50 py-2"
               role="menu"
             >
-              <MenuItem label={t("Settings")} onClick={() => { setShowMenu(false); window.location.href = "/settings"; }} />
-              <MenuItem label={t("Help & Support")} onClick={() => { setShowMenu(false); window.location.href = "/help"; }} />
-              <MenuItem label={t("Feedback")} onClick={() => { setShowMenu(false); window.location.href = "/feedback"; }} />
+              <MenuItem label={t('Settings')} onClick={() => (window.location.href = '/settings')} />
+              <MenuItem label={t('Help & Support')} onClick={() => (window.location.href = '/help')} />
+              <MenuItem label={t('Feedback')} onClick={() => (window.location.href = '/feedback')} />
             </div>
           )}
         </div>
       </div>
     </header>
-  );
-}
-
-function MenuItem({ label, onClick }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="w-full text-left px-4 py-2 text-[1rem] text-zinc-800 dark:text-zinc-100 hover:bg-teal-50 dark:hover:bg-zinc-800 focus:bg-teal-50 dark:focus:bg-zinc-800 transition rounded-md"
-      tabIndex={0}
-      role="menuitem"
-    >
-      {label}
-    </button>
   );
 }

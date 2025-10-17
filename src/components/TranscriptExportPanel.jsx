@@ -1,8 +1,5 @@
 // src/components/TranscriptExportPanel.jsx
-import { ChevronDown, ChevronUp, FileDown } from 'lucide-react';
 import { useState } from 'react';
-
-import { AnimatePresence, motion } from '../lib/motion';
 
 export default function TranscriptExportPanel({ transcriptText, segments }) {
   const [open, setOpen] = useState(false);
@@ -109,19 +106,13 @@ export default function TranscriptExportPanel({ transcriptText, segments }) {
         onClick={() => setOpen((o) => !o)}
         className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-semibold flex items-center gap-2 shadow transition-all"
       >
-        <FileDown size={18} />
         Export
-        {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.ul
-            className="absolute right-0 mt-2 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg z-50 overflow-hidden"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-          >
+      {open && (
+        <ul
+          className="absolute right-0 mt-2 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg z-50 overflow-hidden"
+        >
             {[
               { key: "txt", label: ".TXT" },
               { key: "html", label: ".HTML" },
@@ -139,9 +130,8 @@ export default function TranscriptExportPanel({ transcriptText, segments }) {
                 </button>
               </li>
             ))}
-          </motion.ul>
-        )}
-      </AnimatePresence>
+        </ul>
+      )}
     </div>
   );
 }

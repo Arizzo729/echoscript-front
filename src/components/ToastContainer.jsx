@@ -1,26 +1,24 @@
 // src/components/ToastContainer.jsx
 import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { MdCheckCircle, MdClose, MdErrorOutline, MdInfoOutline } from 'react-icons/md';
 
 const toastVariants = {
   success: {
     icon: <MdCheckCircle className="text-green-400 text-xl shrink-0" />,
-    bg: "bg-zinc-800 border-green-500",
+    bg: 'bg-zinc-800 border-green-500',
   },
   error: {
     icon: <MdErrorOutline className="text-red-400 text-xl shrink-0" />,
-    bg: "bg-zinc-800 border-red-500",
+    bg: 'bg-zinc-800 border-red-500',
   },
   info: {
     icon: <MdInfoOutline className="text-blue-400 text-xl shrink-0" />,
-    bg: "bg-zinc-800 border-blue-500",
+    bg: 'bg-zinc-800 border-blue-500',
   },
 };
 
 export default function ToastContainer({ position = 'top-right' }) {
   const [toasts, setToasts] = useState([]);
-  // const { toasts, dismissToast } = useContext(ToastContext); // This context is not defined.
   const timeouts = useRef({});
   const timeoutsRef = timeouts.current;
 
@@ -52,7 +50,7 @@ export default function ToastContainer({ position = 'top-right' }) {
       window.removeEventListener("keydown", escHandler);
       Object.values(timeoutsRef).forEach(clearTimeout);
     };
-  }, [timeoutsRef]);
+  }, []);
 
   const dismiss = (id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -60,7 +58,7 @@ export default function ToastContainer({ position = 'top-right' }) {
     delete timeouts.current[id];
   };
 
-  return createPortal(
+  return (
     <div
       className={`fixed z-[9999] flex flex-col gap-3 max-w-sm ${
         position.includes('top') ? 'top-4' : 'bottom-4'
@@ -78,12 +76,9 @@ export default function ToastContainer({ position = 'top-right' }) {
             onClick={() => dismiss(id)}
             className="text-zinc-400 hover:text-white transition"
             aria-label="Dismiss notification"
-          >
-            <MdClose size={18} />
-          </button>
+          ><MdClose size={18} /></button>
         </div>
       ))}
-    </div>,
-    document.body
+    </div>
   );
 }

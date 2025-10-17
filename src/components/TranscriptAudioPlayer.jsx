@@ -1,8 +1,8 @@
 ﻿// src/components/TranscriptAudioPlayer.jsx
-import React, { useEffect, useRef, useState, useMemo } from "react";
-import { ChevronDown, ChevronUp, Pause, Play } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ChevronDown, ChevronUp, Pause, Play } from 'lucide-react';
 
-const SPEED_OPTIONS = [0.25, 0.5, 1, 1.25, 1.5, 1.75, 2];
+const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 /**
  * TranscriptAudioPlayer
@@ -127,10 +127,8 @@ export default function TranscriptAudioPlayer({
           onClick={togglePlay}
           className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border shadow-sm hover:bg-gray-50"
           aria-label={isPlaying ? "Pause" : "Play"}
-          title={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-          <span className="text-sm">{isPlaying ? "Pause" : "Play"}</span>
         </button>
 
         <div className="text-sm tabular-nums">

@@ -1,25 +1,29 @@
-import React, { Suspense } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import React from "react";
+import { Routes, Route, Link } from "react-router-dom";
 
-// Minimal inline components to satisfy routes without creating new files
-const Home = () => <div>Home Page</div>;
-const Upload = () => <div>Upload Page</div>;
-const Purchase = () => <div>Purchase Page</div>;
-const Contact = () => <div>Contact Page</div>;
-const NotFound = () => <div>404 - Page Not Found</div>;
+function Home() {
+  return (
+    <div style={{ padding: 24 }}>
+      <h1>EchoScript</h1>
+      <p>Welcome  basic shell is live.</p>
+      <nav style={{ display: "flex", gap: 12 }}>
+        <Link to="/">Home</Link>
+        <Link to="/upload">Upload</Link>
+        <Link to="/purchase">Purchase</Link>
+      </nav>
+    </div>
+  );
+}
+function Upload() { return <div style={{ padding: 24 }}><h2>Upload</h2><p>Coming soon.</p></div>; }
+function Purchase() { return <div style={{ padding: 24 }}><h2>Purchase</h2><p>Coming soon.</p></div>; }
 
 export default function App() {
   return (
-    <Suspense fallback={<div>Loading…</div>}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/upload" element={<Upload />} />
-        <Route path="/purchase" element={<Purchase />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/404" element={<NotFound />} />
-        {/* Catch-all route to redirect to the 404 page */}
-        <Route path="*" element={<Navigate to="/404" replace />} />
-      </Routes>
-    </Suspense>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/upload" element={<Upload />} />
+      <Route path="/purchase" element={<Purchase />} />
+      <Route path="*" element={<Home />} />
+    </Routes>
   );
 }
