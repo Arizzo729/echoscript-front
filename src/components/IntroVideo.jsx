@@ -41,6 +41,18 @@ export default function IntroVideo({
     }
   }, []);
 
+  // Auto-skip intro after 5 seconds if video doesn't load or finish
+  useEffect(() => {
+    if (!showIntro) return;
+    const autoSkipTimer = setTimeout(() => {
+      console.log('Auto-skipping intro video after timeout');
+      setShowIntro(false);
+      onFinish?.();
+    }, 5000); // 5 seconds max
+    
+    return () => clearTimeout(autoSkipTimer);
+  }, [showIntro, onFinish]);
+
   useEffect(() => {
     if (showIntro && !hasPlayed.current) {
       const v = videoRef.current;

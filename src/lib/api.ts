@@ -128,6 +128,16 @@ export async function refreshToken(): Promise<Json> {
   });
 }
 
+// ---------- Transcripts ----------
+export async function getTranscripts(): Promise<Json[]> {
+  try {
+    return await call("/transcripts");
+  } catch (err) {
+    console.error('Failed to fetch transcripts:', err);
+    return [];
+  }
+}
+
 // ---------- Stripe helpers (if you call them from components) ----------
 export async function createCheckoutSession(plan: string) {
   return call("/stripe/create-checkout-session", {
@@ -154,6 +164,7 @@ const api = {
   login, 
   logout, 
   refreshToken,
+  getTranscripts,
   createCheckoutSession, 
   createPortalSession 
 };

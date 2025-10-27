@@ -34,7 +34,8 @@ export default function Layout() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { logout } = useAuth();
-  const [showIntro, setShowIntro] = useState(true);
+  // Temporarily disable intro video for testing
+  const [showIntro, setShowIntro] = useState(false);
   const [theme, setTheme] = useState(() => {
     const stored = typeof window !== 'undefined' && localStorage.getItem('theme');
     if (stored) return stored;
@@ -68,7 +69,10 @@ export default function Layout() {
     document.body.style.overflow = showIntro ? 'hidden' : '';
   }, [showIntro]);
 
-  const handleIntroFinish = () => setShowIntro(false);
+  const handleIntroFinish = () => {
+    setShowIntro(false);
+    localStorage.setItem('hasSeenIntro', 'true');
+  };
   const toggleTheme = () => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   const toggleDrawer = () => setDrawerOpen(prev => !prev);
   const collapseSidebar = () => setSidebarCollapsed(prev => !prev);

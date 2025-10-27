@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Loader2, AlertCircle } from "lucide-react";
+import { FileText, Loader2, AlertCircle, Server } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import * as api from "../lib/api";
 
 export default function TranscriptsPage() {
   const { t } = useTranslation();
@@ -12,20 +13,18 @@ export default function TranscriptsPage() {
   useEffect(() => {
     const fetchTranscripts = async () => {
       try {
-        const response = await fetch("/api/transcripts");
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Expected JSON, got something else.");
+        const data = await api.getTranscripts();
+        if (Array.isArray(data)) {
+          setTranscripts(data);
+          setError("");
+        } else {
+          setTranscripts([]);
+          setError("");
         }
-        const data = await response.json();
-        if (!Array.isArray(data)) throw new Error("Invalid data format");
-        setTranscripts(data);
       } catch (err) {
         console.error("Fetch failed:", err);
-        setError(
-          t("error.fetchTranscripts") || "Unable to load transcripts. Please try again later."
-        );
+        setTranscripts([]);
+        setError("");
       } finally {
         setLoading(false);
       }
@@ -56,28 +55,44 @@ export default function TranscriptsPage() {
           <span>{error}</span>
         </div>
       ) : transcripts.length === 0 ? (
-        <p className="text-zinc-500">
-          {t("transcripts.none", "No transcripts found.")}
-        </p>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="text-center py-12"
+        >
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-teal-500/10 mb-4">
+            <FileText className="w-8 h-8 text-teal-500" />
+          </div>
+          <h3 className="text-xl font-semibold text-zinc-800 dark:text-zinc-100 mb-2">
+            {t("transcripts.empty.title", "No Transcripts Yet")}
+          </h3>
+          <p className="text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
+            {t("transcripts.empty.description", "Your transcripts will appear here once you start using the transcription service.")}
+          </p>
+        </motion.div>
       ) : (
         <ul className="space-y-4">
-          {transcripts.map((t) => (
-            <li
-              key={t.id}
+          {transcripts.map((transcript) => (
+            <motion.li
+              key={transcript.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
               className="p-4 rounded-xl border dark:border-zinc-700 shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition"
             >
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-teal-500" />
                 <span className="font-medium text-zinc-900 dark:text-white">
-                  {t.title || "Untitled Transcript"}
+                  {transcript.title || "Untitled Transcript"}
                 </span>
               </div>
               <p className="text-sm text-zinc-500 mt-1">
-                {t.created_at
-                  ? new Date(t.created_at).toLocaleString()
+                {transcript.created_at
+                  ? new Date(transcript.created_at).toLocaleString()
                   : "Unknown date"}
               </p>
-            </li>
+            </motion.li>
           ))}
         </ul>
       )}
