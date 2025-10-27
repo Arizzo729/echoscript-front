@@ -9,7 +9,7 @@ import React, {
   lazy,
   useTransition
 } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import NProgress from 'nprogress';
 import 'nprogress/nprogress.css';
@@ -19,6 +19,7 @@ import { ToastProvider } from './toast/ToastProvider';
 import ToastContainer from './ToastContainer';
 import useIsMobile from '../hooks/useIsMobile';
 import MobileLayout from './MobileLayout';
+import { useAuth } from '../context/AuthContext';
 
 // Only import AudioOverlay once; don't import in MobileLayout.jsx
 import AudioOverlay from './AudioOverlay';
@@ -30,7 +31,9 @@ export const ThemeContext = createContext({ theme: 'light', toggleTheme: () => {
 
 export default function Layout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { logout } = useAuth();
   const [showIntro, setShowIntro] = useState(true);
   const [theme, setTheme] = useState(() => {
     const stored = typeof window !== 'undefined' && localStorage.getItem('theme');
@@ -69,6 +72,11 @@ export default function Layout() {
   const toggleTheme = () => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   const toggleDrawer = () => setDrawerOpen(prev => !prev);
   const collapseSidebar = () => setSidebarCollapsed(prev => !prev);
+  
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
   const themeValue = useMemo(() => ({ theme, toggleTheme }), [theme]);
 
@@ -111,6 +119,7 @@ export default function Layout() {
                   drawerOpen={drawerOpen}
                   collapseSidebar={collapseSidebar}
                   sidebarCollapsed={sidebarCollapsed}
+                  onLogout={handleLogout}
                 />
               </Suspense>
 
