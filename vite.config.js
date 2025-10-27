@@ -5,8 +5,14 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173, // default dev server port
-    open: true,
+    host: '0.0.0.0',
+    port: 5000,
+    strictPort: true,
+    hmr: {
+      clientPort: 443,
+      protocol: 'wss',
+      host: process.env.REPLIT_DEV_DOMAIN || 'localhost'
+    },
     proxy: {
       // proxy API calls to your FastAPI backend
       '/api': {
