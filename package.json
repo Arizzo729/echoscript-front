@@ -1,0 +1,78 @@
+{
+  "name": "echoscript-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EchoScript.AI frontend application - advanced transcription UI with React, TailwindCSS, and Framer Motion",
+  "type": "module",
+  "author": "EchoScript Team",
+  "license": "ISC",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 3000",
+    "preview:ci": "vite preview --port 4173 --host",
+    "lint": "eslint \"src/**/*.{js,jsx}\"",
+    "lint:fix": "eslint \"src/**/*.{js,jsx}\" --fix",
+    "prepare": "husky"
+  },
+  "browserslist": [
+    ">0.5%",
+    "last 2 versions",
+    "not dead",
+    "not op_mini all"
+  ],
+  "lint-staged": {
+    "src/**/*.{js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@sentry/vite-plugin": "^4.4.0",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/line-clamp": "^0.4.4",
+    "@tailwindcss/postcss": "^4.1.13",
+    "@tailwindcss/typography": "^0.5.16",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-alias": "^1.1.2",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.34.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-unused-imports": "^3.2.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.7",
+    "postcss": "^8.5.6",
+    "prettier": "^3.3.2",
+    "tailwindcss": "^3.4.18",
+    "vite": "^7.1.10",
+    "vite-plugin-environment": "^1.1.3"
+  },
+  "dependencies": {
+    "@auth0/auth0-react": "^2.2.4",
+    "@headlessui/react": "^2.2.9",
+    "@heroicons/react": "^2.1.3",
+    "@sentry/react": "^10.20.0",
+    "framer-motion": "^11.2.10",
+    "i18next": "^23.11.5",
+    "i18next-browser-languagedetector": "^8.0.0",
+    "lottie-react": "^2.4.1",
+    "lucide-react": "^0.395.0",
+    "nprogress": "^0.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^14.1.2",
+    "react-icons": "^5.2.1",
+    "react-markdown": "^9.0.1",
+    "react-router-dom": "^6.23.1",
+    "react-swipeable": "^7.0.2",
+    "react-tsparticles": "^2.12.2",
+    "react-type-animation": "^3.2.0",
+    "tailwind-merge": "^2.3.0",
+    "tsparticles-slim": "^2.12.0"
+  }
+}
