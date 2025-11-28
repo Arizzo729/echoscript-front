@@ -16,7 +16,7 @@ export default defineConfig({
     proxy: {
       // proxy API calls to your FastAPI backend
       '/api': {
-        target: 'http://127.0.0.1:8000', // change to your backend URL
+        target: 'https://ebd8l8awoxtwae-8000.proxy.runpod.net/', // change to your backend URL
         changeOrigin: true,
         secure: false,
       },
