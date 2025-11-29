@@ -9,11 +9,11 @@ function normalizeRelPrefix(v: unknown): string {
   let s = String(v || "").trim();
   if (!s) return "/api";
   // If someone sets an absolute URL here by mistake, ignore it and use /api.
-  if (/^https?:\/\//i.test(s)) return "/api/v1";
+  if (/^https?:\/\//i.test(s)) return "/api";
   if (!s.startsWith("/")) s = `/${s}`;
   // Remove trailing slashes
   s = s.replace(/\/+$/, "");
-  return s || "/api/v1";
+  return s || "/api";
 }
 
 // Use env if present, otherwise /api.
