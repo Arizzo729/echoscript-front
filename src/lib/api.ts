@@ -1,24 +1,30 @@
 // src/lib/api.ts
-// Robust, cookie-including API client that ALWAYS uses the relative /api prefix.
-// Supports both cookie-based auth and JWT token-based auth
+// Robust API prefix handling: supports absolute URLs and relative prefixes.
 
 type Json = Record<string, any>;
 
-// Normalize a relative prefix (never allow absolute here)
 function normalizeRelPrefix(v: unknown): string {
   let s = String(v || "").trim();
   if (!s) return "/api";
-  // If someone sets an absolute URL here by mistake, ignore it and use /api.
-  if (/^https?:\/\//i.test(s)) return "/api";
+
+  // If absolute URL => keep it & append /api
+  if (/^https?:\/\//i.test(s)) {
+    return s.replace(/\/+$/, "") + "/api";
+  }
+
+  // If relative => ensure leading slash and remove trailing slashes
   if (!s.startsWith("/")) s = `/${s}`;
-  // Remove trailing slashes
   s = s.replace(/\/+$/, "");
+
   return s || "/api";
 }
 
-// Use env if present, otherwise /api.
-const REL_PREFIX = normalizeRelPrefix((import.meta as any)?.env?.VITE_API_BASE || "/api/v1");
+const RAW_ENV_PREFIX = (import.meta as any)?.env?.VITE_API_BASE;
 
+const REL_PREFIX = normalizeRelPrefix(RAW_ENV_PREFIX || "/api/v1");
+
+// Debug logs (optional)
+console.log("VITE_API_BASE raw:", RAW_ENV_PREFIX);
 console.log("REL_PREFIX:", REL_PREFIX);
 
 
