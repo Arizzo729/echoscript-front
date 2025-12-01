@@ -17,7 +17,16 @@ function normalizeRelPrefix(v: unknown): string {
 }
 
 // Use env if present, otherwise /api.
-const REL_PREFIX = normalizeRelPrefix((import.meta as any)?.env?.VITE_API_BASE || "/api/v1");
+// const REL_PREFIX = normalizeRelPrefix((import.meta as any)?.env?.VITE_API_BASE || "/api/v1");
+
+const rawPrefix = (import.meta as any)?.env?.VITE_API_BASE;
+
+console.log("VITE_API_BASE raw:", rawPrefix);
+
+const REL_PREFIX = normalizeRelPrefix(rawPrefix || "/api/v1");
+
+console.log("Final REL_PREFIX:", REL_PREFIX);
+
 
 // Join helper
 function join(base: string, path: string) {
