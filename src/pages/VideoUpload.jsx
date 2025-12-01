@@ -10,6 +10,7 @@ import {
   Languages,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { SERVER_URL } from "../lib/api";
 
 const ACCEPTED_FORMATS = ["mp4", "mkv", "avi", "mov", "webm"];
 const MAX_FILE_SIZE_MB = 300;
@@ -73,7 +74,7 @@ export default function VideoUpload() {
     }
 
     try {
-      const res = await fetch(`/api/video-task`, {
+      const res = await fetch(`${SERVER_URL}/api/video-task`, {
         method: "POST",
         body: formData,
       });
