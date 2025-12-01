@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { BadgeCheck, Sparkles, GraduationCap, Users, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { SERVER_URL } from "../lib/api";
 
 const plans = [
   {
@@ -103,7 +104,7 @@ export default function PurchasePage() {
 
   const handleCheckout = async (planId) => {
     try {
-      const res = await fetch(`/api/stripe/create-checkout-session`, {
+      const res = await fetch(`${SERVER_URL}/api/stripe/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planId }),
