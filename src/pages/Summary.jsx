@@ -4,6 +4,7 @@ import Textarea from "../components/ui/Textarea";
 import Button from "../components/ui/Button";
 import { Sparkles, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { SERVER_URL } from "../lib/api";
 
 const tones = [
   { id: "default", label: "Smart" },
@@ -24,6 +25,10 @@ export default function SummaryPage() {
   const [loading, setLoading] = useState(false);
   const [cached, setCached] = useState(false);
 
+
+
+
+
   const generateSummary = async () => {
     if (!transcript.trim()) return;
     setLoading(true);
@@ -31,7 +36,7 @@ export default function SummaryPage() {
     setCached(false);
 
     try {
-      const res = await fetch("/api/v1/usage/summary", {
+      const res = await fetch(`${SERVER_URL}/api/v1/usage/summary`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcript, tone, length }),
