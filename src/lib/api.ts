@@ -1,32 +1,30 @@
 // src/lib/api.ts
-// Robust API prefix handling: supports absolute URLs and relative prefixes.
 
 type Json = Record<string, any>;
 
 function normalizeRelPrefix(v: unknown): string {
   let s = String(v || "").trim();
-  if (!s) return "/api";
+  if (!s) return "/api/v1";
 
-  // If absolute URL => keep it & append /api
+  // If absolute URL => keep it & append /api/v1
   if (/^https?:\/\//i.test(s)) {
-    return s.replace(/\/+$/, "") + "/api";
+    return s.replace(/\/+$/, "") + "/api/v1";
   }
 
   // If relative => ensure leading slash and remove trailing slashes
   if (!s.startsWith("/")) s = `/${s}`;
   s = s.replace(/\/+$/, "");
 
-  return s || "/api";
+  return s || "/api/v1";
 }
 
 const RAW_ENV_PREFIX = (import.meta as any)?.env?.VITE_API_BASE;
 
 const REL_PREFIX = normalizeRelPrefix(RAW_ENV_PREFIX || "/api/v1");
 
-// Debug logs (optional)
+// Debug logs
 console.log("VITE_API_BASE raw:", RAW_ENV_PREFIX);
 console.log("REL_PREFIX:", REL_PREFIX);
-
 
 // Join helper
 function join(base: string, path: string) {
