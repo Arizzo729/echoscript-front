@@ -22,6 +22,9 @@ const RAW_ENV_PREFIX = (import.meta as any)?.env?.VITE_API_BASE;
 
 const REL_PREFIX = normalizeRelPrefix(RAW_ENV_PREFIX || "/api/v1");
 
+// src/lib/api.ts
+export const SERVER_URL  = (import.meta as any)?.env?.VITE_API_BASE?.replace(/\/+$/, "") || "";
+
 // Debug logs
 console.log("VITE_API_BASE raw:", RAW_ENV_PREFIX);
 console.log("REL_PREFIX:", REL_PREFIX);
