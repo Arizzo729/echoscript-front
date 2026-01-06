@@ -1,0 +1,375 @@
+import React, { useState, useCallback, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import UploadAndTranscribe from "../components/UploadAndTranscribe";
+import PaywallModal from "../components/PaywallModal";
+import CountdownSelector from "../components/CountdownSelector";
+import CountdownTimer from "../components/CountdownTimer";
+import LiveWaveform from "../components/LiveWaveform";
+import TranscriptEditor from "../components/TranscriptEditor";
+import TranscriptExportPanel from "../components/TranscriptExportPanel";
+import {
+  Mic, MicOff, Timer, Download, Globe, FileText, Subtitles, Info, XCircle,
+} from "lucide-react";
+
+const AUDIO = ["mp3", "wav", "flac", "m4a", "aac", "ogg"];
+const VIDEO = ["mp4", "mkv", "mov"];
+const MAX_MB = 500;
+
+export default function UploadPage() {
+  const { t } = useTranslation();
+  const [recording, setRecording] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  const [showCountdown, setShowCountdown] = useState(false);
+  const [file, setFile] = useState(null);
+  const [transcript, setTranscript] = useState("");
+  const [translated, setTranslated] = useState("");
+  const [summary, setSummary] = useState("");
+  const [sentiment, setSentiment] = useState("");
+  const [segments, setSegments] = useState([]);
+  const [translateEnabled, setTranslateEnabled] = useState(false);
+  const [paywall, setPaywall] = useState(null);
+  const [note, setNote] = useState(null);
+
+  useEffect(() => {
+    if (!file) return;
+    const key = `draft_${file.name}`;
+    const draft = localStorage.getItem(key);
+    if (draft) {
+      const d = JSON.parse(draft);
+      setTranscript(d.transcript || "");
+      setTranslated(d.translated || "");
+      setSummary(d.summary || "");
+      setSentiment(d.sentiment || "");
+      setNote(t("Loaded previous draft."));
+    }
+  }, [file, t]);
+
+  useEffect(() => {
+    if (!note) return;
+    const id = setTimeout(() => setNote(null), 3000);
+    return () => clearTimeout(id);
+  }, [note]);
+
+  const handleFile = useCallback((uploaded) => {
+    const ext = uploaded.name.split(".").pop().toLowerCase();
+    const valid = AUDIO.includes(ext) || VIDEO.includes(ext);
+    const tooBig = uploaded.size > MAX_MB * 1024 * 1024;
+    if (!valid || tooBig) {
+      alert(`${t("Invalid file or too large")} (max ${MAX_MB}MB). ${t("Accepted formats")}: ${[...AUDIO, ...VIDEO].map(f => f.toUpperCase()).join(",")}.`);
+      return;
+    }
+    setFile(uploaded);
+    setTranscript("");
+    setTranslated("");
+    setSummary("");
+    setSentiment("");
+    setSegments([]);
+  }, [t]);
+
+  const handleTranscript = useCallback((res) => {
+    if (res?.status === 403 && res.detail) {
+      setPaywall(res.detail);
+      setTranscript("");
+      setTranslated("");
+      setSummary("");
+      setSentiment("");
+      return;
+    }
+    if (res?.error) {
+      setNote(`Error: ${res.error}`);
+      return;
+    }
+    setPaywall(null);
+    if (res.transcript) {
+      setTranscript(res.transcript);
+      setTranslated(translateEnabled ? `🌍 [${t("Translated")}]: ${res.transcript}` : "");
+      
+      // Auto-save to history
+      const history = JSON.parse(localStorage.getItem("transcriptHistory") || "[]");
+      const newEntry = {
+        id: Date.now(),
+        label: file?.name || t("Untitled Transcription"),
+        date: new Date().toLocaleString(),
+        preview: res.transcript,
+        fullText: res.transcript
+      };
+      localStorage.setItem("transcriptHistory", JSON.stringify([newEntry, ...history]));
+    }
+    if (res.summary) {
+      setSummary(res.summary);
+    }
+    if (res.sentiment) {
+      setSentiment(res.sentiment);
+    }
+    if (res.segments && Array.isArray(res.segments)) {
+      setSegments(res.segments);
+    }
+  }, [translateEnabled, t]);
+
+  const downloadText = useCallback((txt, name) => {
+    if (!txt) return;
+    const blob = new Blob([txt], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+  }, []);
+
+  const saveDraft = () => {
+    if (!file || !transcript) {
+      setNote(t("No transcript to save."));
+      return;
+    }
+    localStorage.setItem(`draft_${file.name}`, JSON.stringify({
+      transcript,
+      translated,
+      summary,
+      sentiment,
+      time: Date.now(),
+    }));
+    setNote(t("Draft saved locally."));
+  };
+
+  const submit = () => {
+    if (!file || !transcript) {
+      setNote(t("No transcript to submit."));
+      return;
+    }
+    setNote(t("Submitting..."));
+    fetch("/api/submitTranscript", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fileName: file.name,
+        transcript,
+        translated: translateEnabled ? translated : null,
+        summary: summary || null,
+        sentiment: sentiment || null,
+      })
+    })
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((data) => {
+        if (data.ok) {
+          setNote(t("Submitted successfully!"));
+        } else {
+          throw new Error(data.error || "Unknown error");
+        }
+      })
+      .catch((err) => {
+        console.error("Submit error:", err);
+        setNote(t("Submission failed. Try again."));
+      });
+  };
+
+  const onDrop = e => {
+    e.preventDefault();
+    const f = e.dataTransfer.files[0];
+    if (f) handleFile(f);
+  };
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="min-h-screen px-2 sm:px-5 py-7 sm:py-14 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-white"
+      >
+        <div className="max-w-3xl mx-auto space-y-9">
+          {/* Header */}
+          <div className="text-center space-y-1">
+            <h1 className="text-2xl xs:text-3xl md:text-4xl font-extrabold tracking-tight">
+              {t("Upload or Record Audio/Video")}
+            </h1>
+            <p className="text-zinc-400 text-base">
+              {t("Supports")} MP3, WAV, MP4, MKV, MOV, FLAC —{" "}
+              {t("click or drag to upload, or record live.")}
+            </p>
+          </div>
+
+          {/* Notification */}
+          {note && (
+            <div className="text-center text-sm text-teal-300 bg-zinc-800/70 px-4 py-2 rounded-lg">
+              {note}
+            </div>
+          )}
+
+          {/* Controls */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3 border border-zinc-700">
+              <Timer className="w-5 h-5 text-teal-400" />
+              <CountdownSelector value={countdown} onChange={setCountdown} />
+            </div>
+            <div className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3 border border-zinc-700">
+              <Globe className="w-5 h-5 text-yellow-400" />
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="form-checkbox accent-teal-600"
+                  checked={translateEnabled}
+                  onChange={() => setTranslateEnabled(x => !x)}
+                  aria-label={t("Enable translation")}
+                />
+                {t("Enable Translation")}
+              </label>
+            </div>
+            {file && (
+              <button
+                onClick={() => setFile(null)}
+                className="flex items-center gap-2 text-sm text-red-400 hover:underline px-3 py-3 bg-zinc-800 rounded-xl border border-zinc-700"
+              >
+                <XCircle className="w-5 h-5" /> {t("Clear File")}
+              </button>
+            )}
+          </div>
+
+          {/* Upload / Record */}
+          <div
+            onDrop={onDrop}
+            onDragOver={e => e.preventDefault()}
+            onClick={() => document.getElementById("hiddenFileInput")?.click()}
+            className="p-7 border-2 border-dashed border-teal-600 bg-zinc-800 rounded-2xl text-base text-zinc-300 text-center cursor-pointer hover:bg-zinc-700 transition-all shadow focus:outline-none"
+            tabIndex={0}
+            aria-label={t("Click or drag your audio/video file here")}
+          >
+            {file ? file.name : t("Click or drag your audio/video file here")}
+            <input
+              id="hiddenFileInput"
+              type="file"
+              accept={[...AUDIO, ...VIDEO].map(f => `.${f}`).join(",")}
+              className="hidden"
+              onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])}
+              disabled={!!file}
+            />
+          </div>
+
+          {/* Recording */}
+          {showCountdown
+            ? <CountdownTimer seconds={countdown} onComplete={() => { setShowCountdown(false); setRecording(true); }} />
+            : (
+              <div className="flex flex-col items-center gap-3">
+                <button
+                  onClick={() => {
+                    recording
+                      ? setRecording(false)
+                      : countdown > 0
+                        ? setShowCountdown(true)
+                        : setRecording(true);
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 bg-teal-600 text-white rounded-xl shadow hover:bg-teal-700 text-lg font-semibold transition-all"
+                >
+                  {recording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                  {recording ? t("Stop") : t("Record")}
+                </button>
+                <span className="text-sm text-zinc-400">
+                  {recording ? t("Recording...") : t("Ready to record")}
+                </span>
+              </div>
+            )
+          }
+
+          {recording && <LiveWaveform sourceType="mic" />}
+
+          {file && (
+            <UploadAndTranscribe
+              fileInput={file}
+              countdown={countdown}
+              translate={translateEnabled}
+              onRecordingStart={() => setRecording(true)}
+              onRecordingEnd={() => setRecording(false)}
+              onTranscriptComplete={handleTranscript}
+            />
+          )}
+
+          {/* Transcript & Translation */}
+          {!paywall && transcript && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+                <div className="p-5 bg-zinc-900 rounded-2xl border border-zinc-800 space-y-3 shadow">
+                  <h3 className="font-semibold text-lg text-white flex gap-2 items-center">
+                    <FileText className="w-5 h-5 text-teal-400" />
+                    {t("Transcript")}
+                  </h3>
+                  <TranscriptEditor value={transcript} onChange={setTranscript} />
+                </div>
+                {translateEnabled && translated && (
+                  <div className="p-5 bg-zinc-900 rounded-2xl border border-zinc-800 space-y-3 shadow">
+                    <h3 className="font-semibold text-lg text-white flex gap-2 items-center">
+                      <Subtitles className="w-5 h-5 text-yellow-400" />
+                      {t("Translated Output")}
+                    </h3>
+                    <pre className="text-zinc-300 text-sm whitespace-pre-wrap max-h-64 overflow-auto">
+                      {translated}
+                    </pre>
+                    <button onClick={() => downloadText(translated, "translated.txt")}
+                      className="text-sm text-yellow-300 flex items-center gap-2 hover:underline"
+                    >
+                      <Download className="w-4 h-4" /> {t("Download Translation")}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Summary and Sentiment */}
+              {(summary || sentiment) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-7 mt-7">
+                  {summary && (
+                    <div className="p-5 bg-blue-900/30 rounded-2xl border border-blue-800 space-y-3 shadow">
+                      <h3 className="font-semibold text-lg text-white flex gap-2 items-center">
+                        <Info className="w-5 h-5 text-blue-400" />
+                        {t("Summary")}
+                      </h3>
+                      <p className="text-blue-200 text-sm whitespace-pre-wrap">
+                        {summary}
+                      </p>
+                    </div>
+                  )}
+                  {sentiment && (
+                    <div className="p-5 bg-purple-900/30 rounded-2xl border border-purple-800 space-y-3 shadow">
+                      <h3 className="font-semibold text-lg text-white flex gap-2 items-center">
+                        <Info className="w-5 h-5 text-purple-400" />
+                        {t("Sentiment")}
+                      </h3>
+                      <p className="text-purple-200 text-sm">
+                        {sentiment}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-7 flex flex-col sm:flex-row justify-center items-center gap-4">
+                <TranscriptExportPanel transcriptText={transcript} segments={segments} />
+                <button onClick={saveDraft} disabled={!transcript}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 disabled:opacity-50 font-semibold transition"
+                >
+                  {t("Save Draft")}
+                </button>
+                <button onClick={submit} disabled={!transcript}
+                  className="px-6 py-2 bg-green-600 text-white rounded-xl shadow hover:bg-green-700 disabled:opacity-50 font-semibold transition"
+                >
+                  {t("Submit for Review")}
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Info */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-base text-zinc-400 space-y-3 mt-7 shadow">
+            <p className="flex items-center gap-2">
+              <Mic className="w-4 h-4 text-teal-400" /> {t("Record or upload your voice or video — EchoScript will auto-clean and transcribe it.")}
+            </p>
+            <p className="flex items-center gap-2">
+              <Info className="w-4 h-4 text-zinc-400" /> {t(`Files up to ${MAX_MB}MB are supported.`)}
+            </p>
+          </div>
+        </div>
+      </motion.div>
+      {paywall && <PaywallModal info={paywall} onClose={() => setPaywall(null)} />}
+    </>
+  );
+}
