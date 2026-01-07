@@ -14,13 +14,10 @@ export default defineConfig({
       protocol: 'wss'
     },
     proxy: {
+      // proxy API calls to your FastAPI backend
       '/api': {
-        target: 'http://127.0.0.1:8000',
-        changeOrigin: true,
-        secure: false,
-      },
-      '/v1': {
-        target: 'http://127.0.0.1:8000',
+        // target: 'http://127.0.0.1:8000', // change to your backend URL
+        target: 'https://uls081qsp0meh0-8000.proxy.runpod.net/', // change to your backend URL
         changeOrigin: true,
         secure: false,
       },
