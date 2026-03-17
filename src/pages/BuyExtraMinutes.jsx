@@ -79,7 +79,7 @@ export default function BuyExtraMinutes() {
         };
       });
 
-      const response = await fetch(`${api.SERVER_URL}/api/stripe/create-checkout-session`, {
+      const response = await fetch(`${api.SERVER_URL}/api/stripe/checkout/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
