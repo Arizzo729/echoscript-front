@@ -33,62 +33,79 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   }, []);
 
+  // Fetch user with automatic token refresh on 401
+  const fetchUserWithRetry = useCallback(async () => {
+    const normalizeUser = (data) => {
+      const rawName = data?.name || data?.username || (data?.email ? data.email.split('@')[0] : "Echo User");
+      const planRaw = data?.plan;
+      let plan = "Free Plan";
+      if (planRaw) {
+        const rawPlan = planRaw.toLowerCase();
+        if (rawPlan === "guest") {
+          plan = "Guest";
+        } else {
+          let formatted = rawPlan.charAt(0).toUpperCase() + rawPlan.slice(1);
+          if (!formatted.toLowerCase().includes("plan")) {
+            formatted += " Plan";
+          }
+          plan = formatted;
+        }
+      }
+      return { ...data, name: rawName, plan };
+    };
+
+    // Helper to try fetching with automatic token refresh on 401
+    const tryFetch = async (fetchFn, name) => {
+      try {
+        const data = await fetchFn();
+        const normalized = normalizeUser(data);
+        setUser(normalized);
+        return normalized;
+      } catch (err) {
+        // If 401 and we have a token, try refreshing and retry once
+        if (err?.status === 401 && localStorage.getItem('access_token')) {
+          try {
+            console.log(`${name} returned 401, attempting token refresh...`);
+            const refreshed = await api.refreshToken();
+            if (refreshed?.access_token) {
+              saveAccessToken(refreshed.access_token);
+              // Retry the fetch with new token
+              const data = await fetchFn();
+              const normalized = normalizeUser(data);
+              setUser(normalized);
+              return normalized;
+            }
+          } catch (refreshErr) {
+            console.error(`Token refresh failed in ${name}:`, refreshErr);
+          }
+        }
+        console.log(`${name} failed (status: ${err?.status}):`, err?.message);
+        return null;
+      }
+    };
+
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      setUser(null);
+      return null;
+    }
+
+    // Try profile first
+    const user = await tryFetch(() => api.profile(), "profile");
+    if (user) return user;
+
+    // Fall back to /auth/me
+    return await tryFetch(() => api.me(), "/auth/me");
+  }, [saveAccessToken]);
+
   // Fetch current user
   const fetchUser = useCallback(async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      if (!token) {
+      const user = await fetchUserWithRetry();
+      if (!user) {
         setUser(null);
-        return null;
       }
-
-      const normalizeUser = (data) => {
-        const rawName = data?.name || data?.username || (data?.email ? data.email.split('@')[0] : "Echo User");
-        const planRaw = data?.plan;
-        let plan = "Free Plan";
-        if (planRaw) {
-          const rawPlan = planRaw.toLowerCase();
-          if (rawPlan === "guest") {
-            plan = "Guest";
-          } else {
-            let formatted = rawPlan.charAt(0).toUpperCase() + rawPlan.slice(1);
-            if (!formatted.toLowerCase().includes("plan")) {
-              formatted += " Plan";
-            }
-            plan = formatted;
-          }
-        }
-
-        return {
-          ...data,
-          name: rawName,
-          plan,
-        };
-      };
-
-      // Try richer profile endpoint first (backend may expose /profile)
-      try {
-        const profileData = await api.profile();
-        const normalized = normalizeUser(profileData);
-        setUser(normalized);
-        return normalized;
-      } catch (profileErr) {
-        console.log("AuthContext profile fetch failed:", profileErr);
-      }
-
-      // Fall back to the standard /auth/me endpoint
-      try {
-        const meData = await api.me();
-        const normalized = normalizeUser(meData);
-        setUser(normalized);
-        return normalized;
-      } catch (meErr) {
-        console.log("AuthContext me fetch failed:", meErr);
-      }
-
-      // If both fail, clear user state
-      setUser(null);
-      return null;
+      return user;
     } catch (error) {
       console.error("AuthContext fetchUser error:", error);
       setUser(null);
@@ -173,29 +190,28 @@ export const AuthProvider = ({ children }) => {
     }
   }, [clearTokens]);
 
-  // Initialize auth state on mount
-  // CRITICAL: Always attempt to fetch user, regardless of local token
-  // This ensures cookie-based sessions work correctly on page reload
+  // Initialize auth state on mount only
+  // CRITICAL: Only run ONCE on component mount, not on every render
   useEffect(() => {
+    let isMounted = true;
+
     const initAuth = async () => {
-      // First try to fetch user with current token
+      console.log("AuthContext initializing...");
+      
       const user = await fetchUser();
       
-      // If that fails and we have a token, try refreshing it and retry
-      if (!user && accessToken) {
-        console.log("Initial fetch failed, attempting token refresh...");
-        const refreshed = await refreshAccessToken();
-        if (refreshed) {
-          console.log("Token refreshed, retrying fetch user...");
-          await fetchUser();
-        }
+      if (isMounted) {
+        setLoading(false);
+        console.log("AuthContext initialization complete, user:", user ? "loaded" : "not loaded");
       }
-      
-      setLoading(false);
     };
 
     initAuth();
-  }, [accessToken, fetchUser, refreshAccessToken]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchUser]);
 
   // Auto-refresh token before expiration (every 14 minutes if token expires in 15)
   // Only runs if we have an access token (for token-based auth)
