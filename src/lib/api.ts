@@ -21,16 +21,17 @@ function normalizeRelPrefix(v: unknown): string {
 const RAW_ENV_PREFIX = (import.meta as any)?.env?.VITE_API_BASE;
 const IS_DEV = Boolean((import.meta as any)?.env?.DEV);
 
-// In development, default to the local backend at port 8000 so Vite doesn't
-// accidentally send API calls to the frontend dev server when no VITE_API_BASE
-// is configured. In production the frontend is typically served from the
-// backend so a relative `/api/v1` path is acceptable.
-const DEFAULT_BACKEND_BASE = IS_DEV ? "http://127.0.0.1:8000" : "/api/v1";
+// NOTE: On production, we want the API base to match the current origin (https://...)
+// to avoid mixed-content and internal container IP issues.
+// VITE_API_BASE can override this, but it must be an HTTPS URL.
+const DEFAULT_BACKEND_BASE = IS_DEV
+  ? "http://127.0.0.1:8000"
+  : (typeof window !== "undefined" ? `${window.location.origin}/api/v1` : "/api/v1");
 
 const REL_PREFIX = normalizeRelPrefix(RAW_ENV_PREFIX ?? DEFAULT_BACKEND_BASE);
 
 // src/lib/api.ts
-export const SERVER_URL = ((import.meta as any)?.env?.VITE_API_BASE || (IS_DEV ? "http://127.0.0.1:8000" : "")).replace(/\/+$/, "");
+export const SERVER_URL = ((import.meta as any)?.env?.VITE_API_BASE || (IS_DEV ? "http://127.0.0.1:8000" : (typeof window !== "undefined" ? window.location.origin : ""))).replace(/\/+$/, "");
 
 // Debug logs
 console.log("VITE_API_BASE raw:", RAW_ENV_PREFIX);
