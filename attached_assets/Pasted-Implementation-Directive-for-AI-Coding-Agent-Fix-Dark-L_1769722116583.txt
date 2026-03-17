@@ -1,0 +1,648 @@
+Implementation Directive for AI Coding Agent: Fix Dark/Light Mode Inconsistency
+Objective
+Fix critical theme inconsistency where dark/light mode randomly breaks across pages, navigation, and refreshes. Implement a reliable, persistent theme system that works consistently throughout the entire application.
+Step 1: Audit Current Theme Implementation
+Task: Understand the existing theme system and identify where it's failing.
+What to investigate:
+
+Locate where theme is currently stored (component state, context, Redux, localStorage)
+Find all locations where theme is applied (global CSS, inline styles, class names, styled-components)
+Check if there's a theme toggle button/switch and where it's located
+Identify which pages/components respect the theme and which don't
+Look for hardcoded colors that bypass the theme system
+Check if theme is being set on initial app load
+Verify if theme persists after page refresh
+Check if theme is applied before page renders (to prevent flash)
+Look for multiple competing theme implementations
+
+Common problems to identify:
+
+Theme stored in component state (lost on navigation)
+Theme not saved to localStorage
+Components not reading from global theme state
+CSS/styles not using theme variables
+Theme applied too late (after initial render)
+Different components using different theme sources
+
+Deliverable: Document current theme architecture and all inconsistencies found.
+
+Step 2: Choose Theme Management Architecture
+Task: Select the best approach for global theme management.
+Architecture options:
+Option A: CSS Variables (Recommended)
+
+Define theme colors as CSS custom properties (variables)
+Switch themes by changing root CSS variables
+Benefits: Native browser support, no re-renders, works with all styling methods
+Implementation: document.documentElement.setAttribute('data-theme', 'dark')
+
+Option B: Styled Components / CSS-in-JS Theme Provider
+
+Use ThemeProvider from styled-components, emotion, or similar
+Pass theme object to all styled components
+Benefits: Type-safe, scoped, programmatic
+Drawbacks: Requires re-render to update
+
+Option C: Tailwind Dark Mode
+
+Use Tailwind's built-in dark mode with dark: prefix
+Toggle by adding/removing dark class on root element
+Benefits: Works seamlessly with Tailwind utilities
+Implementation: document.documentElement.classList.toggle('dark')
+
+Option D: Hybrid Approach (Best for existing apps)
+
+Use CSS variables for theme values
+Use Context API for theme state management
+Use localStorage for persistence
+Apply theme class/attribute to root element
+
+Recommendation: Use Option D (CSS variables + Context + localStorage) for maximum compatibility and performance.
+
+Step 3: Set Up Global Theme State Management
+Task: Create a centralized theme state that all components can access.
+What to build:
+Create Theme Context:
+
+Create ThemeContext using React Context API (or equivalent in your framework)
+Store current theme: 'light' | 'dark' | 'system' (system = follow OS preference)
+Store theme preference in state
+Provide theme value and toggle function to entire app
+
+Context structure:
+ThemeContext:
+  - theme: 'light' | 'dark' | 'system'
+  - effectiveTheme: 'light' | 'dark' (resolved, accounting for system preference)
+  - toggleTheme: () => void
+  - setTheme: (theme) => void
+Alternative for Redux/Zustand:
+
+Create theme slice in global store
+Store theme preference
+Create actions: setTheme, toggleTheme
+Create selectors: selectTheme, selectEffectiveTheme
+
+Wrap entire app:
+
+In App.js or root component, wrap everything with <ThemeProvider>
+Ensure ThemeProvider is at the very top level (above Router, above all other providers)
+Initialize theme from localStorage on provider mount
+Apply theme to DOM immediately on mount
+
+
+Step 4: Implement Theme Persistence with localStorage
+Task: Save theme preference so it survives page refreshes and browser sessions.
+What to implement:
+Save theme to localStorage:
+
+When user changes theme, save to localStorage immediately
+Use key like 'app-theme' or 'echoscript-theme'
+Store the preference: 'light', 'dark', or 'system'
+Don't store the effective theme, store the user's choice
+
+Load theme on app initialization:
+
+On app mount (in ThemeProvider or root component)
+Check localStorage for saved theme preference
+If found: Use saved preference
+If not found: Default to 'system' (follow OS) or 'light'
+Apply theme immediately before first render
+
+Initialization order:
+1. App starts
+2. Check localStorage for 'app-theme'
+3. If exists: Load saved preference
+4. If not: Check system preference (prefers-color-scheme)
+5. Set theme in state
+6. Apply theme to DOM
+7. Render app with correct theme
+Handle system preference:
+
+Use window.matchMedia('(prefers-color-scheme: dark)') to detect OS theme
+If user selects 'system' mode, follow OS preference
+Add listener for OS theme changes: matchMedia.addEventListener('change', handler)
+When OS theme changes and user is on 'system' mode, update effective theme
+Don't update if user has explicit light/dark preference
+
+
+Step 5: Apply Theme to DOM Root Element
+Task: Ensure theme is applied globally at the document level.
+What to implement:
+Set theme attribute/class on root:
+
+When theme changes, update document.documentElement
+Option A: Set data attribute: document.documentElement.setAttribute('data-theme', 'dark')
+Option B: Toggle class: document.documentElement.classList.add('dark')
+Choose one approach and use it consistently
+
+Apply theme immediately on load:
+
+Theme must be set BEFORE React renders
+Add inline script in index.html <head> to apply theme immediately
+This prevents "flash of wrong theme" on page load
+Script should read localStorage and set theme class/attribute instantly
+
+Inline script approach:
+html<script>
+  // In index.html <head>, before React loads
+  const savedTheme = localStorage.getItem('app-theme');
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = savedTheme === 'system' 
+    ? (systemDark ? 'dark' : 'light')
+    : (savedTheme || 'light');
+  document.documentElement.setAttribute('data-theme', theme);
+</script>
+```
+
+**Why this matters:**
+- Without this, page loads in default theme then flashes to correct theme
+- Creates jarring user experience
+- Inline script ensures theme is set before any content renders
+
+---
+
+## Step 6: Define Theme Color Variables
+**Task:** Create a comprehensive set of CSS variables for all theme colors.
+
+**What to define:**
+
+**Create CSS variables for each theme:**
+- Define all color variables in `:root` for light mode
+- Define dark mode overrides in `[data-theme="dark"]` or `.dark`
+- Cover all UI elements: background, text, borders, buttons, inputs, etc.
+
+**Variable naming convention:**
+```
+--color-background-primary
+--color-background-secondary
+--color-text-primary
+--color-text-secondary
+--color-border
+--color-button-background
+--color-button-text
+--color-input-background
+--color-card-background
+--color-link
+--color-error
+--color-success
+Define both themes:
+css:root {
+  /* Light theme (default) */
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f5f5;
+  --color-text-primary: #000000;
+  --color-text-secondary: #666666;
+  --color-border: #e0e0e0;
+}
+
+[data-theme="dark"] {
+  /* Dark theme overrides */
+  --color-background-primary: #1a1a1a;
+  --color-background-secondary: #2a2a2a;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #cccccc;
+  --color-border: #404040;
+}
+```
+
+**Component-specific variables:**
+- Define variables for specific components if needed
+- Example: `--color-navbar-background`, `--color-sidebar-background`
+- Keep generic variables for reusability
+- Use semantic names (background, text) not color names (white, black)
+
+---
+
+## Step 7: Update All Components to Use Theme Variables
+**Task:** Replace all hardcoded colors with theme-aware variables.
+
+**What to change:**
+
+**Find and replace hardcoded colors:**
+- Search codebase for: `color:`, `background:`, `border:`, hex codes (#ffffff), rgb values
+- Replace with CSS variables: `background: var(--color-background-primary)`
+- Replace inline styles with theme-aware styles
+- Replace hardcoded Tailwind colors with theme-aware ones
+
+**For inline styles (React):**
+- Bad: `<div style={{background: '#ffffff'}}>`
+- Good: `<div style={{background: 'var(--color-background-primary)'}}>`
+- Or better: Use CSS classes that reference variables
+
+**For CSS modules / styled-components:**
+- Replace color values with `var(--color-name)`
+- Ensure all components respect theme variables
+- Test each component in both light and dark mode
+
+**For Tailwind (if using):**
+- Configure Tailwind to use CSS variables
+- Update `tailwind.config.js` to reference variables
+- Use Tailwind dark mode utilities: `dark:bg-gray-900`
+- Or extend Tailwind theme with custom colors from variables
+
+**Priority components to update:**
+- Layout components (App wrapper, main container)
+- Navigation (navbar, sidebar, menu)
+- Content areas (pages, cards, panels)
+- Forms (inputs, buttons, selects)
+- Modals and overlays
+- Text elements (headings, paragraphs, links)
+
+---
+
+## Step 8: Create Theme Toggle UI Component
+**Task:** Build a user-friendly theme switcher control.
+
+**What to build:**
+
+**Toggle component options:**
+- Option A: Simple toggle switch (light/dark only)
+- Option B: Three-option selector (light/dark/system)
+- Option C: Dropdown menu with options
+- Option D: Icon button that cycles through modes
+
+**Recommended: Three-option selector**
+- Shows current mode clearly
+- Allows explicit light, dark, or system preference
+- Can be icon-based or text-based
+
+**Component features:**
+- Display current theme visually (sun icon, moon icon, auto icon)
+- Smooth transition/animation when toggling
+- Keyboard accessible (tab navigation, enter to toggle)
+- Accessible labels for screen readers
+- Tooltip showing what each option does
+- Visual feedback on hover/click
+
+**Placement:**
+- Add to navbar/header (top-right corner is conventional)
+- Add to settings page for more control
+- Optionally add to profile dropdown menu
+- Ensure visible and accessible on all pages
+
+**Toggle behavior:**
+- Click to cycle: light → dark → system → light
+- Or show menu with all three options
+- Update global theme state immediately on click
+- Save preference to localStorage
+- Apply to DOM instantly (no delay or flicker)
+
+---
+
+## Step 9: Ensure Theme Consistency Across Routes
+**Task:** Make theme work correctly during navigation and route changes.
+
+**What to verify:**
+
+**Router integration:**
+- Ensure ThemeProvider wraps Router, not inside it
+- Theme state should be outside route context
+- Route changes should not reset theme state
+- New page components should inherit theme automatically
+
+**Correct structure:**
+```
+<ThemeProvider>  ← Theme at top level
+  <Router>
+    <Layout>  ← Uses theme
+      <Routes>
+        <Route path="/" element={<Home />} />  ← All routes inherit theme
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </Layout>
+  </Router>
+</ThemeProvider>
+Test navigation:
+
+Start on home page in dark mode
+Navigate to dashboard → should stay dark
+Navigate to settings → should stay dark
+Use browser back button → should stay dark
+Open new tab/window → should load with saved theme
+
+Lazy-loaded routes:
+
+If using code splitting, ensure lazy-loaded components respect theme
+Theme should be applied before lazy component loads
+No flash of wrong theme when component loads
+
+
+Step 10: Handle Theme Transitions Smoothly
+Task: Add smooth visual transitions when switching themes.
+What to add:
+CSS transitions:
+
+Add transition to background colors, text colors, borders
+Duration: 200-300ms for smooth but not slow transition
+Easing: ease-in-out or custom cubic-bezier
+
+Example:
+css* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Or more specific: */
+body, .card, .navbar, input, button {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+```
+
+**Avoid transition on page load:**
+- Only enable transitions after initial render
+- Prevents transition animation on first load
+- Use class like `theme-transition` added after mount
+
+**Performance considerations:**
+- Don't transition properties that trigger layout (width, height, position)
+- Only transition colors, opacity, transform
+- Use GPU-accelerated properties where possible
+- Consider `prefers-reduced-motion` media query for accessibility
+
+---
+
+## Step 11: Sync Theme Across Browser Tabs
+**Task:** When user changes theme in one tab, update all open tabs.
+
+**What to implement:**
+
+**Use storage event listener:**
+- Listen for localStorage changes: `window.addEventListener('storage', handler)`
+- When `app-theme` key changes in localStorage, update current tab's theme
+- Apply new theme to DOM immediately
+- Update theme state/context
+
+**Implementation flow:**
+```
+User changes theme in Tab A:
+1. Update theme state in Tab A
+2. Save to localStorage
+3. Apply to Tab A DOM
+
+Storage event fires in Tab B:
+1. Detect localStorage change
+2. Read new theme value
+3. Update theme state in Tab B
+4. Apply to Tab B DOM
+```
+
+**Edge cases:**
+- Handle rapid theme changes (debounce if needed)
+- Ignore storage events from same tab
+- Ensure state and DOM stay in sync
+
+**User experience:**
+- Theme changes seamlessly across all tabs
+- No page refresh required
+- Works even if tabs are on different routes
+
+---
+
+## Step 12: Support System Theme Preference
+**Task:** Implement "follow system" mode that respects OS theme settings.
+
+**What to build:**
+
+**Detect system theme:**
+- Use `window.matchMedia('(prefers-color-scheme: dark)')`
+- Returns true if OS is in dark mode
+- Call on initial load and when theme is set to 'system'
+
+**Listen for system theme changes:**
+- Add event listener: `matchMedia.addEventListener('change', (e) => {...})`
+- When OS theme changes, update effective theme if user is on 'system' mode
+- Don't update if user has explicit light/dark preference
+
+**Three-mode logic:**
+```
+User preference: 'light' → Always show light theme
+User preference: 'dark' → Always show dark theme
+User preference: 'system' → Show light or dark based on OS preference
+Implementation:
+
+Store user preference ('light', 'dark', 'system') in state and localStorage
+Calculate effective theme based on preference and OS
+Apply effective theme to DOM
+When OS changes and user is on 'system', recalculate and reapply
+
+UI indication:
+
+When on 'system' mode, show which theme is currently active
+Example: "Auto (Dark)" or "System (following dark mode)"
+Help users understand what 'system' means
+
+
+Step 13: Test Theme Consistency Thoroughly
+Task: Verify theme works correctly in all scenarios.
+Test cases:
+
+Initial Load:
+
+Open app with no saved preference → defaults to light or system
+Open app with saved 'dark' → loads in dark mode immediately
+Open app with saved 'light' → loads in light mode
+No flash of wrong theme on any page load
+
+
+Theme Toggle:
+
+Toggle from light to dark → entire UI updates instantly
+Toggle from dark to light → entire UI updates instantly
+Toggle to system → follows OS preference
+All pages and components respect new theme
+
+
+Navigation:
+
+Start on home in dark mode → navigate to dashboard → stays dark
+Navigate to settings → stays dark
+Navigate to profile → stays dark
+All routes maintain theme consistently
+
+
+Page Refresh:
+
+Set dark mode → refresh page → still dark mode
+Set light mode → refresh page → still light mode
+Close browser → reopen → theme persists
+
+
+Multiple Tabs:
+
+Open two tabs
+Change theme in tab 1 → tab 2 updates automatically
+Change theme in tab 2 → tab 1 updates automatically
+
+
+System Theme Follow:
+
+Set theme to 'system'
+Change OS theme from light to dark → app updates
+Change OS theme from dark to light → app updates
+
+
+Component Coverage:
+
+Check navbar in both themes
+Check dashboard in both themes
+Check forms/inputs in both themes
+Check modals in both themes
+Check all pages in both themes
+Ensure no components have hardcoded colors that ignore theme
+
+
+Browser Compatibility:
+
+Test in Chrome, Firefox, Safari, Edge
+Test on mobile browsers (iOS Safari, Chrome Android)
+Verify CSS variables work in all browsers
+Ensure localStorage works correctly
+
+
+Performance:
+
+Theme toggle should be instant (< 100ms)
+No layout shift or flicker
+No unnecessary re-renders
+Smooth transitions without jank
+
+
+Edge Cases:
+
+User clears localStorage → defaults to system/light
+User disables localStorage → theme works but doesn't persist
+User has very old browser → graceful fallback
+
+
+
+
+Step 14: Handle Images and Media for Themes
+Task: Ensure images, icons, and media work well in both themes.
+What to address:
+Logo handling:
+
+If logo has dark background, provide alternate light version for dark mode
+Use CSS to swap logos: [data-theme="dark"] .logo { content: url('logo-light.png'); }
+Or use SVG with CSS variables for fill colors
+Ensure logo is always visible in both themes
+
+Icons:
+
+Use icon library that supports theming (Lucide, Heroicons, Font Awesome)
+Apply theme color to icons: color: var(--color-text-primary)
+Or use separate icon sets for light/dark if needed
+Test icon visibility in both themes
+
+Images and illustrations:
+
+Check that images look good in both themes
+Consider adding border or shadow in light mode for definition
+Use opacity or filters if images clash with dark mode background
+Provide alternate versions for complex illustrations if needed
+
+Backgrounds and patterns:
+
+If using background patterns/textures, ensure they work in both themes
+Adjust opacity or blend mode for dark theme
+Consider removing complex backgrounds in dark mode for better readability
+
+
+Step 15: Add Theme Documentation and Settings
+Task: Document theme system and provide user controls.
+What to create:
+User-facing settings:
+
+Add theme section to settings page
+Explain theme options: Light, Dark, System
+Show preview of each theme
+Allow user to test theme before saving
+Provide recommended settings (e.g., "System for best experience")
+
+Developer documentation:
+
+Document how to use CSS variables in components
+List all available theme variables
+Show examples of theme-aware component styling
+Document theme context API for accessing theme in JS
+Explain how to add new theme variables
+Document testing procedures for new components
+
+Help/FAQ:
+
+Add FAQ entry: "How do I change to dark mode?"
+Explain what 'System' theme preference means
+Troubleshooting: "Dark mode not working"
+
+Accessibility notes:
+
+Document that theme respects prefers-contrast media query if implemented
+Explain keyboard shortcuts if theme toggle is keyboard accessible
+Note that theme is saved per-device, not per-account (unless implementing account-level preferences)
+
+
+Step 16: Optimize Theme Performance
+Task: Ensure theme switching is fast and doesn't cause performance issues.
+What to optimize:
+Minimize re-renders:
+
+Use CSS variables to avoid React re-renders when theme changes
+Only re-render components that need to respond to theme changes
+Memoize theme context value to prevent unnecessary re-renders
+
+Lazy load theme assets:
+
+If using different stylesheets per theme, lazy load the inactive one
+Preload critical theme assets
+Cache theme assets in service worker if using PWA
+
+Reduce JavaScript bundle size:
+
+Don't include both theme stylesheets if using CSS-in-JS
+Tree-shake unused theme code
+Use CSS variables instead of JS theme objects when possible
+
+Optimize CSS:
+
+Use efficient selectors for theme rules
+Avoid deeply nested theme-specific styles
+Minimize number of CSS variables (don't overdo it)
+Combine theme rules where possible
+
+Initial load performance:
+
+Inline critical theme CSS in HTML head
+Prevent flash of unstyled content (FOUC)
+Apply theme synchronously before React hydration
+
+
+Step 17: Consider Advanced Theme Features (Optional)
+Task: Implement additional theme enhancements if needed.
+Optional features to consider:
+Multiple theme options:
+
+Beyond light/dark, add custom themes (blue, green, high-contrast)
+Let users choose accent colors
+Provide preset theme combinations
+
+Scheduled theme switching:
+
+Auto-switch to dark mode at sunset, light at sunrise
+Allow users to set schedule: "Dark mode from 8 PM to 7 AM"
+Respect user's timezone
+
+Per-page theme overrides:
+
+Allow certain pages to force a theme (e.g., presentation mode always dark)
+Reading mode with optimized theme
+High contrast mode for accessibility
+
+Theme animations:
+
+Animated theme toggle (sun/moon transition)
+Particle effects or color wave during theme switch
+Subtle but delightful transitions
+
+Account-level theme sync:
+
+Save theme preference to user account (not just localStorage)
+Sync theme across devices when user logs in
+Fetch user's theme preference from backend on login

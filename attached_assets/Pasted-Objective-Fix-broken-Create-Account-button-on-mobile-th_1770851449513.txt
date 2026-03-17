@@ -1,0 +1,116 @@
+Objective
+Fix broken "Create Account" button on mobile that doesn't respond to taps or loops endlessly. Mobile users cannot sign up, causing lost revenue.
+
+Step 1: Locate Create Account Button
+Task: Find the broken button in Settings → Account.
+
+What to find:
+
+Settings page component
+Account section/tab
+"Create Account" button element
+Click handler function attached to button
+Navigation/routing logic after button click
+Step 2: Check Mobile Touch Events
+Task: Ensure button responds to mobile taps.
+
+What to fix:
+
+Verify button has onClick handler (works for both click and touch)
+Check if button is using onMouseDown instead (doesn't work on mobile)
+Ensure no CSS blocking touches: pointer-events: none, touch-action: none
+Check if transparent overlay is blocking button
+Verify button isn't disabled on mobile
+Test hit area is large enough for finger tap (min 44x44px)
+Step 3: Fix Navigation Logic
+Task: Ensure button navigates correctly without looping.
+
+What to check:
+
+Find where button should navigate (signup page, modal, form)
+Check if navigation path is correct: navigate('/signup') or similar
+Verify no redirect loop (Settings → Account → Create → back to Settings)
+Ensure button doesn't navigate to current page (causing loop)
+Check if multiple click handlers are conflicting
+Verify navigation method works on mobile (router.push, Link, window.location)
+Common loop causes:
+
+Button redirects to Settings page instead of signup
+onClick handler has wrong path
+Middleware redirects authenticated users back to Settings
+Double navigation calls canceling each other
+Step 4: Check Authentication State
+Task: Verify button behavior matches user state.
+
+What to verify:
+
+If user is already logged in, button shouldn't show or should say "Already have account"
+If user is guest, button should navigate to signup
+Check if authentication check is blocking navigation on mobile
+Ensure no auth redirect interfering with navigation
+Step 5: Fix Event Propagation Issues
+Task: Ensure click event fires properly.
+
+What to fix:
+
+Check if parent element is stopping event: e.stopPropagation()
+Verify no event.preventDefault() blocking default behavior incorrectly
+Ensure button isn't inside a form that's submitting (use type="button")
+Check if scroll/touch events are preventing click
+Step 6: Add Loading State
+Task: Prevent double-clicks and show feedback.
+
+What to add:
+
+Disable button after first tap (prevents loops from multiple taps)
+Show loading spinner or "Creating..." text
+Re-enable if navigation fails
+Add debounce to prevent rapid repeated clicks
+Step 7: Test on Actual Mobile Devices
+Task: Verify fix works on real mobile browsers.
+
+Test on:
+
+iOS Safari (iPhone)
+Chrome Android
+Different screen sizes
+Test tap, don't just click with mouse in DevTools
+Verify no loop, navigation completes successfully
+Check button visual feedback (press state)
+Test flow:
+
+Open app on mobile
+Go to Settings → Account
+Tap "Create Account" button
+Should navigate to signup page/form
+Should not loop back to Settings
+Should only fire once per tap
+Step 8: Add Error Handling
+Task: Handle navigation failures gracefully.
+
+What to add:
+
+Try-catch around navigation logic
+If navigation fails, show error message
+Log error for debugging
+Provide retry option or fallback
+Critical Success Criteria
+✅ Button responds to mobile taps immediately
+✅ Navigates to correct signup page/form
+✅ No redirect loops
+✅ Works on iOS Safari and Chrome Android
+✅ Button disabled during navigation (prevents double-tap)
+✅ Visual feedback on tap (button press state)
+✅ No console errors
+
+Quick Fix Priority
+Immediate action:
+
+Test button on actual mobile device to reproduce issue
+Check onClick handler is attached and fires on mobile
+Verify navigation path is correct (not navigating to self)
+Add type="button" if inside form
+Add loading state to prevent double-clicks
+Deploy and test on mobile immediately
+This is critical - mobile users can't sign up = zero mobile conversions. Fix immediately.
+

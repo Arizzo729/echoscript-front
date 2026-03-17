@@ -1,0 +1,102 @@
+Task: Fix Checkout Flow and Integrate Stripe Payments with Gift Functionality
+
+Current Issue
+
+In the Usage Summary section, the “Buy More Minutes” button redirects users to a cart/checkout page.
+
+The existing checkout flow is non-functional and does not complete payments.
+
+Required Functionalities
+1. Stripe Payment Gateway Integration
+
+Integrate Stripe Checkout for secure payment processing.
+
+Support payments for purchasing additional usage minutes.
+
+Ensure successful payment updates:
+
+User’s usage balance (minutes) immediately
+
+Associated subscription or account record
+
+Handle payment states properly:
+
+Success
+
+Failure
+
+Cancellation
+
+Store Stripe transaction details (payment intent, charge ID) for auditing.
+
+2. Dynamic Pricing & Minutes Mapping
+
+Display available minute packages with:
+
+Price
+
+Total minutes included
+
+Ensure the checkout reflects:
+
+Correct selected package
+
+Correct price and currency
+
+Prevent hardcoded values; pricing and minutes must be configurable.
+
+3. Fix Checkout Flow
+
+Replace or refactor the existing checkout so that:
+
+Clicking “Buy More Minutes” always leads to a working Stripe-powered checkout.
+
+Users cannot proceed without valid authentication.
+
+Guest users are either restricted or handled explicitly.
+
+4. Gift Functionality
+
+Add an option to purchase minutes as a gift:
+
+Allow buyer to enter recipient email or user ID.
+
+Validate recipient exists before payment.
+
+On successful payment:
+
+Credit purchased minutes to the recipient’s account, not the buyer.
+
+Send confirmation (email or in-app notification) to both buyer and recipient.
+
+Maintain a gift transaction record for tracking and support.
+
+5. Data Integrity & Security
+
+Link all purchases to:
+
+user_id
+
+subscription_id (if applicable)
+
+Stripe payment_intent_id
+
+Prevent:
+
+Duplicate credits
+
+Replay attacks on webhook events
+
+Use Stripe webhooks to confirm payments server-side.
+
+Acceptance Criteria
+
+“Buy More Minutes” button results in a fully functional checkout
+
+Payments successfully process via Stripe
+
+Minutes are credited correctly (self or gift)
+
+Checkout works reliably on desktop and mobile
+
+All payment and usage updates are accurate and auditable

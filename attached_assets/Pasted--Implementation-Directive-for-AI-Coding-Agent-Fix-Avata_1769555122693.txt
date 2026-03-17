@@ -1,0 +1,391 @@
+
+Implementation Directive for AI Coding Agent: Fix Avatar System
+Objective
+Implement a complete avatar/profile image system to replace the broken "?" placeholder icon. Users should be able to upload profile pictures, and the system should display real avatars throughout the application.
+Step 1: Analyze Current Avatar Display Logic
+Task: Understand how and where avatars are currently being displayed.
+What to find:
+•	Locate all UI components that show user avatars (navbar, profile page, dashboard, settings, comments, etc.)
+•	Find the current logic showing the "?" icon - is it a hardcoded fallback, default image, or SVG?
+•	Check if there's an avatar or profileImage field in the user data model
+•	Verify if the database user table has an avatar_url or profile_picture column
+•	Identify what happens when avatar data is missing (null, undefined, empty string)
+•	Look for existing image upload functionality anywhere in the app (for reference)
+•	Check what UI library is being used (Material-UI, Ant Design, Tailwind, custom components)
+Deliverable: Document all locations where avatars should appear and current implementation status.
+________________________________________
+Step 2: Design Database Schema for Avatar Storage
+Task: Add database support for storing avatar/profile image data.
+What to add to user table:
+•	Add avatar_url column (VARCHAR/TEXT) to store the image URL or file path
+•	Add avatar_uploaded_at column (TIMESTAMP) to track when avatar was last updated
+•	Optionally add avatar_type column (ENUM: 'uploaded', 'gravatar', 'initials', 'default') to track source
+•	Optionally add avatar_file_name column to store original filename for reference
+•	Consider adding avatar_thumbnail_url if you'll generate thumbnails for performance
+Migration script requirements:
+•	Create migration to add these columns to existing user table
+•	Set default value for avatar_url as NULL (will trigger fallback logic)
+•	For existing users, keep avatar_url as NULL initially
+•	Add index on avatar_url if you'll query by it frequently
+________________________________________
+Step 3: Choose Image Storage Strategy
+Task: Decide where uploaded avatar images will be stored.
+Options to evaluate:
+Option A: Cloud Storage (Recommended)
+•	Use AWS S3, Google Cloud Storage, Cloudflare R2, or similar
+•	Benefits: Scalable, reliable, CDN integration, no server disk usage
+•	Requirements: Setup cloud storage bucket, get API credentials, install SDK
+•	File structure: avatars/{user_id}/{timestamp}-{filename}.jpg
+•	Set bucket permissions to public-read for avatar images
+•	Generate signed URLs for uploads, public URLs for display
+Option B: Local Server Storage
+•	Store files in server filesystem under /uploads/avatars/
+•	Benefits: Simple, no external dependencies, no extra cost
+•	Drawbacks: Doesn't scale well, backup complexity, single point of failure
+•	File structure: /uploads/avatars/{user_id}/{filename}.jpg
+•	Serve files via static file endpoint like /api/avatars/{user_id}/{filename}
+Option C: Database BLOB Storage
+•	Store image data directly in database as BLOB/BYTEA
+•	Benefits: Simple, everything in one place
+•	Drawbacks: Poor performance, increases database size, not recommended
+•	Only use if images are very small or temporary
+Recommendation: Use Option A (cloud storage) for production quality. Use Option B for quick prototyping.
+________________________________________
+Step 4: Set Up File Upload Infrastructure
+Task: Implement secure file upload handling on the backend.
+What to build:
+Create upload endpoint:
+•	Create POST /api/user/avatar endpoint
+•	Require authentication (extract user_id from JWT token)
+•	Accept multipart/form-data with file field named "avatar" or "file"
+•	Use file upload middleware (multer for Node.js, werkzeug for Flask, etc.)
+File validation:
+•	Check file type - only allow image formats: JPEG, PNG, WebP, GIF
+•	Check MIME type matches extension (prevent disguised files)
+•	Limit file size - maximum 5MB or 10MB
+•	Validate image dimensions - reject if larger than 2000x2000px
+•	Scan file header to ensure it's actually an image (prevent malicious uploads)
+•	Reject files with executable extensions even if they claim to be images
+Image processing:
+•	Resize uploaded image to standard size (e.g., 400x400px) to save storage
+•	Generate thumbnail version (e.g., 100x100px) for UI performance
+•	Convert to optimized format (WebP for modern browsers, JPEG fallback)
+•	Strip EXIF metadata for privacy (GPS location, camera data, etc.)
+•	Use image processing library: Sharp (Node.js), Pillow (Python), ImageMagick
+File naming:
+•	Generate unique filename: {user_id}-{timestamp}.{extension}
+•	Or use UUID: {uuid}.jpg and store mapping in database
+•	Never use user-provided filenames directly (security risk)
+Upload flow:
+1.	Receive file upload request
+2.	Validate file type and size
+3.	Process/resize image
+4.	Upload to storage (S3/filesystem)
+5.	Get permanent URL
+6.	Update user record with avatar_url
+7.	Return success with new avatar URL
+________________________________________
+Step 5: Create Avatar Upload UI Component
+Task: Build user interface for uploading and changing profile pictures.
+What to create:
+Avatar Upload Component Location:
+•	Add to user profile page or settings page
+•	Create a dedicated "Edit Profile" section if it doesn't exist
+•	Or add avatar upload to the profile dropdown in navbar
+UI Elements:
+•	Display current avatar (or "?" placeholder if none)
+•	"Upload Photo" or "Change Avatar" button
+•	File input (hidden, triggered by button click)
+•	Preview of selected image before upload
+•	Upload progress indicator (loading spinner or progress bar)
+•	Success/error messages
+•	"Remove Avatar" button to delete current avatar
+User interaction flow:
+1.	User clicks "Upload Photo" button
+2.	File picker dialog opens (filtered to images only)
+3.	User selects image file
+4.	Preview shows selected image
+5.	User confirms or cancels
+6.	On confirm: Upload starts with loading indicator
+7.	On success: Avatar updates throughout UI immediately
+8.	On error: Show error message with retry option
+Frontend validation:
+•	Check file size before upload (save server bandwidth)
+•	Check file type is image
+•	Preview image using FileReader API
+•	Optionally allow basic editing (crop, rotate)
+________________________________________
+Step 6: Implement Avatar Upload API Client
+Task: Create frontend functions to communicate with upload endpoint.
+What to build:
+Upload function:
+•	Create uploadAvatar(file) function in API client or service layer
+•	Build FormData object with file
+•	Make POST request to /api/user/avatar with authentication header
+•	Include auth token in request
+•	Handle response: extract new avatar_url
+•	Update global user state with new avatar_url
+•	Handle errors: file too large, invalid format, network error, server error
+Avatar deletion function:
+•	Create deleteAvatar() function
+•	Make DELETE request to /api/user/avatar
+•	Update user state to remove avatar_url
+•	UI reverts to fallback (initials or default icon)
+Example API client structure:
+uploadAvatar(file) {
+  - Create FormData
+  - Append file
+  - POST to /api/user/avatar with auth
+  - Return avatar_url on success
+  - Throw error on failure
+}
+
+deleteAvatar() {
+  - DELETE /api/user/avatar with auth
+  - Clear avatar_url from state
+  - Return success
+}
+
+getAvatarUrl(userId) {
+  - Return full URL for avatar display
+  - Handle missing/null avatars
+}
+________________________________________
+Step 7: Update User Profile Data Model
+Task: Ensure avatar_url is included in user profile throughout the app.
+What to change:
+Backend user profile endpoint:
+•	When returning user data (GET /api/user/profile or /api/me)
+•	Include avatar_url field in response
+•	Return full URL, not relative path (e.g., https://cdn.example.com/avatars/user123.jpg)
+•	Return null if no avatar uploaded
+•	For guest users, return null or default guest avatar URL
+Frontend user state:
+•	Update user object interface/type to include avatar_url: string | null
+•	When fetching user profile, store avatar_url in state
+•	Ensure avatar_url is preserved across page refreshes (if user state is cached)
+•	After avatar upload, update user state immediately without full page refresh
+After login:
+•	Profile fetch should include avatar_url
+•	Store in global state alongside email, name, plan
+•	All avatar display components should read from this state
+________________________________________
+Step 8: Build Avatar Display Component
+Task: Create a reusable component that displays user avatars correctly.
+What to build:
+Avatar Component Props:
+•	user object (with email, name, avatar_url)
+•	Or: avatarUrl, userName, userEmail as separate props
+•	size prop: 'small' (32px), 'medium' (48px), 'large' (96px), or custom number
+•	showOnlineStatus boolean (optional green dot indicator)
+•	editable boolean (show upload button on hover)
+Display Logic (priority order):
+1.	If avatar_url exists: Display the uploaded image
+2.	If no avatar_url but email exists: Try Gravatar (hash email, fetch from gravatar.com)
+3.	If no avatar but name exists: Show initials in colored circle (first letter of first/last name)
+4.	If nothing: Show default icon (but NOT the "?" - use person silhouette or generic icon)
+Fallback Chain:
+avatar_url → Gravatar → Initials → Default Icon
+Initials Implementation:
+•	Extract initials from user name: "John Doe" → "JD"
+•	Generate background color based on user ID or name (consistent color per user)
+•	Use color palette (avoid red/black, use blues/greens/purples)
+•	Center white text on colored circle background
+Image Loading:
+•	Show loading spinner while image loads
+•	If image fails to load (404, network error), fall back to next option
+•	Use onError handler on <img> tag to detect load failures
+•	Cache avatar images in browser (set proper cache headers)
+________________________________________
+Step 9: Replace All "?" Icons Throughout UI
+Task: Update every location showing user avatar to use new Avatar component.
+What to change:
+Find and replace in:
+•	Navbar/header user menu (top-right corner)
+•	Profile page (large avatar)
+•	Settings page
+•	Dashboard user info section
+•	Comment sections (if any)
+•	User lists or member directories
+•	Any other place showing user identity
+For each location:
+•	Remove hardcoded "?" icon or placeholder
+•	Replace with <Avatar user={currentUser} size="medium" />
+•	Pass appropriate size based on context
+•	Ensure component receives current user data
+•	Test that avatar displays correctly and fallback works
+Example replacements:
+•	Navbar: Small avatar (32px) with name/email
+•	Profile page: Large avatar (96px or 128px) with upload button
+•	Comments: Small avatar (40px) next to comment text
+•	Settings: Medium avatar (64px) in profile section
+________________________________________
+Step 10: Add Gravatar Integration (Optional Enhancement)
+Task: Support Gravatar as automatic fallback for users without uploaded avatars.
+What to implement:
+Gravatar Logic:
+•	When user has no uploaded avatar, try loading from Gravatar
+•	Hash user's email using MD5: md5(email.toLowerCase().trim())
+•	Build Gravatar URL: https://www.gravatar.com/avatar/{hash}?s={size}&d=404
+•	The d=404 parameter returns 404 if no Gravatar exists (vs default image)
+•	On 404 response, fall back to initials
+Benefits:
+•	Many users already have Gravatars (GitHub, WordPress, etc.)
+•	Automatic personalization without upload
+•	Professional look for technical users
+Implementation:
+•	In Avatar component, if avatar_url is null, construct Gravatar URL
+•	Try loading Gravatar image
+•	Use onError handler to detect if Gravatar exists
+•	If Gravatar loads successfully, display it
+•	If Gravatar fails (404), show initials instead
+________________________________________
+Step 11: Implement Avatar Caching and Performance
+Task: Optimize avatar loading for performance.
+What to optimize:
+CDN and Caching:
+•	If using cloud storage, enable CDN (CloudFront for S3, Cloud CDN for GCS)
+•	Set cache headers: Cache-Control: public, max-age=31536000 (1 year)
+•	When avatar is updated, change filename or add timestamp query param to bust cache
+•	Example: avatar.jpg?v=1234567890
+Lazy Loading:
+•	Use loading="lazy" attribute on avatar <img> tags
+•	Load avatars only when they're visible in viewport
+•	Improves page load performance when many avatars are present
+Responsive Images:
+•	Serve appropriate size based on display size
+•	Use srcset for different resolutions: srcset="avatar-100.jpg 100w, avatar-200.jpg 200w"
+•	Serve WebP format to modern browsers, JPEG fallback for older ones
+Preload Critical Avatars:
+•	Preload current user's avatar on app load
+•	Add <link rel="preload" as="image" href="avatar.jpg"> for navbar avatar
+________________________________________
+Step 12: Add Avatar Security and Moderation
+Task: Prevent abuse of avatar upload system.
+What to protect against:
+Rate Limiting:
+•	Limit avatar uploads to 5 per hour per user
+•	Prevent spam/abuse of storage
+•	Track upload attempts in database or rate limit service
+Content Moderation:
+•	Optionally integrate image moderation API (AWS Rekognition, Google Vision, Sightengine)
+•	Detect and block inappropriate content (NSFW, violence, hate symbols)
+•	Manually review flagged images
+•	Allow users to report inappropriate avatars
+File Size and Storage Limits:
+•	Enforce 5MB max file size
+•	Resize all uploads to max 400x400px to prevent storage bloat
+•	Delete old avatar when new one is uploaded (don't accumulate files)
+•	Implement cleanup job to remove orphaned avatar files
+Authorization:
+•	Users can only upload/delete their own avatar (verify user_id from token matches profile being edited)
+•	Admin users can remove any avatar if needed for moderation
+•	Guest users cannot upload avatars (require authentication)
+________________________________________
+Step 13: Handle Avatar Deletion
+Task: Allow users to remove their profile picture.
+What to build:
+Delete endpoint:
+•	Create DELETE /api/user/avatar endpoint
+•	Require authentication
+•	Delete file from storage (S3 or filesystem)
+•	Set user's avatar_url to NULL in database
+•	Return success response
+UI for deletion:
+•	Add "Remove Photo" button on profile/settings page
+•	Show confirmation dialog: "Are you sure you want to remove your profile photo?"
+•	On confirm: Call delete endpoint
+•	On success: Update UI to show fallback (initials or default)
+•	Avatar component should immediately switch to fallback
+Cleanup:
+•	When deleting avatar, remove both full-size and thumbnail versions
+•	Don't leave orphaned files in storage
+•	If using cloud storage, send delete request to S3/GCS
+•	Log deletion for audit trail
+________________________________________
+Step 14: Add Avatar to Registration/Signup Flow (Optional)
+Task: Allow users to upload avatar during account creation.
+What to add:
+Signup Flow Enhancement:
+•	Add optional avatar upload step to registration form
+•	Or add avatar upload to "Complete Your Profile" page after signup
+•	Make it optional (users can skip and add later)
+•	Show benefits: "Add a photo to personalize your profile"
+Flow:
+1.	User creates account (email, password, name)
+2.	After account creation, show "Complete Profile" page
+3.	Include avatar upload option
+4.	User can upload or skip
+5.	On skip, avatar_url remains NULL (will show initials)
+6.	On upload, avatar saved and displayed immediately
+Onboarding UX:
+•	Use progressive disclosure (don't overwhelm new users)
+•	Make avatar upload feel optional but encouraged
+•	Show example of how profile will look with avatar
+________________________________________
+Step 15: Test Avatar System Comprehensively
+Task: Verify avatar system works in all scenarios.
+Test Cases:
+1.	Upload New Avatar: 
+o	Login as user with no avatar
+o	Navigate to profile settings
+o	Upload valid JPEG image
+o	Verify avatar appears in navbar, profile page, dashboard
+o	Refresh page → verify avatar persists
+2.	Replace Existing Avatar: 
+o	User with avatar uploads new one
+o	Verify old avatar is replaced everywhere
+o	Verify old file is deleted from storage
+3.	Delete Avatar: 
+o	User with avatar clicks "Remove Photo"
+o	Confirm deletion
+o	Verify avatar removed, fallback (initials) shown
+o	Verify file deleted from storage
+4.	File Validation: 
+o	Try uploading non-image file → verify rejected
+o	Try uploading 20MB file → verify rejected
+o	Try uploading 10000x10000px image → verify resized
+o	Try uploading PDF renamed as .jpg → verify rejected
+5.	Fallback Logic: 
+o	User with no avatar but valid email → verify Gravatar attempted
+o	User with no avatar and no Gravatar → verify initials shown
+o	Guest user → verify default icon shown (not "?")
+6.	Performance: 
+o	Upload avatar → verify loads quickly via CDN
+o	Check Network tab → verify image cached properly
+o	Load page with many avatars → verify lazy loading works
+7.	Multiple Devices: 
+o	Upload avatar on desktop
+o	Check mobile app/browser → verify updated
+8.	Error Handling: 
+o	Mock upload failure → verify error message shown
+o	Mock network error → verify retry option works
+o	Invalid token during upload → verify handled gracefully
+9.	Security: 
+o	Try uploading avatar to another user's profile → verify blocked (403)
+o	Try accessing avatar upload endpoint without auth → verify blocked (401)
+________________________________________
+Step 16: Add User Feedback and Loading States
+Task: Provide clear feedback during avatar operations.
+What to add:
+Upload Progress:
+•	Show upload progress bar (0-100%)
+•	Display "Uploading..." message
+•	Disable upload button during upload
+•	Show success message: "Profile photo updated!"
+•	Show error message: "Upload failed. Please try again."
+Loading States:
+•	While image is being processed, show spinner on avatar
+•	While checking Gravatar, show loading placeholder
+•	Prevent user from clicking away during upload
+•	Smooth transition when new avatar appears
+Success Feedback:
+•	Toast notification: "Avatar updated successfully"
+•	Or inline success message with green checkmark
+•	Brief highlight/animation on avatar to draw attention
+•	Auto-dismiss after 3 seconds
+Error Messages:
+•	"File too large. Maximum size is 5MB."
+•	"Invalid file format. Please upload a JPEG or PNG image."
+•	"Upload failed. Please check your connection and try again."
+•	Provide clear actionable guidance

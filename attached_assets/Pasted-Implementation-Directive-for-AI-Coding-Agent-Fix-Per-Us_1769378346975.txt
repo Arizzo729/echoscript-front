@@ -1,0 +1,130 @@
+Implementation Directive for AI Coding Agent: Fix Per-User Usage Tracking Bug
+Objective
+Fix critical billing integrity bug where usage tracking is global instead of per-user. This is causing users to see other people's usage data, which will lead to incorrect billing, unfair limit enforcement, and potential legal issues.
+Step 1: Analyze Current Implementation
+Task: Examine the existing codebase to identify where usage tracking occurs.
+What to look for:
+•	Find all database tables storing usage data (look for tables with names like usage, transcriptions, sessions, billing_records)
+•	Locate all API endpoints that record transcription usage
+•	Find the dashboard queries that display "Minutes Used" and "Sessions"
+•	Identify how current usage is being calculated and aggregated
+•	Check if there are ANY user_id or subscription_id fields in usage tables
+•	Review authentication middleware to see if user context is being passed to usage functions
+Deliverable: Document all locations in code where usage is tracked, queried, or displayed. Note which locations are missing user context.
+________________________________________
+Step 2: Design Database Schema Updates
+Task: Modify database schema to enforce per-user tracking at the data layer.
+Required changes:
+•	Add user_id column to all usage-related tables (make it NOT NULL to prevent future bugs)
+•	Add subscription_id column to link usage to specific billing plans
+•	Add session_type column to distinguish between authenticated and guest users
+•	Add timestamps (created_at, updated_at) if missing for proper billing period tracking
+•	Create a separate guest_usage table with columns: guest_token, minutes_used, sessions, expires_at
+•	Add database indexes on user_id, subscription_id, and created_at for query performance
+•	Add foreign key constraints linking user_id to users table and subscription_id to subscriptions table
+Migration strategy:
+•	Create migration scripts that add these columns
+•	For existing data without user_id, either delete it (if test data) or mark it as legacy/orphaned (if production)
+•	Set a flag or timestamp indicating when the fix was deployed to separate old invalid data from new valid data
+________________________________________
+Step 3: Update Usage Recording Logic
+Task: Modify all code that creates usage records to require user identification.
+What to change:
+•	Find every function that inserts into usage tables
+•	Add mandatory userId and subscriptionId parameters to these functions
+•	Add validation that throws an error if these parameters are missing or null
+•	Modify INSERT queries to include user_id and subscription_id columns
+•	For API endpoints handling transcriptions, extract user_id from authentication token/session
+•	For guest users, generate a unique guest_token (UUID stored in cookie) and record to guest_usage table separately
+•	Add logging that records which user_id each usage entry belongs to for debugging
+Error handling:
+•	If user_id cannot be determined, reject the request with 401 Unauthorized
+•	Never allow usage to be recorded without a user identifier
+•	Log any attempts to record usage without user context as critical security events
+________________________________________
+Step 4: Fix Dashboard Query Logic
+Task: Rewrite dashboard queries to filter by current authenticated user only.
+What to change:
+•	Locate the dashboard endpoint or function that calculates "Minutes Used" and "Sessions"
+•	Modify the SQL query to include WHERE user_id = ? clause using the authenticated user's ID
+•	Add a date filter to only count usage within the current billing period (e.g., last 30 days)
+•	Join with the subscriptions table to get the user's specific monthly limit
+•	Calculate remaining minutes as (monthly_limit - minutes_used)
+•	Ensure the query returns zero usage for brand new users who have no records yet (use COALESCE or LEFT JOIN)
+Query structure should be:
+SELECT usage for user X, subscription Y, within billing period Z
+NOT: SELECT total usage across all users
+Test cases:
+•	New user with no usage should see "0 / 120"
+•	User with 5 minutes used should see "5 / 120"
+•	Different users logging in should see completely different numbers
+________________________________________
+Step 5: Add User Context to All Endpoints
+Task: Ensure every API endpoint that touches usage has access to user identification.
+What to implement:
+•	Create or update authentication middleware that runs before all protected endpoints
+•	Extract user_id and subscription_id from JWT token, session cookie, or auth header
+•	Attach these values to the request object (e.g., req.user, req.userId, req.subscriptionId)
+•	Make this middleware mandatory for all transcription and usage-related endpoints
+•	For guest endpoints, create separate middleware that generates/retrieves guest_token from cookies
+Endpoints to protect:
+•	POST /api/transcribe (or equivalent transcription endpoint)
+•	GET /api/usage or /api/dashboard (usage display)
+•	GET /api/subscription (subscription details)
+•	Any endpoint that creates, reads, or checks usage data
+________________________________________
+Step 6: Implement Usage Limit Enforcement
+Task: Add per-user limit checking before allowing transcription.
+What to build:
+•	Create a checkUserLimit(userId, subscriptionId) function
+•	This function queries current billing period usage for specific user
+•	Compare usage against their subscription's monthly_limit
+•	Return { allowed: true/false, used: X, limit: Y, remaining: Z }
+•	Call this function at the START of transcription endpoints before processing
+•	If limit exceeded, return 429 (Too Many Requests) with clear error message
+•	Include remaining minutes in successful API responses so frontend can display warnings
+Edge cases:
+•	Handle users who upgrade/downgrade subscriptions mid-period
+•	Handle expired or cancelled subscriptions
+•	Handle users with unlimited plans (monthly_limit = null or -1)
+________________________________________
+Step 7: Handle Guest Users Separately
+Task: Implement isolated tracking for unauthenticated users.
+What to build:
+•	On first visit without auth, generate a UUID as guest_token
+•	Store guest_token in an HTTP-only cookie with 30-day expiration
+•	Create separate functions: recordGuestUsage(guestToken, minutes) and getGuestUsage(guestToken)
+•	Store guest usage in the guest_usage table, never mixed with authenticated users
+•	Guest usage should have stricter limits (e.g., 10 minutes vs 120 for free tier)
+•	When a guest user signs up/logs in, do NOT carry over their guest usage to their new account
+•	Periodically clean up expired guest_usage records (cron job or scheduled task)
+Guest vs Authenticated:
+•	Completely separate data stores
+•	Different limit enforcement
+•	No migration of usage between states
+________________________________________
+Step 8: Initialize New Users Correctly
+Task: Ensure brand new users start with zero usage.
+What to implement:
+•	When a user signs up or first logs in, check if they have a subscription record
+•	If no subscription exists, create one with default plan (e.g., "free" tier, 120 minute limit)
+•	Do NOT create any usage records yet (they start at zero by absence of records)
+•	Ensure dashboard queries handle missing usage records gracefully (show 0, not error)
+•	Add database constraints to prevent accidental creation of usage without user_id
+User onboarding flow:
+1.	User creates account → subscription record created with 120 minute limit
+2.	User views dashboard → sees "0 / 120 minutes used" (no usage records exist yet)
+3.	User transcribes first file → first usage record created with their user_id
+4.	User views dashboard → sees "5 / 120 minutes used" (aggregates their records only)
+________________________________________
+Step 9: Add Data Migration for Existing Users
+Task: Clean up or migrate existing invalid usage data.
+What to do:
+•	Identify all usage records currently lacking user_id
+•	If this is a test/staging environment, delete all orphaned records
+•	If production, create a one-time migration script: 
+o	Mark orphaned records with user_id = "LEGACY_UNKNOWN" or similar
+o	Exclude these from all usage calculations going forward
+o	Add a migrated flag to track which records were affected
+•	Reset all existing users' displayed usage to only count records with valid user_id
+•	Notify users if their historical usage data was affected

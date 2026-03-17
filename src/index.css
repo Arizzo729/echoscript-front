@@ -1,0 +1,54 @@
+:root {
+  --bg: #ffffff;
+  --fg: #0a0a0a;
+  --zinc-950: #ffffff;
+  --zinc-900: #f4f4f5;
+  --zinc-800: #e4e4e7;
+  --zinc-700: #d4d4d8;
+  --text-white: #000000;
+
+  /* Z-index System */
+  --z-base: 0;
+  --z-content: 1;
+  --z-audio-player: 50;
+  --z-header: 100;
+  --z-sidebar: 200;
+  --z-dropdown: 500;
+  --z-modal: 1000;
+  --z-tooltip: 2000;
+  --z-max: 9999;
+}
+
+.dark {
+  --bg: #0a0a0a;
+  --fg: #f5f5f5;
+  --zinc-950: #09090b;
+  --zinc-900: #18181b;
+  --zinc-800: #27272a;
+  --zinc-700: #3f3f46;
+  --text-white: #ffffff;
+}
+
+html,body,#root { height:100%; }
+body { 
+  margin:0; 
+  background:var(--bg); 
+  color:var(--fg); 
+  font-family:system-ui, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+a { color:inherit; text-decoration:none; }
+
+/* Mobile Touch Targets */
+button, select, input {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Utility classes to use variables */
+.bg-zinc-950 { background-color: var(--zinc-950); }
+.bg-zinc-900 { background-color: var(--zinc-900); }
+.bg-zinc-800 { background-color: var(--zinc-800); }
+.border-zinc-800 { border-color: var(--zinc-800); }
+.text-white { color: var(--text-white); }

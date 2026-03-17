@@ -1,0 +1,153 @@
+Implementation Directive for AI Coding Agent: Fix Newsletter Email Validation
+Objective
+Fix broken email validation regex that is rejecting valid emails like "andrew.rizzo729@gmail.com", causing lost newsletter signups.
+Step 1: Locate Email Validation
+Task: Find where email validation happens for newsletter signup.
+What to find:
+
+Newsletter signup form component
+Email validation regex pattern
+Error message source: "The string did not match the expected pattern"
+Check both frontend validation and backend API endpoint
+Search for: regex patterns, validation schemas (Yup/Joi/Zod), form validation rules
+
+
+Step 2: Identify the Broken Regex
+Task: Analyze why current regex fails on valid emails.
+What to check:
+
+Extract current regex pattern
+Test against andrew.rizzo729@gmail.com
+Identify what's being rejected: numbers? dots? specific domains?
+Common issues: too restrictive username rules, missing character allowances, wrong TLD validation
+
+
+Step 3: Replace with Standard Email Regex
+Task: Use a proven, industry-standard email validation pattern.
+What to implement:
+
+Replace broken regex with recommended pattern that accepts:
+
+Letters, numbers, dots, hyphens, underscores in username
+Standard domains: gmail.com, outlook.com, yahoo.com, custom domains
+Common TLDs: .com, .org, .net, .edu, .co.uk, etc.
+Plus addressing: user+tag@domain.com
+Subdomains: user@mail.company.com
+
+
+
+Recommended approach:
+
+Use simple, permissive regex for basic format check: user@domain.tld
+Don't over-validate - let the email service handle deliverability
+Standard pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ (simple and effective)
+Or use validation library's built-in email validator (Validator.js, email-validator npm package)
+
+
+Step 4: Update Frontend Validation
+Task: Fix client-side email validation in the form.
+What to change:
+
+If using HTML5 validation: ensure type="email" (browser handles basic validation)
+If using custom regex: replace with corrected pattern
+If using validation library: use built-in email rule instead of custom regex
+Update error message to be helpful: "Please enter a valid email address"
+Test with various email formats to ensure they pass
+
+
+Step 5: Update Backend Validation
+Task: Fix server-side email validation in API endpoint.
+What to change:
+
+Locate newsletter signup endpoint (e.g., POST /api/newsletter/subscribe)
+Find backend validation logic
+Replace broken regex with same corrected pattern as frontend
+Ensure backend accepts all emails that frontend accepts (keep them in sync)
+Return clear error message if validation fails
+Log rejected emails for debugging (to catch future issues)
+
+
+Step 6: Test with Real Email Examples
+Task: Verify fix works with common email formats.
+Test cases:
+
+Gmail: andrew.rizzo729@gmail.com, user.name+tag@gmail.com
+Outlook: john_doe@outlook.com, name@hotmail.com
+Yahoo: email123@yahoo.com
+Corporate: john.smith@company.com, user@mail.company.co.uk
+Edge cases: a@b.co, email+filter@domain.com, name_123@sub.domain.org
+Invalid (should still reject): notanemail, missing@domain, @domain.com, user@
+
+Where to test:
+
+Newsletter signup form UI
+Direct API endpoint testing (Postman/curl)
+Both frontend and backend validation
+Try the exact failing email from the bug report
+
+
+Step 7: Ensure Consistency Across App
+Task: Make sure all email validation uses the same correct pattern.
+What to check:
+
+User registration/signup form
+Login form (if applicable)
+Profile email update
+Contact forms
+Any other email inputs
+Replace all instances of broken regex
+Use a shared validation utility function to avoid duplication
+
+
+Step 8: Add Validation Testing
+Task: Prevent this bug from happening again.
+What to add:
+
+Unit tests for email validation function
+Test valid emails pass: common providers, numbers, dots, plus signs
+Test invalid emails fail: no @, no domain, spaces, incomplete
+Integration test for newsletter signup endpoint
+Add test case for the specific failing email from bug report
+
+
+Step 9: Improve User Experience
+Task: Make validation helpful, not frustrating.
+What to improve:
+
+Show inline validation (real-time feedback as user types)
+Clear error messages: "Please enter a valid email address like name@example.com"
+Don't show error until user finishes typing (debounce validation)
+Show success message when valid email is entered
+On successful signup, confirm: "Thanks! Check your inbox to confirm subscription."
+Handle duplicate signups gracefully: "You're already subscribed!"
+
+
+Step 10: Monitor and Log
+Task: Track validation failures to catch future issues.
+What to add:
+
+Log when backend validation rejects an email (include the email pattern, not full email for privacy)
+Track validation error rates in analytics
+Set up alert if rejection rate spikes (indicates new validation bug)
+Periodically review rejected emails to identify patterns
+Monitor newsletter signup conversion rate to ensure fix worked
+
+
+Critical Success Criteria
+✅ andrew.rizzo729@gmail.com successfully passes validation
+✅ All common email providers accepted (Gmail, Outlook, Yahoo, corporate)
+✅ Frontend and backend validation use same correct pattern
+✅ Clear, helpful error messages shown to users
+✅ Newsletter signup conversion rate improves
+✅ Tests in place to prevent regression
+✅ No valid emails are rejected
+Quick Fix Priority
+Immediate action:
+
+Find the broken regex (search for email validation in newsletter signup)
+Replace with: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ or use library's email validator
+Test with andrew.rizzo729@gmail.com
+Deploy fix immediately (this is blocking revenue/leads)
+Add tests after fix is live
+
+This is a high-priority bug - every hour it's unfixed means lost newsletter subscribers and potential customers. Fix validation first, improve UX second, add comprehensive tests third.
