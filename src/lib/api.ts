@@ -34,7 +34,10 @@ export const SERVER_URL = ((import.meta as any)?.env?.VITE_API_BASE || (IS_DEV ?
 
 // Debug logs
 console.log("VITE_API_BASE raw:", RAW_ENV_PREFIX);
+console.log("IS_DEV:", IS_DEV);
+console.log("DEFAULT_BACKEND_BASE:", DEFAULT_BACKEND_BASE);
 console.log("REL_PREFIX:", REL_PREFIX);
+console.log("SERVER_URL:", SERVER_URL);
 
 // Join helper
 function join(base: string, path: string) {
@@ -51,6 +54,8 @@ function getAccessToken(): string | null {
 // Core caller: always send credentials and include JWT token if available
 async function call(path: string, opts: RequestInit = {}) {
   const url = join(REL_PREFIX, path);
+  
+  console.log("API call to:", url); // Debug: show the full URL being called
   
   // Get access token and add to headers if available
   const accessToken = getAccessToken();
