@@ -178,13 +178,24 @@ export const AuthProvider = ({ children }) => {
   // This ensures cookie-based sessions work correctly on page reload
   useEffect(() => {
     const initAuth = async () => {
-      // Always try to fetch user - supports both token and cookie auth
-      await fetchUser();
+      // First try to fetch user with current token
+      const user = await fetchUser();
+      
+      // If that fails and we have a token, try refreshing it and retry
+      if (!user && accessToken) {
+        console.log("Initial fetch failed, attempting token refresh...");
+        const refreshed = await refreshAccessToken();
+        if (refreshed) {
+          console.log("Token refreshed, retrying fetch user...");
+          await fetchUser();
+        }
+      }
+      
       setLoading(false);
     };
 
     initAuth();
-  }, [fetchUser]);
+  }, [accessToken, fetchUser, refreshAccessToken]);
 
   // Auto-refresh token before expiration (every 14 minutes if token expires in 15)
   // Only runs if we have an access token (for token-based auth)

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Trash2, Plus, Minus, ArrowLeft, ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
+import * as api from '../lib/api';
 import {
   Card,
   CardContent,
@@ -78,7 +79,7 @@ export default function BuyExtraMinutes() {
         };
       });
 
-      const response = await fetch(`/api/stripe/checkout/create`, {
+      const response = await fetch(`${api.SERVER_URL}/api/v1/stripe/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,6 +96,20 @@ export default function BuyExtraMinutes() {
         }),
       });
 
+      if (!response.ok) {
+        let errorDetail = 'Checkout failed';
+        try {
+          const errorData = await response.json();
+          errorDetail = errorData.detail || errorData.message || 'Unknown error';
+        } catch (e) {
+          // Response is not JSON
+          errorDetail = `Server error (${response.status}): ${response.statusText}`;
+        }
+        setCheckoutError(errorDetail);
+        setIsCheckingOut(false);
+        return;
+      }
+
       const data = await response.json();
       if (data.url) {
         // Redirect to Stripe Checkout
@@ -104,7 +119,7 @@ export default function BuyExtraMinutes() {
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      setCheckoutError('An error occurred during checkout. Please try again.');
+      setCheckoutError(error.message || 'An error occurred during checkout. Please try again.');
     } finally {
       setIsCheckingOut(false);
     }
