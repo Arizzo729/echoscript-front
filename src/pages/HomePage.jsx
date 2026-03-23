@@ -54,9 +54,9 @@ export default function HomePage() {
   });
 
   const communityLinks = [
-    { name: "Discord", href: "https://discord.com/invite/echoscriptai", icon: FaDiscord, color: "bg-indigo-600" },
+    { name: "Discord", href: "https://discord.gg/ZnF9G4bZSH", icon: FaDiscord, color: "bg-indigo-600" },
     { name: "Instagram", href: "https://instagram.com/echoscriptai", icon: FaInstagram, color: "bg-pink-500" },
-    { name: "LinkedIn", href: "https://linkedin.com/company/echoscriptai", icon: FaLinkedin, color: "bg-blue-700" },
+    { name: "LinkedIn", href: "https://www.linkedin.com/in/echoscript-ai/", icon: FaLinkedin, color: "bg-blue-700" },
     { name: "TikTok", href: "https://tiktok.com/@echoscriptai", icon: FaTiktok, color: "bg-black" }
   ];
 
