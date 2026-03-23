@@ -128,7 +128,9 @@ export default function HomePage() {
           <p className="text-sm mt-1 text-zinc-400 font-mono">{formattedTime}</p>
         </motion.div>
 
-       {/* Removed waveform (causing blank UI issue) */}
+       <button className="mt-4 px-6 py-3 bg-teal-600 hover:bg-teal-700 rounded-xl text-white font-semibold shadow-lg transition">
+  Start Recording
+</button>
 
         {gptResponse && showBubble && (
           <LiveGPTBubble message={gptResponse} onClose={() => setShowBubble(false)} />
