@@ -3,39 +3,62 @@ import { motion, AnimatePresence } from "framer-motion";
 import Button from "./ui/Button";
 import { CheckCircle, XCircle } from "lucide-react";
 
-const API_BASE_URL =
+const RAW_API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "";
+
+const API_BASE_URL = RAW_API_BASE_URL.replace(/\/+$/, "");
+const NEWSLETTER_PATH = "/newsletter/subscribe";
 
 export default function NewsletterSignup() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState("idle"); // idle | loading | success | error
+  const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      setStatus("error");
+      setMessage("Please enter a valid email address.");
+      return;
+    }
+
+    if (!API_BASE_URL) {
+      setStatus("error");
+      setMessage("Missing API base URL in frontend environment variables.");
+      return;
+    }
+
     setStatus("loading");
     setMessage("");
 
-    try {
-      const endpoint = `${API_BASE_URL}/newsletter/subscribe`;
+    const endpoint = `${API_BASE_URL}${NEWSLETTER_PATH}`;
 
+    try {
       const res = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ email: trimmedEmail }),
       });
 
       const rawText = await res.text();
-
       let data = {};
+
       try {
         data = rawText ? JSON.parse(rawText) : {};
       } catch {
-        throw new Error(
-          res.status === 404
-            ? "Newsletter endpoint not found on the live backend."
-            : "Server returned an invalid response."
-        );
+        if (!res.ok) {
+          throw new Error(
+            res.status === 404
+              ? `Newsletter endpoint not found: ${endpoint}`
+              : `Server returned an invalid response. Status: ${res.status}`
+          );
+        }
       }
 
       if (!res.ok) {
@@ -43,7 +66,9 @@ export default function NewsletterSignup() {
           data.detail ||
             data.message ||
             data.error ||
-            "Something went wrong."
+            (res.status === 404
+              ? `Newsletter endpoint not found: ${endpoint}`
+              : `Request failed with status ${res.status}`)
         );
       }
 
@@ -51,6 +76,7 @@ export default function NewsletterSignup() {
       setMessage("You're subscribed!");
       setEmail("");
     } catch (err) {
+      console.error("Newsletter signup error:", err);
       setStatus("error");
       setMessage(err.message || "Something went wrong. Try again.");
     }
@@ -64,7 +90,10 @@ export default function NewsletterSignup() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <label htmlFor="email" className="block text-sm font-medium text-zinc-300">
+      <label
+        htmlFor="email"
+        className="block text-sm font-medium text-zinc-300"
+      >
         🌟 Join our newsletter for updates
       </label>
 
@@ -75,6 +104,7 @@ export default function NewsletterSignup() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@example.com"
+        autoComplete="email"
         className="w-full px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
       />
 
@@ -88,13 +118,13 @@ export default function NewsletterSignup() {
         {status === "loading" ? "Subscribing..." : "Subscribe"}
       </Button>
 
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {status !== "idle" && (
           <motion.div
-            key={status}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            key={`${status}-${message}`}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
             className={`flex items-center gap-2 text-sm justify-center ${
               status === "success" ? "text-teal-400" : "text-red-400"
             }`}
