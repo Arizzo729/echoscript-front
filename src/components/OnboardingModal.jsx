@@ -24,48 +24,60 @@ const STEPS = [
     id: 'core-tools',
     title: 'Your Main Tools',
     description:
-      'EchoScript is built to help you move from raw media to useful content fast. Start with transcription, then translate, generate subtitles, and repurpose the final text wherever you need it.',
-    image: '/assets/onboarding/portal-brand.png',
+      'EchoScript helps you go from raw media to usable content fast — transcription, translation, subtitles, all in one place.',
+    image: '/assets/onboarding/logo-glow.png',
     tips: [
       'Transcription: convert speech into text',
-      'Translation: make content usable across languages',
-      'Subtitles: improve accessibility and video engagement'
+      'Translation: expand to global audiences',
+      'Subtitles: boost engagement + accessibility'
     ]
   },
   {
     id: 'best-results',
-    title: 'How to Get the Best Results',
+    title: 'Get the Best Results',
     description:
-      'Great input gives great output. Cleaner audio means more accurate transcripts, fewer edits, and better subtitle timing.',
+      'Better input = better output. Clean audio means higher accuracy, fewer edits, and better subtitle timing.',
     image: '/assets/onboarding/logo-light.png',
     tips: [
-      'Reduce background noise when possible',
-      'Use one clear speaker or high-quality mic audio',
-      'Break long recordings into smaller files if needed'
+      'Reduce background noise',
+      'Use a clear speaker or good mic',
+      'Split long recordings for better results'
     ]
   },
   {
     id: 'ecosystem',
     title: 'More Than One App',
     description:
-      'EchoScript is part of the wider Echo ecosystem. The company is expanding into AI tools built around productivity, connection, communication, and real-world utility.',
+      'EchoScript is part of a growing AI ecosystem focused on productivity, connection, and real-world utility.',
     image: '/assets/onboarding/echo-ecosystem.png',
     tips: [
-      'EchoScript: AI transcription and media tools',
-      'EchoUnite: community and connection',
-      'EchoLock: utility-focused companion experience'
+      'EchoScript: transcription & media tools',
+      'EchoUnite: community + connection',
+      'EchoLock: utility + safety tools'
+    ]
+  },
+  {
+    id: 'vision',
+    title: 'Step Into the Future',
+    description:
+      'You’re not just using a tool — you’re entering a new way to work with content, powered by AI.',
+    image: '/assets/onboarding/portal-brand.png',
+    tips: [
+      'Fast workflows',
+      'AI-powered productivity',
+      'Built for creators & builders'
     ]
   },
   {
     id: 'audio',
     title: 'Enable Audio Experience',
     description:
-      'Turn on sound for a more immersive experience throughout the platform. This helps with ambient effects, interactions, and a more polished first impression.',
-    image: '/assets/onboarding/hero-guide.png',
+      'Turn on sound for a more immersive experience throughout the platform.',
+    image: '/assets/onboarding/logo-glow.png',
     tips: [
-      'Optional, but recommended',
-      'You can change this later in settings',
-      'Best experienced with speakers or headphones'
+      'Optional but recommended',
+      'Can be changed later',
+      'Best with headphones or speakers'
     ]
   }
 ];
@@ -144,12 +156,11 @@ export default function OnboardingModal({ onClose }) {
     let idx = 0;
     setTypedDesc('');
 
-    const speed = 24;
     const timer = setInterval(() => {
       idx += 1;
       setTypedDesc(full.slice(0, idx));
       if (idx >= full.length) clearInterval(timer);
-    }, speed);
+    }, 18);
 
     return () => clearInterval(timer);
   }, [step]);
@@ -180,20 +191,15 @@ export default function OnboardingModal({ onClose }) {
           ref={modalRef}
           role="dialog"
           tabIndex={-1}
-          aria-labelledby="onboarding-title"
-          aria-describedby="onboarding-desc"
           className="relative w-full max-w-3xl bg-zinc-900/95 text-white rounded-2xl shadow-2xl border border-zinc-700 overflow-hidden"
-          initial={{ y: shouldReduce ? 0 : 40, opacity: 0, scale: shouldReduce ? 1 : 0.98 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
-          exit={{ y: shouldReduce ? 0 : -40, opacity: 0, scale: shouldReduce ? 1 : 0.98 }}
-          transition={{ duration: 0.35, ease: 'easeOut' }}
+          initial={{ y: shouldReduce ? 0 : 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: shouldReduce ? 0 : -40, opacity: 0 }}
+          transition={{ duration: 0.3 }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-teal-500/8 via-transparent to-blue-500/8 pointer-events-none" />
-
           <button
             onClick={finishOnboarding}
-            className="absolute top-3 right-3 z-20 text-zinc-400 hover:text-white transition"
-            aria-label="Close onboarding"
+            className="absolute top-3 right-3 text-zinc-400 hover:text-white"
           >
             <X className="w-6 h-6" />
           </button>
@@ -206,106 +212,53 @@ export default function OnboardingModal({ onClose }) {
               <motion.div
                 className="h-full bg-teal-400"
                 animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.3 }}
               />
             </div>
           </div>
 
           <motion.div
             key={step}
-            className="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center"
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
-            transition={{ duration: 0.3 }}
+            className="px-6 py-6 grid md:grid-cols-2 gap-6 items-center"
           >
-            <div className="w-full h-[260px] sm:h-[320px] bg-zinc-800 rounded-2xl overflow-hidden border border-zinc-700 flex items-center justify-center">
-              {animData ? (
-                <Lottie animationData={animData} loop autoplay style={{ width: '100%', height: '100%' }} />
-              ) : current.image && !imgError ? (
+            <div className="w-full h-[300px] bg-zinc-800 rounded-2xl overflow-hidden border border-zinc-700">
+              {current.image && (
                 <img
                   src={current.image}
-                  alt={current.title || 'Onboarding visual'}
+                  alt=""
                   className="w-full h-full object-cover"
-                  onError={() => setImgError(true)}
                 />
-              ) : (
-                <div className="flex flex-col items-center justify-center text-center px-6">
-                  <div className="animate-pulse h-12 w-12 bg-zinc-700 rounded-full mb-4" />
-                  <p className="text-sm text-zinc-400">
-                    Add your image to the /public/assets/onboarding folder to show this slide visual.
-                  </p>
-                </div>
               )}
             </div>
 
-            <div className="text-left">
-              <h2 id="onboarding-title" className="text-2xl sm:text-3xl font-bold mb-3">
-                {current.title || ''}
+            <div>
+              <h2 className="text-3xl font-bold mb-3">
+                {current.title}
               </h2>
 
-              <p
-                id="onboarding-desc"
-                className="text-sm sm:text-base text-zinc-300 leading-relaxed min-h-[88px]"
-              >
+              <p className="text-zinc-300 mb-4 min-h-[80px]">
                 {typedDesc}
               </p>
 
-              {Array.isArray(current.tips) && current.tips.length > 0 && (
-                <div className="mt-5">
-                  <p className="text-xs uppercase tracking-[0.2em] text-teal-300 mb-3">
-                    Quick Tips
-                  </p>
-                  <div className="space-y-2">
-                    {current.tips.map((tip, index) => (
-                      <div
-                        key={index}
-                        className="flex items-start gap-3 rounded-xl border border-zinc-700 bg-zinc-800/70 px-3 py-2"
-                      >
-                        <div className="mt-1 h-2.5 w-2.5 rounded-full bg-teal-400 shrink-0" />
-                        <p className="text-sm text-zinc-200">{tip}</p>
-                      </div>
-                    ))}
+              <div className="space-y-2">
+                {current.tips?.map((tip, i) => (
+                  <div key={i} className="flex gap-2 text-sm">
+                    <div className="w-2 h-2 bg-teal-400 rounded-full mt-1" />
+                    {tip}
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
             </div>
           </motion.div>
 
-          <div className="flex items-center justify-between px-6 pb-5">
-            <button
-              onClick={prev}
-              disabled={step === 0}
-              className="text-sm text-zinc-400 hover:text-zinc-200 disabled:opacity-40 transition"
-            >
+          <div className="flex justify-between px-6 pb-5">
+            <button onClick={prev} disabled={step === 0}>
               ← Back
             </button>
 
-            <div className="flex space-x-2">
-              {STEPS.map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-2 w-2 rounded-full transition ${
-                    i === step ? 'bg-teal-400' : 'bg-zinc-700'
-                  }`}
-                />
-              ))}
-            </div>
-
             {step < STEPS.length - 1 ? (
-              <button
-                onClick={next}
-                className="text-sm text-teal-300 hover:text-teal-100 transition"
-              >
-                Next →
-              </button>
+              <button onClick={next}>Next →</button>
             ) : (
-              <button
-                onClick={finishOnboarding}
-                className="text-sm text-teal-300 hover:text-teal-100 transition"
-              >
-                Finish
-              </button>
+              <button onClick={finishOnboarding}>Finish</button>
             )}
           </div>
 
@@ -316,7 +269,7 @@ export default function OnboardingModal({ onClose }) {
                   enableSound?.();
                   next();
                 }}
-                className="w-full py-3 font-semibold rounded-full bg-teal-500 hover:bg-teal-400 text-zinc-950 transition"
+                className="w-full py-3 bg-teal-500 text-black rounded-full"
               >
                 Enable Audio
               </button>
