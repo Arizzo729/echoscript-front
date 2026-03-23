@@ -80,9 +80,7 @@ function OverlayManager() {
       )}
       {introComplete && (
         <>
-          <div className="fixed bottom-24 left-4 right-4 z-50 max-w-3xl mx-auto">
-            <TranscriptAudioPlayer audioUrl="/audio/sample-audio.mp3" />
-          </div>
+     
           {isMobile && <MobileBottomNav />}
           {isMobile && <FloatingHome />}
         </>
