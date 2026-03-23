@@ -3,8 +3,22 @@ import React, { useState, useContext, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Switch } from "@headlessui/react";
 import {
-  Volume2, Music2, Settings2, Info, Mail, Text, Speaker, Languages, Bot, Bell,
-  Eye, Moon, User, Star, LogIn, ChevronRight, Clock4
+  Volume2,
+  Music2,
+  Settings2,
+  Info,
+  Mail,
+  Text,
+  Speaker,
+  Languages,
+  Bell,
+  Eye,
+  Moon,
+  User,
+  Star,
+  LogIn,
+  ChevronRight,
+  Clock4,
 } from "lucide-react";
 import Button from "../components/ui/Button";
 import { FontSizeContext } from "../context/useFontSize";
@@ -23,18 +37,6 @@ const tabs = [
 export default function Settings() {
   const { t } = useTranslation();
   const { isAuthenticated, user } = useAuth();
-  const [activeTab, setActiveTab] = useState("preferences");
-  const [darkMode, setDarkMode] = useState(
-    typeof window !== "undefined"
-      ? document.documentElement.classList.contains("dark")
-      : false
-  );
-  const [showHints, setShowHints] = useState(true);
-  const [accessibleFonts, setAccessibleFonts] = useState(false);
-  const [aiAssistantEnabled, setAiAssistantEnabled] = useState(true);
-  const [notifications, setNotifications] = useState(true);
-  const [multiLang, setMultiLang] = useState(true);
-
   const { fontSize, setFontSize } = useContext(FontSizeContext);
   const {
     isMuted,
@@ -45,9 +47,51 @@ export default function Settings() {
     setVolume,
   } = useSound();
 
+  const [activeTab, setActiveTab] = useState("preferences");
+  const [darkMode, setDarkMode] = useState(
+    typeof window !== "undefined"
+      ? document.documentElement.classList.contains("dark")
+      : false
+  );
+
+  const [showHints, setShowHints] = useState(
+    typeof window !== "undefined"
+      ? localStorage.getItem("showHints") !== "false"
+      : true
+  );
+
+  const [notifications, setNotifications] = useState(
+    typeof window !== "undefined"
+      ? localStorage.getItem("notifications") !== "false"
+      : true
+  );
+
+  const [timezone, setTimezone] = useState(() => {
+    if (typeof window === "undefined") return "UTC";
+    return (
+      localStorage.getItem("timezone") ||
+      Intl.DateTimeFormat().resolvedOptions().timeZone ||
+      "UTC"
+    );
+  });
+
   const handleDarkToggle = () => {
-    document.documentElement.classList.toggle("dark");
-    setDarkMode(!darkMode);
+    const next = !darkMode;
+    document.documentElement.classList.toggle("dark", next);
+    setDarkMode(next);
+    localStorage.setItem("darkMode", next.toString());
+  };
+
+  const handleShowHintsToggle = () => {
+    const next = !showHints;
+    setShowHints(next);
+    localStorage.setItem("showHints", next.toString());
+  };
+
+  const handleNotificationsToggle = () => {
+    const next = !notifications;
+    setNotifications(next);
+    localStorage.setItem("notifications", next.toString());
   };
 
   const switchLanguage = () => {
@@ -63,7 +107,17 @@ export default function Settings() {
     );
   }, [fontSize]);
 
-  // Mobile first: full width, vertical stacking, padding
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const savedDark = localStorage.getItem("darkMode");
+    if (savedDark !== null) {
+      const isDark = savedDark === "true";
+      document.documentElement.classList.toggle("dark", isDark);
+      setDarkMode(isDark);
+    }
+  }, []);
+
   return (
     <motion.div
       className="min-h-screen bg-zinc-950/95 dark:bg-zinc-900/95 px-2 sm:px-6 py-6 sm:py-10 max-w-2xl mx-auto"
@@ -74,16 +128,17 @@ export default function Settings() {
       <h1 className="text-2xl sm:text-3xl font-bold mb-4 tracking-tight bg-gradient-to-br from-teal-400 to-blue-500 bg-clip-text text-transparent">
         {t("Settings")}
       </h1>
-      {/* Mobile-first tabs: scrollable */}
+
       <nav className="flex gap-2 overflow-x-auto no-scrollbar mb-6 snap-x">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-3 py-2 min-w-[120px] justify-center rounded-xl snap-center shadow
-              ${activeTab === tab.id
-                ? "bg-gradient-to-r from-teal-600 to-blue-600 text-white shadow-lg"
-                : "bg-zinc-800/90 text-zinc-400 hover:bg-zinc-700/80 transition"
+              ${
+                activeTab === tab.id
+                  ? "bg-gradient-to-r from-teal-600 to-blue-600 text-white shadow-lg"
+                  : "bg-zinc-800/90 text-zinc-400 hover:bg-zinc-700/80 transition"
               }
               font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400
             `}
@@ -116,14 +171,8 @@ export default function Settings() {
                 <ToggleRow
                   label="Show Helpful Hints"
                   value={showHints}
-                  onChange={() => setShowHints(!showHints)}
+                  onChange={handleShowHintsToggle}
                   icon={<Eye />}
-                />
-                <ToggleRow
-                  label="Accessible Fonts"
-                  value={accessibleFonts}
-                  onChange={() => setAccessibleFonts(!accessibleFonts)}
-                  icon={<Text />}
                 />
               </Section>
 
@@ -169,21 +218,18 @@ export default function Settings() {
                     label="Skip Intro Video"
                     value={localStorage.getItem("skipIntro") === "true"}
                     onChange={() => {
-                      const current = localStorage.getItem("skipIntro") === "true";
+                      const current =
+                        localStorage.getItem("skipIntro") === "true";
                       localStorage.setItem("skipIntro", (!current).toString());
                     }}
                     icon={<Eye />}
                   />
                 ) : (
-                  <div className="flex items-center justify-between bg-zinc-800 px-4 py-3 rounded-2xl border border-zinc-700 opacity-60">
-                    <div className="flex items-center gap-3 text-sm text-zinc-400">
-                      <Eye className="text-teal-400 w-4 h-4" />
-                      <span>Skip Intro Video</span>
-                    </div>
-                    <span className="text-xs text-zinc-500 italic pr-2">
-                      Sign in to enable
-                    </span>
-                  </div>
+                  <DisabledRow
+                    icon={<Eye className="text-teal-400 w-4 h-4" />}
+                    label="Skip Intro Video"
+                    note="Sign in to enable"
+                  />
                 )}
 
                 <div className="flex items-center justify-between bg-zinc-800 px-4 py-3 rounded-2xl border border-zinc-700 mt-3">
@@ -192,36 +238,36 @@ export default function Settings() {
                     <span>Time Zone</span>
                   </div>
                   <select
-                    value={localStorage.getItem("timezone") || "UTC"}
-                    onChange={(e) =>
-                      localStorage.setItem("timezone", e.target.value)
-                    }
-                    className="bg-zinc-700 text-white px-3 py-2 rounded-md border border-zinc-600 focus:ring-2 focus:ring-teal-400"
+                    value={timezone}
+                    onChange={(e) => {
+                      setTimezone(e.target.value);
+                      localStorage.setItem("timezone", e.target.value);
+                    }}
+                    className="bg-zinc-700 text-white px-3 py-2 rounded-md border border-zinc-600 focus:ring-2 focus:ring-teal-400 max-w-[190px]"
                   >
-                    {["UTC", "EST", "CST", "MST", "PST", "GMT", "CET"].map((tz) => (
-                      <option key={tz} value={tz}>{tz}</option>
+                    {[
+                      "UTC",
+                      "America/New_York",
+                      "America/Chicago",
+                      "America/Denver",
+                      "America/Los_Angeles",
+                      "Europe/London",
+                      "Europe/Paris",
+                    ].map((tz) => (
+                      <option key={tz} value={tz}>
+                        {tz}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <ToggleRow
-                  label="AI Assistant"
-                  value={aiAssistantEnabled}
-                  onChange={() => setAiAssistantEnabled(!aiAssistantEnabled)}
-                  icon={<Bot />}
-                />
-                <ToggleRow
                   label="Push Notifications"
                   value={notifications}
-                  onChange={() => setNotifications(!notifications)}
+                  onChange={handleNotificationsToggle}
                   icon={<Bell />}
                 />
-                <ToggleRow
-                  label="Enable Multiple Languages"
-                  value={multiLang}
-                  onChange={() => setMultiLang(!multiLang)}
-                  icon={<Languages />}
-                />
+
                 <div className="flex items-center justify-between bg-zinc-800 px-4 py-3 rounded-2xl border border-zinc-700 mt-3">
                   <div className="flex items-center gap-3 text-sm text-zinc-300">
                     <Languages className="text-teal-400 w-4 h-4" />
@@ -254,6 +300,7 @@ export default function Settings() {
                         <strong>Plan:</strong>{" "}
                         {localStorage.getItem("fakePlan") || user?.plan || "Pro"}
                       </p>
+
                       {user?.email === "andrew@echoscript.ai" && (
                         <div className="mt-4">
                           <label className="block text-sm text-white font-medium mb-1">
@@ -276,6 +323,7 @@ export default function Settings() {
                         </div>
                       )}
                     </div>
+
                     <Button variant="outline" icon={<Star />} fullWidth>
                       Manage Subscription
                     </Button>
@@ -285,7 +333,9 @@ export default function Settings() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <p className="text-zinc-300">You’re using EchoScript as a guest.</p>
+                    <p className="text-zinc-300">
+                      You’re using EchoScript as a guest.
+                    </p>
                     <Button variant="primary" icon={<LogIn />} fullWidth>
                       Create Account
                     </Button>
@@ -339,10 +389,12 @@ export default function Settings() {
               <Section title="Contact Us" icon={<Mail />}>
                 <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-700 text-sm space-y-2">
                   <p>
-                    Email: <span className="text-teal-400">support@echoscript.ai</span>
+                    Email:{" "}
+                    <span className="text-teal-400">support@echoscript.ai</span>
                   </p>
                   <p>
-                    Discord: <span className="text-teal-400">discord.gg/echoscript</span>
+                    Discord:{" "}
+                    <span className="text-teal-400">discord.gg/echoscript</span>
                   </p>
                   <p>
                     Follow us on <span className="text-white">X</span>,{" "}
@@ -370,7 +422,6 @@ function Section({ title, icon, children }) {
   );
 }
 
-// Touch-friendly, accessible toggle
 function ToggleRow({ label, value, onChange, icon }) {
   return (
     <div className="flex items-center justify-between bg-zinc-800 px-4 py-3 rounded-2xl border border-zinc-700 transition-all mb-2">
@@ -389,7 +440,7 @@ function ToggleRow({ label, value, onChange, icon }) {
       >
         <span
           className={`
-            ${value ? "translate-x-7" : "translate-x-1"}
+            ${value ? "translate-x-8" : "translate-x-1"}
             inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform
           `}
         />
@@ -398,7 +449,6 @@ function ToggleRow({ label, value, onChange, icon }) {
   );
 }
 
-// Touch-friendly slider row
 function SliderRow({ label, value, onChange, min, max, step, display }) {
   return (
     <div className="flex items-center gap-4 py-2">
@@ -413,6 +463,18 @@ function SliderRow({ label, value, onChange, min, max, step, display }) {
         className="flex-1 h-2 bg-zinc-700 rounded-lg cursor-pointer accent-teal-500 transition-all"
       />
       <span className="text-xs text-zinc-400 w-14 text-right">{display}</span>
+    </div>
+  );
+}
+
+function DisabledRow({ icon, label, note }) {
+  return (
+    <div className="flex items-center justify-between bg-zinc-800 px-4 py-3 rounded-2xl border border-zinc-700 opacity-60">
+      <div className="flex items-center gap-3 text-sm text-zinc-400">
+        {icon}
+        <span>{label}</span>
+      </div>
+      <span className="text-xs text-zinc-500 italic pr-2">{note}</span>
     </div>
   );
 }
