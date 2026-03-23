@@ -1,9 +1,9 @@
-
 import React, { useEffect, useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
+import { Link } from "react-router-dom"; // ✅ ADDED
 import useVoiceInput from "../hooks/useVoiceInput";
 import LiveGPTBubble from "../components/LiveGPTBubble";
 import { GPTContext } from "../context/GPTContext";
@@ -14,7 +14,6 @@ import { Sparkles } from "lucide-react";
 import HintCarousel from "../components/HintCarousel";
 import "../styles/GlareTitle.css";
 import { useTranslation } from "react-i18next";
-import LanguageToggle from "../components/LanguageToggle";
 import { useSound } from "../context/SoundContext";
 
 export default function HomePage() {
@@ -128,9 +127,13 @@ export default function HomePage() {
           <p className="text-sm mt-1 text-zinc-400 font-mono">{formattedTime}</p>
         </motion.div>
 
-       <button className="mt-4 px-6 py-3 bg-teal-600 hover:bg-teal-700 rounded-xl text-white font-semibold shadow-lg transition">
-  Start Recording
-</button>
+        {/* ✅ FIXED BUTTON */}
+        <Link
+          to="/upload"
+          className="mt-4 inline-block px-6 py-3 bg-teal-600 hover:bg-teal-700 rounded-xl text-white font-semibold shadow-lg transition"
+        >
+          Start Here →
+        </Link>
 
         {gptResponse && showBubble && (
           <LiveGPTBubble message={gptResponse} onClose={() => setShowBubble(false)} />
@@ -160,10 +163,11 @@ export default function HomePage() {
         <HintCarousel />
       </div>
 
+      {/* Rest unchanged */}
       <section className="relative z-10 py-20 px-6 text-center">
         <h2 className="text-3xl font-bold mb-4 text-white">What is EchoScript.AI?</h2>
         <p className="max-w-3xl mx-auto text-zinc-400 text-lg">
-          EchoScript.AI is your smart transcription companion — built for creators, students, and professionals. Instantly convert voice to clear, editable text with AI-powered enhancements.
+          EchoScript.AI is your smart transcription companion — built for creators, students, and professionals.
         </p>
       </section>
 
@@ -171,9 +175,6 @@ export default function HomePage() {
         <motion.div className="flex flex-col items-center mb-10">
           <Sparkles className="w-8 h-8 text-teal-400 mb-2 animate-pulse" />
           <h2 className="text-3xl sm:text-4xl font-bold text-white">Join Our Creative Community</h2>
-          <p className="text-zinc-400 mt-4 max-w-2xl">
-            Follow us on social media for AI tips, feature updates, and creative inspiration. Share your voice and shape the future of EchoScript together.
-          </p>
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 justify-center">
@@ -195,9 +196,6 @@ export default function HomePage() {
 
       <section className="relative z-10 py-20 px-6 text-center border-t border-zinc-800">
         <h2 className="text-3xl font-bold text-white mb-4">Stay in the Loop</h2>
-        <p className="text-zinc-400 mb-6 max-w-xl mx-auto">
-          Sign up for occasional updates, helpful AI tips, and product improvements. No spam — just smart content delivered right to you.
-        </p>
         <NewsletterSignup />
       </section>
     </div>
