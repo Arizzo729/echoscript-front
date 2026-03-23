@@ -7,12 +7,76 @@ const RAW_API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "";
 
 const API_BASE_URL = RAW_API_BASE_URL.replace(/\/+$/, "");
-const NEWSLETTER_PATH = "/newsletter/subscribe";
+
+// Try the most likely backend paths in order.
+const NEWSLETTER_PATHS = [
+  "/newsletter/subscribe",
+  "/api/v1/newsletter/subscribe",
+  "/api/newsletter/subscribe",
+];
 
 export default function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+
+  const trySubscribe = async (trimmedEmail) => {
+    let lastError = null;
+
+    for (const path of NEWSLETTER_PATHS) {
+      const endpoint = `${API_BASE_URL}${path}`;
+      console.log("Trying newsletter endpoint:", endpoint);
+
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ email: trimmedEmail }),
+        });
+
+        const rawText = await res.text();
+        let data = {};
+
+        try {
+          data = rawText ? JSON.parse(rawText) : {};
+        } catch {
+          data = {};
+        }
+
+        if (res.ok) {
+          return {
+            ok: true,
+            endpoint,
+            data,
+          };
+        }
+
+        lastError =
+          data.detail ||
+          data.message ||
+          data.error ||
+          `Request failed with status ${res.status} at ${endpoint}`;
+
+        // If endpoint is not found, continue trying next possible path
+        if (res.status === 404) {
+          continue;
+        }
+
+        // For non-404 errors, stop and report immediately
+        throw new Error(lastError);
+      } catch (err) {
+        lastError = err.message || "Something went wrong.";
+      }
+    }
+
+    throw new Error(
+      lastError ||
+        "Newsletter endpoint not found on the live backend. Check API base URL or deployed route."
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,43 +98,10 @@ export default function NewsletterSignup() {
     setStatus("loading");
     setMessage("");
 
-    const endpoint = `${API_BASE_URL}${NEWSLETTER_PATH}`;
-
     try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ email: trimmedEmail }),
-      });
+      const result = await trySubscribe(trimmedEmail);
 
-      const rawText = await res.text();
-      let data = {};
-
-      try {
-        data = rawText ? JSON.parse(rawText) : {};
-      } catch {
-        if (!res.ok) {
-          throw new Error(
-            res.status === 404
-              ? `Newsletter endpoint not found: ${endpoint}`
-              : `Server returned an invalid response. Status: ${res.status}`
-          );
-        }
-      }
-
-      if (!res.ok) {
-        throw new Error(
-          data.detail ||
-            data.message ||
-            data.error ||
-            (res.status === 404
-              ? `Newsletter endpoint not found: ${endpoint}`
-              : `Request failed with status ${res.status}`)
-        );
-      }
+      console.log("Newsletter signup success:", result.endpoint);
 
       setStatus("success");
       setMessage("You're subscribed!");
