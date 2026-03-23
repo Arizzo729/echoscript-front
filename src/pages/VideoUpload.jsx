@@ -198,8 +198,8 @@ export default function VideoUpload() {
 
     if (taskType === "subtitles") {
       formData.append("language", subtitleLang);
-    } else {
-      formData.append("language", translateOutput ? "en" : "auto");
+    } else if (translateOutput) {
+      formData.append("language", "en");
     }
 
     try {
