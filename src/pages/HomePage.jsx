@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { TypeAnimation } from "react-type-animation";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
-import AudioWaveform from "../components/AudioWaveform";
 import useVoiceInput from "../hooks/useVoiceInput";
 import LiveGPTBubble from "../components/LiveGPTBubble";
 import { GPTContext } from "../context/GPTContext";
@@ -129,10 +128,7 @@ export default function HomePage() {
           <p className="text-sm mt-1 text-zinc-400 font-mono">{formattedTime}</p>
         </motion.div>
 
-        <motion.div className="mt-2 mb-4">
-          <AudioWaveform voiceLevel={voiceLevel} />
-          <div className="text-xs text-zinc-500 mt-1 font-medium">{t(micStatus)}</div>
-        </motion.div>
+       {/* Removed waveform (causing blank UI issue) */}
 
         {gptResponse && showBubble && (
           <LiveGPTBubble message={gptResponse} onClose={() => setShowBubble(false)} />
