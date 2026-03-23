@@ -11,6 +11,18 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+const RAW_API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "";
+
+const API_BASE_URL = RAW_API_BASE_URL.replace(/\/+$/, "");
+
+// Update this if your real backend route is different.
+const VIDEO_TASK_PATHS = [
+  "/api/v1/video-task",
+  "/api/video-task",
+  "/video-task",
+];
+
 const ACCEPTED_FORMATS = ["mp4", "mkv", "avi", "mov", "webm"];
 const MAX_FILE_SIZE_MB = 300;
 const SUPPORTED_SUB_LANGS = [
@@ -57,15 +69,77 @@ export default function VideoUpload() {
     setResultText("");
   };
 
+  const tryVideoTaskRequest = async (formData) => {
+    let lastError = null;
+
+    for (const path of VIDEO_TASK_PATHS) {
+      const endpoint = `${API_BASE_URL}${path}`;
+      console.log("Trying video task endpoint:", endpoint);
+
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          body: formData,
+        });
+
+        const contentType = res.headers.get("content-type") || "";
+        const rawText = await res.text();
+
+        if (!contentType.includes("application/json")) {
+          lastError = `Server returned non-JSON response at ${endpoint}`;
+          if (res.status === 404) continue;
+          throw new Error(lastError);
+        }
+
+        let data = {};
+        try {
+          data = rawText ? JSON.parse(rawText) : {};
+        } catch {
+          throw new Error(`Invalid JSON returned from ${endpoint}`);
+        }
+
+        if (res.ok) {
+          return { endpoint, data };
+        }
+
+        lastError =
+          data.detail ||
+          data.message ||
+          data.error ||
+          `Request failed with status ${res.status} at ${endpoint}`;
+
+        if (res.status === 404) continue;
+
+        throw new Error(lastError);
+      } catch (err) {
+        lastError = err.message || "Unknown request error";
+      }
+    }
+
+    throw new Error(
+      lastError ||
+        "Video processing endpoint not found on the live backend."
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!videoFile) return;
+
+    if (!API_BASE_URL) {
+      setStatus("error");
+      setResultText("");
+      console.error("Missing API base URL in frontend environment variables.");
+      return;
+    }
+
     setStatus("processing");
+    setResultText("");
 
     const formData = new FormData();
     formData.append("file", videoFile);
     formData.append("task_type", taskType);
-    
+
     if (taskType === "subtitles") {
       formData.append("language", subtitleLang);
     } else {
@@ -73,34 +147,28 @@ export default function VideoUpload() {
     }
 
     try {
-      const res = await fetch(`/api/video-task`, {
-        method: "POST",
-        body: formData,
-      });
+      const { endpoint, data } = await tryVideoTaskRequest(formData);
+      console.log("Video task success:", endpoint, data);
 
-      const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Server returned HTML instead of JSON");
-      }
-
-      const data = await res.json();
-
-      if (res.ok) {
-        if (taskType === "transcription") {
-          const result = data?.transcript || data?.result || t("Task completed successfully.");
-          setResultText(result);
-        } else {
-          const result = data?.subtitles || data?.result || t("Subtitles generated successfully.");
-          setResultText(result);
-        }
-        setStatus("success");
+      if (taskType === "transcription") {
+        const result =
+          data?.transcript ||
+          data?.result ||
+          t("Task completed successfully.");
+        setResultText(result);
       } else {
-        console.error("Server error:", data);
-        setStatus("error");
+        const result =
+          data?.subtitles ||
+          data?.result ||
+          t("Subtitles generated successfully.");
+        setResultText(result);
       }
+
+      setStatus("success");
     } catch (err) {
       console.error("Fetch failed:", err);
       setStatus("error");
+      setResultText("");
     }
   };
 
@@ -127,11 +195,19 @@ export default function VideoUpload() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="grid gap-6 bg-zinc-900 p-6 rounded-xl border border-zinc-800 shadow-lg">
+        <form
+          onSubmit={handleSubmit}
+          className="grid gap-6 bg-zinc-900 p-6 rounded-xl border border-zinc-800 shadow-lg"
+        >
           <label className="flex items-center gap-3 p-4 border border-zinc-700 rounded-lg bg-zinc-800 cursor-pointer hover:bg-zinc-700">
             <FileVideo className="w-5 h-5 text-teal-400" />
             <span>{videoFile ? videoFile.name : t("Choose a video file")}</span>
-            <input type="file" accept="video/*" onChange={handleFileChange} className="hidden" />
+            <input
+              type="file"
+              accept="video/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </label>
 
           <div className="flex gap-4">
@@ -204,8 +280,11 @@ export default function VideoUpload() {
               <p className="text-green-400">✅ {t("Video processed successfully.")}</p>
               {resultText && (
                 <div className="bg-zinc-800 p-4 rounded border border-zinc-700">
-                  <pre className="text-sm text-zinc-200 whitespace-pre-wrap">{resultText}</pre>
+                  <pre className="text-sm text-zinc-200 whitespace-pre-wrap">
+                    {resultText}
+                  </pre>
                   <button
+                    type="button"
                     onClick={handleDownload}
                     className="mt-3 text-sm text-teal-400 flex items-center gap-2 hover:underline"
                   >
@@ -251,5 +330,4 @@ export default function VideoUpload() {
     </motion.div>
   );
 }
-
 
