@@ -1,8 +1,10 @@
-// ✅ components/NewsletterSignup.jsx — Enhanced & Polished
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "./ui/Button";
 import { CheckCircle, XCircle } from "lucide-react";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "";
 
 export default function NewsletterSignup() {
   const [email, setEmail] = useState("");
@@ -15,24 +17,42 @@ export default function NewsletterSignup() {
     setMessage("");
 
     try {
-      const res = await fetch("/newsletter/subscribe", {
+      const endpoint = `${API_BASE_URL}/newsletter/subscribe`;
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
 
-      const data = await res.json();
+      const rawText = await res.text();
+
+      let data = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        throw new Error(
+          res.status === 404
+            ? "Newsletter endpoint not found on the live backend."
+            : "Server returned an invalid response."
+        );
+      }
 
       if (!res.ok) {
-        throw new Error(data.detail || "Something went wrong.");
+        throw new Error(
+          data.detail ||
+            data.message ||
+            data.error ||
+            "Something went wrong."
+        );
       }
 
       setStatus("success");
-      setMessage("✅ You're subscribed!");
+      setMessage("You're subscribed!");
       setEmail("");
     } catch (err) {
       setStatus("error");
-      setMessage(err.message || "⚠️ Something went wrong. Try again.");
+      setMessage(err.message || "Something went wrong. Try again.");
     }
   };
 
@@ -58,7 +78,13 @@ export default function NewsletterSignup() {
         className="w-full px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
       />
 
-      <Button type="submit" variant="primary" size="sm" className="w-full">
+      <Button
+        type="submit"
+        variant="primary"
+        size="sm"
+        className="w-full"
+        disabled={status === "loading"}
+      >
         {status === "loading" ? "Subscribing..." : "Subscribe"}
       </Button>
 
@@ -73,7 +99,11 @@ export default function NewsletterSignup() {
               status === "success" ? "text-teal-400" : "text-red-400"
             }`}
           >
-            {status === "success" ? <CheckCircle size={18} /> : <XCircle size={18} />}
+            {status === "success" ? (
+              <CheckCircle size={18} />
+            ) : (
+              <XCircle size={18} />
+            )}
             <span>{message}</span>
           </motion.div>
         )}
@@ -81,5 +111,3 @@ export default function NewsletterSignup() {
     </motion.form>
   );
 }
-
-
