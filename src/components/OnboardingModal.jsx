@@ -3,9 +3,14 @@ import ReactDOM from 'react-dom';
 import IntroVideo from './IntroVideo';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useSwipeable } from 'react-swipeable';
-import Lottie from 'lottie-react';
 import { X } from 'lucide-react';
 import { useSound } from '../context/SoundContext';
+
+import heroGuide from '../assets/onboarding/hero-guide.png';
+import logoGlow from '../assets/onboarding/logo-glow.png';
+import logoLight from '../assets/onboarding/logo-light.png';
+import echoEcosystem from '../assets/onboarding/echo-ecosystem.png';
+import portalBrand from '../assets/onboarding/portal-brand.png';
 
 const STEPS = [
   {
@@ -13,7 +18,7 @@ const STEPS = [
     title: 'Welcome to EchoScript.AI',
     description:
       'Turn audio and video into clean, editable text in seconds. Use EchoScript for transcription, translation, subtitles, and faster content workflows.',
-    image: '/assets/onboarding/hero-guide.png',
+    image: heroGuide,
     tips: [
       'Upload audio or video to start quickly',
       'Use clear recordings for the best transcript quality',
@@ -25,7 +30,7 @@ const STEPS = [
     title: 'Your Main Tools',
     description:
       'EchoScript helps you go from raw media to usable content fast — transcription, translation, subtitles, all in one place.',
-    image: '/assets/onboarding/logo-glow.png',
+    image: logoGlow,
     tips: [
       'Transcription: convert speech into text',
       'Translation: expand to global audiences',
@@ -37,7 +42,7 @@ const STEPS = [
     title: 'Get the Best Results',
     description:
       'Better input = better output. Clean audio means higher accuracy, fewer edits, and better subtitle timing.',
-    image: '/assets/onboarding/logo-light.png',
+    image: logoLight,
     tips: [
       'Reduce background noise',
       'Use a clear speaker or good mic',
@@ -49,7 +54,7 @@ const STEPS = [
     title: 'More Than One App',
     description:
       'EchoScript is part of a growing AI ecosystem focused on productivity, connection, and real-world utility.',
-    image: '/assets/onboarding/echo-ecosystem.png',
+    image: echoEcosystem,
     tips: [
       'EchoScript: transcription & media tools',
       'EchoUnite: community + connection',
@@ -61,38 +66,26 @@ const STEPS = [
     title: 'Step Into the Future',
     description:
       'You’re not just using a tool — you’re entering a new way to work with content, powered by AI.',
-    image: '/assets/onboarding/portal-brand.png',
+    image: portalBrand,
     tips: [
       'Fast workflows',
       'AI-powered productivity',
       'Built for creators & builders'
     ]
-  },
-  {
-    id: 'audio',
-    title: 'Enable Audio Experience',
-    description:
-      'Turn on sound for a more immersive experience throughout the platform.',
-    image: '/assets/onboarding/logo-glow.png',
-    tips: [
-      'Optional but recommended',
-      'Can be changed later',
-      'Best with headphones or speakers'
-    ]
   }
 ];
 
 export default function OnboardingModal({ onClose }) {
-  const { playClick, enableSound } = useSound();
+  const { playClick } = useSound();
   const shouldReduce = useReducedMotion();
   const [showVideo, setShowVideo] = useState(true);
   const [step, setStep] = useState(0);
   const [typedDesc, setTypedDesc] = useState('');
-  const [animData, setAnimData] = useState(null);
   const [imgError, setImgError] = useState(false);
   const modalRef = useRef(null);
 
   const handleVideoFinish = useCallback(() => setShowVideo(false), []);
+
   const finishOnboarding = useCallback(() => {
     localStorage.setItem('onboardingComplete', 'true');
     onClose?.();
@@ -117,6 +110,10 @@ export default function OnboardingModal({ onClose }) {
   }, []);
 
   useEffect(() => {
+    setImgError(false);
+  }, [step]);
+
+  useEffect(() => {
     const handler = (e) => {
       if (e.key === 'ArrowRight') next();
       if (e.key === 'ArrowLeft') prev();
@@ -126,29 +123,6 @@ export default function OnboardingModal({ onClose }) {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [finishOnboarding, next, prev]);
-
-  useEffect(() => {
-    let cancel = false;
-    setAnimData(null);
-    setImgError(false);
-
-    const currentStep = STEPS?.[step];
-    if (!currentStep || !currentStep.filename) return;
-
-    const controller = new AbortController();
-
-    fetch(`/assets/onboarding/${currentStep.filename}`, { signal: controller.signal })
-      .then((r) => r.json())
-      .then((data) => {
-        if (!cancel) setAnimData(data);
-      })
-      .catch(() => {});
-
-    return () => {
-      cancel = true;
-      controller.abort();
-    };
-  }, [step]);
 
   useEffect(() => {
     const current = STEPS?.[step];
@@ -191,6 +165,8 @@ export default function OnboardingModal({ onClose }) {
           ref={modalRef}
           role="dialog"
           tabIndex={-1}
+          aria-labelledby="onboarding-title"
+          aria-describedby="onboarding-desc"
           className="relative w-full max-w-3xl bg-zinc-900/95 text-white rounded-2xl shadow-2xl border border-zinc-700 overflow-hidden"
           initial={{ y: shouldReduce ? 0 : 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -199,7 +175,8 @@ export default function OnboardingModal({ onClose }) {
         >
           <button
             onClick={finishOnboarding}
-            className="absolute top-3 right-3 text-zinc-400 hover:text-white"
+            className="absolute top-3 right-3 text-zinc-400 hover:text-white transition"
+            aria-label="Close onboarding"
           >
             <X className="w-6 h-6" />
           </button>
@@ -208,73 +185,104 @@ export default function OnboardingModal({ onClose }) {
             <span className="text-xs text-zinc-400">
               {step + 1}/{STEPS.length}
             </span>
+
             <div className="flex-1 mx-3 h-1 bg-zinc-700 rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-teal-400"
                 animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.3 }}
               />
             </div>
           </div>
 
           <motion.div
             key={step}
-            className="px-6 py-6 grid md:grid-cols-2 gap-6 items-center"
+            className="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center"
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -24 }}
+            transition={{ duration: 0.25 }}
           >
-            <div className="w-full h-[300px] bg-zinc-800 rounded-2xl overflow-hidden border border-zinc-700">
-              {current.image && (
+            <div className="w-full h-[300px] bg-zinc-800 rounded-2xl overflow-hidden border border-zinc-700 flex items-center justify-center">
+              {current.image && !imgError ? (
                 <img
                   src={current.image}
-                  alt=""
+                  alt={current.title || 'Onboarding visual'}
                   className="w-full h-full object-cover"
+                  onError={() => setImgError(true)}
                 />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-center px-6">
+                  <div className="animate-pulse h-12 w-12 bg-zinc-700 rounded-full mb-4" />
+                  <p className="text-sm text-zinc-400">
+                    Image failed to load for this slide.
+                  </p>
+                </div>
               )}
             </div>
 
             <div>
-              <h2 className="text-3xl font-bold mb-3">
+              <h2 id="onboarding-title" className="text-3xl font-bold mb-3">
                 {current.title}
               </h2>
 
-              <p className="text-zinc-300 mb-4 min-h-[80px]">
+              <p
+                id="onboarding-desc"
+                className="text-zinc-300 mb-4 min-h-[80px] leading-relaxed"
+              >
                 {typedDesc}
               </p>
 
               <div className="space-y-2">
                 {current.tips?.map((tip, i) => (
-                  <div key={i} className="flex gap-2 text-sm">
-                    <div className="w-2 h-2 bg-teal-400 rounded-full mt-1" />
-                    {tip}
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 rounded-xl border border-zinc-700 bg-zinc-800/70 px-3 py-2"
+                  >
+                    <div className="w-2 h-2 bg-teal-400 rounded-full mt-1.5 shrink-0" />
+                    <p className="text-sm text-zinc-200">{tip}</p>
                   </div>
                 ))}
               </div>
             </div>
           </motion.div>
 
-          <div className="flex justify-between px-6 pb-5">
-            <button onClick={prev} disabled={step === 0}>
+          <div className="flex items-center justify-between px-6 pb-5">
+            <button
+              onClick={prev}
+              disabled={step === 0}
+              className="text-sm text-zinc-400 hover:text-zinc-200 disabled:opacity-40 transition"
+            >
               ← Back
             </button>
 
+            <div className="flex space-x-2">
+              {STEPS.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-2 w-2 rounded-full transition ${
+                    i === step ? 'bg-teal-400' : 'bg-zinc-700'
+                  }`}
+                />
+              ))}
+            </div>
+
             {step < STEPS.length - 1 ? (
-              <button onClick={next}>Next →</button>
+              <button
+                onClick={next}
+                className="text-sm text-teal-300 hover:text-teal-100 transition"
+              >
+                Next →
+              </button>
             ) : (
-              <button onClick={finishOnboarding}>Finish</button>
+              <button
+                onClick={finishOnboarding}
+                className="text-sm text-teal-300 hover:text-teal-100 transition"
+              >
+                Finish
+              </button>
             )}
           </div>
-
-          {current.id === 'audio' && (
-            <div className="px-6 pb-6">
-              <button
-                onClick={() => {
-                  enableSound?.();
-                  next();
-                }}
-                className="w-full py-3 bg-teal-500 text-black rounded-full"
-              >
-                Enable Audio
-              </button>
-            </div>
-          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>,
