@@ -15,16 +15,19 @@ import { useSound } from '../context/SoundContext';
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
 const bundles = [
-  { id: 1, price: 0.99, minutes: 5, bonus: 0 },
-  { id: 2, price: 3.99, minutes: 25, bonus: 15 },
-  { id: 3, price: 7.49, minutes: 50, bonus: 30 },
-  { id: 4, price: 14.99, minutes: 100, bonus: 60 },
-  { id: 5, price: 29.99, minutes: 200, bonus: 120 },
-  { id: 6, price: 59.99, minutes: 500, bonus: 240 },
+  { id: 1, price: 0.99, minutes: 5, bonus: 0, label: '5 min' },
+  { id: 2, price: 3.99, minutes: 25, bonus: 15, label: '40 min' },
+  { id: 3, price: 7.49, minutes: 50, bonus: 30, label: '80 min' },
+  { id: 4, price: 14.99, minutes: 100, bonus: 60, label: '160 min' },
+  { id: 5, price: 29.99, minutes: 200, bonus: 120, label: '320 min' },
+  { id: 6, price: 59.99, minutes: 500, bonus: 240, label: '740 min' },
 ];
 
-// Map bundle ID -> Stripe price env key name on backend
-// Adjust these values only if Mahafuzar is using different keys/routes.
+/**
+ * IMPORTANT:
+ * These should match BACKEND / STRIPE one-time prices for extra minutes.
+ * If Mahafuzar has only created subscription prices, checkout with mode "payment" will fail.
+ */
 const bundlePriceKeys = {
   1: 'STRIPE_PRICE_MINUTES_5',
   2: 'STRIPE_PRICE_MINUTES_40',
@@ -57,26 +60,27 @@ export default function BuyExtraMinutes() {
   const removeFromCart = (id) => {
     setError('');
     setCart((prev) => {
-      const updated = { ...prev };
-      delete updated[id];
-      return updated;
+      const next = { ...prev };
+      delete next[id];
+      return next;
     });
   };
 
   const changeQuantity = (id, delta) => {
     playClick?.();
     setError('');
+
     setCart((prev) => {
       const current = prev[id] || 0;
-      const updatedQty = current + delta;
+      const nextQty = current + delta;
 
-      if (updatedQty <= 0) {
-        const copy = { ...prev };
-        delete copy[id];
-        return copy;
+      if (nextQty <= 0) {
+        const next = { ...prev };
+        delete next[id];
+        return next;
       }
 
-      return { ...prev, [id]: updatedQty };
+      return { ...prev, [id]: nextQty };
     });
   };
 
@@ -88,71 +92,67 @@ export default function BuyExtraMinutes() {
   const total = useMemo(() => {
     return Object.entries(cart).reduce(
       (acc, [id, qty]) => {
-        const bundle = bundles.find((x) => x.id === Number(id));
+        const bundle = bundles.find((b) => b.id === Number(id));
         if (!bundle) return acc;
 
         return {
           price: acc.price + bundle.price * qty,
           minutes: acc.minutes + (bundle.minutes + bundle.bonus) * qty,
+          items: acc.items + qty,
         };
       },
-      { price: 0, minutes: 0 }
+      { price: 0, minutes: 0, items: 0 }
     );
   }, [cart]);
 
-  const suggestedId =
-    Object.keys(cart).length === 1
-      ? Math.min(...Object.keys(cart).map((i) => Number(i))) + 1
-      : null;
-
-  const canCheckout = Object.keys(cart).length > 0 && !checkoutLoading;
+  const canCheckout = total.items > 0 && !checkoutLoading;
 
   const startCheckout = async () => {
     try {
+      setCheckoutLoading(true);
       setError('');
 
-      if (Object.keys(cart).length === 0) {
+      if (!total.items) {
         setError('Your cart is empty.');
         return;
       }
 
       if (gifting && !isValidEmail(recipient.trim())) {
-        setError('Please enter a valid gift recipient email.');
+        setError('Please enter a valid recipient email.');
         return;
       }
 
-      /**
-       * IMPORTANT:
-       * Stripe Checkout only supports one price per session in your current backend route.
-       * Since your cart allows multiple bundles, we combine the purchase into ONE checkout item
-       * by sending metadata about the cart and using the largest selected bundle as the Stripe line item.
-       *
-       * Best long-term fix:
-       * Mahafuzar should update the backend to support multiple line_items.
-       *
-       * For now:
-       * - If only one bundle is in cart, use it directly.
-       * - If multiple bundles are in cart, use the largest bundle as the checkout item and pass cart metadata.
-       */
       const cartEntries = Object.entries(cart).map(([id, quantity]) => ({
         bundle_id: Number(id),
         quantity: Number(quantity),
+        price_key: bundlePriceKeys[Number(id)],
       }));
 
+      /**
+       * TEMPORARY SAFE FRONTEND APPROACH:
+       * Your current backend appears to create only ONE Stripe line item.
+       * So we use the first/largest selected item as the main price and pass the rest in metadata.
+       *
+       * Mahafuzar should update backend to support multiple line_items.
+       */
       const sortedIds = Object.keys(cart)
         .map(Number)
         .sort((a, b) => b - a);
 
       const primaryBundleId = sortedIds[0];
-      const primaryBundleQty = Number(cart[primaryBundleId] || 1);
-
+      const primaryQty = Number(cart[primaryBundleId] || 1);
       const endpoint = `${API_BASE_URL}/api/stripe/checkout/create`;
 
-      const body = {
-        // Backend can use this if wired for explicit minute products
+      const payload = {
+        /**
+         * DO NOT send mode: "payment" unless the backend uses one-time prices.
+         * Since your screenshot shows a recurring price error, let backend decide mode
+         * OR explicitly use subscription temporarily until backend fixes one-time minute prices.
+         *
+         * For extra minutes, backend should ultimately use one-time prices and payment mode.
+         */
         price_key: bundlePriceKeys[primaryBundleId],
-        quantity: primaryBundleQty,
-        mode: 'payment',
+        quantity: primaryQty,
         success_url: `${window.location.origin}/thank-you`,
         cancel_url: `${window.location.origin}/purchase`,
         metadata: {
@@ -167,11 +167,9 @@ export default function BuyExtraMinutes() {
 
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(body),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json().catch(() => ({}));
@@ -186,12 +184,14 @@ export default function BuyExtraMinutes() {
 
       window.location.href = data.url;
     } catch (err) {
-      setError(err.message || 'Unable to start checkout.');
+      setError(err?.message || 'Unable to start checkout.');
+    } finally {
+      setCheckoutLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col-reverse lg:flex-row max-w-5xl mx-auto px-2 sm:px-4 py-6 gap-7">
+    <div className="flex flex-col-reverse lg:flex-row max-w-6xl mx-auto px-3 sm:px-4 py-6 gap-7">
       <aside className="w-full lg:w-80 flex-shrink-0 sticky lg:top-24 self-start mb-6 lg:mb-0">
         <Card className="bg-zinc-900 border border-teal-500 rounded-2xl shadow-xl">
           <CardHeader>
@@ -201,24 +201,23 @@ export default function BuyExtraMinutes() {
               </CardTitle>
               <span className="text-xs text-zinc-400">{total.minutes} min</span>
             </div>
+
             <CardDescription className="text-sm text-zinc-400">
-              {Object.keys(cart).length
-                ? `${Object.values(cart).reduce((a, b) => a + b, 0)} item(s)`
-                : 'Cart is empty'}
+              {total.items ? `${total.items} item(s)` : 'Cart is empty'}
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
             <AnimatePresence>
-              {Object.keys(cart).length === 0 ? (
+              {!total.items ? (
                 <p className="text-sm text-zinc-400">Your cart is empty.</p>
               ) : (
                 Object.entries(cart).map(([id, qty]) => {
                   const item = bundles.find((b) => b.id === Number(id));
                   if (!item) return null;
 
-                  const minutes = (item.minutes + item.bonus) * qty;
-                  const cost = item.price * qty;
+                  const totalMinutes = (item.minutes + item.bonus) * qty;
+                  const totalCost = item.price * qty;
 
                   return (
                     <motion.div
@@ -229,12 +228,11 @@ export default function BuyExtraMinutes() {
                       className="flex justify-between items-center bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3"
                     >
                       <div>
-                        <p className="text-base text-white font-semibold">
-                          {minutes} min
-                        </p>
-                        <p className="text-xs text-zinc-400">${cost.toFixed(2)}</p>
+                        <p className="text-base text-white font-semibold">{item.label}</p>
+                        <p className="text-xs text-zinc-400">${totalCost.toFixed(2)}</p>
+                        <p className="text-xs text-teal-300 mt-1">{totalMinutes} total min</p>
 
-                        <div className="flex gap-2 mt-1 items-center">
+                        <div className="flex gap-2 mt-2 items-center">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -281,11 +279,9 @@ export default function BuyExtraMinutes() {
               </div>
             </div>
 
-            {suggestedId && suggestedId <= bundles.length && (
-              <p className="mt-2 text-xs text-teal-300 italic">
-                Consider upgrading for more value!
-              </p>
-            )}
+            <p className="mt-2 text-xs text-teal-300 italic">
+              Consider upgrading for more value!
+            </p>
 
             <div className="flex items-center gap-2 pt-2">
               <input
@@ -321,7 +317,7 @@ export default function BuyExtraMinutes() {
             )}
 
             {error && (
-              <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+              <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300 whitespace-pre-wrap break-words">
                 {error}
               </div>
             )}
@@ -342,7 +338,7 @@ export default function BuyExtraMinutes() {
               )}
             </Button>
 
-            {Object.keys(cart).length > 0 && (
+            {total.items > 0 && (
               <button
                 onClick={emptyCart}
                 className="mt-3 text-xs text-zinc-400 hover:text-teal-300 underline transition-colors"
@@ -363,7 +359,7 @@ export default function BuyExtraMinutes() {
           Return
         </button>
 
-        <section className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-4">
+        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {bundles.map((bundle) => (
             <motion.div
               key={bundle.id}
