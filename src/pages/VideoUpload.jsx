@@ -16,7 +16,6 @@ const RAW_API_BASE_URL =
 
 const API_BASE_URL = RAW_API_BASE_URL.replace(/\/+$/, "");
 
-// Update this if your real backend route is different.
 const VIDEO_TASK_PATHS = [
   "/api/v1/video-task",
   "/api/video-task",
@@ -43,6 +42,8 @@ export default function VideoUpload() {
   const [subtitleLang, setSubtitleLang] = useState("en");
   const [status, setStatus] = useState(null);
   const [resultText, setResultText] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [progressLabel, setProgressLabel] = useState("");
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -67,7 +68,84 @@ export default function VideoUpload() {
     setVideoFile(file);
     setStatus(null);
     setResultText("");
+    setProgress(0);
+    setProgressLabel("");
   };
+
+  const uploadWithProgress = (endpoint, formData) =>
+    new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", endpoint, true);
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.min(
+            95,
+            Math.round((event.loaded / event.total) * 100)
+          );
+          setProgress(percent);
+          setProgressLabel(`Uploading... ${percent}%`);
+        } else {
+          setProgressLabel("Uploading...");
+        }
+      };
+
+      xhr.onloadstart = () => {
+        setProgress(0);
+        setProgressLabel("Uploading...");
+      };
+
+      xhr.onload = () => {
+        const contentType = xhr.getResponseHeader("content-type") || "";
+        const rawText = xhr.responseText || "";
+
+        setProgress(100);
+        setProgressLabel("Processing...");
+
+        if (!contentType.includes("application/json")) {
+          return reject({
+            status: xhr.status,
+            message: `Server returned non-JSON response at ${endpoint}`,
+            endpoint,
+          });
+        }
+
+        let data = {};
+        try {
+          data = rawText ? JSON.parse(rawText) : {};
+        } catch {
+          return reject({
+            status: xhr.status,
+            message: `Invalid JSON returned from ${endpoint}`,
+            endpoint,
+          });
+        }
+
+        if (xhr.status >= 200 && xhr.status < 300) {
+          return resolve({ endpoint, data });
+        }
+
+        return reject({
+          status: xhr.status,
+          message:
+            data.detail ||
+            data.message ||
+            data.error ||
+            `Request failed with status ${xhr.status} at ${endpoint}`,
+          endpoint,
+        });
+      };
+
+      xhr.onerror = () => {
+        reject({
+          status: 0,
+          message: `Network error while requesting ${endpoint}`,
+          endpoint,
+        });
+      };
+
+      xhr.send(formData);
+    });
 
   const tryVideoTaskRequest = async (formData) => {
     let lastError = null;
@@ -77,42 +155,16 @@ export default function VideoUpload() {
       console.log("Trying video task endpoint:", endpoint);
 
       try {
-        const res = await fetch(endpoint, {
-          method: "POST",
-          body: formData,
-        });
-
-        const contentType = res.headers.get("content-type") || "";
-        const rawText = await res.text();
-
-        if (!contentType.includes("application/json")) {
-          lastError = `Server returned non-JSON response at ${endpoint}`;
-          if (res.status === 404) continue;
-          throw new Error(lastError);
-        }
-
-        let data = {};
-        try {
-          data = rawText ? JSON.parse(rawText) : {};
-        } catch {
-          throw new Error(`Invalid JSON returned from ${endpoint}`);
-        }
-
-        if (res.ok) {
-          return { endpoint, data };
-        }
-
-        lastError =
-          data.detail ||
-          data.message ||
-          data.error ||
-          `Request failed with status ${res.status} at ${endpoint}`;
-
-        if (res.status === 404) continue;
-
-        throw new Error(lastError);
+        const result = await uploadWithProgress(endpoint, formData);
+        return result;
       } catch (err) {
         lastError = err.message || "Unknown request error";
+
+        if (err.status === 404) {
+          continue;
+        }
+
+        throw new Error(lastError);
       }
     }
 
@@ -129,12 +181,16 @@ export default function VideoUpload() {
     if (!API_BASE_URL) {
       setStatus("error");
       setResultText("");
+      setProgress(0);
+      setProgressLabel("");
       console.error("Missing API base URL in frontend environment variables.");
       return;
     }
 
     setStatus("processing");
     setResultText("");
+    setProgress(0);
+    setProgressLabel("Preparing upload...");
 
     const formData = new FormData();
     formData.append("file", videoFile);
@@ -165,10 +221,13 @@ export default function VideoUpload() {
       }
 
       setStatus("success");
+      setProgress(100);
+      setProgressLabel("Completed");
     } catch (err) {
-      console.error("Fetch failed:", err);
+      console.error("Upload failed:", err);
       setStatus("error");
       setResultText("");
+      setProgressLabel("Failed");
     }
   };
 
@@ -268,12 +327,26 @@ export default function VideoUpload() {
 
           <button
             type="submit"
-            className="bg-teal-600 hover:bg-teal-700 text-white py-2 px-6 rounded-lg flex items-center justify-center gap-2"
+            className="bg-teal-600 hover:bg-teal-700 text-white py-2 px-6 rounded-lg flex items-center justify-center gap-2 disabled:opacity-60"
             disabled={!videoFile || status === "processing"}
           >
             <Upload className="w-4 h-4" />
             {status === "processing" ? t("Processing...") : t("Submit")}
           </button>
+
+          {status === "processing" && (
+            <div className="space-y-2">
+              <div className="w-full h-3 bg-zinc-800 border border-zinc-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-teal-500 transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="text-sm text-zinc-300">
+                {progressLabel || t("Processing...")}
+              </p>
+            </div>
+          )}
 
           {status === "success" && (
             <div className="space-y-3">
@@ -296,7 +369,12 @@ export default function VideoUpload() {
           )}
 
           {status === "error" && (
-            <p className="text-red-400">❌ {t("There was an error. Please try again.")}</p>
+            <div className="space-y-2">
+              <p className="text-red-400">❌ {t("There was an error. Please try again.")}</p>
+              {progressLabel ? (
+                <p className="text-xs text-zinc-500">{progressLabel}</p>
+              ) : null}
+            </div>
           )}
 
           {status === "file_too_large" && (
@@ -330,4 +408,3 @@ export default function VideoUpload() {
     </motion.div>
   );
 }
-
