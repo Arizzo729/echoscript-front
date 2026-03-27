@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { UploadCloud, Loader, AlertCircle } from "lucide-react";
-import API_BASE from "../lib/apiBase";
+
+const TRANSCRIBE_ENDPOINT = "/api/transcribe/";
 
 export default function UploadAndTranscribe({
   fileInput,
@@ -16,15 +17,12 @@ export default function UploadAndTranscribe({
   const [error, setError] = useState(null);
   const uploadedRef = useRef(false);
 
-
-  // Upload the file when fileInput changes
   useEffect(() => {
     if (!fileInput || uploadedRef.current) return;
-    
+
     uploadedRef.current = true;
     uploadAndTranscribe(fileInput);
-    
-    // Reset when file changes
+
     return () => {
       uploadedRef.current = false;
     };
@@ -34,57 +32,70 @@ export default function UploadAndTranscribe({
     setUploading(true);
     setProgress(0);
     setError(null);
-    
+
+    let progressInterval;
+
     try {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("language", translate ? "auto" : "en");
 
-      // Get access token from localStorage
-      const accessToken = localStorage.getItem('access_token');
+      const accessToken = localStorage.getItem("access_token");
 
-      // Simulate progress
-      const progressInterval = setInterval(() => {
+      progressInterval = setInterval(() => {
         setProgress((prev) => Math.min(prev + 10, 90));
       }, 200);
 
-      // Prepare headers
       const headers = {};
       if (accessToken) {
         headers.Authorization = `Bearer ${accessToken}`;
       }
 
-      const res = await fetch(`${API_BASE}/v1/transcribe`, {
+      const res = await fetch(TRANSCRIBE_ENDPOINT, {
         method: "POST",
         body: formData,
-        headers: headers,
+        headers,
         credentials: "include",
       });
 
       clearInterval(progressInterval);
       setProgress(100);
 
+      let responseData = null;
+      const contentType = res.headers.get("content-type") || "";
+
+      if (contentType.includes("application/json")) {
+        responseData = await res.json().catch(() => null);
+      } else {
+        const text = await res.text().catch(() => "");
+        responseData = text ? { detail: text } : null;
+      }
+
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
         if (res.status === 401) {
           throw new Error("Please log in to transcribe files");
         }
-        throw new Error(errorData.detail || `Upload failed: ${res.statusText}`);
+
+        throw new Error(
+          responseData?.detail ||
+            responseData?.message ||
+            `Upload failed: ${res.status} ${res.statusText}`
+        );
       }
 
-      const result = await res.json();
-      
-      // Call the callback with the result
       if (onTranscriptComplete) {
-        onTranscriptComplete(result);
+        onTranscriptComplete(responseData);
       }
     } catch (err) {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+
       console.error("Transcription error:", err);
       setError(err.message || `Failed to transcribe ${file.name}. Please try again.`);
-      
-      // Still call callback with error info
+
       if (onTranscriptComplete) {
-        onTranscriptComplete({ error: err.message });
+        onTranscriptComplete({ error: err.message || "Transcription failed" });
       }
     } finally {
       setUploading(false);
@@ -105,7 +116,9 @@ export default function UploadAndTranscribe({
       <div className="flex items-center gap-3">
         <UploadCloud className="w-6 h-6 text-teal-400" />
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-white">Processing: {fileInput.name}</h3>
+          <h3 className="text-lg font-semibold text-white">
+            Processing: {fileInput.name}
+          </h3>
           <p className="text-sm text-zinc-400">
             Size: {(fileInput.size / (1024 * 1024)).toFixed(2)} MB
           </p>
@@ -144,4 +157,3 @@ export default function UploadAndTranscribe({
     </motion.div>
   );
 }
-
